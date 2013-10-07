@@ -26,6 +26,9 @@
 		opt.delimeter = opt.delimiter || defaults.delimiter;
 		opt.header = typeof opt.header === 'undefined' ? defaults.header : opt.header;
 
+		if (opt.delimiter == '"' || opt.delimiter == "\n")
+			opt.delimiter = defaults.delimiter;
+
 		if (opt.delimiter.length > 1)
 			opt.delimiter = opt.delimiter[0];
 
@@ -80,7 +83,10 @@
 
 		this.setDelimiter = function(delim)
 		{
-			delim = delim || ",";
+			var comma = ",";
+			delim = delim
+				? (delim == '"' || delim == "\n" ? comma : delim)
+				: comma;
 			_config.delimiter = delim[0];
 		};
 
