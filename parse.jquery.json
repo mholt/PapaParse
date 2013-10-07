@@ -1,0 +1,36 @@
+{
+	"name": "parse",
+	"version": "0.5.0",
+	"title": "jQuery Parse plugin",
+	"description": "Parse delimited text (like CSV or tab-delimited) into a usable data structure",
+	"keywords": [
+		"csv",
+		"parse",
+		"parsing",
+		"parser",
+		"delimited",
+		"text",
+		"data",
+		"comma",
+		"tab",
+		"pipe"
+	],
+	"author": {
+		"name": "Matthew Holt",
+		"email": "mholt@users.noreply.github.com",
+		"url": "http://mwholt.com"
+	},
+	"licenses": [
+		{
+			"type": "GPLv3",
+			"url": "http://opensource.org/licenses/gpl-3.0.html"
+		}
+	],
+	"homepage":"https://github.com/mholt/jquery.parse",
+	"docs": "https://github.com/mholt/jquery.parse/blob/master/README.md",
+	"demo": "http://jsfiddle.net/mholt/nCaee",
+	"download": "https://raw.github.com/mholt/jquery.parse/master/jquery.parse.min.js",
+	"dependencies": {
+		"jquery": ">=1.5"
+	}
+}
