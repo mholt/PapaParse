@@ -1,14 +1,17 @@
 /*
 	jQuery Parse plugin
-	v0.5.0
+	v0.5.1
 	https://github.com/mholt/jquery.parse
 */
 
 (function($)
 {
+	"use strict";
+
 	var defaults = {
 		delimiter: ",",
-		header: true
+		header: true,
+		dynamicTyping: false
 	};
 
 	$.parse = function(input, options)
@@ -24,7 +27,12 @@
 	function verifyOptions(opt)
 	{
 		opt.delimeter = opt.delimiter || defaults.delimiter;
-		opt.header = typeof opt.header === 'undefined' ? defaults.header : opt.header;
+		opt.header = typeof opt.header === 'undefined'
+						? defaults.header
+						: opt.header;
+		opt.dynamicTyping = typeof opt.dynamicTyping === 'undefined'
+							? defaults.dynamicTyping
+							: opt.dynamicTyping;
 
 		if (opt.delimiter == '"' || opt.delimiter == "\n")
 			opt.delimiter = defaults.delimiter;
@@ -144,18 +152,26 @@
 
 		function handleQuote()
 		{
-			if (_state.i < _input.length - 1)
-			{
-				if (_input[_state.i+1] == '"' && _state.inQuotes)
-				{
-					_state.fieldVal += '"'
-					_state.i++;
-				}
-				else if (_input[_state.i+1] != _config.delimiter && _state.inQuotes)
-					return addError("Unescaped quote in field value");
-			}
+			var delimBefore = _state.i > 0
+								&& isBoundary(_input[_state.i-1]);
+			var delimAfter  = _state.i < _input.length - 1
+								&& isBoundary(_input[_state.i+1]);
+			var escaped     = _state.i < _input.length - 1
+								&& _input[_state.i+1] == '"';
 
-			_state.inQuotes = !_state.inQuotes;
+			if (_state.inQuotes && escaped)
+			{
+				_state.fieldVal += '"';
+				_state.i++;
+			}
+			else if (delimBefore || delimAfter)
+			{
+				_state.inQuotes = !_state.inQuotes;
+			}
+			else
+			{
+				addError("Unexpected quotes");
+			}
 		}
 
 		function inQuotes()
@@ -185,6 +201,11 @@
 			}
 		}
 
+		function isBoundary(ch)
+		{
+			return ch == _config.delimiter || ch == "\n";
+		}
+
 		function saveField()
 		{
 			if (_config.header)
@@ -198,13 +219,21 @@
 					var currentRow = _state.parsed.rows[_state.parsed.rows.length - 1];
 					var fieldName = _state.parsed.fields[_state.field];
 					if (fieldName)
+					{
+						if (_config.dynamicTyping)
+							_state.fieldVal = tryParseFloat(_state.fieldVal);
 						currentRow[fieldName] = _state.fieldVal;
+					}
 					else
 						addError("Too many fields; expected " + _state.parsed.fields.length + " fields, found extra value: '" + _state.fieldVal + "'");
 				}
 			}
 			else
+			{
+				if (_config.dynamicTyping)
+					_state.fieldVal = tryParseFloat(_state.fieldVal);
 				_state.parsed[_state.parsed.length - 1].push(_state.fieldVal);
+			}
 			
 			_state.fieldVal = "";
 			_state.field ++;
@@ -225,6 +254,12 @@
 
 			_state.line ++;
 			_state.field = 0;
+		}
+
+		function tryParseFloat(num)
+		{
+			var isNumber = num.match(/(\d+)(\.\d+)?|/)[0].length == num.length;
+			return isNumber ? parseFloat(num) : num;
 		}
 
 		function trimEmptyLastLine()
