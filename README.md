@@ -3,6 +3,8 @@ jquery.parse
 
 Robust, efficient CSV parsing (with nearly any delimiting character). Malformed CSV files are especially common, and this parser is an attempt to handle parsing errors more robustly and parse CSV text more efficiently.
 
+**[jsFIDDLE DEMO](http://jsfiddle.net/mholt/nCaee/)**
+
 
 Basic usage
 -----------
