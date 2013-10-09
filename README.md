@@ -1,56 +1,102 @@
 jquery.parse
 ============
 
-Robust, efficient CSV parsing (with nearly any delimiting character)
+Robust, efficient CSV parsing (with nearly any delimiting character). Malformed CSV files are especially common, and this parser is an attempt to handle parsing errors more robustly and parse CSV text more efficiently.
 
 
 Basic usage
 -----------
 
+The second argument is optional, but here it is with the defaults:
+
 ```javascript
 results = $.parse(csvString, {
-	delimiter: "\t",
-	header: true
+	delimiter: ",",
+	header: true,
+	dynamicTyping: true
 });
 ```
 
-The default delimiter is `,` but can be set to anything anything except `"` or `\n`.
+### Config options
 
-By default, a header row is expected. The output and error handling depends on whether you include a header row with your data.
+| Option            | Description
+|------------------ | -----------------
+| `delimiter`       | The delimiting character. Usually just a comma or tab. Can be set to anything anything except `"` or `\n`.
+| `header`          | If true, interpret the first row of parsed data as a header column; fields are returned separately from the data, and data will be returned keyed to its field name. If false, the parser simply returns an array (list) of arrays (rows), including the first column.
+| `dynamicTyping`   | If true, fields that are strictly numeric will be converted to a number type. If false, each parsed datum is returned as a string.
 
-**If `header: true`, the output looks like:**
+### Output
 
-```javascript
+The output and error handling depends on whether you include a header row with your data. If you have a header, each row must have the same number of fields as the header row, or an error will be produced.
+
+**Example input:**
+
+    Item,SKU,Cost,Quantity
+    Book,ABC1234,10.95,4
+    Movie,DEF5678,29.99,3
+
+**With header and dynamic typing:**
+
+```json
 {
-	errors: [
-		// errors, if any (parsing should not throw exceptions)
-	],
-	results: {
-		fields: [
-			// field names from the header row
-		],
-		rows: [
-			// objects, where each field value is keyed to the field name
-		]
-	}
+  "results": {
+    "fields": [
+      "Item",
+      "SKU",
+      "Cost",
+      "Quantity"
+    ],
+    "rows": [
+      {
+        "Item": "Book",
+        "SKU": "ABC1234",
+        "Cost": 10.95,
+        "Quantity": 4
+      },
+      {
+        "Item": "Movie",
+        "SKU": "DEF5678",
+        "Cost": 29.99,
+        "Quantity": 3
+      }
+    ]
+  },
+  "errors": []
 }
 ```
 
+**Without headers and without dynamic typing:**
 
-**If `header: false`, the output looks like:**
-
-```javascript
+```json
 {
-	errors: [
-		// errors, if any (parsing should not throw exceptions)
-	],
-	results: [
-		// each row is itself an array of values separated by delimiter
-	]
+  "results": [
+    [
+      "Item",
+      "SKU",
+      "Cost",
+      "Quantity"
+    ],
+    [
+      "Book",
+      "ABC1234",
+      "10.95",
+      "4"
+    ],
+    [
+      "Movie",
+      "DEF5678",
+      "29.99",
+      "3"
+    ]
+  ],
+  "errors": []
 }
 ```
 
-**Errors look like:**
+Errors
+------
+
+Here is the structure of an error:
 
 ```javascript
 {
@@ -60,3 +106,127 @@ By default, a header row is expected. The output and error handling depends on w
 	index: 0		// Character index within original input
 }
 ```
+
+(Assume again that the default config is used.) Suppose the input is malformed:
+
+	Item,SKU,Cost,Quantity
+	Book,"ABC1234,10.95,4
+	Movie,DEF5678,29.99,3
+
+Notice the stray quotes on the second line. This is the output:
+
+```json
+{
+  "results": {
+    "fields": [
+      "Item",
+      "SKU",
+      "Cost",
+      "Quantity"
+    ],
+    "rows": [
+      {
+        "Item": "Book",
+        "SKU": "ABC1234,10.95,4\nMovie,DEF5678,29.99,3"
+      }
+    ]
+  },
+  "errors": [
+    {
+      "message": "Too few fields; expected 4 fields, parsed 2",
+      "line": 2,
+      "row": 0,
+      "index": 66
+    },
+    {
+      "message": "Unescaped or mismatched quotes",
+      "line": 2,
+      "row": 0,
+      "index": 66
+    }
+  ]
+}
+```
+
+If the header row is disabled, field counting does not occur, because there is no need to key the data to the field name:
+
+```json
+{
+  "results": [
+    [
+      "Item",
+      "SKU",
+      "Cost",
+      "Quantity"
+    ],
+    [
+      "Book",
+      "ABC1234,10.95,4\nMovie,DEF5678,29.99,3"
+    ]
+  ],
+  "errors": [
+    {
+      "message": "Unescaped or mismatched quotes",
+      "line": 2,
+      "row": 1,
+      "index": 66
+    }
+  ]
+}
+```
+
+But you will still be notified about the stray quotes, as shown above.
+
+Suppose a field value with a delimiter is not escaped:
+
+	Item,SKU,Cost,Quantity
+	Book,ABC1234,10,95,4
+	Movie,DEF5678,29.99,3
+
+Again, notice the second line, "10,95" instead of "10.95". This field *should* be quoted: `"10,95"` but the parser handles the problem gracefully:
+
+```json
+{
+  "results": {
+    "fields": [
+      "Item",
+      "SKU",
+      "Cost",
+      "Quantity"
+    ],
+    "rows": [
+      {
+        "Item": "Book",
+        "SKU": "ABC1234",
+        "Cost": 10,
+        "Quantity": 95,
+        "__parsed_extra": [
+          "4"
+        ]
+      },
+      {
+        "Item": "Movie",
+        "SKU": "DEF5678",
+        "Cost": 29.99,
+        "Quantity": 3
+      }
+    ]
+  },
+  "errors": [
+    {
+      "message": "Too many fields; expected 4 fields, found extra value: '4'",
+      "line": 2,
+      "row": 0,
+      "index": 43
+    },
+    {
+      "message": "Too few fields; expected 4 fields, parsed 5",
+      "line": 2,
+      "row": 0,
+      "index": 43
+    }
+  ]
+}
+```
+
+As you can see, any "extra" fields at the end, when using a header row, are simply tacked onto a special field named "__parsed_extra", in the order that the remaining line was parsed.

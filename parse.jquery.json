@@ -1,6 +1,6 @@
 {
 	"name": "parse",
-	"version": "0.5.0",
+	"version": "0.5.2",
 	"title": "jQuery Parse plugin",
 	"description": "Parse delimited text (like CSV or tab-delimited) into a usable data structure",
 	"keywords": [

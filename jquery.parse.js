@@ -1,6 +1,6 @@
 /*
 	jQuery Parse plugin
-	v0.5.1
+	v0.5.2
 	https://github.com/mholt/jquery.parse
 */
 
@@ -225,7 +225,12 @@
 						currentRow[fieldName] = _state.fieldVal;
 					}
 					else
+					{
+						if (typeof currentRow.__parsed_extra === 'undefined')
+							currentRow.__parsed_extra = [];
+						currentRow.__parsed_extra.push(_state.fieldVal);
 						addError("Too many fields; expected " + _state.parsed.fields.length + " fields, found extra value: '" + _state.fieldVal + "'");
+					}
 				}
 			}
 			else
