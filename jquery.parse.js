@@ -258,7 +258,7 @@
 
 		function tryParseFloat(num)
 		{
-			var isNumber = num.match(/(\d+)(\.\d+)?|/)[0].length == num.length;
+			var isNumber = /^\d+(\.\d+)?$/.test(num);
 			return isNumber ? parseFloat(num) : num;
 		}
 
