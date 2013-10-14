@@ -1,6 +1,6 @@
 /*
-	jQuery Parse plugin
-	v0.5.2
+	Parse jQuery Plugin
+	v0.5.3
 	https://github.com/mholt/jquery.parse
 */
 
@@ -263,7 +263,7 @@
 
 		function tryParseFloat(num)
 		{
-			var isNumber = /^\d+(\.\d+)?$/.test(num);
+			var isNumber = /^-?\d+(\.\d+)?$/.test(num);
 			return isNumber ? parseFloat(num) : num;
 		}
 

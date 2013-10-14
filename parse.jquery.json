@@ -1,8 +1,8 @@
 {
 	"name": "parse",
-	"version": "0.5.2",
-	"title": "jQuery Parse plugin",
-	"description": "Parse delimited text (like CSV or tab-delimited) into a usable data structure",
+	"version": "0.5.3",
+	"title": "Parse jQuery Plugin",
+	"description": "Transforms delimited text (like CSV or tab-delimited) into a usable data structure; efficient and robust CSV parser",
 	"keywords": [
 		"csv",
 		"parse",
@@ -22,8 +22,8 @@
 	},
 	"licenses": [
 		{
-			"type": "GPLv3",
-			"url": "http://opensource.org/licenses/gpl-3.0.html"
+			"type": "MIT",
+			"url": "http://opensource.org/licenses/MIT"
 		}
 	],
 	"homepage":"https://github.com/mholt/jquery.parse",
