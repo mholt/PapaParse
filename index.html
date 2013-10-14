@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Parse jQuery Plugin</title>
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+		<script src="jquery.parse.js"></script>
+		<style>
+		body {
+			font-family: sans-serif;
+		}
+
+		textarea,
+		#delim {
+			-webkit-box-sizing: border-box;
+			-moz-box-sizing: border-box;
+			box-sizing: border-box;
+
+			font: 14px/1.5em 'Monaco', monospace;
+			outline: none;
+		}
+		textarea {
+			width: 100%;
+			padding: 10px;
+			height: 260px;
+		}
+
+		#delim {
+			width: 80px;
+		}
+
+		.container {
+			width: 100%;
+		}
+
+		.text-center {
+			text-align: center;
+		}
+
+		code {
+			white-space: pre;
+			font: 12px/1.25em 'Monaco', monospace;
+			background: #EEE;
+			display: block;
+			padding: 5px;
+		}
+
+		button {
+			font-size: 18px;
+			padding: 10px 40px;
+		}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<textarea id="tb" placeholder="CSV input">Address,City,State,Zipcode,Name,Phone Number,Group,URL
+1 Crossgates Mall Road,Albany,NY,12203,Apple Store Cross Gates,(518) 869-3192,"Example ""Group"" 1",http://www.apple.com/retail/crossgates/
+Duke Rd & Walden Ave,Buffalo,NY,14225,Apple Store Walden Galleria,(716) 685-2762,Example Group 2,http://www.apple.com/retail/walden/
+630 Old Country Rd.,Garden City,NY,11530,Apple Store Roosevelt Field,(516) 248-3347,Example Group 3,http://www.apple.com/retail/rooseveltfield/
+160 Walt Whitman Rd.,Huntington Station,NY,11746,Apple Store Walt Whitman,(631) 425-1563,Example Group 3,http://www.apple.com/retail/waltwhitman/
+9553 Carousel Center Drive,Syracuse,NY,13290,Apple Store Carousel,(315) 422-8484,Example Group 2,http://www.apple.com/retail/carousel/
+2655 Richmond Ave,Staten Island,NY,10314,Apple Store Staten Island,(718) 477-4180,Example Group 1,http://www.apple.com/retail/statenisland/
+7979 Victor Road,Victor,NY,14564,Apple Store Eastview,(585) 421-3030,Example Group 1,http://www.apple.com/retail/eastview/
+1591 Palisades Center Drive,West Nyack,NY,10994,Apple Store Palisades,(845) 353-6756,Example Group 2,http://www.apple.com/retail/palisades/
+125 Westchester Ave.,White Plains,NY,10601,Apple Store The Westchester,(914) 428-1877,Example Group 3,http://www.apple.com/retail/thewestchester/
+103 Prince Street,New York,NY,10012,Apple Store SoHo,(212) 226-3126,Example Group 2,http://www.apple.com/retail/soho/</textarea>
+			<br>
+			<div class="text-center">
+				Delimiter: <input type="text" id="delim" value="," maxlength="1">
+				<label><input type="checkbox" id="header" checked> Header row</label>
+				&nbsp; &nbsp;
+				<label><input type="checkbox" id="dyntype" checked> Dynamic typing</label>
+				<br>
+				<button id="btn">Parse</button>
+			</div>
+			<br><br>
+			<code id="output"></code>
+		</div>
+		<script>
+		$(function()
+		{
+			$('#btn').click(function()
+			{
+				var results = $.parse($('#tb').val(), {
+					delimiter: $("#delim").val(),
+					header: $('#header').is(':checked'),
+					dynamicTyping: $('#dyntype').is(':checked')
+				});
+
+				$('#output').text(JSON.stringify(results, undefined, 2));
+			});
+		});
+		</script>
+	</body>
+</html>
