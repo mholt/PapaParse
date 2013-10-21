@@ -1,6 +1,6 @@
 /*
 	Parse jQuery Plugin
-	v0.5.3
+	v0.5.4
 	https://github.com/mholt/jquery.parse
 */
 
@@ -304,7 +304,13 @@
 				return true;
 
 			var expected = _state.parsed.fields.length;
-			var actual = Object.keys(_state.parsed.rows[_state.parsed.rows.length - 1]).length;
+			
+			// Actual field count tabulated manually because IE<9 doesn't support Object.keys
+			var actual = 0;
+			var lastRow = _state.parsed.rows[_state.parsed.rows.length - 1];
+			for (var prop in lastRow)
+				if (lastRow.hasOwnProperty(prop))
+					actual ++;
 
 			if (expected != actual)
 				return addError("Too few fields; expected " + expected + " fields, parsed " + actual);

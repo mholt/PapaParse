@@ -1,6 +1,6 @@
 {
 	"name": "parse",
-	"version": "0.5.3",
+	"version": "0.5.4",
 	"title": "Parse jQuery Plugin",
 	"description": "Transforms delimited text (like CSV or tab-delimited) into a usable data structure; efficient and robust CSV parser",
 	"keywords": [
