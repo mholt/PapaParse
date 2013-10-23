@@ -232,3 +232,11 @@ Again, notice the second line, "10,95" instead of "10.95". This field *should* b
 ```
 
 As you can see, any "extra" fields at the end, when using a header row, are simply tacked onto a special field named "__parsed_extra", in the order that the remaining line was parsed.
+
+
+
+### Is jQuery needed?
+
+Here's a little secret: you don't really need jQuery for this. Just pull out the `Parse` function embedded in the plugin and use its external interface.
+
+I've packaged this as a jQuery plugin primarily for publicity and convenience. 
