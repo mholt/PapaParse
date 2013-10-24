@@ -1,6 +1,6 @@
 /*
 	Parse jQuery Plugin
-	v0.5.4
+	v0.5.5
 	https://github.com/mholt/jquery.parse
 */
 
