@@ -152,10 +152,10 @@
 
 		function handleQuote()
 		{
-			var delimBefore = _state.i > 0
-								&& isBoundary(_input[_state.i-1]);
-			var delimAfter  = _state.i < _input.length - 1
-								&& isBoundary(_input[_state.i+1]);
+			var delimBefore = (_state.i > 0 && isBoundary(_input[_state.i-1]))
+								|| _state.i == 0;
+			var delimAfter  = (_state.i < _input.length - 1 && isBoundary(_input[_state.i+1]))
+								|| _state.i == _input.length - 1;
 			var escaped     = _state.i < _input.length - 1
 								&& _input[_state.i+1] == '"';
 
