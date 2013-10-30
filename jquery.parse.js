@@ -26,7 +26,7 @@
 
 	function verifyOptions(opt)
 	{
-		opt.delimeter = opt.delimiter || defaults.delimiter;
+		opt.delimiter = opt.delimiter || defaults.delimiter;
 		opt.header = typeof opt.header === 'undefined'
 						? defaults.header
 						: opt.header;
