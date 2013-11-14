@@ -237,6 +237,6 @@ As you can see, any "extra" fields at the end, when using a header row, are simp
 
 ### Is jQuery needed?
 
-Here's a little secret: you don't really need jQuery for this. Just pull out the `Parse` function embedded in the plugin and use its external interface.
+Actually, no. Just pull out the `Parser` function [embedded in the plugin](https://github.com/mholt/jquery.parse/blob/master/jquery.parse.js#L46). The jQuery plugin merely wraps this function which has no jQuery dependencies.
 
 I've packaged this as a jQuery plugin primarily for publicity and convenience. 
