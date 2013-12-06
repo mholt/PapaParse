@@ -49,6 +49,10 @@
 		var _input = input;
 		var _config = config;
 		var _errors = [];
+		var _regex = {
+			floats: /^-?\d+(\.\d+)?$/,
+			empty: /^\s*$/
+		}
 		var _state = emptyState();
 
 		this.parse = function(arg)
@@ -64,6 +68,7 @@
 			for (_state.i = 0; _state.i < _input.length; _state.i++)
 			{
 				_state.ch = _input[_state.i];
+				_state.line += _state.ch;
 				
 				if (_state.ch == '"')
 					handleQuote();
@@ -73,10 +78,8 @@
 					notInQuotes();
 			}
 
-			// Treat the last line and its last field
-			saveField();
-			trimEmptyLastLine();
-			inspectFieldCount();
+			// End of input is also end of the last row
+			endRow();
 
 			if (_state.inQuotes)
 				addError("Unescaped or mismatched quotes");
@@ -141,9 +144,10 @@
 		{
 			return {
 				i: 0,
-				line: 1,
+				lineNum: 1,
 				field: 0,
 				fieldVal: "",
+				line: "",
 				ch: "",
 				inQuotes: false,
 				parsed: emptyParsed(config.header)
@@ -192,7 +196,6 @@
 			}
 			else if (_state.ch == "\n")
 			{
-				saveField();
 				newRow();
 			}
 			else
@@ -210,7 +213,7 @@
 		{
 			if (_config.header)
 			{
-				if (_state.line == 1)
+				if (_state.lineNum == 1)
 				{
 					_state.parsed.fields.push(_state.fieldVal)
 				}
@@ -244,55 +247,54 @@
 			_state.field ++;
 		}
 
+		function endRow()
+		{
+			saveField();
+			var emptyLine = trimEmptyLine();
+			if (!emptyLine && _config.header)
+				inspectFieldCount();
+		}
+
 		function newRow()
 		{
-			trimEmptyLastLine();
+			endRow();
 
-			if (_config.header)
-			{
-				inspectFieldCount();
-				if (_state.line > 0)
-					_state.parsed.rows.push({});
-			}
+			if (_config.header && _state.lineNum > 0)
+				_state.parsed.rows.push({});
 			else
 				_state.parsed.push([]);
 
-			_state.line ++;
+			_state.lineNum ++;
+			_state.line = "";
 			_state.field = 0;
 		}
 
 		function tryParseFloat(num)
 		{
-			var isNumber = /^-?\d+(\.\d+)?$/.test(num);
+			var isNumber = _regex.floats.test(num);
 			return isNumber ? parseFloat(num) : num;
 		}
 
-		function trimEmptyLastLine()
+		function trimEmptyLine()
 		{
-			if (_config.header)
+			if (_regex.empty.test(_state.line))
 			{
-				if (_state.line == 1)
+				if (_config.header)
 				{
-					if (_state.parsed.fields.length == 1
-						&& _state.parsed.fields[0].length == 0)
+					if (_state.lineNum == 1)
 					{
 						_state.parsed.fields = [];
-						_state.line --;
+						_state.lineNum --;
 					}
-				}
-				else
-				{
-					var lastRow = _state.parsed.rows[_state.parsed.rows.length - 1];
-					if (!lastRow[_state.parsed.fields[0]])
+					else
 						_state.parsed.rows.splice(_state.parsed.rows.length - 1, 1);
 				}
-			}
-			else
-			{
-				var lastRow = _state.parsed[_state.parsed.length - 1];
-				if (lastRow.length == 0 || (lastRow[0].length == 0))
+				else
 					_state.parsed.splice(_state.parsed.length - 1, 1);
+
+				return true;
 			}
+			return false;
 		}
 
 		function inspectFieldCount()
@@ -322,11 +324,10 @@
 		{
 			_errors.push({
 				message: msg,
-				line: _state.line,
+				line: _state.lineNum,
 				row: _config.header ? _state.parsed.rows.length - 1 : _state.parsed.length - 1,
 				index: _state.i
 			});
-
 			return false;
 		}
 
