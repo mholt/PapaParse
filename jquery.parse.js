@@ -185,7 +185,8 @@
 
 		function appendCharToField()
 		{
-			_state.fieldVal += _state.ch;
+			if (_state.ch != '\r')
+				_state.fieldVal += _state.ch;
 		}
 
 		function notInQuotes()
@@ -214,9 +215,7 @@
 			if (_config.header)
 			{
 				if (_state.lineNum == 1)
-				{
 					_state.parsed.fields.push(_state.fieldVal)
-				}
 				else
 				{
 					var currentRow = _state.parsed.rows[_state.parsed.rows.length - 1];
