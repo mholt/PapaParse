@@ -237,7 +237,143 @@ var tests = [
 			}
 		]
 	},
+	{
+		input: "F1,F2,F3\n,2,V3,V4\nV5,V6,V7",
+		cases: [
+			{
+				config: { delimiter: ",", header: true, dynamicTyping: true },
+				expected: {
+				  "results": {
+				    "fields": [
+				      "F1",
+				      "F2",
+				      "F3"
+				    ],
+				    "rows": [
+				      {
+				        "F1": "",
+				        "F2": 2,
+				        "F3": "V3",
+				        "__parsed_extra": [
+				          "V4"
+				        ]
+				      },
+				      {
+				        "F1": "V5",
+				        "F2": "V6",
+				        "F3": "V7"
+				      }
+				    ]
+				  },
+				  "errors": [
+				    {
+				      "type": "FieldMismatch",
+				      "code": "TooManyFields",
+				      "message": "Too many fields: expected 3 fields but parsed 4",
+				      "line": 2,
+				      "row": 0,
+				      "index": 17
+				    }
+				  ]
+				}
+			}
+		]
+	},
+	{
+		input: "F1,F2,F3\nV1,2.0,-3.01, V4\n\rV5,\"V\n6\",V7",
+		cases: [
+			{
+				config: { delimiter: ",", header: true, dynamicTyping: true },
+				expected: {
+				  "results": {
+				    "fields": [
+				      "F1",
+				      "F2",
+				      "F3"
+				    ],
+				    "rows": [
+				      {
+				        "F1": "V1",
+				        "F2": 2,
+				        "F3": -3.01,
+				        "__parsed_extra": [
+				          " V4"
+				        ]
+				      },
+				      {
+				        "F1": "\rV5",
+				        "F2": "V\n6",
+				        "F3": "V7"
+				      }
+				    ]
+				  },
+				  "errors": [
+				    {
+				      "type": "FieldMismatch",
+				      "code": "TooManyFields",
+				      "message": "Too many fields: expected 3 fields but parsed 4",
+				      "line": 2,
+				      "row": 0,
+				      "index": 25
+				    }
+				  ]
+				}
+			}
+		]
+	},
+	{
+		input: "F1,F2,F3\nV1,V2,V3\nV5,\"V6,V7",
+		cases: [
+			{
+				config: { delimiter: ",", header: true, dynamicTyping: true },
+				expected: {
+				  "results": {
+				    "fields": [
+				      "F1",
+				      "F2",
+				      "F3"
+				    ],
+				    "rows": [
+				      {
+				        "F1": "V1",
+				        "F2": "V2",
+				        "F3": "V3"
+				      },
+				      {
+				        "F1": "V5",
+				        "F2": "V6,V7"
+				      }
+				    ]
+				  },
+				  "errors": [
+				    {
+				      "type": "FieldMismatch",
+				      "code": "TooFewFields",
+				      "message": "Too few fields: expected 3 fields but parsed 2",
+				      "line": 3,
+				      "row": 1,
+				      "index": 27
+				    },
+				    {
+				      "type": "Quotes",
+				      "code": "MissingQuotes",
+				      "message": "Unescaped or mismatched quotes",
+				      "line": 3,
+				      "row": 1,
+				      "index": 27
+				    }
+				  ]
+				}
+			}
+		]
+	}
 ];
+
+
+
+
+
+
 
 $(function()
 {
@@ -274,10 +410,10 @@ function render(input, expected, actual, config, count, status)
 
 	var html =	'<tr>' +
 				'<td class="count">'+count+'</td>' +
-				'<td class="input"><code>'+string(input)+'</code></td>' +
-				'<td class="config"><code>'+string(config)+'</code></td>' +
-				'<td class="output"><code>'+string(expected)+'</code></td>' +
-				'<td class="output '+status+'"><code>'+string(actual)+'</code></td>' +
+				'<td class="input"><div><code>'+string(input)+'</code></div></td>' +
+				'<td class="config"><div><code>'+string(config)+'</code></div></td>' +
+				'<td class="output"><div><code>'+string(expected)+'</code></div></td>' +
+				'<td class="output '+status+'"><div><code>'+string(actual)+'</code></div></td>' +
 				'</tr>';
 	$('#results').append(html);
 }
