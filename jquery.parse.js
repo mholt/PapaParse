@@ -1,6 +1,6 @@
 /*
 	jQuery Parse Plugin
-	v0.5.8
+	v0.5.9
 	https://github.com/mholt/jquery.parse
 */
 
@@ -185,24 +185,23 @@
 
 		function appendCharToField()
 		{
-			if (_state.ch != '\r')
-				_state.fieldVal += _state.ch;
+			_state.fieldVal += _state.ch;
 		}
 
 		function notInQuotes()
 		{
 			if (_state.ch == _config.delimiter)
-			{
 				saveField();
-			}
-			else if (_state.ch == "\n")
+			else if (_state.ch == "\r" && _state.i < _input.length - 1
+						&& _input[_state.i+1] == "\n")
 			{
 				newRow();
+				_state.i++;
 			}
+			else if (_state.ch == "\n")
+				newRow();
 			else
-			{
 				appendCharToField();
-			}
 		}
 
 		function isBoundary(ch)
