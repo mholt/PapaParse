@@ -1,6 +1,6 @@
 /*
 	jQuery Parse Plugin
-	v0.5.9
+	v0.6.0
 	https://github.com/mholt/jquery.parse
 */
 
@@ -82,7 +82,7 @@
 			endRow();
 
 			if (_state.inQuotes)
-				addError("Unescaped or mismatched quotes");
+				addError("Quotes", "MissingQuotes", "Unescaped or mismatched quotes");
 
 			return self.getParsed();
 		};
@@ -156,9 +156,9 @@
 
 		function handleQuote()
 		{
-			var delimBefore = (_state.i > 0 && isBoundary(_input[_state.i-1]))
+			var delimBefore = (_state.i > 0 && isBoundary(_state.i-1))
 								|| _state.i == 0;
-			var delimAfter  = (_state.i < _input.length - 1 && isBoundary(_input[_state.i+1]))
+			var delimAfter  = (_state.i < _input.length - 1 && isBoundary(_state.i+1))
 								|| _state.i == _input.length - 1;
 			var escaped     = _state.i < _input.length - 1
 								&& _input[_state.i+1] == '"';
@@ -174,7 +174,7 @@
 			}
 			else
 			{
-				addError("Unexpected quotes");
+				addError("Quotes", "UnexpectedQuotes", "Unexpected quotes");
 			}
 		}
 
@@ -204,9 +204,30 @@
 				appendCharToField();
 		}
 
-		function isBoundary(ch)
+		function isBoundary(i)
 		{
-			return ch == _config.delimiter || ch == "\n";
+			if (i >= _input.length)
+				return false;
+			
+			var ch = _input[i];
+
+			if (ch == _config.delimiter
+				|| ch == "\n"
+				|| (ch == "\r" && i < _input.length - 1 && _input[i+1] == "\n"))
+				return true;
+			else
+				return false;
+		}
+
+		function isLineEnding(i)
+		{
+			if (i >= _input.length)
+				return false;
+
+			if (i < _input.length - 1)
+				return _input[i] == "\n" || (_input[i] == "\r" && _input[i+1] == "\n");
+			else
+				return _input[i] == "\n";
 		}
 
 		function saveField()
@@ -230,7 +251,6 @@
 						if (typeof currentRow.__parsed_extra === 'undefined')
 							currentRow.__parsed_extra = [];
 						currentRow.__parsed_extra.push(_state.fieldVal);
-						addError("Too many fields; expected " + _state.parsed.fields.length + " fields, found extra value: '" + _state.fieldVal + "'");
 					}
 				}
 			}
@@ -312,15 +332,18 @@
 				if (lastRow.hasOwnProperty(prop))
 					actual ++;
 
-			if (expected != actual)
-				return addError("Too few fields; expected " + expected + " fields, parsed " + actual);
-
+			if (actual < expected)
+				return addError("FieldMismatch", "TooFewFields", "Too few fields: expected " + expected + " fields but parsed " + actual);
+			else if (actual > expected)
+				return addError("FieldMismatch", "TooManyFields", "Too many fields: expected " + expected + " fields but parsed " + actual);
 			return true;
 		}
 
-		function addError(msg)
+		function addError(type, code, msg)
 		{
 			_errors.push({
+				type: type, 
+				code: code,
 				message: msg,
 				line: _state.lineNum,
 				row: _config.header ? _state.parsed.rows.length - 1 : _state.parsed.length - 1,

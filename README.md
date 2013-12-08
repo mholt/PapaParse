@@ -5,6 +5,12 @@ Robust, efficient CSV parsing (supports custom delimiting characters). Malformed
 
 **[jsFIDDLE DEMO](http://jsfiddle.net/mholt/nCaee/)**
 
+Most people will want to use the minified [jquery.parse.min.js](https://github.com/mholt/jquery.parse/blob/master/jquery.parse.min.js) file.
+
+For debug and development, feel free to use the original [jquery.parse.js](https://github.com/mholt/jquery.parse/blob/master/jquery.parse.js) file.
+
+This project is under test. Download this repository and open `tests.html` in your browser to run them.
+
 
 Basic usage
 -----------
@@ -102,10 +108,12 @@ Here is the structure of an error:
 
 ```javascript
 {
-	message: "",	// Human-readable message
-	line: 0,		// Line of original input
-	row: 0,			// Row index where error was
-	index: 0		// Character index within original input
+  type: "",     // Either "Quotes" or "FieldMismatch"
+  code: "",     // Standardized error code like "UnexpectedQuotes"
+	message: "",  // Human-readable error details
+	line: 0,      // Line of original input
+	row: 0,       // Row index of parsed data where error is
+	index: 0      // Character index within original input
 }
 ```
 
@@ -135,12 +143,16 @@ Notice the stray quotes on the second line. This is the output:
   },
   "errors": [
     {
+      "type": "FieldMismatch",
+      "code": "TooFewFields",
       "message": "Too few fields; expected 4 fields, parsed 2",
       "line": 2,
       "row": 0,
       "index": 66
     },
     {
+      "type": "Quotes",
+      "code": "MissingQuotes",
       "message": "Unescaped or mismatched quotes",
       "line": 2,
       "row": 0,
@@ -168,6 +180,8 @@ If the header row is disabled, field counting does not occur, because there is n
   ],
   "errors": [
     {
+      "type": "Quotes",
+      "code": "MissingQuotes",
       "message": "Unescaped or mismatched quotes",
       "line": 2,
       "row": 1,
@@ -216,13 +230,17 @@ Again, notice the second line, "10,95" instead of "10.95". This field *should* b
   },
   "errors": [
     {
-      "message": "Too many fields; expected 4 fields, found extra value: '4'",
+      "type": "FieldMismatch",
+      "code": "TooManyFields",
+      "message": "Too many fields: expected 4 fields but parsed 5",
       "line": 2,
       "row": 0,
       "index": 43
     },
     {
-      "message": "Too few fields; expected 4 fields, parsed 5",
+      "type": "FieldMismatch",
+      "code": "TooFewFields",
+      "message": "Too few fields: expected 4 fields but parsed 5",
       "line": 2,
       "row": 0,
       "index": 43

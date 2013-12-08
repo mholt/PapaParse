@@ -1,6 +1,6 @@
 {
 	"name": "parse",
-	"version": "0.5.9",
+	"version": "0.6.0",
 	"title": "jQuery Parse Plugin",
 	"description": "Parses CSV (or any delimited text) into a usable data structure. This efficient and robust parser gracefully handles malformed input and it can work without jQuery.",
 	"keywords": [
