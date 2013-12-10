@@ -110,10 +110,10 @@ Here is the structure of an error:
 {
   type: "",     // Either "Quotes" or "FieldMismatch"
   code: "",     // Standardized error code like "UnexpectedQuotes"
-	message: "",  // Human-readable error details
-	line: 0,      // Line of original input
-	row: 0,       // Row index of parsed data where error is
-	index: 0      // Character index within original input
+  message: "",  // Human-readable error details
+  line: 0,      // Line of original input
+  row: 0,       // Row index of parsed data where error is
+  index: 0      // Character index within original input
 }
 ```
 
