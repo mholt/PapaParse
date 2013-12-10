@@ -50,7 +50,8 @@
 		var _config = config;
 		var _errors = [];
 		var _regex = {
-			floats: /^-?\d+(\.\d+)?$/,
+			// floats: /^-?\d+(\.\d+)?$/,
+			floats : /^(\s*)(-?)[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?/,
 			empty: /^\s*$/
 		}
 		var _state = emptyState();

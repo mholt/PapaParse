@@ -366,6 +366,41 @@ var tests = [
 				}
 			}
 		]
+	},
+	{
+		input: "F1,F2,F3\n2,-2, 2\n 2. ,.2, .2 \n-2.,  -2.0,  -.4 ",
+		cases: [
+			{
+				config: { delimiter: ",", header: true, dynamicTyping: true },
+				expected: {
+				  "results": {
+				    "fields": [
+				      "F1",
+				      "F2",
+				      "F3"
+				    ],
+				    "rows": [
+				      {
+				        "F1": 2,
+				        "F2": -2,
+				        "F3": 2
+				      },
+				      {
+				        "F1": 2,
+				        "F2": .2,
+				        "F3": .2
+				      },
+				      {
+				        "F1": -2,
+				        "F2": -2,
+				        "F3": -0.4
+				      }
+				    ]
+				  },
+				  "errors": []
+				}
+			}
+		]
 	}
 ];
 
