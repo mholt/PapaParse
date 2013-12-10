@@ -368,7 +368,7 @@ var tests = [
 		]
 	},
 	{
-		input: "F1,F2,F3\n2,-2, 2\n 2. ,.2, .2 \n-2.,  -2.0,  -.4 ",
+		input: "F1,F2,F3\n2,-2, 2\n 2. ,.2, .2 \n-2.,  -2.0e-5,  -.4 ",
 		cases: [
 			{
 				config: { delimiter: ",", header: true, dynamicTyping: true },
@@ -387,12 +387,12 @@ var tests = [
 				      },
 				      {
 				        "F1": 2,
-				        "F2": .2,
-				        "F3": .2
+				        "F2": 0.2,
+				        "F3": 0.2
 				      },
 				      {
 				        "F1": -2,
-				        "F2": -2,
+				        "F2": -0.00002,
 				        "F3": -0.4
 				      }
 				    ]
@@ -441,7 +441,13 @@ function render(input, expected, actual, config, count, status)
 	if (status == passing)
 		passCount++;
 	else
+	{
+		console.log("TEST " + count +" FAILED.");
+		console.log("  Expected:", expected);
+		console.log("  Actual:", actual);
+		console.log("  Config:", config);
 		failCount++;
+	}
 
 	var html =	'<tr>' +
 				'<td class="count">'+count+'</td>' +

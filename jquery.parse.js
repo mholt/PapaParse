@@ -1,6 +1,6 @@
 /*
 	jQuery Parse Plugin
-	v0.6.0
+	v0.6.1
 	https://github.com/mholt/jquery.parse
 */
 
@@ -50,8 +50,7 @@
 		var _config = config;
 		var _errors = [];
 		var _regex = {
-			// floats: /^-?\d+(\.\d+)?$/,
-			floats : /^(\s*)(-?)[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?/,
+			floats: /^\s*-?(\d*\.?\d+|\d+\.?\d*)(e[-+]?\d+)?\s*$/i,
 			empty: /^\s*$/
 		}
 		var _state = emptyState();
