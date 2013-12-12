@@ -1,6 +1,6 @@
 /*
 	jQuery Parse Plugin
-	v0.6.1
+	v1.0.0
 	https://github.com/mholt/jquery.parse
 */
 
@@ -8,10 +8,98 @@
 {
 	"use strict";
 
+	var reader = new FileReader();
 	var defaults = {
 		delimiter: ",",
 		header: true,
 		dynamicTyping: false
+	};
+	var config = {
+		delimiter: defaults.delimiter,
+		header: defaults.header,
+		dynamicTyping: defaults.dynamicTyping
+	};
+
+	$.fn.parse = function(options)
+	{
+		function error(name, elem, file)
+		{
+			if (isFunction(options.error))
+				options.error({name: name}, elem, file);
+		}
+
+		this.each(function(idx)
+		{
+			var supported = $(this).prop('tagName').toUpperCase() == "INPUT"
+							&& $(this).attr('type') == 'file'
+							&& window.FileReader;
+
+			if (!supported)
+				return true;	// continue to next input element
+
+			// Config to be used only for this instance of parsing
+			var instanceConfig = {
+				delimiter: config.delimiter,
+				header: config.header,
+				dynamicTyping: config.dynamicTyping
+			};
+
+			if (!this.files || this.files.length == 0)
+			{
+				error("NoFileError", undefined, this);
+				return true;	// continue to next input element
+			}
+
+			for (var i = 0; i < this.files.length; i++)
+			{
+				var file = this.files[i];
+				if (file.type.indexOf("text") < 0)
+				{
+					error("TypeMismatchError", file, this);
+					continue;	// continue to next file in this input element
+				}
+
+				if (isFunction(options.before))
+				{
+					var returned = options.before(file, this);
+					
+					if (typeof returned === 'object')
+					{
+						// update config for this file/instance only
+						if (isDef(returned.delimiter))
+							instanceConfig.delimiter = returned.delimiter;
+						if (isDef(returned.header))
+							instanceConfig.header = returned.header;
+						if (isDef(returned.dynamicTyping))
+							instanceConfig.dynamicTyping = returned.dynamicTyping;
+					}
+					else if (returned === "skip")
+						continue;		// proceed to next file
+					else if (returned === false)
+					{
+						error("AbortError", file, this);
+						return false;	// aborts the `.each()` loop
+					}
+				}
+
+				if (isFunction(options.error))
+					reader.onerror = function() { options.error(reader.error, file, this); };
+
+				var inputElem = this;
+
+				reader.onload = function(event)
+				{
+					var text = event.target.result;
+					var results = $.parse(text, instanceConfig);
+					if (isFunction(options.complete))
+						options.complete(results, file, inputElem, event);
+				};
+
+				reader.readAsText(file);
+			}
+		});
+
+		return this;
 	};
 
 	$.parse = function(input, options)
@@ -27,12 +115,8 @@
 	function verifyOptions(opt)
 	{
 		opt.delimiter = opt.delimiter || defaults.delimiter;
-		opt.header = typeof opt.header === 'undefined'
-						? defaults.header
-						: opt.header;
-		opt.dynamicTyping = typeof opt.dynamicTyping === 'undefined'
-							? defaults.dynamicTyping
-							: opt.dynamicTyping;
+		opt.header = !isDef(opt.header) ? defaults.header : opt.header;
+		opt.dynamicTyping = !isDef(opt.dynamicTyping) ? defaults.dynamicTyping : opt.dynamicTyping;
 
 		if (opt.delimiter == '"' || opt.delimiter == "\n")
 			opt.delimiter = defaults.delimiter;
@@ -41,6 +125,16 @@
 			opt.delimiter = opt.delimiter[0];
 
 		return opt;
+	}
+
+	function isFunction(func)
+	{
+		return typeof func === 'function';
+	}
+
+	function isDef(val)
+	{
+		return typeof val !== 'undefined'
 	}
 
 	function Parser(input, config)
@@ -112,6 +206,10 @@
 			}
 
 			_config = opt;
+
+			if (typeof opt.delimiter !== 'undefined')
+				self.setDelimiter(opt.delimiter);
+			console.log("DELIM:", _config);
 		}
 
 		this.getInput = function()

@@ -70,25 +70,57 @@ Duke Rd & Walden Ave,Buffalo,NY,14225,Apple Store Walden Galleria,(716) 685-2762
 				&nbsp; &nbsp;
 				<label><input type="checkbox" id="dyntype" checked> Dynamic typing</label>
 				<br>
-				<button id="btn">Parse</button>
+				<button id="parseText">Parse Text</button>
+				<br><hr>
+				or
+				<br><hr>
+				<input type="file" id="fileinput1" multiple>
+				<input type="file" id="fileinput2" multiple>
+				<br><br>
+				<button id="parseFiles">Parse File(s)</button>
 			</div>
 			<br><br>
 			<code id="output"></code>
 		</div>
-		<script>
-		$(function()
-		{
-			$('#btn').click(function()
-			{
-				var results = $.parse($('#tb').val(), {
-					delimiter: $("#delim").val(),
-					header: $('#header').is(':checked'),
-					dynamicTyping: $('#dyntype').is(':checked')
-				});
-
-				$('#output').text(JSON.stringify(results, undefined, 2));
-			});
+<script>
+$(function()
+{
+	$('#parseText').click(function()
+	{
+		var results = $.parse($('#tb').val(), {
+			delimiter: $("#delim").val(),
+			header: $('#header').is(':checked'),
+			dynamicTyping: $('#dyntype').is(':checked')
 		});
-		</script>
+
+		render(results);
+	});
+
+	$('#parseFiles').click(function()
+	{
+		$('#fileinput1, #fileinput2').parse(
+		{
+			before: function(file, inputElem)
+			{
+				console.log("BEFORE", file, inputElem);
+			},
+			error: function(err, file, elem)
+			{
+				console.log("ERROR", err, file, elem);
+			},
+			complete: function(data, file, inputElem, event)
+			{
+				console.log("COMPLETE", data, file, inputElem, event);
+				render(data);
+			}
+		});
+	});
+
+	function render(results)
+	{
+		$('#output').text(JSON.stringify(results, undefined, 2));
+	}
+});
+</script>
 	</body>
 </html>

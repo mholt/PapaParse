@@ -1,8 +1,8 @@
 {
 	"name": "parse",
-	"version": "0.6.1",
-	"title": "jQuery Parse Plugin",
-	"description": "Parses CSV (or any delimited text) into a usable data structure. This efficient and robust parser gracefully handles malformed input. The parsing function can work without jQuery.",
+	"version": "1.0.0",
+	"title": "jQuery Parse",
+	"description": "Efficiently parses CSV (character-separated, or delimited text) files or strings into arrays and objects. Gracefully handles errors. Supports multiple file inputs and multiple files per input element.",
 	"keywords": [
 		"csv",
 		"parse",
@@ -13,7 +13,9 @@
 		"data",
 		"comma",
 		"tab",
-		"pipe"
+		"pipe",
+		"file",
+		"filereader"
 	],
 	"author": {
 		"name": "Matthew Holt",
