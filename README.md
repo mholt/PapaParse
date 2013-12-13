@@ -1,41 +1,159 @@
-Parse jQuery Plugin (jquery.parse)
-==================================
+Parse (jquery.parse) Plugin
+===========================
 
-Robust, efficient CSV parsing (supports custom delimiting characters). Malformed CSV files are especially common, and this parser is an attempt to handle parsing errors more robustly and parse CSV text more efficiently.
+The jQuery Parse plugin is a robust and efficient CSV (character-separated values) parser with these features:
+
+- Parses delimited text strings without any fuss
+- Attach to `<input type="file">` elements to load and parse files from disk
+- Header row support
+- Gracefully handles malformed data
+- Optional dynamic typing so that numeric data is parsed as numbers
+- Descriptive and contextual errors
+- Custom delimiter
+
+
+
+Demo
+----
 
 **[jsFIDDLE DEMO](http://jsfiddle.net/mholt/nCaee/)**
 
-Most people will want to use the minified [jquery.parse.min.js](https://github.com/mholt/jquery.parse/blob/master/jquery.parse.min.js) file.
-
-For debug and development, feel free to use the original [jquery.parse.js](https://github.com/mholt/jquery.parse/blob/master/jquery.parse.js) file.
-
-This project is under test. Download this repository and open `tests.html` in your browser to run them.
+Or download the repository and open `index.html` in your browser.
 
 
-Basic usage
+
+
+Get Started
 -----------
 
-The second argument is optional, but here it is with the defaults:
+For production: [jquery.parse.min.js](https://github.com/mholt/jquery.parse/blob/master/jquery.parse.min.js)
+
+For debug/dev: [jquery.parse.js](https://github.com/mholt/jquery.parse/blob/master/jquery.parse.js)
+
+
+
+### Config object
+
+Any time you invoke the parser, you may customize it using a "config" object. It supports these properties:
+
+| Option              | Default  | Description       
+|-------------------- | -------- | ---------------
+| **`delimiter`**     | `","`    | The delimiting character. Must be a string with length 1. Can be any character except `\n` and `"`.
+| **`header`**        | `true`   | If true, interpret the first row of parsed data as column titles; fields are returned separately from the data, and data will be returned keyed to its field name. Duplicate field names would be problematic. If false, the parser simply returns an array (list) of arrays (rows), including the first row.
+| **`dynamicTyping`** | `true`   | If true, fields that are only numeric will be converted to a number type. If false, each parsed datum is returned as a string.
+
+
+
+
+
+
+### Parsing strings
+
+To parse a delimited text string with default settings, simply do:
 
 ```javascript
-results = $.parse(csvString, {
-	delimiter: ",",
-	header: true,
-	dynamicTyping: true
+var results = $.parse(csvString);
+```
+
+Or to customize the settings, pass in a config object with any properties you wish to change:
+
+```javascript
+var results = $.parse(csvString, {
+  delimiter: "\t",
+  header: false,
+  dynamicTyping: false
 });
 ```
 
-### Config options
 
-| Option            | Description
-|------------------ | -----------------
-| `delimiter`       | The delimiting character. Usually just a comma or tab. Can be set to anything anything except `"` or `\n`.
-| `header`          | If true, interpret the first row of parsed data as a header column; fields are returned separately from the data, and data will be returned keyed to its field name. If false, the parser simply returns an array (list) of arrays (rows), including the first column.
-| `dynamicTyping`   | If true, fields that are strictly numeric will be converted to a number type. If false, each parsed datum is returned as a string.
 
-### Output
 
-The output and error handling depends on whether you include a header row with your data. If you have a header, each row must have the same number of fields as the header row, or an error will be produced.
+### Parsing files
+
+You can parse multiple files from multiple `<input type="file">` elements like so, where each property is optional:
+
+```javascript
+$('input[type=file]').parse({
+  config: {
+    // base settings to use for each file
+  },
+  before: function(file, inputElem)
+  {
+    // executed before parsing each file begins;
+    // see documentation for how return values
+    // affect the behavior of the plugin
+  },
+  error: function(err, file, inputElem)
+  {
+    // executed if an error occurs during loading the file,
+    // or if the file being iterated is the wrong type,
+    // or if the input element has no files selected
+  },
+  complete: function(results, file, inputElem, event)
+  {
+    // executed when parsing each file completes;
+    // this function receives the parse results
+  }
+});
+```
+
+In order to be parsed, a file must have "text" in its MIME type.
+
+
+
+
+#### Callbacks
+
+As indicated above, there are callbacks you can use when parsing files.
+
+
+
+##### `before(file, inputElem)`
+
+If the next file in the queue is found to be some sort of "text" MIME type, this callback will be executed immediately before setting up the FileReader, loading the file, and parsing it. It receives the file object and the `<input>` element so you can inspect the file to be parsed.
+
+You can change what happens next depending on what you return:
+
+- Return `"skip"` to skip parsing this file.
+- Return `false` to abort parsing this and all other files in the queue.
+- Return a config object to alter the options for parsing this file only.
+
+Returning anything else, including `undefined`, continues without any changes.
+
+
+##### `error(err, file, inputElem)`
+
+Invoked if there is an error loading the file. It receives an object that implements the [`DOMError`](https://developer.mozilla.org/en-US/docs/Web/API/DOMError) interface (i.e. call `err.name` to get the error), the file object at hand, and the `<input>` element from which the file was selected.
+
+Errors can occur before reading the file if:
+
+- the HTML element has no files chosen
+- a file chosen is not a "text" type (e.g. "text/csv" or "text/plain")
+- a user-defined callback function (`before`) aborted the process
+
+Otherwise, errors are invoked by FileReader when opening the file. *Parse errors are not reported here, but are reported in the results later on.*
+
+
+##### `complete(results, file, inputElem, event)`
+
+Invoked when parsing a file completes. It receives the results of the parse (including errors), the file object, the `<input>` element from which the file was chosen, and the FileReader-generated event.
+
+
+
+
+Output
+------
+
+Whether you're parsing strings or files, the results returned by the parser are the same since, under the hood, the FileReader loads a file as a string.
+
+The results will always have this basic structure:
+
+```javascript
+{
+  results:  // either an object or array of parse results
+  errors:   // an array of parse errors
+}
+```
 
 **Example input:**
 
@@ -43,7 +161,10 @@ The output and error handling depends on whether you include a header row with y
     Book,ABC1234,10.95,4
     Movie,DEF5678,29.99,3
 
-**With header and dynamic typing:**
+
+### Results if `header: true` and `dynamicTyping: true`
+
+With a header row, each value is keyed to its field name, so the result is an object with `fields` and `rows`. The fields are an array of strings, and the rows are an array of objects:
 
 ```json
 {
@@ -73,7 +194,14 @@ The output and error handling depends on whether you include a header row with y
 }
 ```
 
-**Without headers and without dynamic typing:**
+Notice how the numeric values were converted to numbers. That is what `dynamicTyping` does.
+
+With a header row, the field count must be the same on each row, or a FieldMismatch error will be produced for that row. (Without a header row, lines can have variable number of fields without errors.)
+
+
+### Results if `header: false` and `dynamicTyping: false`
+
+Without a header row, the result is an array (list) of arrays (rows).
 
 ```json
 {
@@ -101,10 +229,15 @@ The output and error handling depends on whether you include a header row with y
 }
 ```
 
-Errors
-------
+Notice how, since dynamic typing is disabled, the numeric values are strings.
 
-Here is the structure of an error:
+If you are concerned about optimizing the performance of the parser, disable dynamic typing. That should speed things up by at least 2x.
+
+
+Parse Errors
+------------
+
+Parse errors are returned alongside the results as an array of objects. Here is the structure of an error object:
 
 ```javascript
 {
@@ -117,11 +250,11 @@ Here is the structure of an error:
 }
 ```
 
-(Assume again that the default config is used.) Suppose the input is malformed:
+Assuming the default settings, suppose the input is malformed:
 
-	Item,SKU,Cost,Quantity
-	Book,"ABC1234,10.95,4
-	Movie,DEF5678,29.99,3
+    Item,SKU,Cost,Quantity
+    Book,"ABC1234,10.95,4
+    Movie,DEF5678,29.99,3
 
 Notice the stray quotes on the second line. This is the output:
 
@@ -162,7 +295,7 @@ Notice the stray quotes on the second line. This is the output:
 }
 ```
 
-If the header row is disabled, field counting does not occur, because there is no need to key the data to the field name:
+If the header row is disabled, field counting does not occur because there is no need to key the data to the field name. Thus we only get a Quotes error:
 
 ```json
 {
@@ -191,13 +324,11 @@ If the header row is disabled, field counting does not occur, because there is n
 }
 ```
 
-But you will still be notified about the stray quotes, as shown above.
-
 Suppose a field value with a delimiter is not escaped:
 
-	Item,SKU,Cost,Quantity
-	Book,ABC1234,10,95,4
-	Movie,DEF5678,29.99,3
+    Item,SKU,Cost,Quantity
+    Book,ABC1234,10,95,4
+    Movie,DEF5678,29.99,3
 
 Again, notice the second line, "10,95" instead of "10.95". This field *should* be quoted: `"10,95"` but the parser handles the problem gracefully:
 
@@ -249,12 +380,25 @@ Again, notice the second line, "10,95" instead of "10.95". This field *should* b
 }
 ```
 
-As you can see, any "extra" fields at the end, when using a header row, are simply tacked onto a special field named "__parsed_extra", in the order that the remaining line was parsed.
+Since files with headers are supposed to have the same number of fields per row, any extra fields are parsed into a special array field named "__parsed_extra" in the order that the remaining line was parsed.
 
 
 
-### Is jQuery needed?
+Tests
+-----
 
-Actually, no. Just pull out the `Parser` function [embedded in the plugin](https://github.com/mholt/jquery.parse/blob/master/jquery.parse.js#L46). The jQuery plugin merely wraps this function which has no jQuery dependencies.
+The Parser component is under test. Download this repository and open `tests.html` in your browser to run them.
 
-I've packaged this as a jQuery plugin primarily for publicity and convenience. 
+
+
+The Parser function
+-------------------
+
+Inside this jQuery plugin is a `Parser` function that actually performs the parsing of delimited text. It does not depend upon jQuery. This plugin uses jQuery to attach to `<input type="file">` elements and to make it more convenient to activate the parsing mechanism.
+
+
+
+Contributing
+-------------------
+
+Please feel free to chip in! If you'd like to see a feature or fix, pull down the code and submit a pull request. But remember, if you're changing anything in the Parser function, a pull request, *with test*, is best. (All changes to the parser component should be validated with tests.)
