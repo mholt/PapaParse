@@ -177,20 +177,6 @@
 
 		this.setOptions(config);
 
-		function returnable()
-		{
-			return {
-				results: _state.parsed,
-				errors: _state.errors
-			};
-		}
-
-		function reset(input)
-		{
-			_state = emptyState();
-			_input = input;
-		}
-
 		function validConfig(config)
 		{
 			if (typeof config.delimiter !== 'string'
@@ -244,13 +230,9 @@
 				_state.i++;
 			}
 			else if (delimBefore || delimAfter)
-			{
 				_state.inQuotes = !_state.inQuotes;
-			}
 			else
-			{
 				addError("Quotes", "UnexpectedQuotes", "Unexpected quotes");
-			}
 		}
 
 		function inQuotes()
@@ -340,14 +322,6 @@
 			_state.field ++;
 		}
 
-		function endRow()
-		{
-			saveField();
-			var emptyLine = trimEmptyLine();
-			if (!emptyLine && _config.header)
-				inspectFieldCount();
-		}
-
 		function newRow()
 		{
 			endRow();
@@ -360,6 +334,14 @@
 			_state.lineNum ++;
 			_state.line = "";
 			_state.field = 0;
+		}
+
+		function endRow()
+		{
+			saveField();
+			var emptyLine = trimEmptyLine();
+			if (!emptyLine && _config.header)
+				inspectFieldCount();
 		}
 
 		function tryParseFloat(num)
@@ -427,6 +409,19 @@
 			return false;
 		}
 
+		function returnable()
+		{
+			return {
+				results: _state.parsed,
+				errors: _state.errors
+			};
+		}
+
+		function reset(input)
+		{
+			_state = emptyState();
+			_input = input;
+		}
 	}
 
 })(jQuery);
