@@ -8,18 +8,6 @@
 {
 	"use strict";
 
-	var reader = new FileReader();
-	var defaults = {
-		delimiter: ",",
-		header: true,
-		dynamicTyping: false
-	};
-	var config = {
-		delimiter: defaults.delimiter,
-		header: defaults.header,
-		dynamicTyping: defaults.dynamicTyping
-	};
-
 	$.fn.parse = function(options)
 	{
 		function error(name, elem, file)
@@ -27,6 +15,8 @@
 			if (isFunction(options.error))
 				options.error({name: name}, elem, file);
 		}
+
+		var config = isDef(options.config) ? options.config : {};
 
 		this.each(function(idx)
 		{
@@ -82,6 +72,8 @@
 					}
 				}
 
+				var reader = new FileReader();
+
 				if (isFunction(options.error))
 					reader.onerror = function() { options.error(reader.error, file, this); };
 
@@ -104,28 +96,9 @@
 
 	$.parse = function(input, options)
 	{
-		options = verifyOptions(options);
-		var parser = new Parser(input, options);
-		return {
-			results: parser.parse(),
-			errors: parser.getErrors()
-		};
+		var parser = new Parser(options);
+		return parser.parse(input);
 	};
-
-	function verifyOptions(opt)
-	{
-		opt.delimiter = opt.delimiter || defaults.delimiter;
-		opt.header = !isDef(opt.header) ? defaults.header : opt.header;
-		opt.dynamicTyping = !isDef(opt.dynamicTyping) ? defaults.dynamicTyping : opt.dynamicTyping;
-
-		if (opt.delimiter == '"' || opt.delimiter == "\n")
-			opt.delimiter = defaults.delimiter;
-
-		if (opt.delimiter.length > 1)
-			opt.delimiter = opt.delimiter[0];
-
-		return opt;
-	}
 
 	function isFunction(func)
 	{
@@ -137,27 +110,49 @@
 		return typeof val !== 'undefined'
 	}
 
-	function Parser(input, config)
+	// Parser is the actual parsing component.
+	// It is under test and does not depend on jQuery.
+	function Parser(config)
 	{
 		var self = this;
-		var _input = input;
-		var _config = config;
-		var _errors = [];
+		var _input = "";
+		var _config = {};
+		var _state = emptyState();
+		var _defaultConfig = {
+			delimiter: ",",
+			header: true,
+			dynamicTyping: true
+		};
 		var _regex = {
 			floats: /^\s*-?(\d*\.?\d+|\d+\.?\d*)(e[-+]?\d+)?\s*$/i,
 			empty: /^\s*$/
-		}
-		var _state = emptyState();
+		};
 
-		this.parse = function(arg)
+		this.setOptions = function(opt)
 		{
-			if (typeof arg === 'object')
-				self.setConfig(arg)
-			else if (typeof arg === 'string')
-				self.setInput(arg);
+			opt = validConfig(opt);
+			_config = {
+				delimiter: opt.delimiter,
+				header: opt.header,
+				dynamicTyping: opt.dynamicTyping
+			};
+		};
 
-			_errors = [];
-			_state = emptyState();
+		this.getOptions = function()
+		{
+			return {
+				delimiter: _config.delimiter,
+				header: _config.header,
+				dynamicTyping: _config.dynamicTyping
+			};
+		};
+
+		this.parse = function(input)
+		{
+			if (typeof input !== 'string')
+				return returnable();
+
+			reset(input);
 
 			for (_state.i = 0; _state.i < _input.length; _state.i++)
 			{
@@ -172,66 +167,47 @@
 					notInQuotes();
 			}
 
-			// End of input is also end of the last row
-			endRow();
+			endRow();	// End of input is also end of the last row
 
 			if (_state.inQuotes)
 				addError("Quotes", "MissingQuotes", "Unescaped or mismatched quotes");
 
-			return self.getParsed();
+			return returnable();
 		};
 
-		this.getDelimiter = function()
+		this.setOptions(config);
+
+		function returnable()
 		{
-			return config.delimiter;
-		};
-
-		this.setDelimiter = function(delim)
-		{
-			var comma = ",";
-			delim = delim
-				? (delim == '"' || delim == "\n" ? comma : delim)
-				: comma;
-			_config.delimiter = delim[0];
-		};
-
-		this.setConfig = function(opt)
-		{
-			if ((typeof opt.header !== 'undefined'
-					&& opt.header != config.header)
-				|| (typeof opt.delimiter !== 'undefined'
-					&& opt.delimiter != config.delimiter))
-			{
-				_state.parsed = emptyParsed(opt.header);
-			}
-
-			_config = opt;
-
-			if (typeof opt.delimiter !== 'undefined')
-				self.setDelimiter(opt.delimiter);
-			console.log("DELIM:", _config);
+			return {
+				results: _state.parsed,
+				errors: _state.errors
+			};
 		}
 
-		this.getInput = function()
+		function reset(input)
 		{
-			return _input;
-		}
-
-		this.setInput = function(input)
-		{
+			_state = emptyState();
 			_input = input;
 		}
 
-		this.getParsed = function()
+		function validConfig(config)
 		{
-			return _state.parsed;
-		}
+			if (typeof config.delimiter !== 'string'
+				|| config.delimiter.length != 1)
+				config.delimiter = _defaultConfig.delimiter;
 
-		this.getErrors = function()
-		{
-			return _errors;
-		}
+			if (config.delimiter == '"' || config.delimiter == "\n")
+				config.delimiter = _defaultConfig.delimiter;
 
+			if (typeof config.header !== 'boolean')
+				config.header = _defaultConfig.header;
+			
+			if (typeof config.dynamicTyping !== 'boolean')
+				config.dynamicTyping = _defaultConfig.dynamicTyping;
+
+			return config;
+		}
 
 		function emptyParsed(header)
 		{
@@ -248,7 +224,8 @@
 				line: "",
 				ch: "",
 				inQuotes: false,
-				parsed: emptyParsed(config.header)
+				parsed: emptyParsed(_config.header),
+				errors: []
 			};
 		}
 
@@ -439,7 +416,7 @@
 
 		function addError(type, code, msg)
 		{
-			_errors.push({
+			_state.errors.push({
 				type: type, 
 				code: code,
 				message: msg,

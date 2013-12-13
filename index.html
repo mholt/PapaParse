@@ -52,6 +52,13 @@
 	</head>
 	<body>
 		<div class="container">
+			<div class="text-center">
+				Delimiter: <input type="text" id="delim" value="," maxlength="1">
+				<label><input type="checkbox" id="header" checked> Header row</label>
+				&nbsp; &nbsp;
+				<label><input type="checkbox" id="dyntype" checked> Dynamic typing</label>
+			</div>
+			<br>
 			<textarea id="tb" placeholder="CSV input">Address,City,State,Zipcode,Name,Phone Number,Group,URL
 1 Crossgates Mall Road,Albany,NY,12203,Apple Store Cross Gates,(518) 869-3192,"Example ""Group"" 1",http://www.apple.com/retail/crossgates/
 Duke Rd & Walden Ave,Buffalo,NY,14225,Apple Store Walden Galleria,(716) 685-2762,Example Group 2,http://www.apple.com/retail/walden/
@@ -65,11 +72,6 @@ Duke Rd & Walden Ave,Buffalo,NY,14225,Apple Store Walden Galleria,(716) 685-2762
 103 Prince Street,New York,NY,10012,Apple Store SoHo,(212) 226-3126,Example Group 2,http://www.apple.com/retail/soho/</textarea>
 			<br>
 			<div class="text-center">
-				Delimiter: <input type="text" id="delim" value="," maxlength="1">
-				<label><input type="checkbox" id="header" checked> Header row</label>
-				&nbsp; &nbsp;
-				<label><input type="checkbox" id="dyntype" checked> Dynamic typing</label>
-				<br>
 				<button id="parseText">Parse Text</button>
 				<br><hr>
 				or
@@ -87,18 +89,12 @@ $(function()
 {
 	$('#parseText').click(function()
 	{
-		var results = $.parse($('#tb').val(), {
-			delimiter: $("#delim").val(),
-			header: $('#header').is(':checked'),
-			dynamicTyping: $('#dyntype').is(':checked')
-		});
-
-		render(results);
+		render($.parse($('#tb').val(), userConfig()));
 	});
 
 	$('#parseFiles').click(function()
 	{
-		$('#fileinput1, #fileinput2').parse(
+		$('#fileinput1').parse(
 		{
 			before: function(file, inputElem)
 			{
@@ -112,9 +108,19 @@ $(function()
 			{
 				console.log("COMPLETE", data, file, inputElem, event);
 				render(data);
-			}
+			},
+			config: userConfig()
 		});
 	});
+
+	function userConfig()
+	{
+		return {
+			delimiter: $("#delim").val(),
+			header: $('#header').is(':checked'),
+			dynamicTyping: $('#dyntype').is(':checked')
+		};
+	}
 
 	function render(results)
 	{
