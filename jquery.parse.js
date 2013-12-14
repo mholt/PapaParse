@@ -195,11 +195,6 @@
 			return config;
 		}
 
-		function emptyParsed(header)
-		{
-			return header ? { fields: [], rows: [] } : [ [] ]; 
-		}
-
 		function emptyState()
 		{
 			return {
@@ -210,8 +205,8 @@
 				line: "",
 				ch: "",
 				inQuotes: false,
-				parsed: emptyParsed(_config.header),
-				errors: []
+				parsed: _config.header ? { fields: [], rows: [] } : [ [] ],
+				errors: { length: 0 }
 			};
 		}
 
@@ -398,14 +393,24 @@
 
 		function addError(type, code, msg)
 		{
-			_state.errors.push({
+			var row = _config.header
+						? _state.parsed.rows.length - 1
+						: _state.parsed.length - 1;
+
+			if (typeof _state.errors[row] === 'undefined')
+				_state.errors[row] = [];
+
+			_state.errors[row].push({
 				type: type, 
 				code: code,
 				message: msg,
 				line: _state.lineNum,
-				row: _config.header ? _state.parsed.rows.length - 1 : _state.parsed.length - 1,
+				row: row,
 				index: _state.i
 			});
+
+			_state.errors.length ++;
+
 			return false;
 		}
 

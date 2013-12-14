@@ -20,7 +20,9 @@ var resultSet1 = [
 		      }
 		    ]
 		  },
-		  "errors": []
+		  "errors": {
+		  	"length": 0
+		  }
 		}
 	},
 	{
@@ -38,7 +40,9 @@ var resultSet1 = [
 		      "V3"
 		    ]
 		  ],
-		  "errors": []
+		  "errors": {
+		  	"length": 0
+		  }
 		}
 	},
 	{
@@ -56,7 +60,9 @@ var resultSet1 = [
 		      "V3"
 		    ]
 		  ],
-		  "errors": []
+		  "errors": {
+		  	"length": 0
+		  }
 		}
 	},
 	{
@@ -76,7 +82,9 @@ var resultSet1 = [
 		      }
 		    ]
 		  },
-		  "errors": []
+		  "errors": {
+		  	"length": 0
+		  }
 		}
 	}
 ];
@@ -131,7 +139,9 @@ var tests = [
 				      }
 				    ]
 				  },
-				  "errors": []
+				  "errors": {
+				  	"length": 0
+				  }
 				}
 			},
 			{
@@ -154,7 +164,9 @@ var tests = [
 				      "V6"
 				    ]
 				  ],
-				  "errors": []
+				  "errors": {
+				  	"length": 0
+				  }
 				}
 			},
 			{
@@ -177,7 +189,9 @@ var tests = [
 				      "V6"
 				    ]
 				  ],
-				  "errors": []
+				  "errors": {
+				  	"length": 0
+				  }
 				}
 			},
 			{
@@ -202,7 +216,9 @@ var tests = [
 				      }
 				    ]
 				  },
-				  "errors": []
+				  "errors": {
+				  	"length": 0
+				  }
 				}
 			}
 		]
@@ -232,7 +248,9 @@ var tests = [
 				      }
 				    ]
 				  },
-				  "errors": []
+				  "errors": {
+				  	"length": 0
+				  }
 				}
 			}
 		]
@@ -265,16 +283,19 @@ var tests = [
 				      }
 				    ]
 				  },
-				  "errors": [
-				    {
-				      "type": "FieldMismatch",
-				      "code": "TooManyFields",
-				      "message": "Too many fields: expected 3 fields but parsed 4",
-				      "line": 2,
-				      "row": 0,
-				      "index": 17
-				    }
-				  ]
+				  "errors": {
+				    "0": [
+				      {
+				        "type": "FieldMismatch",
+				        "code": "TooManyFields",
+				        "message": "Too many fields: expected 3 fields but parsed 4",
+				        "line": 2,
+				        "row": 0,
+				        "index": 17
+				      }
+				    ],
+				    "length": 1
+				  }
 				}
 			}
 		]
@@ -307,17 +328,20 @@ var tests = [
 				      }
 				    ]
 				  },
-				  "errors": [
-				    {
-				      "type": "FieldMismatch",
-				      "code": "TooManyFields",
-				      "message": "Too many fields: expected 3 fields but parsed 4",
-				      "line": 2,
-				      "row": 0,
-				      "index": 25
-				    }
-				  ]
-				}
+				  "errors": {
+				    "0": [
+				      {
+				        "type": "FieldMismatch",
+				        "code": "TooManyFields",
+				        "message": "Too many fields: expected 3 fields but parsed 4",
+				        "line": 2,
+				        "row": 0,
+				        "index": 25
+				      }
+				    ],
+				    "length": 1
+				  }
+			   }
 			}
 		]
 	},
@@ -345,24 +369,27 @@ var tests = [
 				      }
 				    ]
 				  },
-				  "errors": [
-				    {
-				      "type": "FieldMismatch",
-				      "code": "TooFewFields",
-				      "message": "Too few fields: expected 3 fields but parsed 2",
-				      "line": 3,
-				      "row": 1,
-				      "index": 27
-				    },
-				    {
-				      "type": "Quotes",
-				      "code": "MissingQuotes",
-				      "message": "Unescaped or mismatched quotes",
-				      "line": 3,
-				      "row": 1,
-				      "index": 27
-				    }
-				  ]
+				  "errors": {
+				    "1": [
+				      {
+				        "type": "FieldMismatch",
+				        "code": "TooFewFields",
+				        "message": "Too few fields: expected 3 fields but parsed 2",
+				        "line": 3,
+				        "row": 1,
+				        "index": 27
+				      },
+				      {
+				        "type": "Quotes",
+				        "code": "MissingQuotes",
+				        "message": "Unescaped or mismatched quotes",
+				        "line": 3,
+				        "row": 1,
+				        "index": 27
+				      }
+				    ],
+				    "length": 2
+				  }
 				}
 			}
 		]
@@ -397,7 +424,9 @@ var tests = [
 				      }
 				    ]
 				  },
-				  "errors": []
+				  "errors": {
+		  	"length": 0
+		  }
 				}
 			}
 		]

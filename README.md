@@ -150,8 +150,8 @@ The results will always have this basic structure:
 
 ```javascript
 {
-  results:  // either an object or array of parse results
-  errors:   // an array of parse errors
+  results:  // parse results
+  errors:   // parse errors, keyed by row
 }
 ```
 
@@ -190,7 +190,9 @@ With a header row, each value is keyed to its field name, so the result is an ob
       }
     ]
   },
-  "errors": []
+  "errors": {
+    "length": 0
+  }
 }
 ```
 
@@ -225,7 +227,9 @@ Without a header row, the result is an array (list) of arrays (rows).
       "3"
     ]
   ],
-  "errors": []
+  "errors": {
+    "length": 0
+  }
 }
 ```
 
@@ -274,24 +278,27 @@ Notice the stray quotes on the second line. This is the output:
       }
     ]
   },
-  "errors": [
-    {
-      "type": "FieldMismatch",
-      "code": "TooFewFields",
-      "message": "Too few fields; expected 4 fields, parsed 2",
-      "line": 2,
-      "row": 0,
-      "index": 66
-    },
-    {
-      "type": "Quotes",
-      "code": "MissingQuotes",
-      "message": "Unescaped or mismatched quotes",
-      "line": 2,
-      "row": 0,
-      "index": 66
-    }
-  ]
+  "errors": {
+    "0": [
+      {
+        "type": "FieldMismatch",
+        "code": "TooFewFields",
+        "message": "Too few fields: expected 4 fields but parsed 2",
+        "line": 2,
+        "row": 0,
+        "index": 66
+      },
+      {
+        "type": "Quotes",
+        "code": "MissingQuotes",
+        "message": "Unescaped or mismatched quotes",
+        "line": 2,
+        "row": 0,
+        "index": 66
+      }
+    ],
+    "length": 2
+  }
 }
 ```
 
@@ -311,16 +318,19 @@ If the header row is disabled, field counting does not occur because there is no
       "ABC1234,10.95,4\nMovie,DEF5678,29.99,3"
     ]
   ],
-  "errors": [
-    {
-      "type": "Quotes",
-      "code": "MissingQuotes",
-      "message": "Unescaped or mismatched quotes",
-      "line": 2,
-      "row": 1,
-      "index": 66
-    }
-  ]
+  "errors": {
+    "1": [
+      {
+        "type": "Quotes",
+        "code": "MissingQuotes",
+        "message": "Unescaped or mismatched quotes",
+        "line": 2,
+        "row": 1,
+        "index": 66
+      }
+    ],
+    "length": 1
+  }
 }
 ```
 
@@ -359,24 +369,19 @@ Again, notice the second line, "10,95" instead of "10.95". This field *should* b
       }
     ]
   },
-  "errors": [
-    {
-      "type": "FieldMismatch",
-      "code": "TooManyFields",
-      "message": "Too many fields: expected 4 fields but parsed 5",
-      "line": 2,
-      "row": 0,
-      "index": 43
-    },
-    {
-      "type": "FieldMismatch",
-      "code": "TooFewFields",
-      "message": "Too few fields: expected 4 fields but parsed 5",
-      "line": 2,
-      "row": 0,
-      "index": 43
-    }
-  ]
+  "errors": {
+    "0": [
+      {
+        "type": "FieldMismatch",
+        "code": "TooManyFields",
+        "message": "Too many fields: expected 4 fields but parsed 5",
+        "line": 2,
+        "row": 0,
+        "index": 43
+      }
+    ],
+    "length": 1
+  }
 }
 ```
 

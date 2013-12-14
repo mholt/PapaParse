@@ -2,7 +2,7 @@
 	"name": "parse",
 	"version": "1.0.0",
 	"title": "jQuery Parse",
-	"description": "Efficiently parses CSV (character-separated, or delimited text) files or strings into arrays and objects. Gracefully handles errors. Supports multiple file inputs and multiple files per input element.",
+	"description": "Parses CSV (character-separated, or delimited text) files or strings into arrays and objects efficiently. Gracefully handles errors. Supports multiple file inputs and multiple files per input element.",
 	"keywords": [
 		"csv",
 		"parse",
