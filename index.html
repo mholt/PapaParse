@@ -89,7 +89,12 @@ $(function()
 {
 	$('#parseText').click(function()
 	{
-		render($.parse($('#tb').val(), userConfig()));
+		// TODO: Build in some performance logging
+		//var start = performance.now();
+		var results = $.parse($('#tb').val(), userConfig());
+		//var end = performance.now();
+		//console.log((end - start) + " milliseconds");
+		render(results);
 	});
 
 	$('#parseFiles').click(function()
