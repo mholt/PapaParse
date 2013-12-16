@@ -301,7 +301,7 @@ var tests = [
 		]
 	},
 	{
-		input: "F1,F2,F3\nV1,2.0,-3.01, V4\n\rV5,\"V\n6\",V7",
+		input: "F1,F2,F3\nV1,2.0,-3.01, V4\n\rV5,\"V\n6\",V7\r,,",
 		cases: [
 			{
 				config: { delimiter: ",", header: true, dynamicTyping: true },
@@ -322,9 +322,14 @@ var tests = [
 				        ]
 				      },
 				      {
-				        "F1": "\rV5",
+				        "F1": "V5",
 				        "F2": "V\n6",
 				        "F3": "V7"
+				      },
+				      {
+				        "F1": "",
+				        "F2": "",
+				        "F3": ""
 				      }
 				    ]
 				  },
@@ -341,7 +346,7 @@ var tests = [
 				    ],
 				    "length": 1
 				  }
-			   }
+				}
 			}
 		]
 	},

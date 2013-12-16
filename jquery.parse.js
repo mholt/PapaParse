@@ -1,6 +1,6 @@
 /*
 	jQuery Parse Plugin
-	v1.0.0
+	v1.0.1
 	https://github.com/mholt/jquery.parse
 */
 
@@ -244,13 +244,15 @@
 		{
 			if (_state.ch == _config.delimiter)
 				saveField();
-			else if (_state.ch == "\r" && _state.i < _input.length - 1
+			else if ((_state.ch == "\r" && _state.i < _input.length - 1
 						&& _input[_state.i+1] == "\n")
+					|| (_state.ch == "\n" && _state.i < _input.length - 1
+						&& _input[_state.i+1] == "\r"))
 			{
 				newRow();
 				_state.i++;
 			}
-			else if (_state.ch == "\n")
+			else if (_state.ch == "\n" || _state.ch == "\r")
 				newRow();
 			else
 				appendCharToField();
