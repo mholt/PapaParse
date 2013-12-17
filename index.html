@@ -28,6 +28,10 @@
 			width: 80px;
 		}
 
+		#tabdelim {
+			font-size: 12px;
+		}
+
 		.container {
 			width: 100%;
 		}
@@ -53,7 +57,8 @@
 	<body>
 		<div class="container">
 			<div class="text-center">
-				Delimiter: <input type="text" id="delim" value="," maxlength="1">
+				Delimiter: <input type="text" id="delim" value="" maxlength="1" placeholder="auto"> <a href="javascript:" id="tabdelim">(Tab)</a>
+				&nbsp; &nbsp;
 				<label><input type="checkbox" id="header" checked> Header row</label>
 				&nbsp; &nbsp;
 				<label><input type="checkbox" id="dyntype" checked> Dynamic typing</label>
@@ -117,6 +122,11 @@ $(function()
 			config: userConfig()
 		});
 	});
+
+	$('#tabdelim').click(function()
+	{
+		$('#delim').val("\t");
+	})
 
 	function userConfig()
 	{

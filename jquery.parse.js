@@ -1,6 +1,6 @@
 /*
 	jQuery Parse Plugin
-	v1.0.1
+	v1.1.0
 	https://github.com/mholt/jquery.parse
 */
 
@@ -112,6 +112,8 @@
 
 	// Parser is the actual parsing component.
 	// It is under test and does not depend on jQuery.
+	// You could rip this entire function out of the plugin
+	// and use it independently (with attribution).
 	function Parser(config)
 	{
 		var self = this;
@@ -119,32 +121,14 @@
 		var _config = {};
 		var _state = emptyState();
 		var _defaultConfig = {
-			delimiter: ",",
+			delimiter: "",
 			header: true,
-			dynamicTyping: true
+			dynamicTyping: true,
+			preview: 0
 		};
 		var _regex = {
 			floats: /^\s*-?(\d*\.?\d+|\d+\.?\d*)(e[-+]?\d+)?\s*$/i,
 			empty: /^\s*$/
-		};
-
-		this.setOptions = function(opt)
-		{
-			opt = validConfig(opt);
-			_config = {
-				delimiter: opt.delimiter,
-				header: opt.header,
-				dynamicTyping: opt.dynamicTyping
-			};
-		};
-
-		this.getOptions = function()
-		{
-			return {
-				delimiter: _config.delimiter,
-				header: _config.header,
-				dynamicTyping: _config.dynamicTyping
-			};
 		};
 
 		this.parse = function(input)
@@ -154,8 +138,17 @@
 
 			reset(input);
 
+			if (!_config.delimiter && !guessDelimiter(input))
+			{
+				addError("Delimiter", "UndetectableDelimiter", "Unable to auto-detect delimiting character; defaulted to comma", "config");
+				_config.delimiter = ",";
+			}
+
 			for (_state.i = 0; _state.i < _input.length; _state.i++)
 			{
+				if (_config.preview > 0 && _state.row >= _config.preview)
+					break;
+
 				_state.ch = _input[_state.i];
 				_state.line += _state.ch;
 				
@@ -175,6 +168,27 @@
 			return returnable();
 		};
 
+		this.setOptions = function(opt)
+		{
+			opt = validConfig(opt);
+			_config = {
+				delimiter: opt.delimiter,
+				header: opt.header,
+				dynamicTyping: opt.dynamicTyping,
+				preview: opt.preview
+			};
+		};
+
+		this.getOptions = function()
+		{
+			return {
+				delimiter: _config.delimiter,
+				header: _config.header,
+				dynamicTyping: _config.dynamicTyping,
+				preview: _config.preview
+			};
+		};
+
 		this.setOptions(config);
 
 		function validConfig(config)
@@ -183,8 +197,8 @@
 				|| config.delimiter.length != 1)
 				config.delimiter = _defaultConfig.delimiter;
 
-			if (config.delimiter == '"' || config.delimiter == "\n")
-				config.delimiter = _defaultConfig.delimiter;
+			if (config.deimiter == '"' || config.delimiter == "\n")
+				config.delimitelr = _defaultConfig.delimiter;
 
 			if (typeof config.header !== 'boolean')
 				config.header = _defaultConfig.header;
@@ -192,7 +206,59 @@
 			if (typeof config.dynamicTyping !== 'boolean')
 				config.dynamicTyping = _defaultConfig.dynamicTyping;
 
+			if (typeof config.preview !== 'number')
+				config.preview = _defaultConfig.preview;
+
 			return config;
+		}
+
+		function guessDelimiter(input)
+		{
+			var delimiters = [",", "\t", "|", ";"];
+			var bestDelim, bestDelta, fieldCountPrevRow;
+
+			for (var i in delimiters)
+			{
+				var delim = delimiters[i];
+				var delta = 0, avgFieldCount = 0;
+
+				var preview = new Parser({
+					delimiter: delim,
+					header: false,
+					dynamicTyping: false,
+					preview: 10
+				}).parse(input);
+
+				for (var j in preview.results)
+				{
+					var fieldCount = preview.results[j].length;
+					avgFieldCount += fieldCount;
+
+					if (typeof fieldCountPrevRow === 'undefined')
+					{
+						fieldCountPrevRow = fieldCount;
+						continue;
+					}
+					else if (fieldCount > 1)
+					{
+						delta += Math.abs(fieldCount - fieldCountPrevRow);
+						fieldCountPrevRow = fieldCount;
+					}
+				}
+
+				avgFieldCount /= preview.results.length;
+
+				if ((typeof bestDelta === 'undefined' || delta < bestDelta)
+					&& avgFieldCount > 1.99)
+				{
+					bestDelta = delta;
+					bestDelim = delim;
+				}
+			}
+
+			_config.delimiter = bestDelim;
+
+			return !!bestDelim;
 		}
 
 		function emptyState()
@@ -393,16 +459,17 @@
 			return true;
 		}
 
-		function addError(type, code, msg)
+		function addError(type, code, msg, errKey)
 		{
 			var row = _config.header
-						? _state.parsed.rows.length - 1
+						? (_state.parsed.rows.length ? _state.parsed.rows.length - 1 : undefined)
 						: _state.parsed.length - 1;
+			var key = errKey || row;
 
-			if (typeof _state.errors[row] === 'undefined')
-				_state.errors[row] = [];
+			if (typeof _state.errors[key] === 'undefined')
+				_state.errors[key] = [];
 
-			_state.errors[row].push({
+			_state.errors[key].push({
 				type: type, 
 				code: code,
 				message: msg,

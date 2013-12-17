@@ -86,7 +86,29 @@ var resultSet1 = [
 		  	"length": 0
 		  }
 		}
-	}
+	},
+	{
+		config: { delimiter: "", header: true, dynamicTyping: true },
+		expected: {
+		  "results": {
+		    "fields": [
+		      "F1",
+		      "F2",
+		      "F3"
+		    ],
+		    "rows": [
+		      {
+		        "F1": "V1",
+		        "F2": 2,
+		        "F3": "V3"
+		      }
+		    ]
+		  },
+		  "errors": {
+		  	"length": 0
+		  }
+		}
+	},
 ];
 
 var tests = [
@@ -108,6 +130,14 @@ var tests = [
 	},
 	{
 		input: "F1,F2,F3\r\n\r\nV1,2,V3",
+		cases: resultSet1
+	},
+	{
+		input: "F1,F2,F3\n\rV1,2,V3",
+		cases: resultSet1
+	},
+	{
+		input: "F1,F2,F3\rV1,2,V3",
 		cases: resultSet1
 	},
 	{
@@ -432,6 +462,46 @@ var tests = [
 				  "errors": {
 		  	"length": 0
 		  }
+				}
+			}
+		]
+	},
+	{
+		input: "F1\nV1\nV2\nV3\nV4",
+		cases: [
+			{
+				config: { delimiter: "", header: false, dynamicTyping: false },
+				expected: {
+				  "results": [
+				    [
+				      "F1"
+				    ],
+				    [
+				      "V1"
+				    ],
+				    [
+				      "V2"
+				    ],
+				    [
+				      "V3"
+				    ],
+				    [
+				      "V4"
+				    ]
+				  ],
+				  "errors": {
+				    "length": 1,
+				    "config": [
+				      {
+				        "type": "Delimiter",
+				        "code": "UndetectableDelimiter",
+				        "message": "Unable to auto-detect delimiting character; defaulted to comma",
+				        "line": 1,
+				        "row": 0,
+				        "index": 0
+				      }
+				    ]
+				  }
 				}
 			}
 		]

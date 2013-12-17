@@ -5,11 +5,11 @@ The jQuery Parse plugin is a robust and efficient CSV (character-separated value
 
 - Parses delimited text strings without any fuss
 - Attach to `<input type="file">` elements to load and parse files from disk
+- Automatically detects delimiter (or specify a delimiter yourself)
 - Header row support
 - Gracefully handles malformed data
 - Optional dynamic typing so that numeric data is parsed as numbers
 - Descriptive and contextual errors
-- Custom delimiter
 
 
 
@@ -36,11 +36,12 @@ For debug/dev: [jquery.parse.js](https://github.com/mholt/jquery.parse/blob/mast
 
 Any time you invoke the parser, you may customize it using a "config" object. It supports these properties:
 
-| Option              | Default  | Description       
-|-------------------- | -------- | ---------------
-| **`delimiter`**     | `","`    | The delimiting character. Must be a string with length 1. Can be any character except `\n` and `"`.
-| **`header`**        | `true`   | If true, interpret the first row of parsed data as column titles; fields are returned separately from the data, and data will be returned keyed to its field name. Duplicate field names would be problematic. If false, the parser simply returns an array (list) of arrays (rows), including the first row.
-| **`dynamicTyping`** | `true`   | If true, fields that are only numeric will be converted to a number type. If false, each parsed datum is returned as a string.
+| Option              | Default | Description       
+|-------------------- | ------- | ---------------
+| **`delimiter`**     | `""`   | The delimiting character. Leave blank to auto-detect. If you specify a delimiter, it must be a string of length 1, and cannot be `\n`, `\r`, or `"`.
+| **`header`**        | `true`  | If true, interpret the first row of parsed data as column titles; fields are returned separately from the data, and data will be returned keyed to its field name. Duplicate field names would be problematic. If false, the parser simply returns an array (list) of arrays (rows), including the first row.
+| **`dynamicTyping`** | `true`  | If true, fields that are only numeric will be converted to a number type. If false, each parsed datum is returned as a string.
+| **`preview`**       | `0`     | If preview > 0, only that many rows will be parsed.
 
 
 
@@ -61,7 +62,8 @@ Or to customize the settings, pass in a config object with any properties you wi
 var results = $.parse(csvString, {
   delimiter: "\t",
   header: false,
-  dynamicTyping: false
+  dynamicTyping: false,
+  preview: 10
 });
 ```
 
@@ -154,6 +156,8 @@ The results will always have this basic structure:
   errors:   // parse errors, keyed by row
 }
 ```
+
+If no delimiter is specified and a delimiter cannot be auto-detected, an error keyed by "config" will be produced, and a default delimiter will be chosen.
 
 **Example input:**
 
@@ -399,7 +403,7 @@ The Parser component is under test. Download this repository and open `tests.htm
 The Parser function
 -------------------
 
-Inside this jQuery plugin is a `Parser` function that actually performs the parsing of delimited text. It does not depend upon jQuery. This plugin uses jQuery to attach to `<input type="file">` elements and to make it more convenient to activate the parsing mechanism.
+Inside this jQuery plugin is a `Parser` function that performs the parsing of delimited text. It does not depend upon jQuery. This plugin uses jQuery to attach to `<input type="file">` elements and to make it more convenient to activate and use the parsing mechanism.
 
 
 
