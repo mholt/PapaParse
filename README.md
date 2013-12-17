@@ -38,7 +38,7 @@ Any time you invoke the parser, you may customize it using a "config" object. It
 
 | Option              | Default | Description       
 |-------------------- | ------- | ---------------
-| **`delimiter`**     | `""`   | The delimiting character. Leave blank to auto-detect. If you specify a delimiter, it must be a string of length 1, and cannot be `\n`, `\r`, or `"`.
+| **`delimiter`**     | ` `     | The delimiting character. Leave blank to auto-detect. If you specify a delimiter, it must be a string of length 1, and cannot be `\n`, `\r`, or `"`.
 | **`header`**        | `true`  | If true, interpret the first row of parsed data as column titles; fields are returned separately from the data, and data will be returned keyed to its field name. Duplicate field names would be problematic. If false, the parser simply returns an array (list) of arrays (rows), including the first row.
 | **`dynamicTyping`** | `true`  | If true, fields that are only numeric will be converted to a number type. If false, each parsed datum is returned as a string.
 | **`preview`**       | `0`     | If preview > 0, only that many rows will be parsed.
