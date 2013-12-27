@@ -1,6 +1,6 @@
 /*
 	jQuery Parse Plugin
-	v1.1.0
+	v1.1.1
 	https://github.com/mholt/jquery.parse
 */
 
@@ -146,7 +146,7 @@
 
 			for (_state.i = 0; _state.i < _input.length; _state.i++)
 			{
-				if (_config.preview > 0 && _state.row >= _config.preview)
+				if (_config.preview > 0 && _state.lineNum > _config.preview)
 					break;
 
 				_state.ch = _input[_state.i];
