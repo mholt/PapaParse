@@ -31,7 +31,8 @@
 			var instanceConfig = {
 				delimiter: config.delimiter,
 				header: config.header,
-				dynamicTyping: config.dynamicTyping
+				dynamicTyping: config.dynamicTyping,
+				stream: config.stream
 			};
 
 			if (!this.files || this.files.length == 0)
@@ -62,13 +63,17 @@
 							instanceConfig.header = returned.header;
 						if (isDef(returned.dynamicTyping))
 							instanceConfig.dynamicTyping = returned.dynamicTyping;
+						if (isDef(returned.preview))
+							instanceConfig.preview = returned.preview;
+						if (isDef(returned.stream))
+							instanceConfig.stream = returned.stream;
 					}
 					else if (returned === "skip")
 						continue;		// proceed to next file
 					else if (returned === false)
 					{
 						error("AbortError", file, this);
-						return false;	// aborts the `.each()` loop
+						return false;	// aborts the .each() loop
 					}
 				}
 
@@ -175,7 +180,8 @@
 				delimiter: opt.delimiter,
 				header: opt.header,
 				dynamicTyping: opt.dynamicTyping,
-				preview: opt.preview
+				preview: opt.preview,
+				stream: opt.stream
 			};
 		};
 
@@ -185,7 +191,8 @@
 				delimiter: _config.delimiter,
 				header: _config.header,
 				dynamicTyping: _config.dynamicTyping,
-				preview: _config.preview
+				preview: _config.preview,
+				stream: _config.stream
 			};
 		};
 
@@ -198,7 +205,7 @@
 				config.delimiter = _defaultConfig.delimiter;
 
 			if (config.deimiter == '"' || config.delimiter == "\n")
-				config.delimitelr = _defaultConfig.delimiter;
+				config.delimiter = _defaultConfig.delimiter;
 
 			if (typeof config.header !== 'boolean')
 				config.header = _defaultConfig.header;
@@ -208,6 +215,9 @@
 
 			if (typeof config.preview !== 'number')
 				config.preview = _defaultConfig.preview;
+
+			if (typeof config.stream !== 'function')
+				config.stream = _defaultConfig.stream;
 
 			return config;
 		}
@@ -389,10 +399,26 @@
 		{
 			endRow();
 
+			if (doStream())
+			{
+				_state.errors = {};
+				_state.errors.length = 0;
+			}
+
 			if (_config.header && _state.lineNum > 0)
-				_state.parsed.rows.push({});
+			{
+				if (doStream())
+					_state.parsed.rows = [ {} ];
+				else
+					_state.parsed.rows.push({});
+			}
 			else
-				_state.parsed.push([]);
+			{
+				if (doStream())
+					_state.parsed = [ [] ];
+				else
+					_state.parsed.push([]);
+			}
 
 			_state.lineNum ++;
 			_state.line = "";
@@ -405,6 +431,14 @@
 			var emptyLine = trimEmptyLine();
 			if (!emptyLine && _config.header)
 				inspectFieldCount();
+			if (doStream() &&
+					(!_config.header || (_config.header && _state.parsed.rows.length > 0)))
+				_config.stream(returnable());
+		}
+
+		function doStream()
+		{
+			return typeof _config.stream === 'function';
 		}
 
 		function tryParseFloat(num)
