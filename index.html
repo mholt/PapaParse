@@ -48,6 +48,10 @@
 			padding: 5px;
 		}
 
+		label {
+			white-space: nowrap;
+		}
+
 		button {
 			font-size: 18px;
 			padding: 10px 40px;
@@ -58,10 +62,12 @@
 		<div class="container">
 			<div class="text-center">
 				Delimiter: <input type="text" id="delim" value="" maxlength="1" placeholder="auto"> <a href="javascript:" id="tabdelim">(Tab)</a>
-				&nbsp; &nbsp;
+				<br>
 				<label><input type="checkbox" id="header" checked> Header row</label>
 				&nbsp; &nbsp;
 				<label><input type="checkbox" id="dyntype" checked> Dynamic typing</label>
+				&nbsp; &nbsp;
+				<label><input type="checkbox" id="stream"> Stream results</label>
 			</div>
 			<br>
 			<textarea id="tb" placeholder="CSV input">Address,City,State,Zipcode,Name,Phone Number,Group,URL
@@ -92,32 +98,74 @@ Duke Rd & Walden Ave,Buffalo,NY,14225,Apple Store Walden Galleria,(716) 685-2762
 <script>
 $(function()
 {
+	var rowCount = 0;
+	var big = 10240;	// 10 MB
+
 	$('#parseText').click(function()
 	{
-		// TODO: Build in some performance logging
-		//var start = performance.now();
+		rowCount = 0;
+		$('#parseFiles').prop('disabled', true);
+
+		if (is('stream'))
+			console.log("Now parsing input (not showing progress for massive performance boost)...");
+
+		// TODO: Build in some performance logging?
+		var start = performance.now();
 		var results = $.parse($('#tb').val(), userConfig());
-		//var end = performance.now();
-		//console.log((end - start) + " milliseconds");
-		render(results);
+		var end = performance.now();
+
+		console.log(Math.round(end - start) + " ms to parse input text");
+
+		if (!is('stream'))
+			render(results);
+		else
+		{
+			console.log("Rows parsed:", rowCount);
+			render({"message": "Results were streamed and were not aggregated in order to save memory. See console for row count."});
+		}
+		$('#parseFiles').prop('disabled', false);
 	});
 
 	$('#parseFiles').click(function()
 	{
+		rowCount = 0;
+		$('#parseFiles').prop('disabled', true);
+		
+		var start = performance.now();
+
 		$('#fileinput1, #fileinput2').parse(
 		{
 			before: function(file, inputElem)
 			{
 				console.log("BEFORE", file, inputElem);
+				if (file.size && file.size > big && !is('stream'))
+				{
+					if (!confirm("WARNING - " + file.name + " is a large file, but you chose not to stream the results. This could make your browser tab lock up. Continue?"))
+						return false;
+				}
+				if (is('stream'))
+					console.log("File is being parsed and the results are being streamed... (not showing progress for massive performance boost)");
 			},
 			error: function(err, file, elem)
 			{
 				console.log("ERROR", err, file, elem);
+				if (err.name == "AbortError")
+					$('#parseFiles').prop('disabled', false);
 			},
 			complete: function(data, file, inputElem, event)
 			{
-				console.log("COMPLETE", data, file, inputElem, event);
-				render(data);
+				var end = performance.now();
+				
+				console.log("COMPLETE", file.size < big ? data : "(too big to render data here or file was streamed)", file, inputElem, event);
+				console.log(Math.round(end - start) + " ms to parse file");
+
+				if (file.size && file.size < big && !is('stream'))
+					render(data);
+				else
+					render({"message": "File too big to render here; open Developer Tools to see the console output instead"});
+
+				$('#parseFiles').prop('disabled', false);
+				console.log("Rows parsed:", rowCount);
 			},
 			config: userConfig()
 		});
@@ -132,9 +180,15 @@ $(function()
 	{
 		return {
 			delimiter: $("#delim").val(),
-			header: $('#header').is(':checked'),
-			dynamicTyping: $('#dyntype').is(':checked')
+			header: is('header'),
+			dynamicTyping: is('dyntype'),
+			stream: is('stream') ? function(results) { rowCount++; } : false
 		};
+	}
+
+	function is(checkboxId)
+	{
+		return $('#'+checkboxId).is(':checked');
 	}
 
 	function render(results)
