@@ -98,9 +98,10 @@ Duke Rd & Walden Ave,Buffalo,NY,14225,Apple Store Walden Galleria,(716) 685-2762
 <script>
 $(function()
 {
-	var rowCount = 0;
+	var rowCount = 0, queued = 0;
 	var bigParse = 5243000;		// 10 MB
 	var bigRender = 1024 * 10;	// 10 KB
+	// Note: when streaming from a large file, I'm able to get about 1 million rows every 1.8s
 
 	$('#parseText').click(function()
 	{
@@ -129,9 +130,8 @@ $(function()
 
 	$('#parseFiles').click(function()
 	{
-		rowCount = 0;
-		$('#parseFiles').prop('disabled', true);
-		
+		rowCount = 0, queued = 0;
+
 		var start = performance.now();
 
 		$('#fileinput1, #fileinput2').parse(
@@ -139,18 +139,25 @@ $(function()
 			before: function(file, inputElem)
 			{
 				console.log("BEFORE", file, inputElem);
+
 				if (file.size && file.size > bigParse && !is('stream'))
 				{
 					if (!confirm("WARNING - " + file.name + " is a large file, but you chose not to stream the results. This could make your browser tab lock up. Continue?"))
 						return false;
 				}
+
+				queued++;
+				$('#parseFiles').prop('disabled', true);
+
 				if (is('stream'))
 					console.log("File is being parsed and the results are being streamed... (not showing progress for massive performance boost)");
 			},
 			error: function(err, file, elem)
 			{
 				console.log("ERROR", err, file, elem);
-				if (err.name == "AbortError")
+				if (err.name != "NoFileError")
+					queued--;
+				if (queued == 0 || err.name == "AbortError")
 					$('#parseFiles').prop('disabled', false);
 			},
 			complete: function(data, file, inputElem, event)
@@ -161,12 +168,15 @@ $(function()
 				
 				console.log(Math.round(end - start) + " ms to parse file");
 
+				queued--;
+
 				if (file.size && file.size < bigRender && !is('stream'))
 					render(data);
 				else
 					render({"message": "File was streamed or is too big to render here; open Developer Tools to see the console output instead"});
 
-				$('#parseFiles').prop('disabled', false);
+				if (queued == 0)
+					$('#parseFiles').prop('disabled', false);
 				if (is('stream'))
 					console.log("Rows parsed:", rowCount);
 			},
