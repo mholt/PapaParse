@@ -99,7 +99,8 @@ Duke Rd & Walden Ave,Buffalo,NY,14225,Apple Store Walden Galleria,(716) 685-2762
 $(function()
 {
 	var rowCount = 0;
-	var big = 10240;	// 10 MB
+	var bigParse = 5243000;		// 10 MB
+	var bigRender = 1024 * 10;	// 10 KB
 
 	$('#parseText').click(function()
 	{
@@ -138,7 +139,7 @@ $(function()
 			before: function(file, inputElem)
 			{
 				console.log("BEFORE", file, inputElem);
-				if (file.size && file.size > big && !is('stream'))
+				if (file.size && file.size > bigParse && !is('stream'))
 				{
 					if (!confirm("WARNING - " + file.name + " is a large file, but you chose not to stream the results. This could make your browser tab lock up. Continue?"))
 						return false;
@@ -156,16 +157,18 @@ $(function()
 			{
 				var end = performance.now();
 				
-				console.log("COMPLETE", file.size < big ? data : "(too big to render data here or file was streamed)", file, inputElem, event);
+				console.log("COMPLETE", file.size < bigRender ? data : "(too big to render data here or file was streamed)", file, inputElem, event);
+				
 				console.log(Math.round(end - start) + " ms to parse file");
 
-				if (file.size && file.size < big && !is('stream'))
+				if (file.size && file.size < bigRender && !is('stream'))
 					render(data);
 				else
-					render({"message": "File too big to render here; open Developer Tools to see the console output instead"});
+					render({"message": "File was streamed or is too big to render here; open Developer Tools to see the console output instead"});
 
 				$('#parseFiles').prop('disabled', false);
-				console.log("Rows parsed:", rowCount);
+				if (is('stream'))
+					console.log("Rows parsed:", rowCount);
 			},
 			config: userConfig()
 		});
