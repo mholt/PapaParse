@@ -9,7 +9,7 @@
 		<link rel="icon" class="favicon" href="favicon.ico" type="image/vnd.microsoft.icon">
 		<link rel="shortcut icon" class="favicon" href="favicon.ico" type="image/vnd.microsoft.icon">
 		<script src="resources/js/jquery2-0-2.min.js"></script>
-		<script src="https://raw.githack.com/mholt/jquery.parse/master/jquery.parse.min.js"></script>
+		<script src="resources/js/jquery.parse.min.js"></script>
 		<script src="resources/js/main.js"></script>
 		<meta name="viewport" content="width=device-width, maximum-scale=1.0">
 	</head>
@@ -18,7 +18,7 @@
 
 			<div class="grid-100">
 				<p class="text-center" style="padding-bottom: 0; margin-bottom: -20px;">
-					<a href="index.html">Back to Home</a>
+					<a href="/">Back to Home</a>
 				</p>
 				<h1>Papa Parse</h1>
 				<br>
@@ -504,7 +504,7 @@
 					Papa uses HTML 5's FileReader API to load files, which uses a stream to read in the data. FileReader doesn't technically allow us to hook into the underlying stream (other than providing occasional progress reports), but it does let us load the file in chunks/blobs. Don't worry about that though, because if you want to stream, you'll still get results, row-by-row, into your <a href="#step">step</a> function.
 				</p>
 			</div>
-			<div class="clear"></div><br>
+			<div class="clear"></div>
 
 
 			<hr>
@@ -533,7 +533,7 @@
 
 				<h3>What kinds of numbers does it recognize?</h3>
 				<p>
-					Papa can convert numbers like: 1, -2, 1.23, -4.56, .123, 1., 2., 1.23e4, 5.67E+7, -1.23e4, 5.67e-7, etc.
+					Papa can convert numbers like: 0, "1", -2, 1.23, -4.56, .123, 1., 2., 1.23e4, 5.67E+7, -1.23e4, 5.67e-7, etc.
 				</p>
 
 				<h3>Does whitespace affect dynamic typing?</h3>
@@ -571,7 +571,7 @@
 
 			<div class="grid-100">
 				<footer>
-					<a href="index.html">Papa Parse</a> is brought to you by <a href="https://github.com/mholt/jquery.parse/graphs/contributors">these contributors</a>. Thanks!
+					<a href="/">Papa Parse</a> is brought to you by <a href="https://github.com/mholt/jquery.parse/graphs/contributors">these contributors</a>. Thanks!
 				</footer>
 			</div>
 

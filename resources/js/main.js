@@ -4,14 +4,35 @@ $(function()
 	var scrollDuration = 400;
 	var reallyBig = 1024 * 1024;	// 1 MB
 	var textDemos = {
-		basic: 'AK,63.588753,-154.493062,Alaska\nAL,32.318231,-86.902298,Alabama\nAR,35.20105,-91.831833,Arkansas\nAZ,34.048928,-111.093731,Arizona\nCA,36.778261,-119.417932,California\nCO,39.550051,-105.782067,Colorado\nCT,41.603221,-73.087749,Connecticut\nDC,38.905985,-77.033418,"District of Columbia"\nDE,38.910832,-75.52767,Delaware\nFL,27.664827,-81.515754,Florida',
-		header: 'Address,City,State,Zipcode,Name,Phone Number,Group,URL\n1 Crossgates Mall Road,Albany,NY,12203,Apple Store Cross Gates,(518) 869-3192,"Example ""Group"" 1",http://www.apple.com/retail/crossgates/\nDuke Rd & Walden Ave,Buffalo,NY,14225,Apple Store Walden Galleria,(716) 685-2762,Example Group 2,http://www.apple.com/retail/walden/\n630 Old Country Rd.,Garden City,NY,11530,Apple Store Roosevelt Field,(516) 248-3347,Example Group 3,http://www.apple.com/retail/rooseveltfield/\n160 Walt Whitman Rd.,Huntington Station,NY,11746,Apple Store Walt Whitman,(631) 425-1563,Example Group 3,http://www.apple.com/retail/waltwhitman/\n9553 Carousel Center Drive,Syracuse,NY,13290,Apple Store Carousel,(315) 422-8484,Example Group 2,http://www.apple.com/retail/carousel/\n2655 Richmond Ave,Staten Island,NY,10314,Apple Store Staten Island,(718) 477-4180,Example Group 1,http://www.apple.com/retail/statenisland/\n7979 Victor Road,Victor,NY,14564,Apple Store Eastview,(585) 421-3030,Example Group 1,http://www.apple.com/retail/eastview/\n1591 Palisades Center Drive,West Nyack,NY,10994,Apple Store Palisades,(845) 353-6756,Example Group 2,http://www.apple.com/retail/palisades/\n125 Westchester Ave.,White Plains,NY,10601,Apple Store The Westchester,(914) 428-1877,Example Group 3,http://www.apple.com/retail/thewestchester/\n103 Prince Street,New York,NY,10012,Apple Store SoHo,(212) 226-3126,Example Group 2,http://www.apple.com/retail/soho/'
+		basic: {
+			input: '1-1,1-2,1-3,1-4\n2-1,2-2,2-3,2-4\n3-1,3-2,3-3,3-4',
+			header: false,
+			dynamicTyping: false,
+			stream: false
+		},
+		header: {
+			input: 'First;Second;Third\n1-1;1-2;1-3\n2-1;2-2;2-3',
+			header: true,
+			dynamicTyping: false,
+			stream: false
+		},
+		numbers: {
+			input: 'Item|SKU|Cost|Quantity\nBook|ABC1234|10.95|4\nMovie|DEF5678|29.99|3',
+			header: true,
+			dynamicTyping: true,
+			stream: false
+		},
+		malformed: {
+			input: 'Item,SKU,Cost,Quantity\nBook,ABC1234,10.95,4,Extra\nMovie,DEF5678",29.99,3',
+			header: true,
+			dynamicTyping: true,
+			stream: false
+		}
 	};
-	var textareaFilename = textareaFilename;	// internal use only
 
 	// State - don't touch!
 	var scrolledToDemoOnce = false;
-	var rowCounts = {}, errCounts = {}, finished = 0, queued = 0;
+	var rowCount = 0, errCount = 0, finished = 0, queued = 0;
 	var start, end;
 
 
@@ -69,20 +90,20 @@ $(function()
 				// PARSE TEXT
 
 				var input = $('#input').val();
-				rowCounts[textareaFilename] = 0;
-				errCounts[textareaFilename] = 0;
+				rowCount = 0;
+				errCount = 0;
 
 				if (!input)
 				{
 					statusErr("** Nothing to parse - please provide input **");
 					$('#input').focus();
-					return done(textareaFilename);
+					return done();
 				}
 
 				if (!bigCheck(input))
 				{
 					statusErr("** Parsing aborted - recommend streaming large strings **");
-					return done(textareaFilename);
+					return done();
 				}
 
 				status("Parsing text...");
@@ -95,8 +116,8 @@ $(function()
 
 				if (is('stream'))
 				{
-					var baseMsg = "Finished parsing " + rowCounts[textareaFilename] + " rows of data in <b>" + perfResult() + "</b> with <b>" + errCounts[textareaFilename] + " errors</b>.";
-					if (errCounts[textareaFilename] == 0)
+					var baseMsg = "Finished parsing " + rowCount + " rows of data in <b>" + perfResult() + "</b> with <b>" + errCount + " errors</b>.";
+					if (errCount == 0)
 						statusGood("&#10003; " + baseMsg);
 					else	
 						statusErr("x " + baseMsg);
@@ -113,7 +134,7 @@ $(function()
 					render(data);
 				}
 
-				done(textareaFilename);
+				done();
 			}
 			else
 			{
@@ -125,8 +146,8 @@ $(function()
 				{
 					before: function(file, inputElem)
 					{
-						rowCounts[file.name] = 0;
-						errCounts[file.name] = 0;
+						rowCount = 0;
+						errCount = 0;
 
 						if (!bigCheck(file))
 							return false;
@@ -148,18 +169,18 @@ $(function()
 						finished++;
 						$('#output').empty();
 
-						var baseMsg = "Parsed <b>" + file.name + "</b> containing <b>" + rowCounts[file.name] + " rows</b> in <b>" + perfResult() + "</b> with <b>" + errCounts[file.name] + " errors</b>.";
+						var baseMsg = "Parsed <b>" + file.name + "</b> containing <b>" + rowCount + " rows</b> in <b>" + perfResult() + "</b> with <b>" + (is('stream') ? errCount : data.errors.length) + " errors</b>.";
 
 						if (!is('stream'))
 						{
-							if (errCounts[file.name] == 0)
+							if (data.errors.length == 0)
 								statusGood("&#10003; " + baseMsg);
 							else
 								statusErr("x " + baseMsg);
 						}
 						else
 						{
-							if (errCounts[file.name] == 0)
+							if (errCount == 0)
 								statusGood("&#10003; " + baseMsg);
 							else
 								statusErr("x " + baseMsg);
@@ -181,8 +202,8 @@ $(function()
 	function done(filename)
 	{
 		$('#submit').prop('disabled', false);
-		rowCounts[filename] = 0;
-		errCounts[filename] = 0;
+		rowCount = 0;
+		errCount = 0;
 		finished = 0;
 		queued = 0;
 		status("");
@@ -235,10 +256,8 @@ $(function()
 
 	function stepFunc(data, file, inputElem)
 	{
-		if (!file)
-			file = { name: textareaFilename };
-		rowCounts[file.name]++;
-		errCounts[file.name] += data.errors.length;
+		rowCount++;
+		errCount += data.errors.length;
 	}
 
 	function is(checkboxId)
@@ -277,7 +296,12 @@ $(function()
 	{
 		$('.demo-insert').click(function()
 		{
-			$('#input').val(textDemos[$(this).data('demo')]);
+			var demo = textDemos[$(this).data('demo')];
+			$('#clearfiles').click();
+			$('#input').val(demo.input);
+			$('#header').prop('checked', demo.header);
+			$('#dyntype').prop('checked', demo.dynamicTyping);
+			$('#stream').prop('checked', demo.stream);
 		});
 
 		$('#tabdelim').click(function()
