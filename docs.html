@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Documentation - Papa Parse</title>
+		<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Raleway:200,400,600,800|Arvo">
+		<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/font-awesome/4.0.0/css/font-awesome.css">
+		<link rel="stylesheet" href="resources/css/unsemantic.css">
+		<link rel="stylesheet" href="resources/css/style.css">
+		<link rel="icon" class="favicon" href="favicon.ico" type="image/vnd.microsoft.icon">
+		<link rel="shortcut icon" class="favicon" href="favicon.ico" type="image/vnd.microsoft.icon">
+		<script src="resources/js/jquery2-0-2.min.js"></script>
+		<script src="https://raw.githack.com/mholt/jquery.parse/master/jquery.parse.min.js"></script>
+		<script src="resources/js/main.js"></script>
+		<meta name="viewport" content="width=device-width, maximum-scale=1.0">
+	</head>
+	<body>
+		<div class="grid-container">
+
+			<div class="grid-100">
+				<p class="text-center" style="padding-bottom: 0; margin-bottom: -20px;">
+					<a href="index.html">Back to Home</a>
+				</p>
+				<h1>Papa Parse</h1>
+				<br>
+				<h2 style="text-transform: uppercase; font-size: 22px;">Documentation</h2>
+
+				<hr>
+				<h2 id="strings">Parsing strings</h2>
+				<p class="text-center">
+					<code>$.parse(inputString<i>[, <a href="#config">config</a>]</i>)</code>
+					<br><br>
+					Returns a <a href="#results">parse results</a> object.
+				</p>
+				<hr>
+			</div>
+
+
+			<div class="grid-50">
+				<h3>Examples</h3>
+
+				<p>
+					With default settings:
+				</p>
+				<code class="block">var results = $.parse(csvString);</code>
+
+				<p>
+					With custom <a href="#config">config</a>:
+				</p>
+				<code class="block">var results = $.parse(csvString, {
+    delimiter: "\t",
+    header: false,
+    dynamicTyping: false,
+    preview: 10,
+    step: function(data, file, inputElem) {
+        console.log(data.results);
+    }
+});</code>
+			</div>
+			<div class="grid-50">
+				<h3>Notes</h3>
+
+				<ul>
+					<li>Parsing strings does not utilize jQuery.</li>
+					<li>This is simply a wrapper over the internal "Parser" function that does the heavy lifting.</li>
+					<li>If any bad <a href="#config">config settings</a> are passed in, that setting's default will be used instead.</li>
+					<li>If you specify a <code>step</code> callback, the input will be streamed and <code>step</code> will be executed after each row is parsed.
+				</ul>
+			</div>
+			<div class="clear"></div>
+
+
+
+
+
+			<hr>
+			<h2 id="files">Parsing files</h2>
+			<p class="text-center">
+				<code>$(selector).parse(settings)</code>
+				<br><br>
+				Where <i>selector</i> selects file input elements and <i>settings</i> is an object as described below.
+			</p>
+			<hr>
+
+
+
+			<div class="grid-50">
+				<h3>Example</h3>
+
+				<p>
+					You can parse one or more files from one or more <code>&lt;input type="file"&gt;</code> elements like so, where each property is optional:
+				</p>
+				<code class="block">$('input[type=file]').parse({
+  config: {
+    // base <a href="#config">config</a> to use for each file
+  },
+  before: function(file, inputElem)
+  {
+    // executed before parsing each file begins;
+    // what you return here controls the flow
+  },
+  error: function(err, file, inputElem)
+  {
+    // executed if an error occurs during loading the file,
+    // or if the file being iterated is the wrong type,
+    // or if the input element has no files selected
+  },
+  complete: function(results, file, inputElem, event)
+  {
+    // executed when parsing each file completes;
+    // this function receives the parse results
+  }
+});</code>
+			</div>
+			<div class="grid-50">
+				<h3>Notes</h3>
+
+				<ul>
+					<li>
+						<code><b>config</b></code> should be a <a href="#config">config object</a> as described below.
+					</li>
+					<li>
+						<code><b>before</b></code> is an optional callback that lets you inspect each file before parsing begins. Return:
+						<ul>
+							<li><code>"skip"</code> to skip parsing just that file.</li>
+							<li><code>false</code> to abort parsing this and all other files in the queue.</li>
+							<li>a config object to alter the options for parsing that file only</li>
+							<li>anything else, including <code>undefined</code>, to continue without any changes</li>
+						</ul>
+					</li>
+					<li>
+						<code><b>error</b></code> is executed when there is a problem getting the file ready to parse. (Parse errors are <i>not</i> reported here.) It receives an object that implements the <a href="https://developer.mozilla.org/en-US/docs/Web/API/DOMError">DOMError</a> interface, the File object at hand, and the &lt;input&gt; element from which the file was selected. Errors can occur before reading the file if:
+
+						<ul>
+							<li>the HTML file input element has no files chosen</li>
+							<li>the file is not a "text" type (e.g. "text/csv" or "text/plain")</li>
+							<li>a user-defined callback function ("before" aborted the process</li>
+						</ul>
+
+						Otherwise, errors are invoked by FileReader when opening the file.
+					</li>
+					<li>
+						<code><b>complete</b></code> is invoked when parsing a file completes. It receives the results of the parse (including parse errors), the File object, the &lt;input&gt; element from which the file was chosen, and the FileReader-generated event.
+					</li>
+					<li>
+						Read about <a href="#streaming">streaming</a> for large files.
+					</li>
+				</ul>
+			</div>
+			<div class="clear"></div>
+
+
+
+
+			<hr>
+			<h2 id="config">The config object</h2>
+			<p class="text-center">
+				Use a config object to specify the parser's behavior.
+			</p>
+			<hr>
+
+
+			<div class="grid-50">	
+				<p>
+					Any time you invoke the parser, you may customize its behavior using a "config" object. It supports these properties:
+				</p>
+
+				<ul>
+					<li>
+						<code><b>delimiter</b></code> The delimiting character. Leave blank to auto-detect. If you specify a delimiter, it must be a string of length 1, and cannot be <code>\n</code>, <code>\r</code>, or <code>"</code>.
+					</li>
+
+					<li>
+						<code><b>header</b></code> If true, the first row of parsed data will be interpreted as column titles (fields). Fields are returned separately from the rows, and each data point will be keyed to its field name. If false, the parser simply returns an array of arrays, including the first row.
+					</li>
+
+					<li>
+						<code><b>dynamicTyping</b></code> If true, fields that are only numeric will be converted to a number type. If false, each parsed datum is returned as a string.
+					</li>
+
+					<li>
+						<code><b>preview</b></code> If preview &gt; 0, only that many rows will be parsed.
+					</li>
+
+					<li>
+						<code><b>step</b></code> To use a stream, <a href="#step">define a callback function</a> here which receives the data, row-by-row, as each row is parsed. If parsing a file, step also receives the source file and file input element. Return <code>false</code> to abort the process.
+					</li>
+				</ul>
+			</div>
+			<div class="grid-50">
+
+				<h3>Default config object</h3>
+
+				<br>
+
+				<code class="block">{
+    delimiter: "",
+    header: true,
+    dynamicTyping: true,
+    preview: 0,
+    step: undefined
+}</code>
+				
+				<br>
+
+				<h3>Notes</h3>
+
+				<ul>
+					<li>If using a header row, duplicate field names would be problematic.</li>
+					<li>Dynamic typing comes at a slight performance hit, only noticable for large files. If you don't need it, disable it.</li>
+					<li>Step through results by defining a "step" callback function that receives data from the parser after each row is parsed.</li>
+				</ul>
+
+			</div>
+			<div class="clear"></div>
+
+
+
+
+
+
+
+
+			<hr>
+			<h2 id="results">Parse results (output)</h2>
+			<hr>
+
+
+
+
+			<div class="grid-50">
+				<h3>Structure</h3>
+
+				<p>
+					Parse output is always an object like this:
+				</p>
+
+				<code class="block">{
+    results:  // parse results
+    errors:   // parse <a href="#errors">errors</a>, keyed by row
+}</code>
+			</div>
+			<div class="grid-50">
+				<h3>Notes</h3>
+
+				<ul>
+					<li>
+						<code>results</code> will be an array of arrays if header row is <i>disabled</i>, or an array of objects if header row is <i>enabled</i>.
+					</li>
+					<li>
+						If no delimiter is specified and a delimiter cannot be auto-detected, an error keyed by "config" will be produced and a default delimiter will be chosen.
+					</li>
+					<li>
+						With a header row, the field count must be the same on each row or a FieldMismatch error will be produced for that row. (Without a header row, lines can have variable number of fields without errors.)
+					</li>
+				</ul>
+			</div>
+			<div class="clear"></div>
+
+
+
+
+
+			<div class="grid-50">
+				<h3 id="example1">Example 1</h3>
+
+				<p>
+					With default config (header row and dynamic typing <b>enabled</b>):
+				</p>
+
+				<code class="block limit-height">{
+  "results": {
+    "fields": [
+      "Item",
+      "SKU",
+      "Cost",
+      "Quantity"
+    ],
+    "rows": [
+      {
+        "Item": "Book",
+        "SKU": "ABC1234",
+        "Cost": 10.95,
+        "Quantity": 4
+      },
+      {
+        "Item": "Movie",
+        "SKU": "DEF5678",
+        "Cost": 29.99,
+        "Quantity": 3
+      }
+    ]
+  },
+  "errors": {
+    "length": 0
+  }
+}</code>
+			</div>
+			<div class="grid-45">
+				<ul>
+					<li>
+						With a header row, field names are returned as an array, separate from the rows of actual data which are returned as an array of objects. The values are keyed to their field names, which is much easier to work with than index positions.
+					</li>
+					<li>
+						Using the header row can degrade performance with really large inputs.
+					</li>
+					<li>
+						Notice how dynamic typing turned numeric values into Number types. This also comes at a slight performance hit (you'd only notice with really big inputs).
+					</li>
+					<li>
+						Because header row is enabled, errors will be raised for each row that has a different field count from the first (header) row.
+					</li>
+				</ul>
+			</div>
+			<div class="clear"></div>
+
+
+
+
+
+			<div class="grid-50">
+				<h3>Example 2</h3>
+
+				<p>
+					With header row and dynamic typing <b>disabled</b>:
+				</p>
+
+				<code class="block limit-height">{
+  "results": [
+    [
+      "Item",
+      "SKU",
+      "Cost",
+      "Quantity"
+    ],
+    [
+      "Book",
+      "ABC1234",
+      "10.95",
+      "4"
+    ],
+    [
+      "Movie",
+      "DEF5678",
+      "29.99",
+      "3"
+    ]
+  ],
+  "errors": {
+    "length": 0
+  }
+}</code>
+			</div>
+			<div class="grid-50">
+				<ul>
+					<li>
+						The results are returned as an array of arrays because the header row is disabled. You'll have to use plain ol' non-descript index positions to access the values.
+					</li>
+					<li>
+						Mismatching field counts will not produce <a href="#errors">errors</a> without a header row.
+					</li>
+					<li>
+						This is a fast configuration. With header row and dynamic typing disabled, you should see faster performance for large inputs.
+					</li>
+				</ul>
+			</div>
+			<div class="clear"></div>
+
+
+
+			<hr>
+			<h2 id="errors">Parse errors</h2>
+			<hr>
+
+			<div class="grid-50">
+				<h3>Structure</h3>
+
+				<p>
+					Parse errors are returned in this format, keyed by the row number, alongside the "length" property (shown above) which is included for convenience:
+				</p>
+
+				<code class="block">{
+    type: "",     // A generalization of the error
+    code: "",     // Standardized error code
+    message: "",  // Human-readable details
+    line: 0,      // Line of original input
+    row: 0,       // Row index of parsed data where error is
+    index: 0      // Character index within original input
+}</code>
+			</div>
+			<div class="grid-45">
+				<h3>Notes</h3>
+
+				<ul>
+					<li>
+						If no delimiter is specified and a delimiter cannot be auto-detected, an error keyed by "config" will be produced and a default delimiter will be chosen.
+					</li>
+					<li>
+						With a header row, the field count must be the same on each row or a FieldMismatch error will be produced for that row. (Without a header row, lines can have variable number of fields without errors.)
+					</li>
+					<li>
+						The <code>type</code> will be one of "Abort", "Quotes", "Delimiter", or "FieldMismatch".
+					</li>
+					<li>
+						The <code>code</code> may be:
+						<ul>
+							<li>ParseAbort</li>
+							<li>MissingQuotes</li>
+							<li>UnexpectedQuotes</li>
+							<li>UndetectableDelimiter</li>
+							<li>TooFewFields</li>
+							<li>TooManyFields</li>
+						</ul>
+					</li>
+					<li>
+						The <code>index</code> will be the character index across the entire input where the error occurred; it is <i>not</i> the index of the offending character on that <i>line</i>.
+					</li>
+					<li>
+						In the event of an error, the Parser makes its best attempt to continue parsing as correctly as possible. For example, if a header row is used and extra fields are found on a line, they will be put into an array keyed by the field name "__parsed_extra".
+					</li>
+				</ul>
+			</div>
+			<div class="clear"></div>
+
+
+
+
+			<hr>
+			<h2 id="streaming">Streaming files</h2>
+			<p class="text-center">
+				Papa can load and parse very large files by using streams.
+			</p>
+			<hr>
+
+
+			<div class="grid-60 prefix-20 suffix-20">
+				<h3>Can Papa load and parse huge text files?</h3>
+				<p>
+					Yes. By defining a <a href="#step">step</a> callback function, you're able to receive parsed results, row-by-row, as the data is collected. This dramatically reduces memory usage and prevents browsers from crashing.
+				</p>
+
+				<h3>What is a stream and when should I stream files?</h3>
+				<p>
+					A stream is a unique data structure which, given infinite time, gives you infinite space. 
+					So if you're short on memory (as client computers often are), use a stream.
+				</p>
+
+				<h3>Wait, does that mean streaming takes more time?</h3>
+				<p>
+					Yes and no. Typically, when we gain speed, we pay with space. The opposite is true, too. Streaming uses significantly less memory with large inputs, but since the reading happens in chunks and results are processed at each row instead of at the very end, yes, it can be slower.
+				</p>
+				<p>
+					But consider the alternative: upload the file to a remote server, open and process it there using a (hopefully) fast and accurate parser, then compress it and have the client download the results. How long does it take you to upload a 500 MB or 1 GB file? Then consider that the server still has to open the file and read its contents, which is what the client would have done minutes ago. The server might parse it faster with natively-compiled binaries, but only if its resources are dedicated to the task and isn't already parsing files for many other users.
+				</p>
+				<p>
+					So unless your clients have <a href="http://google.com/fiber">a fiber line</a> and you have a scalable cloud application, local parsing by streaming is nearly guaranteed to be faster.
+				</p>
+
+				<h3 id="step">How do I use the <code>step</code> function?</h3>
+				<p>
+					Simple example:
+
+					<code class="block">$('input[type=file]').parse({
+    config: {
+        step: function(data, file, inputElem) {
+            console.log("Row data:", data.results);
+            console.log("Row errors:", data.errors);
+        }
+    }
+    complete: function() {
+        console.log("All done!");
+    }
+});</code>
+				
+					Notice that the function only receives data, which has the same structure as the <a href="#results">output described above</a>.
+				</p>
+
+				<h3>How do I get all the results together after streaming?</h3>
+				<p>
+					You don't. Unless you assemble it manually. And really, don't do that... it defeats the purpose of using a stream. Just take the bits you need as they come through.
+				</p>
+
+				<h3>How big should a file be before streaming it?</h3>
+				<p>
+					In some very unscientific testing (with the fastest 2013 Macbook Pro), we were able to load files of about 250 MB for parsing in Chrome without crashing the tab. Beyond that, Chrome started to choke. Actual performance may vary widely. But keep in mind that file size may not be the only factor for choosing to stream.
+				</p>
+
+				<h3>Why <i>wouldn't</i> I stream the input?</h3>
+				<p>
+					Getting parsed results one row at a time is usually less convenient to work with; it's hard to see the big picture. (But the big picture might be <i>really</i> big.) As results stream in, you can tabulate stats or keep track of whatever you need to, but you wouldn't want to reassemble all the data...
+				</p>
+
+				<h3>Why should I stream large files, even if they fit in memory?</h3>
+				<p>
+					The space required by the parsed results is often much larger than that of the original input file. The convenience of Javascript objects afforded by 64-bit pointers (to make each value quickly accessible) takes up a lot more space than globbing it together like a file does (at the cost of accessibility). In other words, the output may not fit in memory even if the input does.
+				</p>
+
+				<h3>Can I stream text without using a file?</h3>
+				<p>
+					Yes, though that's often not necessary. Input that comfortably fits in a textarea usually is small enough that it doesn't need to be streamed.
+				</p>
+
+				<h3>Does Papa use a true stream?</h3>
+				<p>
+					Papa uses HTML 5's FileReader API to load files, which uses a stream to read in the data. FileReader doesn't technically allow us to hook into the underlying stream (other than providing occasional progress reports), but it does let us load the file in chunks/blobs. Don't worry about that though, because if you want to stream, you'll still get results, row-by-row, into your <a href="#step">step</a> function.
+				</p>
+			</div>
+			<div class="clear"></div><br>
+
+
+			<hr>
+			<h2 id="dynamic">Dynamic typing</h2>
+			<p class="text-center">
+				Papa can convert numeric values to true numbers for you
+			</p>
+			<hr>
+
+
+			<div class="grid-60 prefix-20 suffix-20">
+				<h3>What is dynamic typing?</h3>
+				<p>
+					By default, parsed values are returned as strings. Dynamic typing is a feature built into Papa that converts numeric values to a Number type. When dynamic typing is enabled, parsed values that resemble a number will be converted to one.
+				</p>
+
+				<h3>Do I need dynamic typing?</h3>
+				<p>
+					If you're performing mathematical operations on the data, then yes, it'll be very helpful. (You'd probably rather add two numbers than concatenate them, right?)
+				</p>
+
+				<h3>What's the trade-off for using dynamic typing?</h3>
+				<p>
+					Performance, as usual. Each parsed value is matched against a regular expression to determine its numerality. You probably won't notice the degraded performance except with very large inputs. Even then, it may not be significantly slower in many cases. But if you absolutely need the best performance possible, turn off dynamic typing (and header row).
+				</p>
+
+				<h3>What kinds of numbers does it recognize?</h3>
+				<p>
+					Papa can convert numbers like: 1, -2, 1.23, -4.56, .123, 1., 2., 1.23e4, 5.67E+7, -1.23e4, 5.67e-7, etc.
+				</p>
+
+				<h3>Does whitespace affect dynamic typing?</h3>
+				<p>
+					If, for some reason, the data is padded by whitespace, it will be ignored. Within the actual data, however, whitespace is significant. For example, floats represented using scientific notation should not have spaces around the "e" character.
+				</p>
+			</div>
+			<div class="clear"></div>
+
+
+
+
+
+			<hr>
+			<h2 id="contribute">Contribute</h2>
+			<p class="text-center">
+				Help make Papa better
+			</p>
+			<hr>
+
+			<div class="grid-60 prefix-20 suffix-20">
+				<h3>How to contribute</h3>
+				<p>
+					Please, feel free to <a href="https://github.com/mholt/jquery.parse">fork Papa on GitHub</a> and submit a <a href="https://github.com/mholt/jquery.parse/pulls">pull request</a>. Remember, the Parser component is <a href="https://github.com/mholt/jquery.parse/blob/master/tests.html">under test</a>, so if you're making changes to the actual parsing mechanisms, be sure to add a test case to validate your change.
+				</p>
+
+				<h3>Feedback</h3>
+				<p>
+					You can <a href="https://github.com/mholt/jquery.parse/issues?state=open">open an issue</a> on GitHub to ask questions or start discussion, or you can hashtag <a href="https://twitter.com/search?q=%23PapaParse&src=typd&f=realtime">#PapaParse</a> on Twitter.
+				</p>
+			</div>
+			<div class="clear"></div>
+
+
+
+			<div class="grid-100">
+				<footer>
+					<a href="index.html">Papa Parse</a> is brought to you by <a href="https://github.com/mholt/jquery.parse/graphs/contributors">these contributors</a>. Thanks!
+				</footer>
+			</div>
+
+
+		</div>
+	</body>
+</html>

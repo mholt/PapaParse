@@ -1,0 +1,289 @@
+/* Eric Meyer's Reset CSS v2.0 */
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,details,embed,figure,figcaption,footer,header,hgroup,menu,nav,output,ruby,section,summary,time,mark,audio,video{border:0;font-size:100%;font:inherit;vertical-align:baseline;margin:0;padding:0}article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{display:block}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:none}table{border-collapse:collapse;border-spacing:0}
+
+::selection {
+	background: #D60003;
+	color: #FFF;
+	text-shadow: none;
+}
+
+::-moz-selection {
+	background: #D60003;
+	color: #FFF;
+	text-shadow: none;
+}
+
+html,
+body {
+	color: #333;
+	font-family: 'Raleway', sans-serif;
+	height: 100%;
+	min-height: 100%;
+}
+
+textarea,
+input[type=text],
+input[type=password] {
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+
+	outline: none;
+	font-family: 'Liberation Mono', 'Consolas', 'Monaco', 'Menlo', 'Courier New', monospace;
+	padding: 5px;
+}
+
+textarea {
+	width: 100%;
+	resize: vertical;
+}
+
+label {
+	font-size: 13px;
+	line-height: 1.5em;
+	white-space: nowrap;
+}
+
+b,
+strong{
+	font-weight: bold;
+}
+
+i,
+em {
+	font-style: italic;
+}
+
+small {
+	font-size: 12px;
+}
+
+code {
+	font-family: 'Liberation Mono', 'Consolas', 'Monaco', 'Menlo', 'Courier New', monospace;
+	font-weight: normal;
+	background: #EEE;
+	color: #222;
+	padding: 5px;
+}
+
+code.block {
+	display: block;
+	white-space: pre;
+	line-height: 1.75em;
+	font-size: 13px;
+	padding: 10px;
+	overflow-x: auto;
+	margin: 15px 0;
+}
+
+code.block.limit-height {
+	max-height: 500px;
+}
+
+ul {
+	margin: 15px 0;
+}
+
+ul > li {
+	list-style: disc;
+	line-height: 1.5em;
+	margin: 10px 0 15px 2em;
+}
+
+li code {
+	font-size: 14px;
+}
+
+li li {
+	margin: 5px 0 5px 2em;
+}
+
+li li code {
+	font-size: 12px;
+}
+
+h1 {
+	font: 110px 'Arvo';
+	color: black;
+	text-align: center;
+	margin-top: 25px;
+	white-space: nowrap;}
+
+h2 {
+	color: black;
+	text-align: center;
+	font-weight: bold;
+	font-size: 30px;
+	line-height: 1.5em;
+}
+
+h2 code {
+	font-size: 24px;
+}
+
+h3 {
+	font-size: 18px;
+	font-weight: bold;
+	margin: 10px 0;
+}
+
+hr {
+	border: none;
+	clear: both;
+	margin: 35px 0;
+	border-bottom: 1px solid #CCC;
+}
+
+p {
+	padding: 10px 0;
+	font-size: 16px;
+	line-height: 1.5em;
+}
+
+p code {
+	font-size: 14px;
+}
+
+p.text-center code {
+	font-size: 16px;
+}
+
+a {
+	color: #D60003;
+	text-decoration: none;
+}
+
+a:hover {
+	color: #FF0000;
+	text-decoration: underline;
+}
+
+.samples {
+	padding: 0;
+}
+
+.samples a {
+	display: inline-block;
+	margin: 5px;
+	padding: 5px 10px;
+	background: #D60003;
+	color: #FFF;
+}
+
+.samples a:hover {
+	text-decoration: none;
+	background: #8C0000;
+}
+
+.samples b {
+	font-weight: 800;
+}
+
+div.clear {
+	margin-bottom: 50px;
+}
+
+.text-center {
+	text-align: center;
+}
+
+footer {
+	font-size: 12px;
+	text-align: center;
+	margin-top: 20px;
+	margin-bottom: 50px;
+}
+
+#status {
+	font-size: 12px;
+	font-family: 'Menlo', 'Courier New', monospace;
+	color: #CCC;
+	height: 120px;
+	overflow-y: auto;
+	background: #063449;
+	border-radius: 5px;
+	padding: 5px;
+	line-height: 1.2em;
+}
+
+#output {
+	font-size: 10px;
+	line-height: 1.2em;
+	margin: 0;
+}
+
+
+
+
+
+button {
+	transition: all .25s;
+	border: 1px solid #222;
+	border-radius: 4px;
+	font-weight: bold;
+	font-size: 16px;
+	cursor: pointer;
+	outline: none;
+	padding: 10px 50px;
+	color: #FFF;
+	text-decoration: none !important;
+	text-shadow: 0px -1px 0px rgba(0, 0, 0, .7);
+	vertical-align: middle;
+	background: #E20404;
+	box-shadow: inset 0 1px 1px rgba(255, 255, 255, .6), inset 0 -10px 15px #AA1903;
+}
+
+button:hover {
+	background: #FF0000;
+	box-shadow: inset 0 1px 1px rgba(255, 255, 255, .6), inset 0 -10px 15px #E20404;
+}
+
+button:active {
+	background: #FF0000;
+	box-shadow: inset 0 1px 1px rgba(255, 255, 255, .6), inset 0 10px 15px #E20404;
+}
+
+button:disabled {
+	background: #CCC;
+	box-shadow: none;
+	cursor: default;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+@media (max-width: 1024px) {
+	h1 {
+		font-size: 82px;
+	}
+
+	h2 {
+		font-size: 24px;
+	}
+
+	h2 code {
+		font-size: 20px;
+	}
+}
+
+@media (max-width: 600px) {
+	h1 {
+		font-size: 48px;
+	}
+
+	h2 {
+		font-size: 22px;
+	}
+
+	h2 code {
+		font-size: 18px;
+	}
+}
