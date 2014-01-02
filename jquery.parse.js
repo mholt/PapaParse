@@ -1,6 +1,6 @@
 /*
-	jQuery Parse Plugin
-	v1.1.1
+	Papa Parse
+	v2.0.0
 	https://github.com/mholt/jquery.parse
 */
 
@@ -10,30 +10,19 @@
 
 	$.fn.parse = function(options)
 	{
-		function error(name, elem, file)
-		{
-			if (isFunction(options.error))
-				options.error({name: name}, elem, file);
-		}
-
-		var config = isDef(options.config) ? options.config : {};
+		var config = options.config ? options.config : {};
+		var queue = [];
 
 		this.each(function(idx)
 		{
 			var supported = $(this).prop('tagName').toUpperCase() == "INPUT"
-							&& $(this).attr('type') == 'file'
+							&& $(this).attr('type') == "file"
 							&& window.FileReader;
 
 			if (!supported)
 				return true;	// continue to next input element
 
-			// Config to be used only for this instance of parsing
-			var instanceConfig = {
-				delimiter: config.delimiter,
-				header: config.header,
-				dynamicTyping: config.dynamicTyping,
-				stream: config.stream
-			};
+			var instanceConfig = $.extend({}, config);	// This copy is very important
 
 			if (!this.files || this.files.length == 0)
 			{
@@ -42,61 +31,83 @@
 			}
 
 			for (var i = 0; i < this.files.length; i++)
-			{
-				var file = this.files[i];
-				if (file.type.indexOf("text") < 0)
-				{
-					error("TypeMismatchError", file, this);
-					continue;	// continue to next file in this input element
-				}
+				queue.push({
+					file: this.files[i],
+					inputElem: this,
+					instanceConfig: instanceConfig
+				});
 
-				if (isFunction(options.before))
-				{
-					var returned = options.before(file, this);
-					
-					if (typeof returned === 'object')
-					{
-						// update config for this file/instance only
-						if (isDef(returned.delimiter))
-							instanceConfig.delimiter = returned.delimiter;
-						if (isDef(returned.header))
-							instanceConfig.header = returned.header;
-						if (isDef(returned.dynamicTyping))
-							instanceConfig.dynamicTyping = returned.dynamicTyping;
-						if (isDef(returned.preview))
-							instanceConfig.preview = returned.preview;
-						if (isDef(returned.stream))
-							instanceConfig.stream = returned.stream;
-					}
-					else if (returned === "skip")
-						continue;		// proceed to next file
-					else if (returned === false)
-					{
-						error("AbortError", file, this);
-						return false;	// aborts the .each() loop
-					}
-				}
-
-				var reader = new FileReader();
-
-				if (isFunction(options.error))
-					reader.onerror = function() { options.error(reader.error, file, this); };
-
-				var inputElem = this;
-
-				reader.onload = function(event)
-				{
-					var text = event.target.result;
-					var results = $.parse(text, instanceConfig);
-					if (isFunction(options.complete))
-						options.complete(results, file, inputElem, event);
-				};
-
-				reader.readAsText(file);
-			}
+			if (queue.length > 0)
+				parseFile(queue[0]);
 		});
 
 		return this;
+
+
+		function parseFile(f)
+		{
+			var completeFunc = complete, errorFunc;
+
+			if (isFunction(options.error))
+				errorFunc = function() { options.error(reader.error, f.file, f.inputElem); };
+			if (isFunction(options.complete))
+				completeFunc = function(results, file, inputElem, event) { options.complete(results, file, inputElem, event); complete(); };
+
+			if (f.file.type.indexOf("text") < 0)
+			{
+				error("TypeMismatchError", f.file, f.inputElem);
+				return complete();
+			}
+
+			if (isFunction(options.before))
+			{
+				var returned = options.before(f.file, f.inputElem);
+				
+				if (typeof returned === 'object')
+					f.instanceConfig = $.extend(f.instanceConfig, returned);
+				else if (returned === "skip")
+					return complete();		// Proceeds to next file
+				else if (returned === false)
+				{
+					error("AbortError", f.file, f.inputElem);
+					return;	// Aborts all queued files immediately
+				}
+			}
+
+			if (f.instanceConfig.step)
+			{
+				var streamer = new Streamer(f.file, {
+					inputElem: f.inputElem,
+					config: $.extend({}, f.instanceConfig)	// This copy is very important
+				});
+				streamer.stream(completeFunc, errorFunc);
+			}
+			else
+			{
+				var reader = new FileReader();
+				reader.onerror = errorFunc;
+				reader.onload = function(event)
+				{
+					var text = event.target.result;
+					var results = $.parse(text, f.instanceConfig);
+					completeFunc(results, f.file, f.inputElem, event);
+				};
+				reader.readAsText(f.file);
+			}
+		}
+
+		function error(name, file, elem)
+		{
+			if (isFunction(options.error))
+				options.error({name: name}, file, elem);
+		}
+
+		function complete()
+		{
+			queue.splice(0, 1);
+			if (queue.length > 0)
+				parseFile(queue[0]);
+		}
 	};
 
 	$.parse = function(input, options)
@@ -105,14 +116,84 @@
 		return parser.parse(input);
 	};
 
-	function isFunction(func)
-	{
-		return typeof func === 'function';
-	}
+	function isFunction(func) { return typeof func === 'function'; }
 
-	function isDef(val)
+	// Streamer is a wrapper over Parser to handle chunking the input file
+	function Streamer(file, settings)
 	{
-		return typeof val !== 'undefined'
+		if (!settings)
+			settings = {};
+
+		if (!settings.chunkSize)
+			settings.chunkSize = 1024 * 1024 * 5;	// 5 MB
+
+		if (settings.config.step)	// it had better be there...!
+		{
+			var userStep = settings.config.step;
+			settings.config.step = function(data) { userStep(data, file, settings.inputElem); };
+		}
+
+		var start = 0;
+		var partialLine = "";
+		var parser = new Parser(settings.config);
+		var reader = new FileReader();
+
+		reader.onload = blobLoaded;
+		reader.onerror = blobError;
+
+		this.stream = function(completeCallback, fileErrorCallback)
+		{
+			settings.onComplete = completeCallback;
+			settings.onFileError = fileErrorCallback;
+			nextChunk();
+		};
+
+		function blobLoaded(event)
+		{
+			var text = partialLine + event.target.result;
+			partialLine = "";
+
+			var lastLineEnd = text.lastIndexOf("\n");
+			
+			if (lastLineEnd < 0)
+				lastLineEnd = text.lastIndexOf("\r");
+			
+			if (lastLineEnd > -1)
+			{
+				partialLine = text.substring(lastLineEnd + 1);	// skip the line ending character
+				text = text.substring(0, lastLineEnd);
+			}
+
+			var results = parser.parse(text);
+
+			if (start >= file.size)
+				return done(event);
+			else if (results.errors.abort)
+				return;
+			else
+				nextChunk();
+		}
+
+		function done(event)
+		{
+			if (typeof settings.onComplete === 'function')
+				settings.onComplete(undefined, file, settings.inputElem, event);
+		}
+
+		function blobError()
+		{
+			if (typeof settings.onFileError === 'function')
+				settings.onFileError(reader.error, file, settings.inputElem);
+		}
+
+		function nextChunk()
+		{
+			if (start < file.size)
+			{
+				reader.readAsText(file.slice(start, Math.min(start + settings.chunkSize, file.size)));
+				start += settings.chunkSize;
+			}
+		};
 	}
 
 	// Parser is the actual parsing component.
@@ -122,9 +203,12 @@
 	function Parser(config)
 	{
 		var self = this;
+		var _invocations = 0;
 		var _input = "";
+		var _chunkOffset = 0;
+		var _abort = false;
 		var _config = {};
-		var _state = emptyState();
+		var _state = freshState();
 		var _defaultConfig = {
 			delimiter: "",
 			header: true,
@@ -134,6 +218,15 @@
 		var _regex = {
 			floats: /^\s*-?(\d*\.?\d+|\d+\.?\d*)(e[-+]?\d+)?\s*$/i,
 			empty: /^\s*$/
+		};
+
+		config = validConfig(config);
+		_config = {
+			delimiter: config.delimiter,
+			header: config.header,
+			dynamicTyping: config.dynamicTyping,
+			preview: config.preview,
+			step: config.step
 		};
 
 		this.parse = function(input)
@@ -151,7 +244,7 @@
 
 			for (_state.i = 0; _state.i < _input.length; _state.i++)
 			{
-				if (_config.preview > 0 && _state.lineNum > _config.preview)
+				if (_abort || (_config.preview > 0 && _state.lineNum > _config.preview))
 					break;
 
 				_state.ch = _input[_state.i];
@@ -165,24 +258,16 @@
 					notInQuotes();
 			}
 
-			endRow();	// End of input is also end of the last row
-
-			if (_state.inQuotes)
-				addError("Quotes", "MissingQuotes", "Unescaped or mismatched quotes");
+			if (_abort)
+				addError("Abort", "ParseAbort", "Parsing was aborted by the user's step function", "abort");
+			else
+			{
+				endRow();	// End of input is also end of the last row
+				if (_state.inQuotes)
+					addError("Quotes", "MissingQuotes", "Unescaped or mismatched quotes");
+			}
 
 			return returnable();
-		};
-
-		this.setOptions = function(opt)
-		{
-			opt = validConfig(opt);
-			_config = {
-				delimiter: opt.delimiter,
-				header: opt.header,
-				dynamicTyping: opt.dynamicTyping,
-				preview: opt.preview,
-				stream: opt.stream
-			};
 		};
 
 		this.getOptions = function()
@@ -192,11 +277,9 @@
 				header: _config.header,
 				dynamicTyping: _config.dynamicTyping,
 				preview: _config.preview,
-				stream: _config.stream
+				step: _config.step
 			};
 		};
-
-		this.setOptions(config);
 
 		function validConfig(config)
 		{
@@ -216,8 +299,8 @@
 			if (typeof config.preview !== 'number')
 				config.preview = _defaultConfig.preview;
 
-			if (typeof config.stream !== 'function')
-				config.stream = _defaultConfig.stream;
+			if (typeof config.step !== 'function')
+				config.step = _defaultConfig.step;
 
 			return config;
 		}
@@ -271,21 +354,6 @@
 			return !!bestDelim;
 		}
 
-		function emptyState()
-		{
-			return {
-				i: 0,
-				lineNum: 1,
-				field: 0,
-				fieldVal: "",
-				line: "",
-				ch: "",
-				inQuotes: false,
-				parsed: _config.header ? { fields: [], rows: [] } : [ [] ],
-				errors: { length: 0 }
-			};
-		}
-
 		function handleQuote()
 		{
 			var delimBefore = (_state.i > 0 && isBoundary(_state.i-1))
@@ -319,7 +387,7 @@
 		function notInQuotes()
 		{
 			if (_state.ch == _config.delimiter)
-				saveField();
+				saveValue();
 			else if ((_state.ch == "\r" && _state.i < _input.length - 1
 						&& _input[_state.i+1] == "\n")
 					|| (_state.ch == "\n" && _state.i < _input.length - 1
@@ -360,11 +428,11 @@
 				return _input[i] == "\n";
 		}
 
-		function saveField()
+		function saveValue()
 		{
 			if (_config.header)
 			{
-				if (_state.lineNum == 1)
+				if (_state.lineNum == 1 && _invocations == 1)
 					_state.parsed.fields.push(_state.fieldVal)
 				else
 				{
@@ -399,7 +467,7 @@
 		{
 			endRow();
 
-			if (doStream())
+			if (streaming())
 			{
 				_state.errors = {};
 				_state.errors.length = 0;
@@ -407,14 +475,14 @@
 
 			if (_config.header && _state.lineNum > 0)
 			{
-				if (doStream())
+				if (streaming())
 					_state.parsed.rows = [ {} ];
 				else
 					_state.parsed.rows.push({});
 			}
 			else
 			{
-				if (doStream())
+				if (streaming())
 					_state.parsed = [ [] ];
 				else
 					_state.parsed.push([]);
@@ -427,18 +495,28 @@
 
 		function endRow()
 		{
-			saveField();
+			if (_abort)
+				return;
+
+			saveValue();
+
 			var emptyLine = trimEmptyLine();
+			
 			if (!emptyLine && _config.header)
 				inspectFieldCount();
-			if (doStream() &&
-					(!_config.header || (_config.header && _state.parsed.rows.length > 0)))
-				_config.stream(returnable());
+
+			if (streaming() && (!_config.header ||
+					(_config.header && _state.parsed.rows.length > 0)))
+			{
+				var keepGoing = _config.step(returnable());
+				if (keepGoing === false)
+					_abort = true;
+			}
 		}
 
-		function doStream()
+		function streaming()
 		{
-			return typeof _config.stream === 'function';
+			return typeof _config.step === 'function';
 		}
 
 		function tryParseFloat(num)
@@ -484,7 +562,7 @@
 			var lastRow = _state.parsed.rows[_state.parsed.rows.length - 1];
 			for (var prop in lastRow)
 				if (lastRow.hasOwnProperty(prop))
-					actual ++;
+					actual++;
 
 			if (actual < expected)
 				return addError("FieldMismatch", "TooFewFields", "Too few fields: expected " + expected + " fields but parsed " + actual);
@@ -509,7 +587,7 @@
 				message: msg,
 				line: _state.lineNum,
 				row: row,
-				index: _state.i
+				index: _state.i + _chunkOffset
 			});
 
 			_state.errors.length ++;
@@ -527,8 +605,39 @@
 
 		function reset(input)
 		{
-			_state = emptyState();
+			_invocations++;
+			if (_invocations > 1 && streaming())
+				_chunkOffset += input.length;
+			_state = freshState();
 			_input = input;
+		}
+
+		function freshState()
+		{
+			// If streaming, and thus parsing the input in chunks, this
+			// is careful to preserve what we've already got, when necessary.
+			var parsed;
+			if (_config.header)
+			{
+				parsed = {
+					fields: streaming() ? _state.parsed.fields || [] : [],
+					rows: streaming() && _invocations > 1 ? [ {} ] : []
+				};
+			}
+			else
+				parsed = [ [] ];
+
+			return {
+				i: 0,
+				lineNum: streaming() ? _state.lineNum : 1,
+				field: 0,
+				fieldVal: "",
+				line: "",
+				ch: "",
+				inQuotes: false,
+				parsed: parsed,
+				errors: { length: 0 }
+			};
 		}
 	}
 
