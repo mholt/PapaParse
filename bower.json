@@ -1,0 +1,27 @@
+{
+  "name": "papa-parse",
+  "main": "jquery.parse.js",
+  "version": "2.0.0",
+  "homepage": "http://papaparse.com",
+  "authors": [
+    "Matt mholt"
+  ],
+  "description": "Papa is a powerful CSV (delimited text) parser",
+  "keywords": [
+    "jquery",
+    "csv",
+    "parse",
+    "decode"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "~2.0.0"
+  }
+}
