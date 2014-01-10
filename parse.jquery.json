@@ -2,7 +2,7 @@
 	"name": "parse",
 	"version": "2.0.0",
 	"title": "Papa Parse",
-	"description": "Papa is a powerful CSV (delimited text) parser with that gracefully handles large files and malformed input.",
+	"description": "Papa is a powerful CSV (delimited text) parser that gracefully handles large files and malformed input.",
 	"keywords": [
 		"csv",
 		"parse",
@@ -30,9 +30,9 @@
 			"url": "http://opensource.org/licenses/MIT"
 		}
 	],
-	"homepage":"https://github.com/mholt/jquery.parse",
-	"docs": "https://github.com/mholt/jquery.parse/blob/master/README.md",
-	"demo": "http://jsfiddle.net/mholt/nCaee",
+	"homepage":"http://papaparse.com",
+	"docs": "http://papaparse.com/docs.html",
+	"demo": "http://papaparse.com/#demo",
 	"download": "https://raw.github.com/mholt/jquery.parse/master/jquery.parse.min.js",
 	"dependencies": {
 		"jquery": ">=1.5"
