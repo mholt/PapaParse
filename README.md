@@ -41,3 +41,10 @@ Contributing
 ------------
 
 If you'd like to see a feature or bug fix, pull down the code and submit a pull request. But remember, if you're changing anything in the Parser function, a pull request, *with test*, is best. (All changes to the parser component should be validated with tests.) You may also open issues for discussion or join in on Twitter with [#PapaParse](https://twitter.com/search?q=%23PapaParse&src=typd&f=realtime)
+
+
+
+Origins
+-------
+
+Papa Parse is the result of an experiment by [SmartyStreets](http://smartystreets.com) which matured into a fully-featured, independent jQuery plugin. Wanting to enhance the demo on their homepage, SmartyStreets looked into ways to simulate their list service. This involved processing at least part of a potentially large delimited text file. And what else? They wanted to do it without requiring a file upload (for simplicity and to alleviate privacy concerns). No suitable solutions were found, so they built their own. After finding it successful, the code was brought out into this jQuery plugin, now known as Papa Parse.
