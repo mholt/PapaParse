@@ -112,6 +112,9 @@
 
 	$.parse = function(input, options)
 	{
+		if (!options)
+			options = {};
+
 		var parser = new Parser(options);
 		return parser.parse(input);
 	};
