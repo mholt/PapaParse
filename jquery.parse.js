@@ -1,6 +1,6 @@
 /*
 	Papa Parse
-	v2.0.0
+	v2.0.1
 	https://github.com/mholt/jquery.parse
 */
 
@@ -112,9 +112,6 @@
 
 	$.parse = function(input, options)
 	{
-		if (!options)
-			options = {};
-
 		var parser = new Parser(options);
 		return parser.parse(input);
 	};
@@ -286,6 +283,9 @@
 
 		function validConfig(config)
 		{
+			if (typeof config !== 'object')
+				config = {};
+
 			if (typeof config.delimiter !== 'string'
 				|| config.delimiter.length != 1)
 				config.delimiter = _defaultConfig.delimiter;
