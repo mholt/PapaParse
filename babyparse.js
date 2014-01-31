@@ -1,205 +1,18 @@
 /*
+	Baby Parse
+	v0.1.0
+	https://github.com/Rich-Harris/BabyParse
+
+	based on:
+
 	Papa Parse
 	v2.0.1
 	https://github.com/mholt/jquery.parse
 */
 
-(function($)
-{
-	"use strict";
 
-	$.fn.parse = function(options)
-	{
-		var config = options.config ? options.config : {};
-		var queue = [];
+(function ( global ) {
 
-		this.each(function(idx)
-		{
-			var supported = $(this).prop('tagName').toUpperCase() == "INPUT"
-							&& $(this).attr('type') == "file"
-							&& window.FileReader;
-
-			if (!supported)
-				return true;	// continue to next input element
-
-			var instanceConfig = $.extend({}, config);	// This copy is very important
-
-			if (!this.files || this.files.length == 0)
-			{
-				error("NoFileError", undefined, this);
-				return true;	// continue to next input element
-			}
-
-			for (var i = 0; i < this.files.length; i++)
-				queue.push({
-					file: this.files[i],
-					inputElem: this,
-					instanceConfig: instanceConfig
-				});
-
-			if (queue.length > 0)
-				parseFile(queue[0]);
-		});
-
-		return this;
-
-
-		function parseFile(f)
-		{
-			var completeFunc = complete, errorFunc;
-
-			if (isFunction(options.error))
-				errorFunc = function() { options.error(reader.error, f.file, f.inputElem); };
-			if (isFunction(options.complete))
-				completeFunc = function(results, file, inputElem, event) { options.complete(results, file, inputElem, event); complete(); };
-
-			if (f.file.type.indexOf("text") < 0)
-			{
-				error("TypeMismatchError", f.file, f.inputElem);
-				return complete();
-			}
-
-			if (isFunction(options.before))
-			{
-				var returned = options.before(f.file, f.inputElem);
-				
-				if (typeof returned === 'object')
-					f.instanceConfig = $.extend(f.instanceConfig, returned);
-				else if (returned === "skip")
-					return complete();		// Proceeds to next file
-				else if (returned === false)
-				{
-					error("AbortError", f.file, f.inputElem);
-					return;	// Aborts all queued files immediately
-				}
-			}
-
-			if (f.instanceConfig.step)
-			{
-				var streamer = new Streamer(f.file, {
-					inputElem: f.inputElem,
-					config: $.extend({}, f.instanceConfig)	// This copy is very important
-				});
-				streamer.stream(completeFunc, errorFunc);
-			}
-			else
-			{
-				var reader = new FileReader();
-				reader.onerror = errorFunc;
-				reader.onload = function(event)
-				{
-					var text = event.target.result;
-					var results = $.parse(text, f.instanceConfig);
-					completeFunc(results, f.file, f.inputElem, event);
-				};
-				reader.readAsText(f.file);
-			}
-		}
-
-		function error(name, file, elem)
-		{
-			if (isFunction(options.error))
-				options.error({name: name}, file, elem);
-		}
-
-		function complete()
-		{
-			queue.splice(0, 1);
-			if (queue.length > 0)
-				parseFile(queue[0]);
-		}
-	};
-
-	$.parse = function(input, options)
-	{
-		var parser = new Parser(options);
-		return parser.parse(input);
-	};
-
-	function isFunction(func) { return typeof func === 'function'; }
-
-	// Streamer is a wrapper over Parser to handle chunking the input file
-	function Streamer(file, settings)
-	{
-		if (!settings)
-			settings = {};
-
-		if (!settings.chunkSize)
-			settings.chunkSize = 1024 * 1024 * 5;	// 5 MB
-
-		if (settings.config.step)	// it had better be there...!
-		{
-			var userStep = settings.config.step;
-			settings.config.step = function(data) { userStep(data, file, settings.inputElem); };
-		}
-
-		var start = 0;
-		var partialLine = "";
-		var parser = new Parser(settings.config);
-		var reader = new FileReader();
-
-		reader.onload = blobLoaded;
-		reader.onerror = blobError;
-
-		this.stream = function(completeCallback, fileErrorCallback)
-		{
-			settings.onComplete = completeCallback;
-			settings.onFileError = fileErrorCallback;
-			nextChunk();
-		};
-
-		function blobLoaded(event)
-		{
-			var text = partialLine + event.target.result;
-			partialLine = "";
-
-			var lastLineEnd = text.lastIndexOf("\n");
-			
-			if (lastLineEnd < 0)
-				lastLineEnd = text.lastIndexOf("\r");
-			
-			if (lastLineEnd > -1)
-			{
-				partialLine = text.substring(lastLineEnd + 1);	// skip the line ending character
-				text = text.substring(0, lastLineEnd);
-			}
-
-			var results = parser.parse(text);
-
-			if (start >= file.size)
-				return done(event);
-			else if (results.errors.abort)
-				return;
-			else
-				nextChunk();
-		}
-
-		function done(event)
-		{
-			if (typeof settings.onComplete === 'function')
-				settings.onComplete(undefined, file, settings.inputElem, event);
-		}
-
-		function blobError()
-		{
-			if (typeof settings.onFileError === 'function')
-				settings.onFileError(reader.error, file, settings.inputElem);
-		}
-
-		function nextChunk()
-		{
-			if (start < file.size)
-			{
-				reader.readAsText(file.slice(start, Math.min(start + settings.chunkSize, file.size)));
-				start += settings.chunkSize;
-			}
-		};
-	}
-
-	// Parser is the actual parsing component.
-	// It is under test and does not depend on jQuery.
-	// You could rip this entire function out of the plugin
-	// and use it independently (with attribution).
 	function Parser(config)
 	{
 		var self = this;
@@ -249,7 +62,7 @@
 
 				_state.ch = _input[_state.i];
 				_state.line += _state.ch;
-				
+
 				if (_state.ch == '"')
 					handleQuote();
 				else if (_state.inQuotes)
@@ -295,7 +108,7 @@
 
 			if (typeof config.header !== 'boolean')
 				config.header = _defaultConfig.header;
-			
+
 			if (typeof config.dynamicTyping !== 'boolean')
 				config.dynamicTyping = _defaultConfig.dynamicTyping;
 
@@ -409,7 +222,7 @@
 		{
 			if (i >= _input.length)
 				return false;
-			
+
 			var ch = _input[i];
 
 			if (ch == _config.delimiter
@@ -461,7 +274,7 @@
 					_state.fieldVal = tryParseFloat(_state.fieldVal);
 				_state.parsed[_state.parsed.length - 1].push(_state.fieldVal);
 			}
-			
+
 			_state.fieldVal = "";
 			_state.field ++;
 		}
@@ -504,7 +317,7 @@
 			saveValue();
 
 			var emptyLine = trimEmptyLine();
-			
+
 			if (!emptyLine && _config.header)
 				inspectFieldCount();
 
@@ -559,7 +372,7 @@
 				return true;
 
 			var expected = _state.parsed.fields.length;
-			
+
 			// Actual field count tabulated manually because IE<9 doesn't support Object.keys
 			var actual = 0;
 			var lastRow = _state.parsed.rows[_state.parsed.rows.length - 1];
@@ -585,7 +398,7 @@
 				_state.errors[key] = [];
 
 			_state.errors[key].push({
-				type: type, 
+				type: type,
 				code: code,
 				message: msg,
 				line: _state.lineNum,
@@ -642,6 +455,21 @@
 				errors: { length: 0 }
 			};
 		}
+	};
+
+	// export to Node...
+	if ( typeof module !== 'undefined' && module.exports ) {
+		module.exports = Parser;
 	}
 
-})(jQuery);
+	// ...or as AMD module...
+	else if ( typeof define === 'function' && define.amd ) {
+		define( function () { return Parser; });
+	}
+
+	// ...or as browser global
+	else {
+		global.Parser = Parser;
+	}
+
+}( typeof window !== 'undefined' ? window : this ));

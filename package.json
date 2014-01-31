@@ -1,0 +1,32 @@
+{
+	"name": "babyparse",
+	"version": "0.1.0",
+	"title": "BabyParse",
+	"description": "Fast and reliable CSV parser based on PapaParse",
+	"keywords": [
+		"csv",
+		"parse",
+		"parsing",
+		"parser",
+		"delimited",
+		"text",
+		"data",
+		"auto-detect",
+		"comma",
+		"tab",
+		"pipe",
+		"file",
+		"filereader",
+		"stream"
+	],
+	"author": {
+		"name": "Rich Harris",
+		"url": "http://rich-harris.co.uk"
+	},
+	"licenses": [
+		{
+			"type": "MIT",
+			"url": "http://opensource.org/licenses/MIT"
+		}
+	]
+}

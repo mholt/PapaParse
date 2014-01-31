@@ -1,50 +1,30 @@
-Parse CSV with Javascript
-========================================
+BabyParse
+=========
 
-Papa Parse (formerly the jQuery Parse Plugin) is a robust and powerful CSV (character-separated values) parser with these features:
+I needed a really fast and reliable CSV parser. [PapaParse.com](http://papaparse.com/#demo) is the best one I've come across yet. But it's wrapped up as a jQuery plugin like it's 2006 or something :P
 
-- Parses delimited text strings without any fuss
-- Attach to `<input type="file">` elements to load and parse files from disk
-- Automatically detects delimiter (or specify a delimiter yourself)
-- Supports streaming large inputs
-- Utilize the header row, if present
-- Gracefully handles malformed data
-- Optional dynamic typing so that numeric data is parsed as numbers
-- Descriptive and contextual errors
+So I stripped out the actual parsing bit and made it Node/AMD compatible, so that I could drop it into non-jQuery projects. The code hasn't been touched other than that - I think there's a load of logic for handling streams and whatnot. I honestly don't know and can't be bothered to look. It seems pretty decent. In the project I'm working on now it was an order of magnitude quicker than the thicket of regex hacks it replaced.
+
+Don't thank me, thank [@mholt](https://github.com/mholt). (Thanks Matt!)
 
 
 
-Demo
-----
-
-Visit **[PapaParse.com](http://papaparse.com/#demo)** to give Papa a whirl!
-
-
-
-Get Started
------------
-
-Use [jquery.parse.min.js](https://github.com/mholt/jquery.parse/blob/master/jquery.parse.min.js) for production.
-
-For usage instructions, see the [homepage](http://papaparse.com) and, for more detail, the [documentation](http://papaparse.com/docs.html).
-
-
-
-Tests
+Usage
 -----
 
-The Parser component is under test. Download this repository and open `tests.html` in your browser to run them.
+```js
+// see http://papaparse.com/docs.html for config options
+parser = new Parser( config );
+
+// pass in the contents of a csv file
+parsed = parser.parse( csv );
+
+// voila
+rows = parser.results.rows;
+```
 
 
-
-Contributing
-------------
-
-If you'd like to see a feature or bug fix, pull down the code and submit a pull request. But remember, if you're changing anything in the Parser function, a pull request, *with test*, is best. (All changes to the parser component should be validated with tests.) You may also open issues for discussion or join in on Twitter with [#PapaParse](https://twitter.com/search?q=%23PapaParse&src=typd&f=realtime)
-
-
-
-Origins
+License
 -------
 
-Papa Parse is the result of an experiment by [SmartyStreets](http://smartystreets.com) which matured into a fully-featured, independent jQuery plugin. Wanting to enhance the demo on their homepage, SmartyStreets looked into ways to simulate their list service. This involved processing at least part of a potentially large delimited text file. And what else? They wanted to do it without requiring a file upload (for simplicity and to alleviate privacy concerns). No suitable solutions were found, so they built their own. After finding it successful, the code was brought out into this jQuery plugin, now known as Papa Parse.
+The original PapaParse is MIT licensed. So is BabyParse.

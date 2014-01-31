@@ -537,7 +537,8 @@ $(function()
 
 function doTest(input, config)
 {
-	return $.parse(input, config);
+	var parser = new Parser(config);
+	return parser.parse(input);
 }
 
 function render(input, expected, actual, config, count, status)
