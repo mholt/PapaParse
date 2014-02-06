@@ -40,7 +40,7 @@ $(function()
 	prepareDemo();
 
 	// Smooth in-page scrolling; thanks to css-tricks.com
-	$('body').on('click', 'a[href^=#]:not([href=#])', function()
+	$('body').on('click', 'a[href^=#]:not([href=#])', function(event)
 	{
 		var isDemoLink = $(this).hasClass('demo-insert');
 		
@@ -53,6 +53,7 @@ $(function()
 			|| location.hostname == this.hostname)
 		{
 			scrollTo(this.hash);
+			return suppress(event);
 		}
 	}).on('click', 'a[href=#]', function(event) {
 		$('html, body').animate({
@@ -71,7 +72,6 @@ $(function()
 			$('html, body').animate({
 				scrollTop: target.offset().top - 40
 			}, scrollDuration);
-			return suppress(event);
 		}
 	}
 
