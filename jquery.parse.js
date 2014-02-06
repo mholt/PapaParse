@@ -1,6 +1,6 @@
 /*
 	Papa Parse
-	v2.0.1
+	v2.0.2
 	https://github.com/mholt/jquery.parse
 */
 
@@ -52,12 +52,6 @@
 				errorFunc = function() { options.error(reader.error, f.file, f.inputElem); };
 			if (isFunction(options.complete))
 				completeFunc = function(results, file, inputElem, event) { options.complete(results, file, inputElem, event); complete(); };
-
-			if (f.file.type.indexOf("text") < 0)
-			{
-				error("TypeMismatchError", f.file, f.inputElem);
-				return complete();
-			}
 
 			if (isFunction(options.before))
 			{
