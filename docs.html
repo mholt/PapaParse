@@ -133,11 +133,10 @@
 
 						<ul>
 							<li>the HTML file input element has no files chosen</li>
-							<li>the file is not a "text" type (e.g. "text/csv" or "text/plain")</li>
-							<li>a user-defined callback function ("before" aborted the process</li>
+							<li>a user-defined callback function ("before") aborted the process</li>
 						</ul>
 
-						Otherwise, errors are invoked by FileReader when opening the file.
+						Otherwise, errors are invoked by FileReader when opening the file. (Loading a non-text file may result in undefined behavior.)
 					</li>
 					<li>
 						<code><b>complete</b></code> is invoked when parsing a file completes. It receives the results of the parse (including parse errors), the File object, the &lt;input&gt; element from which the file was chosen, and the FileReader-generated event.
