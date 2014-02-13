@@ -116,7 +116,7 @@ $(function()
 
 				if (is('stream'))
 				{
-					var baseMsg = "Finished parsing " + rowCount + " rows of data in <b>" + perfResult() + "</b> with <b>" + errCount + " errors</b>.";
+					var baseMsg = "Finished parsing <b>" + rowCount + " rows</b> of data in <b>" + perfResult() + "</b> with <b>" + errCount + " errors</b>.";
 					if (errCount == 0)
 						statusGood("&#10003; " + baseMsg);
 					else	
@@ -126,7 +126,12 @@ $(function()
 				}
 				else
 				{
-					var out = "Finished in <b>" + perfResult() + "</b> with <b>" + data.errors.length + " errors</b>.";
+					if (is('header'))
+						rowCount = data.results.rows.length;
+					else
+						rowCount = data.results.length;
+
+					var out = "Finished <b>" + rowCount + " rows</b> in <b>" + perfResult() + "</b> with <b>" + data.errors.length + " errors</b>.";
 					if (data.errors.length == 0)
 						statusGood("&#10003; " + out);
 					else
@@ -168,6 +173,14 @@ $(function()
 
 						finished++;
 						$('#output').empty();
+
+						if (!is('stream'))
+						{
+							if (is('header'))
+								rowCount = data.results.rows.length;
+							else
+								rowCount = data.results.length;
+						}
 
 						var baseMsg = "Parsed <b>" + file.name + "</b> containing <b>" + rowCount + " rows</b> in <b>" + perfResult() + "</b> with <b>" + (is('stream') ? errCount : data.errors.length) + " errors</b>.";
 
@@ -256,6 +269,7 @@ $(function()
 
 	function stepFunc(data, file, inputElem)
 	{
+		//console.log(data.results);
 		rowCount++;
 		errCount += data.errors.length;
 	}
