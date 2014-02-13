@@ -1,6 +1,6 @@
 /*
 	Papa Parse
-	v2.0.2
+	v2.0.3
 	https://github.com/mholt/jquery.parse
 */
 
@@ -10,7 +10,7 @@
 
 	$.fn.parse = function(options)
 	{
-		var config = options.config ? options.config : {};
+		var config = options.config || {};
 		var queue = [];
 
 		this.each(function(idx)
@@ -147,15 +147,21 @@
 			var text = partialLine + event.target.result;
 			partialLine = "";
 
-			var lastLineEnd = text.lastIndexOf("\n");
-			
-			if (lastLineEnd < 0)
-				lastLineEnd = text.lastIndexOf("\r");
-			
-			if (lastLineEnd > -1)
+			// If we're maxing out the chunk size, we probably cut a line
+			// in half. However: doing these operations if the whole file
+			// fits in one chunk will leave off the last line, which is bad.
+			if (text >= settings.chunkSize)
 			{
-				partialLine = text.substring(lastLineEnd + 1);	// skip the line ending character
-				text = text.substring(0, lastLineEnd);
+				var lastLineEnd = text.lastIndexOf("\n");
+				
+				if (lastLineEnd < 0)
+					lastLineEnd = text.lastIndexOf("\r");
+				
+				if (lastLineEnd > -1)
+				{
+					partialLine = text.substring(lastLineEnd + 1);	// skip the line ending character
+					text = text.substring(0, lastLineEnd);
+				}
 			}
 
 			var results = parser.parse(text);
