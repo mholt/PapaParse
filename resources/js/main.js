@@ -22,6 +22,12 @@ $(function()
 			dynamicTyping: true,
 			stream: false
 		},
+		asciictrl: {
+			input: ['Item','SKU','Cost','Quantity\nBook','ABC1234','10.95','4\nMovie','DEF5678','29.99','3'].join(String.fromCharCode(30)),
+			header: true,
+			dynamicTyping: true,
+			stream: false
+		},
 		malformed: {
 			input: 'Item,SKU,Cost,Quantity\nBook,ABC1234,10.95,4,Extra\nMovie,DEF5678",29.99,3',
 			header: true,
