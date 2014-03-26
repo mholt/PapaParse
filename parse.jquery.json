@@ -35,6 +35,6 @@
 	"demo": "http://papaparse.com/#demo",
 	"download": "https://raw.github.com/mholt/jquery.parse/master/jquery.parse.min.js",
 	"dependencies": {
-		"jquery": ">=1.5"
+		"jquery": ">=1.6.0"
 	}
 }
