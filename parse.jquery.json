@@ -1,6 +1,6 @@
 {
 	"name": "parse",
-	"version": "2.0.5",
+	"version": "2.0.6",
 	"title": "Papa Parse",
 	"description": "Papa is a powerful CSV (delimited text) parser that streams large files and gracefully handles malformed input.",
 	"keywords": [
