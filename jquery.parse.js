@@ -1,6 +1,6 @@
 /*
 	Papa Parse
-	v2.0.3
+	v2.0.4
 	https://github.com/mholt/jquery.parse
 */
 
@@ -436,7 +436,7 @@
 			if (_config.header)
 			{
 				if (_state.lineNum == 1 && _invocations == 1)
-					_state.parsed.fields.push(_state.fieldVal)
+					_state.parsed.fields.push(_state.fieldVal);
 				else
 				{
 					var currentRow = _state.parsed.rows[_state.parsed.rows.length - 1];
@@ -487,11 +487,11 @@
 			{
 				if (streaming())
 					_state.parsed = [ [] ];
-				else
+				else if (!_config.header)
 					_state.parsed.push([]);
 			}
 
-			_state.lineNum ++;
+			_state.lineNum++;
 			_state.line = "";
 			_state.field = 0;
 		}
@@ -537,7 +537,7 @@
 					if (_state.lineNum == 1)
 					{
 						_state.parsed.fields = [];
-						_state.lineNum --;
+						_state.lineNum--;
 					}
 					else
 						_state.parsed.rows.splice(_state.parsed.rows.length - 1, 1);

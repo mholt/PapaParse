@@ -145,6 +145,10 @@ var tests = [
 		cases: resultSet1
 	},
 	{
+		input: "\r\nF1,F2,F3\r\n \r\nV1,2,V3",
+		cases: resultSet1
+	},
+	{
 		input: "F1,F2,F3\nV1,2,V3\nV4,V5,V6",
 		cases: [
 			{
@@ -537,7 +541,14 @@ $(function()
 
 function doTest(input, config)
 {
-	return $.parse(input, config);
+	// try
+	// {
+	 	return $.parse(input, config);
+	// }
+	// catch (e)
+	// {
+	// 	return {exception: e.message, error: e, note: "See console to inspect stack"};
+	// }
 }
 
 function render(input, expected, actual, config, count, status)
