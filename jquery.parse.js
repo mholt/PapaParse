@@ -56,7 +56,7 @@
 			if (isFunction(options.before))
 			{
 				var returned = options.before(f.file, f.inputElem);
-				
+
 				if (typeof returned === 'object')
 					f.instanceConfig = $.extend(f.instanceConfig, returned);
 				else if (returned === "skip")
@@ -124,7 +124,7 @@
 		if (settings.config.step)	// it had better be there...!
 		{
 			var userStep = settings.config.step;
-			settings.config.step = function(data) { userStep(data, file, settings.inputElem); };
+			settings.config.step = function(data) { return userStep(data, file, settings.inputElem); };
 		}
 
 		var start = 0;
@@ -153,10 +153,10 @@
 			if (text >= settings.chunkSize)
 			{
 				var lastLineEnd = text.lastIndexOf("\n");
-				
+
 				if (lastLineEnd < 0)
 					lastLineEnd = text.lastIndexOf("\r");
-				
+
 				if (lastLineEnd > -1)
 				{
 					partialLine = text.substring(lastLineEnd + 1);	// skip the line ending character
@@ -249,7 +249,7 @@
 
 				_state.ch = _input[_state.i];
 				_state.line += _state.ch;
-				
+
 				if (_state.ch == '"')
 					handleQuote();
 				else if (_state.inQuotes)
@@ -295,7 +295,7 @@
 
 			if (typeof config.header !== 'boolean')
 				config.header = _defaultConfig.header;
-			
+
 			if (typeof config.dynamicTyping !== 'boolean')
 				config.dynamicTyping = _defaultConfig.dynamicTyping;
 
@@ -409,7 +409,7 @@
 		{
 			if (i >= _input.length)
 				return false;
-			
+
 			var ch = _input[i];
 
 			if (ch == _config.delimiter
@@ -461,7 +461,7 @@
 					_state.fieldVal = tryParseFloat(_state.fieldVal);
 				_state.parsed[_state.parsed.length - 1].push(_state.fieldVal);
 			}
-			
+
 			_state.fieldVal = "";
 			_state.field ++;
 		}
@@ -507,7 +507,7 @@
 			saveValue();
 
 			var emptyLine = trimEmptyLine();
-			
+
 			if (!emptyLine && _config.header)
 				inspectFieldCount();
 
@@ -562,7 +562,7 @@
 				return true;
 
 			var expected = _state.parsed.fields.length;
-			
+
 			// Actual field count tabulated manually because IE<9 doesn't support Object.keys
 			var actual = 0;
 			var lastRow = _state.parsed.rows[_state.parsed.rows.length - 1];
@@ -588,7 +588,7 @@
 				_state.errors[key] = [];
 
 			_state.errors[key].push({
-				type: type, 
+				type: type,
 				code: code,
 				message: msg,
 				line: _state.lineNum,
