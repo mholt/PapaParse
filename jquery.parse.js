@@ -1,6 +1,6 @@
 /*
 	Papa Parse
-	v2.0.4
+	v2.0.5
 	https://github.com/mholt/jquery.parse
 */
 
@@ -476,12 +476,15 @@
 				_state.errors.length = 0;
 			}
 
-			if (_config.header && _state.lineNum > 0)
+			if (_config.header)
 			{
-				if (streaming())
-					_state.parsed.rows = [ {} ];
-				else
-					_state.parsed.rows.push({});
+				if (_state.lineNum > 0)
+				{
+					if (streaming())
+						_state.parsed.rows = [ {} ];
+					else
+						_state.parsed.rows.push({});
+				}
 			}
 			else
 			{
