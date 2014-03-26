@@ -1,6 +1,9 @@
 var passCount = 0, failCount = 0;
 var passing = "passing";
-var failing = "failing"
+var failing = "failing";
+
+var recordSep = String.fromCharCode(30);
+var unitSep = String.fromCharCode(31);
 
 var resultSet1 = [
 	{
@@ -145,7 +148,7 @@ var tests = [
 		cases: resultSet1
 	},
 	{
-		input: "\r\nF1,F2,F3\r\n \r\nV1,2,V3",
+		input: "\r\nF1,F2,F3\r\nV1,2,V3",
 		cases: resultSet1
 	},
 	{
@@ -464,8 +467,8 @@ var tests = [
 				    ]
 				  },
 				  "errors": {
-		  	"length": 0
-		  }
+				  	"length": 0
+				  }
 				}
 			}
 		]
@@ -505,6 +508,56 @@ var tests = [
 				        "index": 0
 				      }
 				    ]
+				  }
+				}
+			}
+		]
+	},
+	{
+		input: ["F1","F2","F3\r\nV1","V2","V3"].join(recordSep),
+		cases: [
+			{
+				config: { delimiter: "", header: false, dynamicTyping: false },
+				expected: {
+				  "results": [
+				    [
+				      "F1",
+				      "F2",
+				      "F3"
+				    ],
+				    [
+				      "V1",
+				      "V2",
+				      "V3"
+				    ],
+				  ],
+				  "errors": {
+				    "length": 0
+				  }
+				}
+			}
+		]
+	},
+	{
+		input: ["F1","F2","F3\r\nV1","V2","V3"].join(unitSep),
+		cases: [
+			{
+				config: { delimiter: "", header: false, dynamicTyping: false },
+				expected: {
+				  "results": [
+				    [
+				      "F1",
+				      "F2",
+				      "F3"
+				    ],
+				    [
+				      "V1",
+				      "V2",
+				      "V3"
+				    ],
+				  ],
+				  "errors": {
+				    "length": 0
 				  }
 				}
 			}

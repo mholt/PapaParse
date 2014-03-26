@@ -1,6 +1,6 @@
 /*
 	Papa Parse
-	v2.0.6
+	v2.0.7
 	https://github.com/mholt/jquery.parse
 */
 
@@ -310,7 +310,9 @@
 
 		function guessDelimiter(input)
 		{
-			var delimiters = [",", "\t", "|", ";"];
+			var recordSep = String.fromCharCode(30);
+			var unitSep = String.fromCharCode(31);
+			var delimiters = [",", "\t", "|", ";", recordSep, unitSep];
 			var bestDelim, bestDelta, fieldCountPrevRow;
 
 			for (var i in delimiters)
