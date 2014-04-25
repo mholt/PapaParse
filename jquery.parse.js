@@ -1,6 +1,6 @@
 /*
 	Papa Parse
-	v2.0.7
+	v2.0.8
 	https://github.com/mholt/jquery.parse
 */
 
@@ -315,7 +315,7 @@
 			var delimiters = [",", "\t", "|", ";", recordSep, unitSep];
 			var bestDelim, bestDelta, fieldCountPrevRow;
 
-			for (var i in delimiters)
+			for (var i = 0; i < delimiters.length; i++)
 			{
 				var delim = delimiters[i];
 				var delta = 0, avgFieldCount = 0;
@@ -327,7 +327,7 @@
 					preview: 10
 				}).parse(input);
 
-				for (var j in preview.results)
+				for (var j = 0; j < preview.results.length; j++)
 				{
 					var fieldCount = preview.results[j].length;
 					avgFieldCount += fieldCount;
