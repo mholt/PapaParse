@@ -184,6 +184,10 @@
 					<li>
 						<code><b>step</b></code> To use a stream, <a href="#step">define a callback function</a> here which receives the data, row-by-row, as each row is parsed. If parsing a file, step also receives the source file and file input element. Return <code>false</code> to abort the process.
 					</li>
+
+					<li>
+						<code><b>encoding</b></code> UTF-8 is the default encoding for parsing files, but you can specify another. Applies only to reading files.
+					</li>
 				</ul>
 			</div>
 			<div class="grid-50">
@@ -197,7 +201,8 @@
     header: true,
     dynamicTyping: true,
     preview: 0,
-    step: undefined
+    step: undefined,
+    encoding: "UTF-8"
 }</code>
 				
 				<br>
