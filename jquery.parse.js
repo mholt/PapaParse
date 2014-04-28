@@ -1,6 +1,6 @@
 /*
 	Papa Parse
-	v2.0.8
+	v2.1.0
 	https://github.com/mholt/jquery.parse
 */
 
@@ -86,7 +86,7 @@
 					var results = $.parse(text, f.instanceConfig);
 					completeFunc(results, f.file, f.inputElem, event);
 				};
-				reader.readAsText(f.file);
+				reader.readAsText(f.file, f.instanceConfig.encoding);
 			}
 		}
 
@@ -190,7 +190,7 @@
 		{
 			if (start < file.size)
 			{
-				reader.readAsText(file.slice(start, Math.min(start + settings.chunkSize, file.size)));
+				reader.readAsText(file.slice(start, Math.min(start + settings.chunkSize, file.size)), settings.config.encoding);
 				start += settings.chunkSize;
 			}
 		};
