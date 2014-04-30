@@ -607,7 +607,10 @@
 		{
 			return {
 				results: _state.parsed,
-				errors: _state.errors
+				errors: _state.errors,
+				meta: {
+					delimiter: _config.delimiter
+				}
 			};
 		}
 
