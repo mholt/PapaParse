@@ -24,7 +24,10 @@ var resultSet1 = [
 		    ]
 		  },
 		  "errors": {
-		  	"length": 0
+		    "length": 0
+		  },
+		  "meta": {
+		    "delimiter": ","
 		  }
 		}
 	},
@@ -44,7 +47,10 @@ var resultSet1 = [
 		    ]
 		  ],
 		  "errors": {
-		  	"length": 0
+		    "length": 0
+		  },
+		  "meta": {
+		    "delimiter": ","
 		  }
 		}
 	},
@@ -64,7 +70,10 @@ var resultSet1 = [
 		    ]
 		  ],
 		  "errors": {
-		  	"length": 0
+		    "length": 0
+		  },
+		  "meta": {
+		    "delimiter": ","
 		  }
 		}
 	},
@@ -86,7 +95,10 @@ var resultSet1 = [
 		    ]
 		  },
 		  "errors": {
-		  	"length": 0
+		    "length": 0
+		  },
+		  "meta": {
+		    "delimiter": ","
 		  }
 		}
 	},
@@ -108,7 +120,10 @@ var resultSet1 = [
 		    ]
 		  },
 		  "errors": {
-		  	"length": 0
+		    "length": 0
+		  },
+		  "meta": {
+		    "delimiter": ","
 		  }
 		}
 	},
@@ -178,6 +193,9 @@ var tests = [
 				  },
 				  "errors": {
 				  	"length": 0
+				  },
+				  "meta": {
+				    "delimiter": ","
 				  }
 				}
 			},
@@ -203,6 +221,9 @@ var tests = [
 				  ],
 				  "errors": {
 				  	"length": 0
+				  },
+				  "meta": {
+				    "delimiter": ","
 				  }
 				}
 			},
@@ -228,6 +249,9 @@ var tests = [
 				  ],
 				  "errors": {
 				  	"length": 0
+				  },
+				  "meta": {
+				    "delimiter": ","
 				  }
 				}
 			},
@@ -255,6 +279,9 @@ var tests = [
 				  },
 				  "errors": {
 				  	"length": 0
+				  },
+				  "meta": {
+				    "delimiter": ","
 				  }
 				}
 			}
@@ -287,6 +314,9 @@ var tests = [
 				  },
 				  "errors": {
 				  	"length": 0
+				  },
+				  "meta": {
+				    "delimiter": ","
 				  }
 				}
 			}
@@ -332,6 +362,9 @@ var tests = [
 				      }
 				    ],
 				    "length": 1
+				  },
+				  "meta": {
+				    "delimiter": ","
 				  }
 				}
 			}
@@ -382,6 +415,9 @@ var tests = [
 				      }
 				    ],
 				    "length": 1
+				  },
+				  "meta": {
+				    "delimiter": ","
 				  }
 				}
 			}
@@ -431,6 +467,9 @@ var tests = [
 				      }
 				    ],
 				    "length": 2
+				  },
+				  "meta": {
+				    "delimiter": ","
 				  }
 				}
 			}
@@ -468,6 +507,9 @@ var tests = [
 				  },
 				  "errors": {
 				  	"length": 0
+				  },
+				  "meta": {
+				    "delimiter": ","
 				  }
 				}
 			}
@@ -508,6 +550,9 @@ var tests = [
 				        "index": 0
 				      }
 				    ]
+				  },
+				  "meta": {
+				    "delimiter": ","
 				  }
 				}
 			}
@@ -533,6 +578,9 @@ var tests = [
 				  ],
 				  "errors": {
 				    "length": 0
+				  },
+				  "meta": {
+				    "delimiter": "\u001e"
 				  }
 				}
 			}
@@ -558,6 +606,9 @@ var tests = [
 				  ],
 				  "errors": {
 				    "length": 0
+				  },
+				  "meta": {
+				    "delimiter": "\u001f"
 				  }
 				}
 			}
