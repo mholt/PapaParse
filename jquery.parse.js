@@ -290,7 +290,7 @@
 				|| config.delimiter.length != 1)
 				config.delimiter = _defaultConfig.delimiter;
 
-			if (config.deimiter == '"' || config.delimiter == "\n")
+			if (config.delimiter == '"' || config.delimiter == "\n")
 				config.delimiter = _defaultConfig.delimiter;
 
 			if (typeof config.header !== 'boolean')
