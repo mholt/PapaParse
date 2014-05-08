@@ -401,7 +401,7 @@
 				newRow();
 				_state.i++;
 			}
-			else if (_state.ch == "\n" || _state.ch == "\r")
+			else if (_state.ch == "\r" || _state.ch == "\n")
 				newRow();
 			else
 				appendCharToField();
@@ -409,28 +409,9 @@
 
 		function isBoundary(i)
 		{
-			if (i >= _input.length)
-				return false;
-
-			var ch = _input[i];
-
-			if (ch == _config.delimiter
-				|| ch == "\n"
-				|| (ch == "\r" && i < _input.length - 1 && _input[i+1] == "\n"))
-				return true;
-			else
-				return false;
-		}
-
-		function isLineEnding(i)
-		{
-			if (i >= _input.length)
-				return false;
-
-			if (i < _input.length - 1)
-				return _input[i] == "\n" || (_input[i] == "\r" && _input[i+1] == "\n");
-			else
-				return _input[i] == "\n";
+			return _input[i] == _config.delimiter
+				|| _input[i] == "\n"
+				|| _input[i] == "\r";
 		}
 
 		function saveValue()

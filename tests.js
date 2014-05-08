@@ -167,6 +167,10 @@ var tests = [
 		cases: resultSet1
 	},
 	{
+		input: 'F1,F2,"F3"\n"V1","2",V3',
+		cases: resultSet1
+	},
+	{
 		input: "F1,F2,F3\nV1,2,V3\nV4,V5,V6",
 		cases: [
 			{
