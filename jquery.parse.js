@@ -150,7 +150,7 @@
 			// If we're maxing out the chunk size, we probably cut a line
 			// in half. However: doing these operations if the whole file
 			// fits in one chunk will leave off the last line, which is bad.
-			if (text >= settings.chunkSize)
+			if (text.length >= settings.chunkSize)
 			{
 				var lastLineEnd = text.lastIndexOf("\n");
 
