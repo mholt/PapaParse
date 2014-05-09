@@ -1,6 +1,6 @@
 /*
 	Papa Parse
-	v2.1.0
+	v2.1.3
 	https://github.com/mholt/jquery.parse
 */
 
