@@ -1,6 +1,6 @@
 /*
 	Papa Parse
-	v2.1.3
+	v2.1.4
 	https://github.com/mholt/jquery.parse
 */
 
@@ -128,6 +128,7 @@
 		}
 
 		var start = 0;
+		var aggregate = "";
 		var partialLine = "";
 		var parser = new Parser(settings.config);
 		var reader = new FileReader();
@@ -144,27 +145,32 @@
 
 		function blobLoaded(event)
 		{
-			var text = partialLine + event.target.result;
+			aggregate += partialLine + event.target.result;
 			partialLine = "";
 
-			// If we're maxing out the chunk size, we probably cut a line
-			// in half. However: doing these operations if the whole file
-			// fits in one chunk will leave off the last line, which is bad.
-			if (text.length >= settings.chunkSize)
+			if (start < file.size)
 			{
-				var lastLineEnd = text.lastIndexOf("\n");
+				var lastLineEnd = aggregate.lastIndexOf("\n");
 
 				if (lastLineEnd < 0)
-					lastLineEnd = text.lastIndexOf("\r");
+					lastLineEnd = aggregate.lastIndexOf("\r");
 
 				if (lastLineEnd > -1)
 				{
-					partialLine = text.substring(lastLineEnd + 1);	// skip the line ending character
-					text = text.substring(0, lastLineEnd);
+					partialLine = aggregate.substring(lastLineEnd + 1);	// skip the line ending character
+					aggregate = aggregate.substring(0, lastLineEnd);
+				}
+				else
+				{
+					// For chunk sizes smaller than a line (a line could not fit in a single chunk)
+					// we simply build our aggregate by reading in the next chunk, until we find a newline
+					nextChunk();
+					return;
 				}
 			}
 
-			var results = parser.parse(text);
+			var results = parser.parse(aggregate);
+			aggregate = "";
 
 			if (start >= file.size)
 				return done(event);
