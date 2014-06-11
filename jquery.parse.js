@@ -219,7 +219,8 @@
 			delimiter: "",
 			header: true,
 			dynamicTyping: true,
-			preview: 0
+			preview: 0,
+			commentChar: false
 		};
 		var _regex = {
 			floats: /^\s*-?(\d*\.?\d+|\d+\.?\d*)(e[-+]?\d+)?\s*$/i,
@@ -232,7 +233,8 @@
 			header: config.header,
 			dynamicTyping: config.dynamicTyping,
 			preview: config.preview,
-			step: config.step
+			step: config.step,
+			commentChar: config.commentChar
 		};
 
 		this.parse = function(input)
@@ -254,6 +256,24 @@
 					break;
 
 				_state.ch = _input[_state.i];
+
+				if (_config.commentChar) {
+					// Check if line begins with a commentChar
+					if (_state.line == "" &&_state.ch == _config.commentChar) {
+						newRow();
+
+						// skip to next row
+						while (true) {
+							++_state.i
+							if (_input[_state.i] == "\r" || _input[_state.i] == "\n")
+								break;
+						}
+					}
+
+				  _state.ch = _input[_state.i];
+
+        }
+
 				_state.line += _state.ch;
 
 				if (_state.ch == '"')
@@ -310,6 +330,12 @@
 
 			if (typeof config.step !== 'function')
 				config.step = _defaultConfig.step;
+
+			if (config.commentChar === true)
+				config.commentChar = '#';
+
+			if (typeof config.commentChar !== 'string' && config.commentChar !== false)
+				config.commentChar = false;
 
 			return config;
 		}
