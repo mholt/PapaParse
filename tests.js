@@ -1,693 +1,384 @@
-var passCount = 0, failCount = 0;
-var passing = "passing";
-var failing = "failing";
+var RECORD_SEP = String.fromCharCode(30);
+var UNIT_SEP = String.fromCharCode(31);
 
-var recordSep = String.fromCharCode(30);
-var unitSep = String.fromCharCode(31);
-
-var resultSet1 = [
+var TESTS = [
 	{
-		config: { delimiter: ",", header: true, dynamicTyping: true },
+		input: 'A,b,c',
+		description: "One row",
 		expected: {
-		  "results": {
-		    "fields": [
-		      "F1",
-		      "F2",
-		      "F3"
-		    ],
-		    "rows": [
-		      {
-		        "F1": "V1",
-		        "F2": 2,
-		        "F3": "V3"
-		      }
-		    ]
-		  },
-		  "errors": {
-		    "length": 0
-		  },
-		  "meta": {
-		    "delimiter": ","
-		  }
+			data: [['A', 'b', 'c']],
+			errors: []
 		}
 	},
 	{
-		config: { delimiter: ",", header: false, dynamicTyping: true },
+		input: 'A,b,c\r\nd,E,f',
+		description: "Two rows",
 		expected: {
-		  "results": [
-		    [
-		      "F1",
-		      "F2",
-		      "F3"
-		    ],
-		    [
-		      "V1",
-		      2,
-		      "V3"
-		    ]
-		  ],
-		  "errors": {
-		    "length": 0
-		  },
-		  "meta": {
-		    "delimiter": ","
-		  }
+			data: [['A', 'b', 'c'], ['d', 'E', 'f']],
+			errors: []
 		}
 	},
 	{
-		config: { delimiter: ",", header: false, dynamicTyping: false },
+		input: 'A,b,c\rd,E,f',
+		description: "Two rows, just \\r",
 		expected: {
-		  "results": [
-		    [
-		      "F1",
-		      "F2",
-		      "F3"
-		    ],
-		    [
-		      "V1",
-		      "2",
-		      "V3"
-		    ]
-		  ],
-		  "errors": {
-		    "length": 0
-		  },
-		  "meta": {
-		    "delimiter": ","
-		  }
+			data: [['A', 'b', 'c'], ['d', 'E', 'f']],
+			errors: []
 		}
 	},
 	{
-		config: { delimiter: ",", header: true, dynamicTyping: false },
+		input: 'A,b,c\nd,E,f',
+		description: "Two rows, just \\n",
 		expected: {
-		  "results": {
-		    "fields": [
-		      "F1",
-		      "F2",
-		      "F3"
-		    ],
-		    "rows": [
-		      {
-		        "F1": "V1",
-		        "F2": "2",
-		        "F3": "V3"
-		      }
-		    ]
-		  },
-		  "errors": {
-		    "length": 0
-		  },
-		  "meta": {
-		    "delimiter": ","
-		  }
+			data: [['A', 'b', 'c'], ['d', 'E', 'f']],
+			errors: []
 		}
 	},
 	{
-		config: { delimiter: "", header: true, dynamicTyping: true },
+		input: 'a,  b ,c',
+		description: "Whitespace at edges of unquoted field",
+		notes: "Extra whitespace should graciously be preserved",
 		expected: {
-		  "results": {
-		    "fields": [
-		      "F1",
-		      "F2",
-		      "F3"
-		    ],
-		    "rows": [
-		      {
-		        "F1": "V1",
-		        "F2": 2,
-		        "F3": "V3"
-		      }
-		    ]
-		  },
-		  "errors": {
-		    "length": 0
-		  },
-		  "meta": {
-		    "delimiter": ","
-		  }
+			data: [['a', '  b ', 'c']],
+			errors: []
 		}
 	},
-];
-
-var tests = [
 	{
-		input: "F1,F2,F3\nV1,2,V3",
-		cases: resultSet1
+		input: 'A,"B",C',
+		description: "Quoted field",
+		expected: {
+			data: [['A', 'B', 'C']],
+			errors: []
+		}
 	},
 	{
-		input: "F1,F2,F3\r\nV1,2,V3",
-		cases: resultSet1
+		input: 'A," B  ",C',
+		description: "Quoted field with extra whitespace on edges",
+		expected: {
+			data: [['A', ' B  ', 'C']],
+			errors: []
+		}
 	},
 	{
-		input: "F1,\"F2\",F3\r\nV1,2,\"V3\"",
-		cases: resultSet1
+		input: 'A,"B,B",C',
+		description: "Quoted field with delimiter",
+		expected: {
+			data: [['A', 'B,B', 'C']],
+			errors: []
+		}
 	},
 	{
-		input: "F1,F2,F3\n\nV1,2,V3",
-		cases: resultSet1
+		input: 'A,"B\r\nB",C',
+		description: "Quoted field with \\r\\n",
+		expected: {
+			data: [['A', 'B\r\nB', 'C']],
+			errors: []
+		}
 	},
 	{
-		input: "F1,F2,F3\r\n\r\nV1,2,V3",
-		cases: resultSet1
+		input: 'A,"B\rB",C',
+		description: "Quoted field with \\r",
+		expected: {
+			data: [['A', 'B\rB', 'C']],
+			errors: []
+		}
 	},
 	{
-		input: "F1,F2,F3\n\rV1,2,V3",
-		cases: resultSet1
+		input: 'A,"B\nB",C',
+		description: "Quoted field with \\n",
+		expected: {
+			data: [['A', 'B\nB', 'C']],
+			errors: []
+		}
 	},
 	{
-		input: "F1,F2,F3\rV1,2,V3",
-		cases: resultSet1
+		input: 'A,"B""B""B",C',
+		description: "Quoted field with escaped quotes",
+		expected: {
+			data: [['A', 'B"B"B', 'C']],
+			errors: []
+		}
 	},
 	{
-		input: "F1,F2,F3\r\n \r\nV1,2,V3",
-		cases: resultSet1
+		input: 'A,"""B""",C',
+		description: "Quoted field with escaped quotes at boundaries",
+		expected: {
+			data: [['A', '"B"', 'C']],
+			errors: []
+		}
 	},
 	{
-		input: "\r\nF1,F2,F3\r\nV1,2,V3",
-		cases: resultSet1
+		input: 'A, "B" ,C',
+		description: "Quoted field with whitespace around quotes",
+		notes: "This is malformed input, but it should be parsed gracefully (with errors)",
+		expected: {
+			data: [['A', ' "B" ', 'C']],
+			errors: [
+				{"type": "Quotes", "code": "UnexpectedQuotes", "message": "Unexpected quotes", "line": 1, "row": 0, "index": 3},
+				{"type": "Quotes", "code": "UnexpectedQuotes", "message": "Unexpected quotes", "line": 1, "row": 0, "index": 5}
+			]
+		}
 	},
 	{
-		input: 'F1,F2,"F3"\n"V1","2",V3',
-		cases: resultSet1
+		input: 'a\tb\tc\r\nd\te\tf',
+		config: { delimiter: "\t" },
+		description: "Tab delimiter",
+		expected: {
+			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
+			errors: []
+		}
 	},
 	{
-		input: "F1,F2,F3\nV1,2,V3\nV4,V5,V6",
-		cases: [
-			{
-				config: { delimiter: ",", header: true, dynamicTyping: true },
-				expected: {
-				  "results": {
-				    "fields": [
-				      "F1",
-				      "F2",
-				      "F3"
-				    ],
-				    "rows": [
-				      {
-				        "F1": "V1",
-				        "F2": 2,
-				        "F3": "V3"
-				      },
-				      {
-				        "F1": "V4",
-				        "F2": "V5",
-				        "F3": "V6"
-				      }
-				    ]
-				  },
-				  "errors": {
-				  	"length": 0
-				  },
-				  "meta": {
-				    "delimiter": ","
-				  }
-				}
-			},
-			{
-				config: { delimiter: ",", header: false, dynamicTyping: true },
-				expected: {
-				  "results": [
-				    [
-				      "F1",
-				      "F2",
-				      "F3"
-				    ],
-				    [
-				      "V1",
-				      2,
-				      "V3"
-				    ],
-				    [
-				      "V4",
-				      "V5",
-				      "V6"
-				    ]
-				  ],
-				  "errors": {
-				  	"length": 0
-				  },
-				  "meta": {
-				    "delimiter": ","
-				  }
-				}
-			},
-			{
-				config: { delimiter: ",", header: false, dynamicTyping: false },
-				expected: {
-				  "results": [
-				    [
-				      "F1",
-				      "F2",
-				      "F3"
-				    ],
-				    [
-				      "V1",
-				      "2",
-				      "V3"
-				    ],
-				    [
-				      "V4",
-				      "V5",
-				      "V6"
-				    ]
-				  ],
-				  "errors": {
-				  	"length": 0
-				  },
-				  "meta": {
-				    "delimiter": ","
-				  }
-				}
-			},
-			{
-				config: { delimiter: ",", header: true, dynamicTyping: false },
-				expected: {
-				  "results": {
-				    "fields": [
-				      "F1",
-				      "F2",
-				      "F3"
-				    ],
-				    "rows": [
-				      {
-				        "F1": "V1",
-				        "F2": "2",
-				        "F3": "V3"
-				      },
-				      {
-				        "F1": "V4",
-				        "F2": "V5",
-				        "F3": "V6"
-				      }
-				    ]
-				  },
-				  "errors": {
-				  	"length": 0
-				  },
-				  "meta": {
-				    "delimiter": ","
-				  }
-				}
-			}
-		]
+		input: 'a|b|c\r\nd|e|f',
+		config: { delimiter: "|" },
+		description: "Pipe delimiter",
+		expected: {
+			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
+			errors: []
+		}
 	},
 	{
-		input: "F1,F2,F3\n,2,V3\nV4,V5,V6",
-		cases: [
-			{
-				config: { delimiter: ",", header: true, dynamicTyping: true },
-				expected: {
-				  "results": {
-				    "fields": [
-				      "F1",
-				      "F2",
-				      "F3"
-				    ],
-				    "rows": [
-				      {
-				        "F1": "",
-				        "F2": 2,
-				        "F3": "V3"
-				      },
-				      {
-				        "F1": "V4",
-				        "F2": "V5",
-				        "F3": "V6"
-				      }
-				    ]
-				  },
-				  "errors": {
-				  	"length": 0
-				  },
-				  "meta": {
-				    "delimiter": ","
-				  }
-				}
-			}
-		]
+		input: 'a'+RECORD_SEP+'b'+RECORD_SEP+'c\r\nd'+RECORD_SEP+'e'+RECORD_SEP+'f',
+		config: { delimiter: RECORD_SEP },
+		description: "ASCII 30 delimiter",
+		expected: {
+			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
+			errors: []
+		}
 	},
 	{
-		input: "F1,F2,F3\n,2,V3,V4\nV5,V6,V7",
-		cases: [
-			{
-				config: { delimiter: ",", header: true, dynamicTyping: true },
-				expected: {
-				  "results": {
-				    "fields": [
-				      "F1",
-				      "F2",
-				      "F3"
-				    ],
-				    "rows": [
-				      {
-				        "F1": "",
-				        "F2": 2,
-				        "F3": "V3",
-				        "__parsed_extra": [
-				          "V4"
-				        ]
-				      },
-				      {
-				        "F1": "V5",
-				        "F2": "V6",
-				        "F3": "V7"
-				      }
-				    ]
-				  },
-				  "errors": {
-				    "0": [
-				      {
-				        "type": "FieldMismatch",
-				        "code": "TooManyFields",
-				        "message": "Too many fields: expected 3 fields but parsed 4",
-				        "line": 2,
-				        "row": 0,
-				        "index": 17
-				      }
-				    ],
-				    "length": 1
-				  },
-				  "meta": {
-				    "delimiter": ","
-				  }
-				}
-			}
-		]
+		input: 'a'+UNIT_SEP+'b'+UNIT_SEP+'c\r\nd'+UNIT_SEP+'e'+UNIT_SEP+'f',
+		config: { delimiter: UNIT_SEP },
+		description: "ASCII 31 delimiter",
+		expected: {
+			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
+			errors: []
+		}
 	},
 	{
-		input: "F1,F2,F3\nV1,2.0,-3.01, V4\n\rV5,\"V\n6\",V7\r,,",
-		cases: [
-			{
-				config: { delimiter: ",", header: true, dynamicTyping: true },
-				expected: {
-				  "results": {
-				    "fields": [
-				      "F1",
-				      "F2",
-				      "F3"
-				    ],
-				    "rows": [
-				      {
-				        "F1": "V1",
-				        "F2": 2,
-				        "F3": -3.01,
-				        "__parsed_extra": [
-				          " V4"
-				        ]
-				      },
-				      {
-				        "F1": "V5",
-				        "F2": "V\n6",
-				        "F3": "V7"
-				      },
-				      {
-				        "F1": "",
-				        "F2": "",
-				        "F3": ""
-				      }
-				    ]
-				  },
-				  "errors": {
-				    "0": [
-				      {
-				        "type": "FieldMismatch",
-				        "code": "TooManyFields",
-				        "message": "Too many fields: expected 3 fields but parsed 4",
-				        "line": 2,
-				        "row": 0,
-				        "index": 25
-				      }
-				    ],
-				    "length": 1
-				  },
-				  "meta": {
-				    "delimiter": ","
-				  }
-				}
-			}
-		]
+		input: 'aDELIMbDELIMc',
+		config: { delimiter: "DELIM" },
+		description: "Bad delimiter",
+		notes: "Should silently default to comma",
+		expected: {
+			data: [['aDELIMbDELIMc']],
+			errors: []
+		}
 	},
 	{
-		input: "F1,F2,F3\nV1,V2,V3\nV5,\"V6,V7",
-		cases: [
-			{
-				config: { delimiter: ",", header: true, dynamicTyping: true },
-				expected: {
-				  "results": {
-				    "fields": [
-				      "F1",
-				      "F2",
-				      "F3"
-				    ],
-				    "rows": [
-				      {
-				        "F1": "V1",
-				        "F2": "V2",
-				        "F3": "V3"
-				      },
-				      {
-				        "F1": "V5",
-				        "F2": "V6,V7"
-				      }
-				    ]
-				  },
-				  "errors": {
-				    "1": [
-				      {
-				        "type": "FieldMismatch",
-				        "code": "TooFewFields",
-				        "message": "Too few fields: expected 3 fields but parsed 2",
-				        "line": 3,
-				        "row": 1,
-				        "index": 27
-				      },
-				      {
-				        "type": "Quotes",
-				        "code": "MissingQuotes",
-				        "message": "Unescaped or mismatched quotes",
-				        "line": 3,
-				        "row": 1,
-				        "index": 27
-				      }
-				    ],
-				    "length": 2
-				  },
-				  "meta": {
-				    "delimiter": ","
-				  }
-				}
-			}
-		]
+		input: '# Comment!\r\na,b,c',
+		config: { comments: true },
+		description: "Commented line at beginning (comments: true)",
+		expected: {
+			data: [['a', 'b', 'c']],
+			errors: []
+		}
 	},
 	{
-		input: "F1,F2,F3\n2,-2, 2\n 2. ,.2, .2 \n-2.,  -2.0e-5,  -.4 ",
-		cases: [
-			{
-				config: { delimiter: ",", header: true, dynamicTyping: true },
-				expected: {
-				  "results": {
-				    "fields": [
-				      "F1",
-				      "F2",
-				      "F3"
-				    ],
-				    "rows": [
-				      {
-				        "F1": 2,
-				        "F2": -2,
-				        "F3": 2
-				      },
-				      {
-				        "F1": 2,
-				        "F2": 0.2,
-				        "F3": 0.2
-				      },
-				      {
-				        "F1": -2,
-				        "F2": -0.00002,
-				        "F3": -0.4
-				      }
-				    ]
-				  },
-				  "errors": {
-				  	"length": 0
-				  },
-				  "meta": {
-				    "delimiter": ","
-				  }
-				}
-			}
-		]
+		input: 'a,b,c\r\n# Comment\r\nd,e,f',
+		config: { comments: true },
+		description: "Commented line in middle (comments: true)",
+		expected: {
+			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
+			errors: []
+		}
 	},
 	{
-		input: "F1\nV1\nV2\nV3\nV4",
-		cases: [
-			{
-				config: { delimiter: "", header: false, dynamicTyping: false },
-				expected: {
-				  "results": [
-				    [
-				      "F1"
-				    ],
-				    [
-				      "V1"
-				    ],
-				    [
-				      "V2"
-				    ],
-				    [
-				      "V3"
-				    ],
-				    [
-				      "V4"
-				    ]
-				  ],
-				  "errors": {
-				    "length": 1,
-				    "config": [
-				      {
-				        "type": "Delimiter",
-				        "code": "UndetectableDelimiter",
-				        "message": "Unable to auto-detect delimiting character; defaulted to comma",
-				        "line": 1,
-				        "row": 0,
-				        "index": 0
-				      }
-				    ]
-				  },
-				  "meta": {
-				    "delimiter": ","
-				  }
-				}
-			}
-		]
+		input: 'a,b,c\r\n# Comment',
+		config: { comments: true },
+		description: "Commented line at end (comments: true)",
+		expected: {
+			data: [['a', 'b', 'c']],
+			errors: []
+		}
 	},
 	{
-		input: ["F1","F2","F3\r\nV1","V2","V3"].join(recordSep),
-		cases: [
-			{
-				config: { delimiter: "", header: false, dynamicTyping: false },
-				expected: {
-				  "results": [
-				    [
-				      "F1",
-				      "F2",
-				      "F3"
-				    ],
-				    [
-				      "V1",
-				      "V2",
-				      "V3"
-				    ],
-				  ],
-				  "errors": {
-				    "length": 0
-				  },
-				  "meta": {
-				    "delimiter": "\u001e"
-				  }
-				}
-			}
-		]
+		input: 'a,b,c\r\n!Comment goes here\r\nd,e,f',
+		config: { comments: '!' },
+		description: "Comment with non-default character (comments: '!')",
+		expected: {
+			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
+			errors: []
+		}
 	},
 	{
-		input: ["F1","F2","F3\r\nV1","V2","V3"].join(unitSep),
-		cases: [
-			{
-				config: { delimiter: "", header: false, dynamicTyping: false },
-				expected: {
-				  "results": [
-				    [
-				      "F1",
-				      "F2",
-				      "F3"
-				    ],
-				    [
-				      "V1",
-				      "V2",
-				      "V3"
-				    ],
-				  ],
-				  "errors": {
-				    "length": 0
-				  },
-				  "meta": {
-				    "delimiter": "\u001f"
-				  }
-				}
-			}
-		]
+		input: 'a,b,c\r\n=N(Comment)\r\nd,e,f',
+		config: { comments: '=N(' },
+		description: "Comment, but bad char specified (comments: \"=N(\")",
+		notes: "Should silently disable comment parsing",
+		expected: {
+			data: [['a', 'b', 'c'], ['=N(Comment)'], ['d', 'e', 'f']],
+			errors: []
+		}
+	},
+	{
+		input: '#commented line\r\n',
+		config: { comments: true },
+		description: "Input with only a commented line (comments: true)",
+		expected: {
+			data: [],
+			errors: []
+		}
+	},
+	{
+		input: '#commented line',
+		description: "Input with comment without comments enabled",
+		expected: {
+			data: [['#commented line']],
+			errors: []
+		}
+	},
+	{
+		input: 'a\r\n b\r\nc',
+		description: "Input without comments with line starting with whitespace",
+		notes: "\" \" == false, but \" \" !== false, so === comparison is required",
+		expected: {
+			data: [['a'], [' b'], ['c']],
+			errors: []
+		}
+	},
+	{
+		input: 'a#b#c\r\n# Comment',
+		config: { delimiter: '#', comments: '#' },
+		description: "Comment char same as delimiter",
+		notes: "Comment parsing should automatically be silently disabled in this case",
+		expected: {
+			data: [['a', 'b', 'c'], ['', ' Comment']],
+			errors: []
+		}
+	},
+	{
+		input: '\r\na,b,c\r\nd,e,f',
+		description: "Blank line at beginning",
+		expected: {
+			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
+			errors: []
+		}
+	},
+	{
+		input: 'a,b,c\r\n\r\nd,e,f',
+		description: "Blank line in middle",
+		expected: {
+			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
+			errors: []
+		}
+	},
+	{
+		input: 'a,b,c\r\nd,e,f\r\n\r\n',
+		description: "Blank lines at end",
+		expected: {
+			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
+			errors: []
+		}
+	},
+	{
+		input: 'a,b,c\r\n \r\nd,e,f',
+		description: "Blank line in middle with whitespace",
+		expected: {
+			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
+			errors: []
+		}
+	},
+	{
+		input: 'a,b,c\r\n,e,f',
+		description: "First field of a line is empty",
+		expected: {
+			data: [['a', 'b', 'c'], ['', 'e', 'f']],
+			errors: []
+		}
+	},
+	{
+		input: 'a,b,c\r\n,e,f',
+		description: "First field of a line is empty",
+		expected: {
+			data: [['a', 'b', 'c'], ['', 'e', 'f']],
+			errors: []
+		}
+	},
+	{
+		input: 'a,,c\r\n,,',
+		description: "Other fields are empty",
+		expected: {
+			data: [['a', '', 'c'], ['', '', '']],
+			errors: []
+		}
+	},
+	{
+		input: '',
+		description: "Empty input string",
+		expected: {
+			data: [],
+			errors: []
+		}
+	},
+	{
+		input: ',',
+		description: "Input is just the delimiter (2 empty fields)",
+		expected: {
+			data: [['', '']],
+			errors: []
+		}
+	},
+	{
+		input: 'Abc def',
+		description: "Input is just a string (a single field)",
+		expected: {
+			data: [['Abc def']],
+			errors: []
+		}
+	},
+	{
+		input: 'a,b,c\r\nd,e,f\r\ng,h,i',
+		config: { preview: 0 },
+		description: "Preview 0 rows should default to parsing all",
+		expected: {
+			data: [['a', 'b', 'c'], ['d', 'e', 'f'], ['g', 'h', 'i']],
+			errors: []
+		}
+	},
+	{
+		input: 'a,b,c\r\nd,e,f\r\ng,h,i',
+		config: { preview: 1 },
+		description: "Preview 1 row",
+		expected: {
+			data: [['a', 'b', 'c']],
+			errors: []
+		}
+	},
+	{
+		input: 'a,b,c\r\nd,e,f\r\ng,h,i',
+		config: { preview: 2 },
+		description: "Preview 2 rows",
+		expected: {
+			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
+			errors: []
+		}
+	},
+	{
+		input: 'a,b,c\r\nd,e,f\r\ng,h,i',
+		config: { preview: 3 },
+		description: "Preview all (3) rows",
+		expected: {
+			data: [['a', 'b', 'c'], ['d', 'e', 'f'], ['g', 'h', 'i']],
+			errors: []
+		}
+	},
+	{
+		input: 'a,b,c\r\nd,e,f\r\ng,h,i',
+		config: { preview: 4 },
+		description: "Preview more rows than input has",
+		expected: {
+			data: [['a', 'b', 'c'], ['d', 'e', 'f'], ['g', 'h', 'i']],
+			errors: []
+		}
+	},
+	{
+		input: 'a,b,c\r\nd,e,"f\r\nf",g,h,i',
+		config: { preview: 2 },
+		description: "Preview should count rows, not lines",
+		expected: {
+			data: [['a', 'b', 'c'], ['d', 'e', 'f\r\nf', 'g', 'h', 'i']],
+			errors: []
+		}
 	}
 ];
-
-
-
-
-
-
-
-$(function()
-{
-	var counter = 0;
-	for (var i = 0; i < tests.length; i++)
-	{
-		var test = tests[i];
-		var input = test.input;
-		for (var j = 0; j < test.cases.length; j++)
-		{
-			counter++;
-			var testCase = test.cases[j];
-			var actual = doTest(input, testCase.config);
-			var status = equal(actual, testCase.expected) ? passing : failing;
-			render(input, testCase.expected, actual, testCase.config, counter, status);
-		}
-	}
-
-	$('#pass-count').text(passCount);
-	$('#fail-count').text(failCount);
-});
-
-function doTest(input, config)
-{
-	// try
-	// {
-	 	return $.parse(input, config);
-	// }
-	// catch (e)
-	// {
-	// 	return {exception: e.message, error: e, note: "See console to inspect stack"};
-	// }
-}
-
-function render(input, expected, actual, config, count, status)
-{
-	if (status == passing)
-		passCount++;
-	else
-	{
-		console.log("TEST " + count +" FAILED.");
-		console.log("  Expected:", expected);
-		console.log("  Actual:", actual);
-		console.log("  Config:", config);
-		failCount++;
-	}
-
-	var html =	'<tr>' +
-				'<td class="count">'+count+'</td>' +
-				'<td class="input"><div><code>'+string(input)+'</code></div></td>' +
-				'<td class="config"><div><code>'+string(config)+'</code></div></td>' +
-				'<td class="output"><div><code>'+string(expected)+'</code></div></td>' +
-				'<td class="output '+status+'"><div><code>'+string(actual)+'</code></div></td>' +
-				'</tr>';
-	$('#results').append(html);
-}
-
-function string(obj)
-{
-	return typeof obj === "string" ? obj : JSON.stringify(obj, undefined, 2);
-}
-
-function equal(actual, expected)
-{
-	return string(actual) === string(expected);
-}
