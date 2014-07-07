@@ -325,6 +325,7 @@
 			{
 				var delim = delimiters[i];
 				var delta = 0, avgFieldCount = 0;
+				var fieldCountPrevRow = undefined;
 
 				var preview = new Parser({
 					delimiter: delim,
