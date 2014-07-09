@@ -196,7 +196,15 @@
 		{
 			if (start < file.size)
 			{
-				reader.readAsText(file.slice(start, Math.min(start + settings.chunkSize, file.size)), settings.config.encoding);
+				var end = Math.min(start + settings.chunkSize, file.size);
+
+				if (file.slice) {
+					reader.readAsText(file.slice(start, end), settings.config.encoding);
+				}
+				else if (file.webkitSlice) {
+					reader.readAsText(file.webkitSlice(start, end), settings.config.encoding);
+				}
+
 				start += settings.chunkSize;
 			}
 		};
