@@ -56,8 +56,7 @@ $(function()
 
 function runTest(test, num)
 {
-	var parser = new Parser(test.config);
-	var actual = parser.parse(test.input);
+	var actual = Papa.parse(test.input, test.config);
 
 	var results = compare(actual.data, actual.errors, test.expected);
 

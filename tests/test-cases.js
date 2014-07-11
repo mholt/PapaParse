@@ -1,3 +1,8 @@
+// TODO: Add tests for unparse:
+// If fields is omitted, write a CSV string without a header row
+// If delimiter is omitted, choose comma by default
+// If data is omitted, do nothing... maybe if fields IS specified, write just the header row?
+
 var RECORD_SEP = String.fromCharCode(30);
 var UNIT_SEP = String.fromCharCode(31);
 

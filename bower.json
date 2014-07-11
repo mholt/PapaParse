@@ -1,0 +1,34 @@
+{
+  "name": "Papa-Parse",
+  "main": "papaparse.js",
+  "homepage": "http://papaparse.com",
+  "authors": [
+    "Matthew Holt"
+  ],
+  "description": "Papa is a powerful CSV (delimited text) parser",
+  "keywords": [
+    "csv",
+    "parse",
+    "parsing",
+    "parser",
+    "delimited",
+    "text",
+    "data",
+    "auto-detect",
+    "comma",
+    "tab",
+    "pipe",
+    "file",
+    "filereader",
+    "stream"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    "player"
+  ]
+}
