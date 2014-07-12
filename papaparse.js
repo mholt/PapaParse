@@ -74,7 +74,8 @@
 			{
 				if (queue.length == 0)
 				{
-					options.complete();
+					if (isFunction(options.complete))
+						options.complete();
 					return;
 				}
 
@@ -108,9 +109,10 @@
 
 				// Wrap up the user's complete callback, if any, so that ours also gets executed
 				var userCompleteFunc = f.instanceConfig.complete;
-				f.instanceConfig.complete = function(results) {
+				f.instanceConfig.complete = function(results)
+				{
 					if (isFunction(userCompleteFunc))
-						userCompleteFunc(results, f.file, f.inputElem, event);
+						userCompleteFunc(results, f.file, f.inputElem);
 					fileComplete();
 				};
 
@@ -510,10 +512,12 @@
 
 		this.stream = function(file)
 		{
-			var slice = file.slice || file.webkitSlice || file.mozSlice;	// TODO: Why doesn't this work?
+			var slice = file.slice || file.webkitSlice || file.mozSlice;
 			
 			// TODO: Pull this setup out of the streamer and have reader, nextChunk and chunkLoaded passed in?
-			if (IS_WORKER)
+			// TODO/NOTE: Using FileReaderSync introduces very weird performance issues.
+			// See: http://stackoverflow.com/q/24708649/1048862
+			/*if (IS_WORKER)
 			{
 				reader = new FileReaderSync();
 				nextChunk = function()
@@ -527,7 +531,7 @@
 				};
 			}
 			else
-			{
+			{*/
 				reader = new FileReader();
 				reader.onload = chunkLoaded;
 				reader.onerror = chunkError;
@@ -537,7 +541,7 @@
 					if (start < file.size)
 						readChunk();
 				};
-			}
+			//}
 
 			nextChunk();	// Starts streaming
 
@@ -593,13 +597,10 @@
 					});
 				}
 				
-				if (finishedWithEntireFile)
-				{
-					if (isFunction(config.complete))
-						config.complete(undefined, file);
-				}
+				if (finishedWithEntireFile && (isFunction(config.complete))
+					config.complete(undefined, file);
 				else if (results.meta.aborted && isFunction(config.complete))
-					config.complete(results);
+					config.complete(results, file);
 				else if (!results.meta.paused)
 					nextChunk();
 			}
@@ -646,9 +647,8 @@
 			}
 
 			var parser = new Parser(_config);
-
 			_results = parser.parse(input);
-			
+
 			if (needsHeaderRow())
 				fillHeaderFields();
 			
@@ -841,7 +841,7 @@
 			|| _comments == _delimiter)
 			_comments = false;
 
-		// Parses delimited text input
+
 		this.parse = function(input)
 		{
 			if (typeof input !== 'string')
