@@ -5,10 +5,9 @@ $(function()
 {
 	$('#submit').click(function()
 	{
+		stepped = 0;
 		var txt = $('#input').val();
 		var files = $('#files')[0].files;
-		stepped = 0;
-
 		var config = buildConfig();
 
 		if (files.length > 0)
