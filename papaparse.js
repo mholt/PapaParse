@@ -597,7 +597,7 @@
 					});
 				}
 				
-				if (finishedWithEntireFile && (isFunction(config.complete))
+				if (finishedWithEntireFile && isFunction(config.complete))
 					config.complete(undefined, file);
 				else if (results.meta.aborted && isFunction(config.complete))
 					config.complete(results, file);
