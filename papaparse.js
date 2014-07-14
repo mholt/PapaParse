@@ -153,9 +153,11 @@
 
 			w.userStep = config.step;
 			w.userComplete = config.complete;
+			w.userError = config.error;
 
 			config.step = isFunction(config.step);
 			config.complete = isFunction(config.complete);
+			config.error = isFunction(config.error);
 			delete config.worker;	// prevent infinite loop
 
 			w.postMessage({
@@ -175,17 +177,6 @@
 				}
 				else
 				{
-					if (IS_WORKER && config.step)
-					{
-						config.step = function(results)
-						{
-							global.postMessage({
-								workerId: Papa.WORKER_ID,
-								results: results,
-								finished: false
-							});
-						};
-					}
 					var ph = new ParserHandle(config);
 					var results = ph.parse(_input);
 					if (isFunction(config.complete))
@@ -232,15 +223,19 @@
 
 
 
-	function JsonToCsv(_input)
+	function JsonToCsv(_input, _config)
 	{
 		var _output = "";
 		var _fields = [];
-		var _delimiter = ",";
-		var _quotes = false;	// whether to surround every datum with quotes
-		var _newline = "\r\n";
 
-		if (typeof _input === "string")
+		// Default configuration
+		var _quotes = false;	// whether to surround every datum with quotes
+		var _delimiter = ",";	// delimiting character
+		var _newline = "\r\n";	// newline character(s)
+
+		unpackConfig();
+
+		if (typeof _input === 'string')
 			_input = JSON.parse(_input);
 
 		if (_input instanceof Array)
@@ -256,20 +251,7 @@
 				_input.data = JSON.parse(_input.data);
 
 			if (_input.data instanceof Array)
-			{
-				if (typeof _input.delimiter === 'string'
-					&& _input.delimiter.length == 1
-					&& global.Papa.BAD_DELIMITERS.indexOf(_input.delimiter) == -1)
-				{
-					_delimiter = _input.delimiter;
-				}
-
-				if (typeof _input.quotes === 'boolean')
-					_quotes = _input.quotes;
-
-				if (typeof _input.newline === 'string')
-					_newline = _input.newline;
-				
+			{				
 				if (!_input.fields)
 					_input.fields = _input.data[0] instanceof Array
 									? _input.fields
@@ -285,6 +267,25 @@
 		// Default (any valid paths should return before this)
 		throw "exception: Unable to serialize unrecognized input";
 
+
+		function unpackConfig()
+		{
+			if (typeof _config !== 'object')
+				return;
+
+			if (typeof _config.delimiter === 'string'
+				&& _config.delimiter.length == 1
+				&& global.Papa.BAD_DELIMITERS.indexOf(_config.delimiter) == -1)
+			{
+				_delimiter = _config.delimiter;
+			}
+
+			if (typeof _config.quotes === 'boolean')
+				_quotes = _config.quotes;
+
+			if (typeof _config.newline === 'string')
+				_newline = _config.newline;
+		}
 
 
 		// Turns an object's keys into an array
@@ -373,7 +374,7 @@
 
 
 
-
+	// TODO: The NetworkStreamer and FileStreamer have much in common. Consolidate?
 	function NetworkStreamer(config)
 	{
 		config = config || {};
@@ -388,7 +389,6 @@
 
 		this.stream = function(url)
 		{
-			// TODO: Pull this setup out of the streamer and have reader, nextChunk and chunkLoaded passed in?
 			if (IS_WORKER)
 			{
 				nextChunk = function()
@@ -423,14 +423,21 @@
 					xhr.setRequestHeader("Range", "bytes="+start+"-"+end);
 				}
 				xhr.send();
+				if (IS_WORKER && xhr.status == 0)
+					chunkError();
 				start += config.chunkSize;
-				return xhr.responseText;
 			}
 
 			function chunkLoaded()
 			{
 				if (xhr.readyState != 4)
 					return;
+
+				if (xhr.status < 200 || xhr.status >= 400)
+				{
+					chunkError();
+					return;
+				}
 
 				// Rejoin the line we likely just split in two by chunking the file
 				aggregate += partialLine + xhr.responseText;
@@ -471,11 +478,8 @@
 					});
 				}
 				
-				if (finishedWithEntireFile)
-				{
-					if (isFunction(config.complete))
-						config.complete(undefined);
-				}
+				if (finishedWithEntireFile && isFunction(config.complete))
+					config.complete(results);
 				else if (results.meta.aborted && isFunction(config.complete))
 					config.complete(results);
 				else
@@ -485,7 +489,15 @@
 			function chunkError()
 			{
 				if (isFunction(config.error))
-					config.error(reader.error, file);
+					config.error(xhr.statusText);
+				else if (IS_WORKER && config.error)
+				{
+					global.postMessage({
+						workerId: Papa.WORKER_ID,
+						error: xhr.statusText,
+						finished: false
+					});
+				}
 			}
 		};
 	}
@@ -514,39 +526,17 @@
 		{
 			var slice = file.slice || file.webkitSlice || file.mozSlice;
 			
-			// TODO: Pull this setup out of the streamer and have reader, nextChunk and chunkLoaded passed in?
-			// TODO/NOTE: Using FileReaderSync introduces very weird performance issues.
-			// See: http://stackoverflow.com/q/24708649/1048862
-			/*if (IS_WORKER)
-			{
-				reader = new FileReaderSync();
-				nextChunk = function()
-				{
-					if (start < file.size)
-						chunkLoaded({
-							target: {	// simulate the structure of a FileReader event
-								result: readChunk()
-							}
-						});
-				};
-			}
-			else
-			{*/
-				reader = new FileReader();
-				reader.onload = chunkLoaded;
-				reader.onerror = chunkError;
-
-				nextChunk = function()
-				{
-					if (start < file.size)
-						readChunk();
-				};
-			//}
+			reader = new FileReader();	// Better than FileReaderSync (even in worker threads). See: http://stackoverflow.com/q/24708649/1048862
+			reader.onload = chunkLoaded;
+			reader.onerror = chunkError;
 
 			nextChunk();	// Starts streaming
 
-
-
+			function nextChunk()
+			{
+				if (start < file.size)
+					readChunk();
+			}
 
 			function readChunk()
 			{
@@ -609,6 +599,15 @@
 			{
 				if (isFunction(config.error))
 					config.error(reader.error, file);
+				else if (IS_WORKER && config.error)
+				{
+					global.postMessage({
+						workerId: Papa.WORKER_ID,
+						error: reader.error,
+						file: file,
+						finished: false
+					});
+				}
 			}
 		};
 	}
@@ -640,22 +639,96 @@
 					_config.delimiter = delimGuess.bestDelimiter;
 				else
 				{
-					addError("Delimiter", "UndetectableDelimiter", "Unable to auto-detect delimiting character; defaulted to comma");
+					addError(_results, "Delimiter", "UndetectableDelimiter", "Unable to auto-detect delimiting character; defaulted to comma");
 					_config.delimiter = ",";
 				}
 				_results.meta.delimiter = _config.delimiter;
 			}
 
-			var parser = new Parser(_config);
-			_results = parser.parse(input);
+			if (isFunction(_config.step))
+			{
+				var userStep = _config.step;
+				_config.step = function(results, parser)
+				{
+					_results = results;
+					if (needsHeaderRow())
+						processResults();
+					else
+						userStep(processResults(), parser);
+				};
+			}
 
+			_results = new Parser(_config).parse(input);
+			return processResults();
+		};
+
+		function processResults()
+		{
 			if (needsHeaderRow())
 				fillHeaderFields();
-			
-			var results = applyHeaderAndDynamicTyping();
+			return applyHeaderAndDynamicTyping();
+		}
 
-			return results;
-		};
+		function needsHeaderRow()
+		{
+			return _config.header && _fields.length == 0;
+		}
+
+		function fillHeaderFields()
+		{
+			if (!_results)
+				return;
+			for (var i = 0; needsHeaderRow() && i < _results.data.length; i++)
+				for (var j = 0; j < _results.data[i].length; j++)
+					_fields.push(_results.data[i][j]);
+			_results.data.splice(0, 1);
+		}
+
+		function applyHeaderAndDynamicTyping()
+		{
+			if (!_results || (!_config.header && !_config.dynamicTyping))
+				return _results;
+
+			for (var i = 0; i < _results.data.length; i++)
+			{
+				var row = {};
+				for (var j = 0; j < _results.data[i].length; j++)
+				{
+					if (_config.dynamicTyping)
+					{
+						var value = _results.data[i][j];
+						if (value == "true")
+							_results.data[i][j] = true;
+						else if (value == "false")
+							_results.data[i][j] = false;
+						else
+							_results.data[i][j] = tryParseFloat(value);
+					}
+
+					if (_config.header)
+					{
+						if (j >= _fields.length)
+						{
+							if (!row["__parsed_extra"])
+								row["__parsed_extra"] = [];
+							row["__parsed_extra"].push(_results.data[i][j]);
+						}
+						row[_fields[j]] = _results.data[i][j];
+					}
+				}
+
+				if (_config.header)
+				{
+					_results.data[i] = row;
+					if (j > _fields.length)
+						addError("FieldMismatch", "TooManyFields", "Too many fields: expected " + _fields.length + " fields but parsed " + j, i);
+					else if (j < _fields.length)
+						addError("FieldMismatch", "TooFewFields", "Too few fields: expected " + _fields.length + " fields but parsed " + j, i);
+				}
+			}
+
+			return _results;
+		}
 
 		function guessDelimiter(input)
 		{
@@ -706,68 +779,6 @@
 				successful: !!bestDelim,
 				bestDelimiter: bestDelim
 			}
-		}
-
-		function needsHeaderRow()
-		{
-			return _config.header && _fields.length == 0;
-		}
-
-		function fillHeaderFields()
-		{
-			if (!_results)
-				return;
-			for (var i = 0; needsHeaderRow() && i < _results.data.length; i++)
-				for (var j = 0; j < _results.data[i].length; j++)
-					_fields.push(_results.data[i][j]);
-			_results.data.splice(0, 1);
-		}
-
-		function applyHeaderAndDynamicTyping()
-		{
-			if (!_results)
-				return;
-
-			for (var i = 0; i < _results.data.length; i++)
-			{
-				var row = {};
-				for (var j = 0; j < _results.data[i].length; j++)
-				{
-					if (_config.dynamicTyping)
-					{
-						var value = _results.data[i][j];
-
-						if (value == "true")
-							_results.data[i][j] = true;
-						else if (value == "false")
-							_results.data[i][j] = false;
-						else
-							_results.data[i][j] = tryParseFloat(value);
-					}
-
-					if (_config.header)
-					{
-						if (j >= _fields.length)
-						{
-							if (!row["__parsed_extra"])
-								row["__parsed_extra"] = [];
-							row["__parsed_extra"].push(_results.data[i][j]);
-						}
-						row[_fields[j]] = _results.data[i][j];
-					}
-				}
-
-				if (_config.header)
-				{
-					_results.data[i] = row;
-					if (j > _fields.length)
-						addError("FieldMismatch", "TooManyFields", "Too many fields: expected " + _fields.length + " fields but parsed " + j, i);
-					else if (j < _fields.length)
-						addError("FieldMismatch", "TooFewFields", "Too few fields: expected " + _fields.length + " fields but parsed " + j, i);
-				}
-			}
-
-			return _results;
 		}
 
 		function tryParseFloat(val)
@@ -876,7 +887,7 @@
 			{
 				if (_aborted) break;
 				if (_preview > 0 && _rowIdx >= _preview) break;
-				if (_paused) return returnable();
+				if (_paused) return finishParsing();
 				
 				if (_ch == '"')
 					parseQuotes();
@@ -904,7 +915,8 @@
 			if (_inQuotes)
 				addError("Quotes", "MissingQuotes", "Unescaped or mismatched quotes");
 			endRow();	// End of input is also end of the last row
-			return returnable();
+			if (!isFunction(_step))
+				return returnable();
 		}
 
 		function parseQuotes()
@@ -988,7 +1000,7 @@
 		function endRow()
 		{
 			trimEmptyLastRow();
-			if (typeof _step === 'function')
+			if (isFunction(_step))
 			{
 				if (_data[_rowIdx])
 					_step(returnable(), self);
@@ -1121,8 +1133,17 @@
 		if (msg.results && msg.results.data && isFunction(worker.userStep))
 		{
 			for (var i = 0; i < msg.results.data.length; i++)
-				worker.userStep(msg.results.data[i]);
+			{
+				worker.userStep({
+					data: [msg.results.data[i]],
+					errors: msg.results.errors,
+					meta: msg.results.meta
+				});
+			}
+			delete msg.results;	// free memory ASAP
 		}
+		else if (msg.error)
+			worker.userError(msg.error, msg.file);
 
 		if (msg.finished)
 		{
