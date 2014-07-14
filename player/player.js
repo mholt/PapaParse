@@ -47,7 +47,7 @@ function buildConfig()
 	return {
 		delimiter: $('#delimiter').val(),
 		header: $('#header').prop('checked'),
-		dynamicTyping: $('#header').prop('checked'),
+		dynamicTyping: $('#dynamicTyping').prop('checked'),
 		preview: parseInt($('#preview').val()),
 		step: $('#stream').prop('checked') ? stepFn : undefined,
 		encoding: $('#encoding').val(),
