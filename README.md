@@ -30,7 +30,7 @@ Visit **[PapaParse.com/demo.html](http://papaparse.com/demo.html)** to try Papa!
 Get Started
 -----------
 
-Use [papaparse.min.js](https://github.com/mholt/jquery.parse/blob/master/papaparse.min.js) for production.
+Use [papaparse.min.js](https://github.com/mholt/PapaParse/blob/master/papaparse.min.js) for production.
 
 For usage instructions, see the [homepage](http://papaparse.com) and, for more detail, the [documentation](http://papaparse.com/docs.html).
 
@@ -46,7 +46,7 @@ Papa Parse is under test (especially its core Parser). Download this repository 
 Contributing
 ------------
 
-To discuss a new feature or ask a question, open an issue. To fix a bug, submit a pull request to be credited with the [contributors](https://github.com/mholt/jquery.parse/graphs/contributors)! Remember, a pull request, *with test*, is best. (Especially all changes to the Parser component should be validated with tests.) You may also discuss on Twitter with [#PapaParse](https://twitter.com/search?q=%23PapaParse&src=typd&f=realtime) or directly to me, [@mholt6](https://twitter.com/mholt6).
+To discuss a new feature or ask a question, open an issue. To fix a bug, submit a pull request to be credited with the [contributors](https://github.com/mholt/PapaParse/graphs/contributors)! Remember, a pull request, *with test*, is best. (Especially all changes to the Parser component should be validated with tests.) You may also discuss on Twitter with [#PapaParse](https://twitter.com/search?q=%23PapaParse&src=typd&f=realtime) or directly to me, [@mholt6](https://twitter.com/mholt6).
 
 
 

@@ -161,12 +161,12 @@ var TESTS = [
 		}
 	},
 	{
-		input: 'aDELIMbDELIMc',
+		input: 'a,b,c',
 		config: { delimiter: "DELIM" },
 		description: "Bad delimiter",
 		notes: "Should silently default to comma",
 		expected: {
-			data: [['aDELIMbDELIMc']],
+			data: [['a', 'b', 'c']],
 			errors: []
 		}
 	},
@@ -218,7 +218,7 @@ var TESTS = [
 	},
 	{
 		input: '#commented line\r\n',
-		config: { comments: true },
+		config: { comments: true, delimiter: ',' },
 		description: "Input with only a commented line (comments: true)",
 		expected: {
 			data: [],
@@ -227,6 +227,7 @@ var TESTS = [
 	},
 	{
 		input: '#commented line',
+		config: { delimiter: ',' },
 		description: "Input with comment without comments enabled",
 		expected: {
 			data: [['#commented line']],
@@ -235,6 +236,7 @@ var TESTS = [
 	},
 	{
 		input: 'a\r\n b\r\nc',
+		config: { delimiter: ',' },
 		description: "Input without comments with line starting with whitespace",
 		notes: "\" \" == false, but \" \" !== false, so === comparison is required",
 		expected: {
@@ -313,7 +315,11 @@ var TESTS = [
 		description: "Empty input string",
 		expected: {
 			data: [],
-			errors: []
+			errors: [{
+				"type": "Delimiter",
+				"code": "UndetectableDelimiter",
+				"message": "Unable to auto-detect delimiting character; defaulted to comma"
+			}]
 		}
 	},
 	{
@@ -329,7 +335,13 @@ var TESTS = [
 		description: "Input is just a string (a single field)",
 		expected: {
 			data: [['Abc def']],
-			errors: []
+			errors: [
+				{
+					"type": "Delimiter",
+					"code": "UndetectableDelimiter",
+					"message": "Unable to auto-detect delimiting character; defaulted to comma"
+				}
+			]
 		}
 	},
 	{

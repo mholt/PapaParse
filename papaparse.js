@@ -1,6 +1,6 @@
 /*
 	Papa Parse
-	v3.0.0 alpha - MAY BE UNSTABLE - STILL IN DEVELOPMENT
+	v3.0.0
 	https://github.com/mholt/PapaParse
 */
 (function(global)

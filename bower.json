@@ -20,7 +20,11 @@
     "pipe",
     "file",
     "filereader",
-    "stream"
+    "stream",
+    "workers",
+    "ajax",
+    "threading",
+    "multi-threaded"
   ],
   "license": "MIT",
   "ignore": [
