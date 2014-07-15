@@ -1,0 +1,368 @@
+/* Eric Meyer's Reset CSS v2.0 */
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,details,embed,figure,figcaption,footer,header,hgroup,menu,nav,output,ruby,section,summary,time,mark,audio,video{border:0;font-size:100%;font:inherit;vertical-align:baseline;margin:0;padding:0}article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{display:block}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:none}table{border-collapse:collapse;border-spacing:0}
+
+body,
+main {
+	background: #F0F0F0;
+}
+
+body {
+	font: 18px/1.5em 'Source Sans Pro', 'Lato', 'Open Sans', 'Helvetica Neue', sans-serif;
+	font-size: 18px;
+	color: #333;
+	height: 100%;
+}
+
+a {
+	color: #1D58B1;
+}
+
+a:hover {
+	color: #2D81FF;
+}
+
+b {
+	font-weight: bold;
+}
+
+i {
+	font-style: italic;
+}
+
+p {
+	margin: 25px 0;
+}
+
+small {
+	font-size: 14px;
+}
+
+h1 {
+	font-family: Arvo;
+	font-size: 120px;
+	line-height: 1em;
+	margin-bottom: 50px;
+	text-align: center;
+}
+
+h2,
+h3,
+h4,
+h5,
+h6 {
+	font-family: Lato, sans-serif;
+}
+
+h2,
+h3 {
+	text-align: center;
+}
+
+h2 {
+	font-size: 60px;
+	line-height: 1.25em;
+}
+
+h3 {
+	font-size: 34px;
+	font-weight: bold;
+	margin: 40px auto 30px;
+	color: #000;
+	line-height: 1.25em;
+}
+
+h4 {
+	font-size: 20px;
+	font-weight: 900;
+}
+
+h3:first-child,
+h4:first-child {
+	margin-top: 15px;
+}
+
+/*
+	Neat hack! http://css-tricks.com/hash-tag-links-padding/
+	So when you navigate in-page, the sticky header doesn't cover it up
+*/
+h2[id]:before,
+h3[id]:before,
+h4[id]:before,
+.note:before { 
+	display: block; 
+	content: " "; 
+	margin-top: -75px; 
+	height: 75px; 
+	visibility: hidden; 
+}
+
+.note {
+	color: #AAA;
+	text-transform: uppercase;
+	font-size: 12px;
+}
+
+ul,
+ol {
+	margin: 30px 0 30px 2em;
+}
+
+ul ul,
+ol ul,
+ol ol,
+ul ol {
+	margin: 0 0 0 2em;
+}
+
+ul {
+	list-style-type: disc;
+}
+
+ol {
+	list-style-type: decimal;
+}
+
+header,
+.insignia {
+	background: #253C50;
+}
+
+header {
+	position: fixed;
+	top: 0;
+	width: 100%;
+	z-index: 1;
+}
+
+main {
+	padding-top: 100px;
+}
+
+main h2 {
+	color: #253C50; /* #365DA3 */ /* #3D3D3D */ /* #9B0000 */
+	font-weight: 300;
+	line-height: 1.25em;
+	margin: 0px 0 50px;
+}
+
+.text-logo,
+.links a {
+	display: inline-block;
+	padding: 15px 10px;
+	color: #FFF;
+}
+
+.text-logo {
+	font-family: Arvo, sans-serif;
+	font-size: 24px;
+	text-decoration: none;
+}
+
+.text-logo:hover {
+	color: #66B0E2;
+}
+
+.links a {
+	font-size: 16px;
+	text-decoration: none;
+	transition: background .2s;
+}
+
+.links a:hover {
+	background: #66B0E2;
+}
+
+.links a .fa {
+	margin-right: 5px;
+}
+
+.donate {
+	background: #58AA38;
+}
+
+.donate:hover {
+	background: #67C941 !important;
+}
+
+.ticker .ticker-statement:not(:first-child) {
+	display: none;
+}
+
+code {
+	font: 13px/1em 'Liberation Mono', 'Consolas', 'Monaco', 'Menlo', 'Courier New', monospace;
+	background: #FFF;
+	color: #000;
+	padding: 5px;
+}
+
+h2 code {
+	font-size: 42px;
+	background: none;
+}
+
+code.block {
+	color: #000;
+	padding: 10px;
+	display: block;
+	white-space: pre;
+	overflow-x: auto;
+	line-height: 1.4em;
+	margin: 15px auto;
+	tab-size: 4;
+}
+
+.grid-55 code {
+	margin-top: 25px !important;
+}
+
+code .comment {
+	color: #999;
+}
+
+.button,
+button,
+input[type=button],
+button[type=submit] {
+	display: inline-block;
+	padding: 10px 25px;
+	color: #FFF;
+	border: 0;
+	text-decoration: none;
+	background: #366992;
+	margin: 5px;
+	transition: background .2s;
+	border-radius: 50px;
+	cursor: pointer;
+	outline: none;
+	font-size: 18px;
+}
+
+.button[disabled],
+button[disabled],
+input[disabled] {
+	background: #BBB !important;
+	cursor: default !important;
+}
+
+.button:hover,
+button:hover,
+input[type=button]:hover,
+button[type=submit]:hover {
+	text-decoration: none;
+	background: #4B91C9;
+	color: #FFF;
+}
+
+.button.red,
+button.red {
+	background: #A01919;
+}
+
+.button.red:hover,
+button.red:hover {
+	background: #BE1717;
+}
+
+.button.green,
+button.green {
+	background: #419236;
+}
+
+.button.green:hover,
+button.green:hover {
+	background: #4DB43F;
+}
+
+hr {
+	border: 0;
+	border-top: 1px solid #D0D0D0;
+	margin: 35px auto 50px;
+}
+
+.clear {
+	border: 0;
+	clear: both;
+	background: 0;
+	margin: 0;
+}
+
+.pad-50 {
+	padding-top: 50px;
+	padding-bottom: 50px;
+}
+
+.pad-75 {
+	padding-top: 75px;
+	padding-bottom: 75px;
+}
+
+.pad-100 {
+	padding-top: 100px;
+	padding-bottom: 100px;
+}
+
+.text-center {
+	text-align: center;
+}
+
+.text-right {
+	text-align: right;
+}
+
+.mini-papa {
+	text-align: right;
+}
+
+.stuck {
+	position: fixed;
+	top: 0;
+	width: 100%;
+}
+
+footer {
+	padding: 25px 0;
+	background: #333;
+	color: #DDD;
+}
+
+footer a {
+	color: #CCC;
+}
+
+@media (max-width: 1100px) {
+	.text-logo {
+		font-size: 16px;
+	}
+}
+
+@media (max-width: 767px) {
+	/* mobile */
+
+	header,
+	.sticky-wrapper {
+		position: static;
+		margin-bottom: 50px !important;
+	}
+
+	main {
+		padding-top: 0;
+	}
+
+	.links a {
+		font-size: 16px;
+		display: block;
+		text-align: left;
+	}
+
+	main h2 {
+		font-size: 40px;
+	}
+
+	main h2 code {
+		font-size: 30px;
+	}
+
+	.mini-papa {
+		text-align: left;
+	}
+}

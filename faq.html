@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>FAQ - Papa Parse</title>
+		<meta charset="utf-8">
+		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css">
+		<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700,400italic|Lato:300,400,700,900|Arvo">
+		<link rel="stylesheet" href="resources/css/unsemantic.css">
+		<link rel="stylesheet" href="resources/css/common.css">
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
+		<script src="resources/js/common.js"></script>
+	</head>
+	<body>
+
+		<header>
+			<div class="grid-container">
+				<div class="grid-40 mobile-grid-50">
+					<div class="links">
+						<a href="https://github.com/mholt/PapaParse">
+							<i class="fa fa-github fa-lg"></i> GitHub
+						</a>
+						<a href="/demo.html">
+							<i class="fa fa-magic fa-lg"></i> Demo
+						</a>
+						<a href="/docs.html">
+							<i class="fa fa-book fa-lg"></i> Docs
+						</a>
+					</div>
+				</div>
+				<div class="grid-20 hide-on-mobile text-center">
+					<a href="/" class="text-logo">Papa Parse</a>
+				</div>
+				<div class="grid-40 mobile-grid-50 text-right">
+					<div class="links">
+						<a href="/faq.html">
+							<i class="fa fa-question fa-lg"></i> FAQ
+						</a>
+						<a href="https://github.com/mholt/PapaParse/issues">
+							<i class="fa fa-bug fa-lg"></i> Issues
+						</a>
+						<a href="https://www.gittip.com/mholt/" class="donate">
+							<i class="fa fa-heart fa-lg"></i> Donate
+						</a>
+					</div>
+				</div>
+			</div>
+		</header>
+
+
+		<main>
+			<div class="grid-container">
+				<h2>FAQ</h2>
+
+				<div class="prefix-20 grid-60 suffix-20">
+
+					<h3 id="general">General</h3>
+
+
+					<h4>Why use Papa Parse?</h4>
+
+					<p>
+						There's a thousand CSV libraries for Javascript. Papa is different. It's written with correctness and performance in mind. Papa is the first (and so far only) multi-threaded CSV parser that runs on web pages. It can parse files gigabytes in size without crashing the browser. It correctly handles malformed or edge-case CSV text. It can parse files on the local filesystem or download them over the Internet. Papa is boss.
+					</p>
+
+					<p>
+						Privacy advocates also use Papa Parse to avoid having to transmit sensitive files over the Internet. Now all the processing can be done locally on the client's computer. This is especially significant considering some organizations' policies.
+					</p>
+
+
+					<h4>Demo? Testing?</h4>
+
+					<p>
+						There's the <a href="demo.html">online demo</a> or you can download and use the player file in the GitHub repository for testing. You'll also find actual tests there that keep Papa strong.
+					</p>
+
+
+
+
+					<h4>Is it open source? (Can I contribute something?)</h4>
+
+					<p>
+						Yes, please! I don't want to do this all by myself. Head over to the <a href="https://github.com/mholt/PapaParse">GitHub project page</a> and hack away.
+					</p>
+
+
+
+
+
+
+
+
+
+
+
+					<hr>
+					<h3 id="streaming">Streaming</h3>
+
+					<h4>Can Papa load and parse huge files?</h4>
+					<p>
+						Yes. Parsing huge text files is facilitated by <i>streaming</i>, where the file is loaded a little bit at a time, parsed, and the results are sent to your <a href="docs.html#config">step</a> callback function, row-by-row.
+					</p>
+
+					<h4>How do I stream my input?</h4>
+					<p>
+						Just specify a <a href="docs.html#config">step</a> callback function. Results will <i>not</i> be available after parsing is finished, however. You have to inspect the results one row at a time.
+					</p>
+
+					<h4>What is a stream and when should I stream files?</h4>
+					<p>
+						A stream is a unique data structure which, given infinite time, gives you infinite space. 
+						So if you're short on memory (as browsers often are), use a stream.
+					</p>
+
+					<h4>Wait, does that mean streaming takes more time?</h4>
+					<p>
+						Yes and no. Typically, when we gain speed, we pay with space. The opposite is true, too. Streaming uses significantly less memory with large inputs, but since the reading happens in chunks and results are processed at each row instead of at the very end, yes, it can be slower.
+					</p>
+					<p>
+						But consider the alternative: upload the file to a remote server, open and process it there, then compress the output and have the client download the results. How long does it take you to upload a 500 MB or 1 GB file? Then consider that the server still has to open the file and read its contents, which is what the client would have done minutes ago. The server might parse it faster with natively-compiled binaries, but only if its resources are dedicated to the task and isn't already parsing files for many other users.
+					</p>
+					<p>
+						So unless your clients have <a href="http://google.com/fiber">a fiber line</a> and you have a scalable cloud application, local parsing by streaming is nearly guaranteed to be faster.
+					</p>
+
+					<h4>How do I get all the results together after streaming?</h4>
+					<p>
+						You don't. Unless you assemble it manually. And really, don't do that... it defeats the purpose of using a stream. Just take the parts you need as they come through.
+					</p>
+
+					<h4>Does Papa use a true stream?</h4>
+					<p>
+						Papa uses HTML5's FileReader API which uses a stream. FileReader doesn't technically allow us to hook into the underlying stream, but it does let us load the file in pieces. But fortunately you don't have to worry about that; it's all taken care of for you. Just take the results one row at a time.
+					</p>
+
+					<h4>Can I stream files over a network or the Internet?</h4>
+					<p>
+						Yes, Papa Parse supports this. It will download a file in pieces using HTTP's standard Range header, then pass the parsed results to your step function just like a local file. However, these requests may not work cross-origin (different domain/hostname), depending on the server's configuration.
+					</p>
+
+
+
+
+
+
+
+
+
+					<hr>
+					<h3 id="workers">Multi-threading (Workers)</h3>
+
+					<h4>What is a web worker? Why use one?</h4>
+					<p>
+						<a href="https://developer.mozilla.org/en-US/docs/Web/API/Worker">HTML5 Web Workers</a> facilitate basic multi-threading in the browser. This means that a web page can spawn a new thread in the operating system that runs Javascript code. This is highly beneficial for long-running scripts that would otherwise lock up the web page. 
+					</p>
+
+					<h4>How do I use a worker?</h4>
+					<p>
+						Just specify <code>worker: true</code> in your <a href="docs.html#config">config</a>. You'll also need to make a <code>complete</code> callback (unless you're streaming) so that you can get the results, because using a worker makes the parse function asynchronous.
+					</p>
+
+					<h4>When should I use a worker?</h4>
+					<p>
+						That's up to you. The most typical reason to use a web worker is if your web page becomes unresponsive during parsing. In other words, it freezes: you can't click things or the scrolling becomes choppy. Some browsers, like Firefox, will warn the user that a script has become unresponsive or is taking a long time (even if it's working properly). If this happens to you or some of your users, consider using a web worker, at least for the large inputs.
+					</p>
+
+					<p>
+						However, read the next answer for more information. Using workers has performance implications (both good and bad).
+					</p>
+
+					<h4>What are the performance implications of using a worker thread?</h4>
+					<p>
+						Using a worker will be a little slower. In Javascript, threads don't share memory. That's really annoying because sharing memory is the primary reason for multi-threading. As such, all parse results in a worker thread need to be <i>copied</i> to the main thread. And if you're parsing a string in a worker thread, that string also needs to be copied into the worker in the first place. (Files will be opened or downloaded by the worker itself, so the input doesn't need to be copied from the main thread in those cases.)
+					</p>
+
+					<p>
+						The process of sending data between the page and the worker thread can stall the main page for just a moment. Each thread must also wait for the data to finish sending before un-blocking.
+					</p>
+
+					<p>
+						Basically: if you don't have much time, don't use a worker. If you can afford a little extra time, use a worker. It will keep your page from appearing unresponsive and give users an overall better experience.
+					</p>
+
+
+					<h4>Can I stream and use a worker at the same time?</h4>
+					<p>
+						Yup. If the input is too large to fit in memory (or large enough to crash the browser), streaming is <i>always</i> the answer, even in a worker thread. Workers keep the page reactive. Streaming makes it able to fit in memory. Use both if you need to.
+					</p>
+
+				</div>
+			</div>
+		</main>
+		<br><br><br>
+
+
+		<footer>
+			<div class="grid-container">
+				<div class="grid-100 text-center">
+					&copy; 2013-2014
+					<br>
+					Thanks to all <a href="https://github.com/mholt/jquery.parse/graphs/contributors">contributors</a>!
+				</div>
+			</div>
+		</footer>
+
+	</body>
+</html>
