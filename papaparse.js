@@ -740,6 +740,9 @@
 				}
 			}
 
+			if (_config.header && _results.meta);
+				_results.meta.fields = _fields;
+
 			return _results;
 		}
 
