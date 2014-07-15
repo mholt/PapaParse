@@ -3,30 +3,34 @@ Parse CSV with Javascript
 
 [![mholt on Gittip](http://img.shields.io/badge/tips-accepted-brightgreen.svg?style=flat)](https://www.gittip.com/mholt/)
 
-
 Papa Parse (formerly the jQuery Parse Plugin) is a robust and powerful CSV (character-separated values) parser with these features:
 
-- Parses delimited text strings without any fuss
-- Attach to `<input type="file">` elements to load and parse files from disk
-- Automatically detects delimiter (or specify a delimiter yourself)
-- Supports streaming large inputs
-- Utilize the header row, if present
-- Gracefully handles malformed data
-- Optional dynamic typing so that numeric data is parsed as numbers
-- Descriptive and contextual errors
+- Easy to use
+- Parse CSV files directly (local or over the network)
+- Stream large files (even via HTTP)
+- Reverse parsing (converts JSON to CSV)
+- Auto-detects the delimiter
+- Worker threads to keep your web page responsive
+- Header row support
+- Can convert numbers and booleans to their types
+- Graceful and robust error handling
+- Minor jQuery integration to get files from `<input type="file">` elements
+
+All are optional (except for being easy to use).
 
 
-Demo
+
+[Demo](http://papaparse.com/demo.html)
 ----
 
-Visit **[PapaParse.com](http://papaparse.com/#demo)** to give Papa a whirl!
+Visit **[PapaParse.com/demo.html](http://papaparse.com/demo.html)** to try Papa!
 
 
 
 Get Started
 -----------
 
-Use [jquery.parse.min.js](https://github.com/mholt/jquery.parse/blob/master/jquery.parse.min.js) for production.
+Use [papaparse.min.js](https://github.com/mholt/PapaParse/blob/master/papaparse.min.js) for production.
 
 For usage instructions, see the [homepage](http://papaparse.com) and, for more detail, the [documentation](http://papaparse.com/docs.html).
 
@@ -35,18 +39,18 @@ For usage instructions, see the [homepage](http://papaparse.com) and, for more d
 Tests
 -----
 
-The Parser component is under test. Download this repository and open `tests.html` in your browser to run them.
+Papa Parse is under test (especially its core Parser). Download this repository and open `tests/tests.html` in your browser to run them.
 
 
 
 Contributing
 ------------
 
-If you'd like to see a feature or bug fix, pull down the code and submit a pull request. But remember, if you're changing anything in the Parser function, a pull request, *with test*, is best. (All changes to the parser component should be validated with tests.) You may also open issues for discussion or join in on Twitter with [#PapaParse](https://twitter.com/search?q=%23PapaParse&src=typd&f=realtime)
+To discuss a new feature or ask a question, open an issue. To fix a bug, submit a pull request to be credited with the [contributors](https://github.com/mholt/PapaParse/graphs/contributors)! Remember, a pull request, *with test*, is best. (Especially all changes to the Parser component should be validated with tests.) You may also discuss on Twitter with [#PapaParse](https://twitter.com/search?q=%23PapaParse&src=typd&f=realtime) or directly to me, [@mholt6](https://twitter.com/mholt6).
 
 
 
 Origins
 -------
 
-Papa Parse is the result of an experiment by [SmartyStreets](http://smartystreets.com) which matured into a fully-featured, independent jQuery plugin. Wanting to enhance the demo on their homepage, SmartyStreets looked into ways to simulate their list service. This involved processing at least part of a potentially large delimited text file. And what else? They wanted to do it without requiring a file upload (for simplicity and to alleviate privacy concerns). No suitable solutions were found, so they built their own. After finding it successful, the code was brought out into this jQuery plugin, now known as Papa Parse.
+Papa Parse is the result of a successful experiment by [SmartyStreets](http://smartystreets.com) which matured into a fully-featured, independent Javascript library.

@@ -1,6 +1,6 @@
 {
   "name": "Papa-Parse",
-  "main": "jquery.parse.js",
+  "main": "papaparse.js",
   "homepage": "http://papaparse.com",
   "authors": [
     "Matthew Holt"
@@ -20,7 +20,11 @@
     "pipe",
     "file",
     "filereader",
-    "stream"
+    "stream",
+    "workers",
+    "ajax",
+    "threading",
+    "multi-threaded"
   ],
   "license": "MIT",
   "ignore": [
@@ -28,9 +32,7 @@
     "node_modules",
     "bower_components",
     "test",
-    "tests"
-  ],
-  "dependencies": {
-    "jquery": ">=1.6.0"
-  }
+    "tests",
+    "player"
+  ]
 }
