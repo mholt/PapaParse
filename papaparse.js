@@ -35,6 +35,12 @@
 	global.Papa.BAD_DELIMITERS = ["\r", "\n", "\"", global.Papa.BYTE_ORDER_MARK];
 	global.Papa.WORKERS_SUPPORTED = !!global.Worker;
 
+	// Exposed for testing and development only
+	global.Papa.Parser = Parser;
+	global.Papa.ParserHandle = ParserHandle;
+	global.Papa.NetworkStreamer = NetworkStreamer;
+	global.Papa.FileStreamer = FileStreamer;
+
 	if (global.jQuery)
 	{
 		var $ = global.jQuery;
