@@ -374,14 +374,13 @@
 
 
 
-	// TODO: The NetworkStreamer and FileStreamer have much in common. Consolidate?
 	function NetworkStreamer(config)
 	{
 		config = config || {};
 		if (!config.chunkSize)
 			config.chunkSize = 1024 * 1024 * 5;	// 5 MB
 
-		var start = 0;
+		var start = 0, fileSize = 0;
 		var aggregate = "";
 		var partialLine = "";
 		var xhr, nextChunk;
@@ -420,12 +419,15 @@
 				if (config.step)
 				{
 					var end = start + config.chunkSize - 1;	// minus one because byte range is inclusive
+					if (fileSize && end > fileSize) // Hack around a Chrome bug: http://stackoverflow.com/q/24745095/1048862
+						end = fileSize;
 					xhr.setRequestHeader("Range", "bytes="+start+"-"+end);
 				}
 				xhr.send();
 				if (IS_WORKER && xhr.status == 0)
 					chunkError();
-				start += config.chunkSize;
+				else
+					start += config.chunkSize;
 			}
 
 			function chunkLoaded()
@@ -443,7 +445,7 @@
 				aggregate += partialLine + xhr.responseText;
 				partialLine = "";
 
-				var finishedWithEntireFile = !config.step || xhr.responseText.length < config.chunkSize;
+				var finishedWithEntireFile = !config.step || start > getFileSize(xhr);
 
 				if (!finishedWithEntireFile)
 				{
@@ -467,7 +469,7 @@
 				}
 
 				var results = handle.parse(aggregate);
-				aggregate = "";	// very important to reset each time we parse an aggregate
+				aggregate = "";	// very important to reset each time a chunk is parsed
 
 				if (IS_WORKER)
 				{
@@ -480,9 +482,9 @@
 				
 				if (finishedWithEntireFile && isFunction(config.complete))
 					config.complete(results);
-				else if (results.meta.aborted && isFunction(config.complete))
+				else if (results && results.meta.aborted && isFunction(config.complete))
 					config.complete(results);
-				else
+				else if (!finishedWithEntireFile)
 					nextChunk();
 			}
 
@@ -498,6 +500,12 @@
 						finished: false
 					});
 				}
+			}
+
+			function getFileSize(xhr)
+			{
+				var contentRange = xhr.getResponseHeader("Content-Range");
+				return parseInt(contentRange.substr(contentRange.lastIndexOf("/") + 1));
 			}
 		};
 	}
@@ -526,7 +534,7 @@
 		{
 			var slice = file.slice || file.webkitSlice || file.mozSlice;
 			
-			reader = new FileReader();	// Better than FileReaderSync (even in worker threads). See: http://stackoverflow.com/q/24708649/1048862
+			reader = new FileReader();	// Better than FileReaderSync (even in worker). See: http://stackoverflow.com/q/24708649/1048862
 			reader.onload = chunkLoaded;
 			reader.onerror = chunkError;
 
@@ -576,7 +584,7 @@
 				}
 
 				var results = handle.parse(aggregate);
-				aggregate = "";	// very important to reset each time we parse an aggregate
+				aggregate = "";	// very important to reset each time a chunk is parsed
 
 				if (IS_WORKER)
 				{
@@ -622,8 +630,9 @@
 		// One goal is to minimize the use of regular expressions...
 		var FLOAT = /^\s*-?(\d*\.?\d+|\d+\.?\d*)(e[-+]?\d+)?\s*$/i;
 
-		var _fields = [];	// Fields are from the header row of the input, if there is one
-		var _results = {	// The last results returned from the parser
+		var _delimiterError;	// Temporary state between delimiter detection and processing results
+		var _fields = [];		// Fields are from the header row of the input, if there is one
+		var _results = {		// The last results returned from the parser
 			data: [],
 			errors: [],
 			meta: {}
@@ -632,6 +641,7 @@
 
 		this.parse = function(input)
 		{
+			_delimiterError = false;
 			if (!_config.delimiter)
 			{
 				var delimGuess = guessDelimiter(input);
@@ -639,7 +649,7 @@
 					_config.delimiter = delimGuess.bestDelimiter;
 				else
 				{
-					addError(_results, "Delimiter", "UndetectableDelimiter", "Unable to auto-detect delimiting character; defaulted to comma");
+					_delimiterError = true;	// add error after parsing (otherwise it would be overwritten)
 					_config.delimiter = ",";
 				}
 				_results.meta.delimiter = _config.delimiter;
@@ -664,8 +674,15 @@
 
 		function processResults()
 		{
+			if (_results && _delimiterError)
+			{
+				addError("Delimiter", "UndetectableDelimiter", "Unable to auto-detect delimiting character; defaulted to comma");
+				_delimiterError = false;
+			}
+
 			if (needsHeaderRow())
 				fillHeaderFields();
+
 			return applyHeaderAndDynamicTyping();
 		}
 
