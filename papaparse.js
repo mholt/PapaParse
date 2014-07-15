@@ -49,12 +49,7 @@
 								&& $(this).attr('type').toLowerCase() == "file"
 								&& global.FileReader;
 
-				if (!supported)
-					return true;	// continue to next input element
-
-				var instanceConfig = $.extend({}, config);
-
-				if (!this.files || this.files.length == 0)
+				if (!supported || !this.files || this.files.length == 0)
 					return true;	// continue to next input element
 
 				for (var i = 0; i < this.files.length; i++)
@@ -62,13 +57,14 @@
 					queue.push({
 						file: this.files[i],
 						inputElem: this,
-						instanceConfig: instanceConfig
+						instanceConfig: $.extend({}, config)
 					});
 				}
 			});
 
-			parseNextFile();
-			return this;	// chainability
+			parseNextFile();	// begin parsing
+			return this;		// maintains chainability
+
 
 			function parseNextFile()
 			{
@@ -373,7 +369,7 @@
 
 
 
-
+	// NOTE/TODO: Many of the functions of NetworkStreamer and FileStreamer are the same. Consolidate?
 	function NetworkStreamer(config)
 	{
 		config = config || {};
@@ -469,7 +465,7 @@
 				}
 
 				var results = handle.parse(aggregate);
-				aggregate = "";	// very important to reset each time a chunk is parsed
+				aggregate = "";
 
 				if (IS_WORKER)
 				{
@@ -584,7 +580,7 @@
 				}
 
 				var results = handle.parse(aggregate);
-				aggregate = "";	// very important to reset each time a chunk is parsed
+				aggregate = "";
 
 				if (IS_WORKER)
 				{
