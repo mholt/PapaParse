@@ -104,7 +104,7 @@ $(function()
 				config: config,
 				before: function(file, inputElem)
 				{
-					start = performance.now();
+					start = performance ? performance.now() : 0;
 					console.log("Parsing file...", file);
 				},
 				error: function(err, file)
@@ -115,7 +115,7 @@ $(function()
 				},
 				complete: function()
 				{
-					end = performance.now();
+					end = performance ? performance.now() : 0;
 					printStats("Done with all files");
 				}
 			});
@@ -128,12 +128,12 @@ $(function()
 				return enableButton();
 			}
 
-			start = performance.now();
+			start = performance ? performance.now() : 0;
 			var csv = Papa.unparse(input, config);
-			end = performance.now();
+			end = performance ? performance.now() : 0;
 
 			console.log("Unparse complete");
-			console.log("Time:", end-start, "ms");
+			console.log("Time:", (end-start || "(Unknown; your browser does not support the Performance API)"), "ms");
 			
 			if (csv.length > maxUnparseLength)
 			{
@@ -152,7 +152,7 @@ $(function()
 		}
 		else
 		{
-			start = performance.now();
+			start = performance ? performance.now() : 0;
 			var results = Papa.parse(input, config);
 			console.log("Synchronous results:", results);
 			if (config.worker || config.download)
@@ -173,7 +173,7 @@ function printStats(msg)
 {
 	if (msg)
 		console.log(msg);
-	console.log("       Time:", end-start, "ms");
+	console.log("       Time:", (end-start || "(Unknown; your browser does not support the Performance API)"), "ms");
 	console.log("  Row count:", rowCount);
 	if (stepped)
 		console.log("    Stepped:", stepped);
@@ -218,7 +218,7 @@ function stepFn(results, parser)
 
 function completeFn(results)
 {
-	end = performance.now();
+	end = performance ? performance.now() : 0;
 
 	if (results && results.errors)
 	{
@@ -240,7 +240,7 @@ function completeFn(results)
 
 function errorFn(err)
 {
-	end = performance.now();
+	end = performance ? performance.now() : 0;
 	console.log("ERROR:", err);
 	enableButton();
 }
