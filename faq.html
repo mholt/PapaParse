@@ -138,6 +138,10 @@
 						Yes, Papa Parse supports this. It will download a file in pieces using HTTP's standard Range header, then pass the parsed results to your step function just like a local file. However, these requests may not work cross-origin (different domain/hostname), depending on the server's configuration.
 					</p>
 
+					<p>
+						Streaming remote files also requires the Content-Range header in the server's response. Most production-ready servers support this header, but for example, Python's SimpleHTTPServer does not.
+					</p>
+
 
 
 
