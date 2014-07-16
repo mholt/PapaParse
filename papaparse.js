@@ -507,7 +507,15 @@
 			function getFileSize(xhr)
 			{
 				var contentRange = xhr.getResponseHeader("Content-Range");
-				return parseInt(contentRange.substr(contentRange.lastIndexOf("/") + 1));
+				if (contentRange)
+				{
+					return parseInt(contentRange.substr(contentRange.lastIndexOf("/") + 1));
+				}
+				else
+				{
+					var contentLength = xhr.getResponseHeader("Content-Length");
+					return parseInt(contentLength);
+				}
 			}
 		};
 	}
