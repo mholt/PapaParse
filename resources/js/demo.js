@@ -104,7 +104,7 @@ $(function()
 				config: config,
 				before: function(file, inputElem)
 				{
-					start = performance ? performance.now() : 0;
+					start = now();
 					console.log("Parsing file...", file);
 				},
 				error: function(err, file)
@@ -115,7 +115,7 @@ $(function()
 				},
 				complete: function()
 				{
-					end = performance ? performance.now() : 0;
+					end = now();
 					printStats("Done with all files");
 				}
 			});
@@ -128,9 +128,9 @@ $(function()
 				return enableButton();
 			}
 
-			start = performance ? performance.now() : 0;
+			start = now();
 			var csv = Papa.unparse(input, config);
-			end = performance ? performance.now() : 0;
+			end = now();
 
 			console.log("Unparse complete");
 			console.log("Time:", (end-start || "(Unknown; your browser does not support the Performance API)"), "ms");
@@ -152,7 +152,7 @@ $(function()
 		}
 		else
 		{
-			start = performance ? performance.now() : 0;
+			start = now();
 			var results = Papa.parse(input, config);
 			console.log("Synchronous results:", results);
 			if (config.worker || config.download)
@@ -218,7 +218,7 @@ function stepFn(results, parser)
 
 function completeFn(results)
 {
-	end = performance ? performance.now() : 0;
+	end = now();
 
 	if (results && results.errors)
 	{
@@ -240,7 +240,7 @@ function completeFn(results)
 
 function errorFn(err)
 {
-	end = performance ? performance.now() : 0;
+	end = now();
 	console.log("ERROR:", err);
 	enableButton();
 }
@@ -248,4 +248,11 @@ function errorFn(err)
 function enableButton()
 {
 	$('#submit').prop('disabled', false);
+}
+
+function now()
+{
+	return typeof window.performance !== 'undefined'
+			? window.performance.now()
+			: 0;
 }
