@@ -599,9 +599,9 @@
 				
 				if (finishedWithEntireFile && isFunction(config.complete))
 					config.complete(undefined, file);
-				else if (results.meta.aborted && isFunction(config.complete))
+				else if (results && results.meta.aborted && isFunction(config.complete))	// TODO: Abort needs reworking like pause/resume need it (if streaming, no results object is returned, so it has no meta to say aborted: true...)
 					config.complete(results, file);
-				else if (!results.meta.paused)
+				else if (!finishedWithEntireFile)
 					nextChunk();
 			}
 
