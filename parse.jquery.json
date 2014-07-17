@@ -1,6 +1,6 @@
 {
 	"name": "parse",
-	"version": "3.0.0",
+	"version": "3.0.1",
 	"title": "Papa Parse",
 	"description": "Powerful CSV parser that converts CSV to JSON and JSON to CSV. Supports web workers and streaming large files. Gracefully handles malformed input.",
 	"keywords": [
@@ -27,7 +27,7 @@
 	"author": {
 		"name": "Matthew Holt",
 		"email": "mholt@users.noreply.github.com",
-		"url": "http://mwholt.com"
+		"url": "https://twitter.com/mholt6"
 	},
 	"licenses": [
 		{

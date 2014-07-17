@@ -1,6 +1,6 @@
 /*
 	Papa Parse
-	v3.0.0
+	v3.0.1
 	https://github.com/mholt/PapaParse
 */
 (function(global)
@@ -1063,7 +1063,7 @@
 
 		function quotesOnBoundary()
 		{
-			return isBoundary(_i-1) || isBoundary(_i+1);
+			return (!_inQuotes && isBoundary(_i-1)) || isBoundary(_i+1);
 		}
 
 		function isBoundary(i)
@@ -1073,12 +1073,10 @@
 
 			var ch = _input[i];
 
-			return (i == -1 || i == _input.length)
-				|| (i < _input.length
-					&& i > -1
-					&& (ch == _delimiter
-						|| ch == "\r"
-						|| ch == "\n"));
+			return (i <= -1 || i >= _input.length)
+				|| (ch == _delimiter
+					|| ch == "\r"
+					|| ch == "\n");
 		}
 
 		function addError(type, code, msg)

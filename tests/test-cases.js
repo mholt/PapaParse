@@ -113,6 +113,24 @@ var TESTS = [
 		}
 	},
 	{
+		input: 'A,""",""",C',
+		description: "Quoted field with quotes around delimiter",
+		notes: "For a boundary to exist immediately before the quotes, we must not already be in quotes",
+		expected: {
+			data: [['A', '","', 'C']],
+			errors: []
+		}
+	},
+	{
+		input: 'A,",""",C',
+		description: "Quoted field with quotes on one side of delimiter",
+		notes: "Similar to the test above but with quotes only after the delimiter",
+		expected: {
+			data: [['A', ',"', 'C']],
+			errors: []
+		}
+	},
+	{
 		input: 'A, "B" ,C',
 		description: "Quoted field with whitespace around quotes",
 		notes: "This is malformed input, but it should be parsed gracefully (with errors)",
