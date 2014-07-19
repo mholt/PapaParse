@@ -74,6 +74,89 @@ h3 {
 	text-align: left;
 }
 
+.showcase {
+	text-align: left;
+	margin-bottom: 40px;
+	background: #1D2933;
+	clear: both;
+}
+
+.showcase a {
+	color: #668B99;
+}
+
+.showcase-title {
+	color: #FFF;
+	font-size: 14px;
+	text-transform: uppercase;
+	padding: 10px 0;
+	background: #2C4252;
+	text-align: center;
+}
+
+.showcase .fa-heart {
+	color: #F00;
+	margin: 0 2px;
+}
+
+.showcase-image img {
+	width: 90%;
+	vertical-align: middle;
+}
+
+.showcase-image .fa-plus {
+	padding: 20px 35px;
+	border: 4px dashed #2C4252;
+}
+
+.showcase-image {
+	width: 200px;
+	height: 100px;
+	line-height: 100px;
+	text-align: center;
+	display: inline-block;
+	transition: background .4s;
+}
+
+.showcase-image:hover {
+	background: #375A77;	/* default */
+}
+
+
+
+
+
+.showcase-image.smartystreets:hover {
+	background: #FFC200;
+}
+
+.showcase-image.maxcdn:hover {
+	background: #F37121;
+}
+
+.showcase-image.maxcdn img {
+	width: auto;
+	max-height: 20px;
+}
+
+
+
+
+
+
+.showcase-add {
+	display: none;
+	color: #DDD;
+	padding: 10px 0;
+	font-size: 16px;
+	text-align: center;
+	border-top: 1px solid #337BAC;
+}
+
+
+
+
+
 @media (max-width: 900px) {
 	header,
 	.sticky-wrapper {
@@ -107,5 +190,16 @@ h3 {
 
 	.insignia {
 		display: none;
+	}
+
+
+
+
+	.showcase-image {
+		width: 49%;
+	}
+
+	.showcase img {
+		max-width: 200px;
 	}
 }

@@ -34,4 +34,9 @@ $(function()
 			$next.fadeIn(500).addClass('current');
 		});
 	}, 7000);
+
+	$('#showcase-add-link').click(function()
+	{
+		$('.showcase-add').slideToggle('fast');
+	});
 });
