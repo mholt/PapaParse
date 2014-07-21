@@ -347,17 +347,15 @@ var results = Papa.parse(csv, {
 						</p>
 					</div>
 					<div class="grid-55">
-						<code class="block"><span class="comment">// Errors are returned with results. Always. Example:
-/*
-	{
-	    type: "Quotes",
-	    code: "UnexpectedQuotes",
-	    message: "Unexpected quotes",
-	    line: 2,
-	    row: 1,
-	    index: 83
-	}
-*/</span></code>
+						<code class="block"><span class="comment">// Example error:</span>
+{
+	type: "Quotes",
+	code: "UnexpectedQuotes",
+	message: "Unexpected quotes",
+	line: 2,
+	row: 1,
+	index: 83
+}</code>
 					</div>
 					<div class="clear"></div>
 					<hr>
@@ -368,7 +366,7 @@ var results = Papa.parse(csv, {
 						<div class="note" id="jquery">jQuery Plugin</div>
 						<h4>"Can I use Papa with jQuery?"</h4>
 						<p>
-							Sure! But it's not required. You can use jQuery to select file input elements and then parse their files. Papa exposes its file parsing API as a jQuery plugin only when jQuery is defined. Papa Parse has <b>no dependencies</b>.
+							Sure, but it's not required. You can use jQuery to select file input elements and then parse their files. Papa exposes its file parsing API as a jQuery plugin only when jQuery is defined. Papa Parse has <b>no dependencies</b>.
 						</p>
 					</div>
 					<div class="grid-55">
