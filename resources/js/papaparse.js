@@ -147,7 +147,7 @@
 	function CsvToJson(_input, _config)
 	{
 		var config = IS_WORKER ? _config : copyAndValidateConfig(_config);
-		var useWorker = config.worker && Papa.WORKERS_SUPPORTED;
+		var useWorker = config.worker && Papa.WORKERS_SUPPORTED && SCRIPT_PATH;
 
 		if (useWorker)
 		{
