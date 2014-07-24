@@ -31,6 +31,13 @@ h1 {
 	margin-bottom: 30px;
 }
 
+h2 {
+	text-align: center;
+	font-weight: bold;
+	font-size: 26px;
+	margin-bottom: 20px;
+}
+
 .status-pass,
 .status-fail {
 	padding: 10px;
@@ -49,6 +56,10 @@ h1 {
 
 .status-fail {
 	background: #BB0000;
+}
+
+.test-group {
+	margin-bottom: 50px;
 }
 
 table {

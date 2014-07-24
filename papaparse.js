@@ -251,9 +251,9 @@
 		{
 			if (typeof _input.data === 'string')
 				_input.data = JSON.parse(_input.data);
-
+			
 			if (_input.data instanceof Array)
-			{				
+			{
 				if (!_input.fields)
 					_input.fields = _input.data[0] instanceof Array
 									? _input.fields
@@ -261,9 +261,9 @@
 
 				if (!(_input.data[0] instanceof Array) && typeof _input.data[0] !== 'object')
 					_input.data = [_input.data];	// handles input like [1,2,3] or ["asdf"]
-
-				return serialize(_input.fields, _input.data);
 			}
+
+			return serialize(_input.fields || [], _input.data || []);
 		}
 
 		// Default (any valid paths should return before this)

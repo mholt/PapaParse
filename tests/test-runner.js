@@ -1,10 +1,11 @@
 var passCount = 0;
 var failCount = 0;
+var testCount = 0;
 
 $(function()
 {
 	// First, wireup!
-	$('#results').on('click', 'td.rvl', function()
+	$('.results').on('click', 'td.rvl', function()
 	{
 		var tr = $(this).closest('tr');
 		if (tr.hasClass('collapsed'))
@@ -22,29 +23,22 @@ $(function()
 		tr.toggleClass('collapsed expanded');
 	});
 
-	$('#expand-all').click(function()
+	$('.expand-all').click(function()
 	{
-		$('.collapsed .rvl').click();
+		var $testGroup = $(this).closest('.test-group');
+		$('.collapsed .rvl', $testGroup).click();
 	});
 
-	$('#collapse-all').click(function()
+	$('.collapse-all').click(function()
 	{
-		$('.expanded .rvl').click();
+		var $testGroup = $(this).closest('.test-group');
+		$('.expanded .rvl', $testGroup).click();
 	});
-
 
 
 	// Next, run tests and render results!
-	for (var i = 0; i < TESTS.length; i++)
-	{
-		var test = TESTS[i];
-		var passed = runTest(test, i);
-		if (passed)
-			passCount++;
-		else
-			failCount++;
-	}
-
+	runParseTests();
+	runUnparseTests();
 
 
 	// Finally, show the overall status.
@@ -54,98 +48,212 @@ $(function()
 		$('#status').addClass('status-fail').html("<b>"+failCount+"</b> test"+(failCount == 1 ? "" : "s")+" failed; <b>"+passCount+"</b> passed");
 });
 
-function runTest(test, num)
+
+
+
+// Executes all tests in PARSE_TESTS from test-cases.js
+// and renders results in the table.
+function runParseTests()
 {
-	var actual = Papa.parse(test.input, test.config);
-
-	var results = compare(actual.data, actual.errors, test.expected);
-
-	var testDescription = (test.description || "");
-	if (testDescription.length > 0)
-		testDescription += '<br>';
-	if (test.notes)
-		testDescription += '<span class="notes">' + test.notes + '</span>';
-
-	var tr = '<tr class="collapsed" id="test-'+num+'">'
-			+ '<td class="rvl">+</td>'
-			+ '<td>' + testDescription + '</td>'
-			+ passOrFailTd(results.data)
-			+ passOrFailTd(results.errors)
-			+ '<td class="revealable pre"><div class="revealer">condensed</div><div class="hidden">' + JSON.stringify(test.config, null, 2) + '</div></td>'
-			+ '<td class="revealable pre"><div class="revealer">condensed</div><div class="hidden">' + revealChars(test.input) + '</div></td>'
-			+ '<td class="revealable pre"><div class="revealer">condensed</div><div class="hidden">data: ' + JSON.stringify(test.expected.data, null, 4) + '\r\nerrors: ' + JSON.stringify(test.expected.errors, null, 4) + '</div></td>'
-			+ '<td class="revealable pre"><div class="revealer">condensed</div><div class="hidden">data: ' + JSON.stringify(actual.data, null, 4) + '\r\nerrors: ' + JSON.stringify(actual.errors, null, 4) + '</div></td>'
-		   + '</tr>';
-
-	$('#results').append(tr);
-
-	if (!results.data.passed || !results.errors.passed)
-		$('#test-'+num+' td.rvl').click();
-
-	return results.data.passed && results.errors.passed
-}
-
-function compare(actualData, actualErrors, expected)
-{
-	var data = compareData(actualData, expected.data);
-	var errors = compareErrors(actualErrors, expected.errors);
-	return {
-		data: data,
-		errors: errors
-	}
-}
-
-function compareData(actual, expected)
-{
-	var passed = true;
-
-	if (actual.length != expected.length)
-		passed = false;
-
-	for (var row = 0; row < expected.length; row++)
+	for (var i = 0; i < PARSE_TESTS.length; i++)
 	{
-		if (actual.length != expected.length)
-		{
-			passed = false;
-			break;
-		}
-
-		for (var col = 0; col < expected[row].length; col++)
-		{
-			if (actual[row].length != expected[row].length)
-			{
-				passed = false;
-				break;
-			}
-
-			var expectedVal = expected[row][col];
-			var actualVal = actual[row][col];
-
-			if (actualVal !== expectedVal)
-			{
-				passed = false;
-				break;
-			}
-		}
+		var test = PARSE_TESTS[i];
+		var passed = runTest(test);
+		if (passed)
+			passCount++;
+		else
+			failCount++;
 	}
 
-	// We pass back an object right now, even though it only contains
-	// one value, because we might add details to the test results later
-	// (same with compareErrors below)
-	return {
-		passed: passed
-	};
+
+	function runTest(test)
+	{
+		var actual;
+
+		try
+		{
+			actual = Papa.parse(test.input, test.config);
+		}
+		catch (e)
+		{
+			actual.data = [];
+			actual.errors = [e];
+		}
+
+		var testId = testCount++;
+		var results = compare(actual.data, actual.errors, test.expected);
+
+		var testDescription = (test.description || "");
+		if (testDescription.length > 0)
+			testDescription += '<br>';
+		if (test.notes)
+			testDescription += '<span class="notes">' + test.notes + '</span>';
+
+		var tr = '<tr class="collapsed" id="test-'+testId+'">'
+				+ '<td class="rvl">+</td>'
+				+ '<td>' + testDescription + '</td>'
+				+ passOrFailTd(results.data)
+				+ passOrFailTd(results.errors)
+				+ '<td class="revealable pre"><div class="revealer">condensed</div><div class="hidden">' + JSON.stringify(test.config, null, 2) + '</div></td>'
+				+ '<td class="revealable pre"><div class="revealer">condensed</div><div class="hidden">' + revealChars(test.input) + '</div></td>'
+				+ '<td class="revealable pre"><div class="revealer">condensed</div><div class="hidden">data: ' + JSON.stringify(test.expected.data, null, 4) + '\r\nerrors: ' + JSON.stringify(test.expected.errors, null, 4) + '</div></td>'
+				+ '<td class="revealable pre"><div class="revealer">condensed</div><div class="hidden">data: ' + JSON.stringify(actual.data, null, 4) + '\r\nerrors: ' + JSON.stringify(actual.errors, null, 4) + '</div></td>'
+			   + '</tr>';
+
+		$('#tests-for-parse .results').append(tr);
+
+		if (!results.data.passed || !results.errors.passed)
+			$('#test-'+testId+' td.rvl').click();
+
+		return results.data.passed && results.errors.passed
+	}
+
+
+	function compare(actualData, actualErrors, expected)
+	{
+		var data = compareData(actualData, expected.data);
+		var errors = compareErrors(actualErrors, expected.errors);
+		
+		return {
+			data: data,
+			errors: errors
+		}
+
+
+		function compareData(actual, expected)
+		{
+			var passed = true;
+
+			if (actual.length != expected.length)
+				passed = false;
+
+			for (var row = 0; row < expected.length; row++)
+			{
+				if (actual.length != expected.length)
+				{
+					passed = false;
+					break;
+				}
+
+				for (var col = 0; col < expected[row].length; col++)
+				{
+					if (actual[row].length != expected[row].length)
+					{
+						passed = false;
+						break;
+					}
+
+					var expectedVal = expected[row][col];
+					var actualVal = actual[row][col];
+
+					if (actualVal !== expectedVal)
+					{
+						passed = false;
+						break;
+					}
+				}
+			}
+
+			// We pass back an object right now, even though it only contains
+			// one value, because we might add details to the test results later
+			// (same with compareErrors below)
+			return {
+				passed: passed
+			};
+		}
+
+
+		function compareErrors(actual, expected)
+		{
+			var passed = JSON.stringify(actual) == JSON.stringify(expected);
+
+			return {
+				passed: passed
+			};
+		}
+	}
 }
 
-function compareErrors(actual, expected)
+
+
+
+
+
+// Executes all tests in UNPARSE_TESTS from test-cases.js
+// and renders results in the table.
+function runUnparseTests()
 {
-	var passed = JSON.stringify(actual) == JSON.stringify(expected);
+	for (var i = 0; i < UNPARSE_TESTS.length; i++)
+	{
+		var test = UNPARSE_TESTS[i];
+		var passed = runTest(test);
+		if (passed)
+			passCount++;
+		else
+			failCount++;
+	}
 
-	return {
-		passed: passed
-	};
+	function runTest(test)
+	{
+		var actual;
+
+		try
+		{
+			actual = Papa.unparse(test.input, test.config);
+		}
+		catch (e)
+		{
+			actual = e;
+		}
+
+		var testId = testCount++;
+		var results = compare(actual, test.expected);
+
+		var testDescription = (test.description || "");
+		if (testDescription.length > 0)
+			testDescription += '<br>';
+		if (test.notes)
+			testDescription += '<span class="notes">' + test.notes + '</span>';
+
+		var tr = '<tr class="collapsed" id="test-'+testId+'">'
+				+ '<td class="rvl">+</td>'
+				+ '<td>' + testDescription + '</td>'
+				+ passOrFailTd(results)
+				+ '<td class="revealable pre"><div class="revealer">condensed</div><div class="hidden">' + JSON.stringify(test.config, null, 2) + '</div></td>'
+				+ '<td class="revealable pre"><div class="revealer">condensed</div><div class="hidden">' + JSON.stringify(test.input, null, 4) + '</div></td>'
+				+ '<td class="revealable pre"><div class="revealer">condensed</div><div class="hidden">' + revealChars(test.expected) + '</div></td>'
+				+ '<td class="revealable pre"><div class="revealer">condensed</div><div class="hidden">' + revealChars(actual) + '</div></td>'
+			   + '</tr>';
+
+		$('#tests-for-unparse .results').append(tr);
+
+		if (!results.passed)
+			$('#test-'+testId+' td.rvl').click();
+
+		return results.passed;
+	}
+
+
+	function compare(actual, expected)
+	{
+		return {
+			passed: actual == expected
+		};
+	}
 }
 
+
+
+
+
+
+
+
+
+
+
+
+// Makes a TD tag with OK or FAIL depending on test result
 function passOrFailTd(result)
 {
 	if (result.passed)
@@ -154,18 +262,25 @@ function passOrFailTd(result)
 		return '<td class="fail">FAIL</td>';
 }
 
+
+// Reveals some hidden, whitespace, or invisible characters
 function revealChars(txt)
 {
 	// Make spaces and tabs more obvious when glancing
 	txt = txt.replace(/( |\t)/ig, '<span class="whitespace-char">$1</span>');
-
 	txt = txt.replace(/(\r\n|\n\r|\r|\n)/ig, '<span class="whitespace-char special-char">$1</span>$1');
 
-	// Now make the line breaks within the spans actually appear on the page
+	// Make UNIT_SEP and RECORD_SEP characters visible
+	txt = txt.replace(/(\u001e|\u001f)/ig, '<span class="special-char">$1</span>$1');
+
+	// Now make the whitespace and invisible characters
+	// within the spans actually appear on the page
 	txt = txt.replace(/">\r\n<\/span>/ig, '">\\r\\n</span>');
 	txt = txt.replace(/">\n\r<\/span>/ig, '">\\n\\r</span>');
 	txt = txt.replace(/">\r<\/span>/ig, '">\\r</span>');
 	txt = txt.replace(/">\n<\/span>/ig, '">\\n</span>');
+	txt = txt.replace(/">\u001e<\/span>/ig, '">\\u001e</span>');
+	txt = txt.replace(/">\u001f<\/span>/ig, '">\\u001f</span>');
 
 	return txt;
 }
