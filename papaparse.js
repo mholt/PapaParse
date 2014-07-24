@@ -21,7 +21,8 @@
 		worker: false,
 		comments: false,
 		complete: undefined,
-		download: false
+		download: false,
+		keepEmptyRows: false
 	};
 
 	global.Papa = {};
@@ -251,7 +252,7 @@
 		{
 			if (typeof _input.data === 'string')
 				_input.data = JSON.parse(_input.data);
-			
+
 			if (_input.data instanceof Array)
 			{
 				if (!_input.fields)
@@ -1036,7 +1037,10 @@
 		{
 			if (_data[_rowIdx].length == 1 && EMPTY.test(_data[_rowIdx][0]))
 			{
-				_data.splice(_rowIdx, 1);
+				if (config.keepEmptyRows)
+					_data[_rowIdx].splice(0, 1);
+				else
+					_data.splice(_rowIdx, 1);
 				_rowIdx = _data.length - 1;
 			}
 		}
@@ -1240,6 +1244,9 @@
 
 		if (typeof config.download !== 'boolean')
 			config.download = DEFAULTS.download;
+
+		if (typeof config.keepEmptyRows !== 'boolean')
+			config.keepEmptyRows = DEFAULTS.keepEmptyRows;
 
 		return config;
 	}
