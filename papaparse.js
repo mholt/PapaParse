@@ -282,7 +282,8 @@
 				_delimiter = _config.delimiter;
 			}
 
-			if (typeof _config.quotes === 'boolean')
+			if (typeof _config.quotes === 'boolean'
+				|| _config.quotes instanceof Array)
 				_quotes = _config.quotes;
 
 			if (typeof _config.newline === 'string')
@@ -321,7 +322,7 @@
 				{
 					if (i > 0)
 						csv += _delimiter;
-					csv += safe(fields[i]);
+					csv += safe(fields[i], i);
 				}
 				if (data.length > 0)
 					csv += _newline;
@@ -337,7 +338,7 @@
 					if (col > 0)
 						csv += _delimiter;
 					var colIdx = hasHeader && dataKeyedByField ? fields[col] : col;
-					csv += safe(data[row][colIdx]);
+					csv += safe(data[row][colIdx], col);
 				}
 
 				if (row < data.length - 1)
@@ -348,14 +349,15 @@
 		}
 
 		// Encloses a value around quotes if needed (makes a value safe for CSV insertion)
-		function safe(str)
+		function safe(str, col)
 		{
 			if (typeof str === "undefined")
 				return "";
 
 			str = str.toString().replace(/"/g, '""');
 
-			var needsQuotes = _quotes
+			var needsQuotes = (typeof _quotes === 'boolean' && _quotes)
+							|| (_quotes instanceof Array && _quotes[col])
 							|| hasAny(str, global.Papa.BAD_DELIMITERS)
 							|| str.indexOf(_delimiter) > -1
 							|| str.charAt(0) == ' '

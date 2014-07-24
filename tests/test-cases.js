@@ -542,13 +542,13 @@ var UNPARSE_TESTS = [
 	{
 		description: "Force quotes around certain fields only",
 		input: [['a', 'b', 'c'], ['d', 'e', 'f']],
-		config: { quotes: [0, 2] },
+		config: { quotes: [true, false, true] },
 		expected: '"a",b,"c"\r\n"d",e,"f"'
 	},
 	{
 		description: "Force quotes around certain fields only (with header row)",
 		input: [{ "Col1": "a", "Col2": "b", "Col3": "c" }, { "Col1": "d", "Col2": "e", "Col3": "f" }],
-		config: { quotes: [0, 2] },
+		config: { quotes: [true, false, true] },
 		expected: '"Col1",Col2,"Col3"\r\n"a",b,"c"\r\n"d",e,"f"'
 	},
 	{
