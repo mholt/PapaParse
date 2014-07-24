@@ -5,40 +5,40 @@ var UNIT_SEP = String.fromCharCode(31);
 // Tests for Papa.parse() function (CSV to JSON)
 var PARSE_TESTS = [
 	{
-		input: 'A,b,c',
 		description: "One row",
+		input: 'A,b,c',
 		expected: {
 			data: [['A', 'b', 'c']],
 			errors: []
 		}
 	},
 	{
-		input: 'A,b,c\r\nd,E,f',
 		description: "Two rows",
+		input: 'A,b,c\r\nd,E,f',
 		expected: {
 			data: [['A', 'b', 'c'], ['d', 'E', 'f']],
 			errors: []
 		}
 	},
 	{
-		input: 'A,b,c\rd,E,f',
 		description: "Two rows, just \\r",
+		input: 'A,b,c\rd,E,f',
 		expected: {
 			data: [['A', 'b', 'c'], ['d', 'E', 'f']],
 			errors: []
 		}
 	},
 	{
-		input: 'A,b,c\nd,E,f',
 		description: "Two rows, just \\n",
+		input: 'A,b,c\nd,E,f',
 		expected: {
 			data: [['A', 'b', 'c'], ['d', 'E', 'f']],
 			errors: []
 		}
 	},
 	{
-		input: 'a,  b ,c',
 		description: "Whitespace at edges of unquoted field",
+		input: 'a,  b ,c',
 		notes: "Extra whitespace should graciously be preserved",
 		expected: {
 			data: [['a', '  b ', 'c']],
@@ -46,72 +46,72 @@ var PARSE_TESTS = [
 		}
 	},
 	{
-		input: 'A,"B",C',
 		description: "Quoted field",
+		input: 'A,"B",C',
 		expected: {
 			data: [['A', 'B', 'C']],
 			errors: []
 		}
 	},
 	{
-		input: 'A," B  ",C',
 		description: "Quoted field with extra whitespace on edges",
+		input: 'A," B  ",C',
 		expected: {
 			data: [['A', ' B  ', 'C']],
 			errors: []
 		}
 	},
 	{
-		input: 'A,"B,B",C',
 		description: "Quoted field with delimiter",
+		input: 'A,"B,B",C',
 		expected: {
 			data: [['A', 'B,B', 'C']],
 			errors: []
 		}
 	},
 	{
-		input: 'A,"B\r\nB",C',
 		description: "Quoted field with \\r\\n",
+		input: 'A,"B\r\nB",C',
 		expected: {
 			data: [['A', 'B\r\nB', 'C']],
 			errors: []
 		}
 	},
 	{
-		input: 'A,"B\rB",C',
 		description: "Quoted field with \\r",
+		input: 'A,"B\rB",C',
 		expected: {
 			data: [['A', 'B\rB', 'C']],
 			errors: []
 		}
 	},
 	{
-		input: 'A,"B\nB",C',
 		description: "Quoted field with \\n",
+		input: 'A,"B\nB",C',
 		expected: {
 			data: [['A', 'B\nB', 'C']],
 			errors: []
 		}
 	},
 	{
-		input: 'A,"B""B""B",C',
 		description: "Quoted field with escaped quotes",
+		input: 'A,"B""B""B",C',
 		expected: {
 			data: [['A', 'B"B"B', 'C']],
 			errors: []
 		}
 	},
 	{
-		input: 'A,"""B""",C',
 		description: "Quoted field with escaped quotes at boundaries",
+		input: 'A,"""B""",C',
 		expected: {
 			data: [['A', '"B"', 'C']],
 			errors: []
 		}
 	},
 	{
-		input: 'A,""",""",C',
 		description: "Quoted field with quotes around delimiter",
+		input: 'A,""",""",C',
 		notes: "For a boundary to exist immediately before the quotes, we must not already be in quotes",
 		expected: {
 			data: [['A', '","', 'C']],
@@ -119,8 +119,8 @@ var PARSE_TESTS = [
 		}
 	},
 	{
-		input: 'A,",""",C',
 		description: "Quoted field with quotes on one side of delimiter",
+		input: 'A,",""",C',
 		notes: "Similar to the test above but with quotes only after the delimiter",
 		expected: {
 			data: [['A', ',"', 'C']],
@@ -128,8 +128,8 @@ var PARSE_TESTS = [
 		}
 	},
 	{
-		input: 'A, "B" ,C',
 		description: "Quoted field with whitespace around quotes",
+		input: 'A, "B" ,C',
 		notes: "This is malformed input, but it should be parsed gracefully (with errors)",
 		expected: {
 			data: [['A', ' "B" ', 'C']],
@@ -140,45 +140,45 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Tab delimiter",
 		input: 'a\tb\tc\r\nd\te\tf',
 		config: { delimiter: "\t" },
-		description: "Tab delimiter",
 		expected: {
 			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
 			errors: []
 		}
 	},
 	{
+		description: "Pipe delimiter",
 		input: 'a|b|c\r\nd|e|f',
 		config: { delimiter: "|" },
-		description: "Pipe delimiter",
 		expected: {
 			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
 			errors: []
 		}
 	},
 	{
+		description: "ASCII 30 delimiter",
 		input: 'a'+RECORD_SEP+'b'+RECORD_SEP+'c\r\nd'+RECORD_SEP+'e'+RECORD_SEP+'f',
 		config: { delimiter: RECORD_SEP },
-		description: "ASCII 30 delimiter",
 		expected: {
 			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
 			errors: []
 		}
 	},
 	{
+		description: "ASCII 31 delimiter",
 		input: 'a'+UNIT_SEP+'b'+UNIT_SEP+'c\r\nd'+UNIT_SEP+'e'+UNIT_SEP+'f',
 		config: { delimiter: UNIT_SEP },
-		description: "ASCII 31 delimiter",
 		expected: {
 			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
 			errors: []
 		}
 	},
 	{
+		description: "Bad delimiter",
 		input: 'a,b,c',
 		config: { delimiter: "DELIM" },
-		description: "Bad delimiter",
 		notes: "Should silently default to comma",
 		expected: {
 			data: [['a', 'b', 'c']],
@@ -186,45 +186,45 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Commented line at beginning (comments: true)",
 		input: '# Comment!\r\na,b,c',
 		config: { comments: true },
-		description: "Commented line at beginning (comments: true)",
 		expected: {
 			data: [['a', 'b', 'c']],
 			errors: []
 		}
 	},
 	{
+		description: "Commented line in middle (comments: true)",
 		input: 'a,b,c\r\n# Comment\r\nd,e,f',
 		config: { comments: true },
-		description: "Commented line in middle (comments: true)",
 		expected: {
 			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
 			errors: []
 		}
 	},
 	{
+		description: "Commented line at end (comments: true)",
 		input: 'a,b,c\r\n# Comment',
 		config: { comments: true },
-		description: "Commented line at end (comments: true)",
 		expected: {
 			data: [['a', 'b', 'c']],
 			errors: []
 		}
 	},
 	{
+		description: "Comment with non-default character (comments: '!')",
 		input: 'a,b,c\r\n!Comment goes here\r\nd,e,f',
 		config: { comments: '!' },
-		description: "Comment with non-default character (comments: '!')",
 		expected: {
 			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
 			errors: []
 		}
 	},
 	{
+		description: "Comment, but bad char specified (comments: \"=N(\")",
 		input: 'a,b,c\r\n=N(Comment)\r\nd,e,f',
 		config: { comments: '=N(' },
-		description: "Comment, but bad char specified (comments: \"=N(\")",
 		notes: "Should silently disable comment parsing",
 		expected: {
 			data: [['a', 'b', 'c'], ['=N(Comment)'], ['d', 'e', 'f']],
@@ -232,27 +232,27 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Input with only a commented line (comments: true)",
 		input: '#commented line\r\n',
 		config: { comments: true, delimiter: ',' },
-		description: "Input with only a commented line (comments: true)",
 		expected: {
 			data: [],
 			errors: []
 		}
 	},
 	{
+		description: "Input with comment without comments enabled",
 		input: '#commented line',
 		config: { delimiter: ',' },
-		description: "Input with comment without comments enabled",
 		expected: {
 			data: [['#commented line']],
 			errors: []
 		}
 	},
 	{
+		description: "Input without comments with line starting with whitespace",
 		input: 'a\r\n b\r\nc',
 		config: { delimiter: ',' },
-		description: "Input without comments with line starting with whitespace",
 		notes: "\" \" == false, but \" \" !== false, so === comparison is required",
 		expected: {
 			data: [['a'], [' b'], ['c']],
@@ -260,9 +260,9 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Comment char same as delimiter",
 		input: 'a#b#c\r\n# Comment',
 		config: { delimiter: '#', comments: '#' },
-		description: "Comment char same as delimiter",
 		notes: "Comment parsing should automatically be silently disabled in this case",
 		expected: {
 			data: [['a', 'b', 'c'], ['', ' Comment']],
@@ -270,64 +270,64 @@ var PARSE_TESTS = [
 		}
 	},
 	{
-		input: '\r\na,b,c\r\nd,e,f',
 		description: "Blank line at beginning",
+		input: '\r\na,b,c\r\nd,e,f',
 		expected: {
 			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
 			errors: []
 		}
 	},
 	{
-		input: 'a,b,c\r\n\r\nd,e,f',
 		description: "Blank line in middle",
+		input: 'a,b,c\r\n\r\nd,e,f',
 		expected: {
 			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
 			errors: []
 		}
 	},
 	{
-		input: 'a,b,c\r\nd,e,f\r\n\r\n',
 		description: "Blank lines at end",
+		input: 'a,b,c\r\nd,e,f\r\n\r\n',
 		expected: {
 			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
 			errors: []
 		}
 	},
 	{
-		input: 'a,b,c\r\n \r\nd,e,f',
 		description: "Blank line in middle with whitespace",
+		input: 'a,b,c\r\n \r\nd,e,f',
 		expected: {
 			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
 			errors: []
 		}
 	},
 	{
-		input: 'a,b,c\r\n,e,f',
 		description: "First field of a line is empty",
+		input: 'a,b,c\r\n,e,f',
 		expected: {
 			data: [['a', 'b', 'c'], ['', 'e', 'f']],
 			errors: []
 		}
 	},
 	{
-		input: 'a,b,\r\nd,e,f',
 		description: "Last field of a line is empty",
+		input: 'a,b,\r\nd,e,f',
 		expected: {
 			data: [['a', 'b', ''], ['d', 'e', 'f']],
 			errors: []
 		}
 	},
 	{
-		input: 'a,,c\r\n,,',
 		description: "Other fields are empty",
+		input: 'a,,c\r\n,,',
 		expected: {
 			data: [['a', '', 'c'], ['', '', '']],
 			errors: []
 		}
 	},
 	{
-		input: '',
 		description: "Empty input string",
+		input: '',
 		expected: {
 			data: [],
 			errors: [{
@@ -338,16 +338,16 @@ var PARSE_TESTS = [
 		}
 	},
 	{
-		input: ',',
 		description: "Input is just the delimiter (2 empty fields)",
+		input: ',',
 		expected: {
 			data: [['', '']],
 			errors: []
 		}
 	},
 	{
-		input: 'Abc def',
 		description: "Input is just a string (a single field)",
+		input: 'Abc def',
 		expected: {
 			data: [['Abc def']],
 			errors: [
@@ -360,56 +360,99 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Preview 0 rows should default to parsing all",
 		input: 'a,b,c\r\nd,e,f\r\ng,h,i',
 		config: { preview: 0 },
-		description: "Preview 0 rows should default to parsing all",
 		expected: {
 			data: [['a', 'b', 'c'], ['d', 'e', 'f'], ['g', 'h', 'i']],
 			errors: []
 		}
 	},
 	{
+		description: "Preview 1 row",
 		input: 'a,b,c\r\nd,e,f\r\ng,h,i',
 		config: { preview: 1 },
-		description: "Preview 1 row",
 		expected: {
 			data: [['a', 'b', 'c']],
 			errors: []
 		}
 	},
 	{
+		description: "Preview 2 rows",
 		input: 'a,b,c\r\nd,e,f\r\ng,h,i',
 		config: { preview: 2 },
-		description: "Preview 2 rows",
 		expected: {
 			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
 			errors: []
 		}
 	},
 	{
+		description: "Preview all (3) rows",
 		input: 'a,b,c\r\nd,e,f\r\ng,h,i',
 		config: { preview: 3 },
-		description: "Preview all (3) rows",
 		expected: {
 			data: [['a', 'b', 'c'], ['d', 'e', 'f'], ['g', 'h', 'i']],
 			errors: []
 		}
 	},
 	{
+		description: "Preview more rows than input has",
 		input: 'a,b,c\r\nd,e,f\r\ng,h,i',
 		config: { preview: 4 },
-		description: "Preview more rows than input has",
 		expected: {
 			data: [['a', 'b', 'c'], ['d', 'e', 'f'], ['g', 'h', 'i']],
 			errors: []
 		}
 	},
 	{
+		description: "Preview should count rows, not lines",
 		input: 'a,b,c\r\nd,e,"f\r\nf",g,h,i',
 		config: { preview: 2 },
-		description: "Preview should count rows, not lines",
 		expected: {
 			data: [['a', 'b', 'c'], ['d', 'e', 'f\r\nf', 'g', 'h', 'i']],
+			errors: []
+		}
+	},
+	{
+		description: "Keep empty rows",
+		input: 'a,b,c\r\n\r\nd,e,f',
+		config: { keepEmptyRows: true },
+		expected: {
+			data: [['a', 'b', 'c'], [], ['d', 'e', 'f']],
+			errors: []
+		}
+	},
+	{
+		description: "Keep empty rows, with newline at end of input",
+		input: 'a,b,c\r\n\r\nd,e,f\r\n',
+		config: { keepEmptyRows: true },
+		expected: {
+			data: [['a', 'b', 'c'], [], ['d', 'e', 'f'], []],
+			errors: []
+		}
+	},
+	{
+		description: "Keep empty rows, with empty input",
+		input: '',
+		config: { keepEmptyRows: true },
+		expected: {
+			data: [[]],
+			errors: [
+				{
+					"type": "Delimiter",
+					"code": "UndetectableDelimiter",
+					"message": "Unable to auto-detect delimiting character; defaulted to comma"
+				}
+			]
+		}
+	},
+	{
+		description: "Keep empty rows, with first line only whitespace empty",
+		notes: "Even with keepEmptyRows enabled, rows with just a single field,<br>being whitespace, should be stripped of that field",
+		input: ' \r\na,b,c',
+		config: { keepEmptyRows: true },
+		expected: {
+			data: [[], ['a', 'b', 'c']],
 			errors: []
 		}
 	}
