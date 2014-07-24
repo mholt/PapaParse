@@ -129,7 +129,7 @@ function runParseTests()
 
 			for (var row = 0; row < expected.length; row++)
 			{
-				if (actual.length != expected.length)
+				if (actual[row].length != expected[row].length)
 				{
 					passed = false;
 					break;
@@ -137,12 +137,6 @@ function runParseTests()
 
 				for (var col = 0; col < expected[row].length; col++)
 				{
-					if (actual[row].length != expected[row].length)
-					{
-						passed = false;
-						break;
-					}
-
 					var expectedVal = expected[row][col];
 					var actualVal = actual[row][col];
 
@@ -237,7 +231,7 @@ function runUnparseTests()
 	function compare(actual, expected)
 	{
 		return {
-			passed: actual == expected
+			passed: actual === expected
 		};
 	}
 }
