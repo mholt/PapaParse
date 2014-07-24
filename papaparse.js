@@ -322,7 +322,7 @@
 				{
 					if (i > 0)
 						csv += _delimiter;
-					csv += safe(fields[i]);
+					csv += safe(fields[i], i);
 				}
 				if (data.length > 0)
 					csv += _newline;
