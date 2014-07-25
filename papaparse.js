@@ -36,6 +36,10 @@
 	global.Papa.BAD_DELIMITERS = ["\r", "\n", "\"", global.Papa.BYTE_ORDER_MARK];
 	global.Papa.WORKERS_SUPPORTED = !!global.Worker;
 
+	// Configurable chunk sizes for local and remote files, respectively
+	global.Papa.LocalChunkSize = 1024 * 1024 * 10;	// 10 MB
+	global.Papa.RemoteChunkSize = 1024 * 1024 * 5;	// 5 MB
+
 	// Exposed for testing and development only
 	global.Papa.Parser = Parser;
 	global.Papa.ParserHandle = ParserHandle;
@@ -155,10 +159,12 @@
 			var w = newWorker();
 
 			w.userStep = config.step;
+			w.userChunk = config.chunk;
 			w.userComplete = config.complete;
 			w.userError = config.error;
 
 			config.step = isFunction(config.step);
+			config.chunk = isFunction(config.chunk);
 			config.complete = isFunction(config.complete);
 			config.error = isFunction(config.error);
 			delete config.worker;	// prevent infinite loop
@@ -189,7 +195,7 @@
 			}
 			else if (_input instanceof File)
 			{
-				if (config.step)
+				if (config.step || config.chunk)
 				{
 					var streamer = new FileStreamer(config);
 					streamer.stream(_input);
@@ -383,7 +389,7 @@
 	{
 		config = config || {};
 		if (!config.chunkSize)
-			config.chunkSize = 1024 * 1024 * 5;	// 5 MB
+			config.chunkSize = Papa.RemoteChunkSize;
 
 		var start = 0, fileSize = 0;
 		var aggregate = "";
@@ -484,6 +490,11 @@
 						finished: finishedWithEntireFile
 					});
 				}
+				else if (isFunction(config.chunk))
+				{
+					config.chunk(results);
+					results = undefined;
+				}
 				
 				if (finishedWithEntireFile && isFunction(config.complete))
 					config.complete(results);
@@ -527,7 +538,7 @@
 	{
 		config = config || {};
 		if (!config.chunkSize)
-			config.chunkSize = 1024 * 1024 * 10;	// 10 MB
+			config.chunkSize = Papa.LocalChunkSize;
 		
 		var start = 0;
 		var aggregate = "";
@@ -598,6 +609,11 @@
 						workerId: Papa.WORKER_ID,
 						finished: finishedWithEntireFile
 					});
+				}
+				else if (isFunction(config.chunk))
+				{
+					config.chunk(results, file);
+					results = undefined;
 				}
 				
 				if (finishedWithEntireFile && isFunction(config.complete))
@@ -1038,9 +1054,9 @@
 			if (_data[_rowIdx].length == 1 && EMPTY.test(_data[_rowIdx][0]))
 			{
 				if (config.keepEmptyRows)
-					_data[_rowIdx].splice(0, 1);
+					_data[_rowIdx].splice(0, 1);	// leave row, but no fields
 				else
-					_data.splice(_rowIdx, 1);
+					_data.splice(_rowIdx, 1);		// cut out row entirely
 				_rowIdx = _data.length - 1;
 			}
 		}
@@ -1156,20 +1172,26 @@
 		var msg = e.data;
 		var worker = workers[msg.workerId];
 
-		if (msg.results && msg.results.data && isFunction(worker.userStep))
+		if (msg.error)
+			worker.userError(msg.error, msg.file);
+		else if (msg.results && msg.results.data)
 		{
-			for (var i = 0; i < msg.results.data.length; i++)
+			if (isFunction(worker.userStep))
 			{
-				worker.userStep({
-					data: [msg.results.data[i]],
-					errors: msg.results.errors,
-					meta: msg.results.meta
-				});
+				for (var i = 0; i < msg.results.data.length; i++)
+				{
+					worker.userStep({
+						data: [msg.results.data[i]],
+						errors: msg.results.errors,
+						meta: msg.results.meta
+					});
+				}
 			}
+			else if (isFunction(worker.userChunk))
+				worker.userChunk(msg.results, msg.file);
+
 			delete msg.results;	// free memory ASAP
 		}
-		else if (msg.error)
-			worker.userError(msg.error, msg.file);
 
 		if (msg.finished)
 		{
