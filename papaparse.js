@@ -492,7 +492,7 @@
 				}
 				else if (isFunction(config.chunk))
 				{
-					config.chunk(results);
+					config.chunk(results);	// TODO: Implement abort? (like step)
 					results = undefined;
 				}
 				

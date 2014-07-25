@@ -29,6 +29,10 @@ label {
 	display: block;
 }
 
+input[type=number] {
+	width: 55px;
+}
+
 
 .text-center {
 	text-align: center;

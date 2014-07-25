@@ -16,13 +16,17 @@
 			<div class="grid-25">
 				<label><input type="checkbox" id="download"> Download</label>
 				<label><input type="checkbox" id="stream"> Stream</label>
+				<label><input type="checkbox" id="chunk"> Chunk</label>
 				<label><input type="checkbox" id="worker"> Worker thread</label>
 				<label><input type="checkbox" id="header"> Header row</label>
 				<label><input type="checkbox" id="dynamicTyping"> Dynamic typing</label>
+				<label><input type="checkbox" id="keepEmptyRows"> Keep empty rows</label>
 				<label>Preview: <input type="number" min="0" max="1000" placeholder="default" id="preview"></label>
 				<label>Encoding: <input type="text" id="encoding" placeholder="default" size="10"></label>
 				<label>Comment char: <input type="text" size="5" maxlength="1" placeholder="default" id="comments"></label>
 				<label>Delimiter: <input type="text" size="5" maxlength="1" placeholder="auto" id="delimiter"> <a href="javascript:" id="insert-tab">tab</a></label>
+				<label>Papa.LocalChunkSize: <input type="number" min="0" placeholder="default" id="localChunkSize"></label>
+				<label>Papa.RemoteChunkSize: <input type="number" min="0" placeholder="default" id="remoteChunkSize"></label>
 			</div>
 
 			<div class="grid-75 text-center">
