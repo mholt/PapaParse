@@ -75,7 +75,6 @@
 							</ul>
 						</li>
 						<li><a href="#extras">Extras</a></li>
-						<!--<li><a href="#examples"><b>Examples</b></a>-->
 					</ol>
 				</div>
 				<div class="clear"></div>
@@ -275,7 +274,7 @@ var csv = Papa.unparse({
 	delimiter: ",",
 	newline: "\r\n"
 }</code>
-							Set <code>quotes</code> to <code>true</code> to force enclosing each datum around quotes. The <code>delimiter</code> can be any valid delimiting character. And the <code>newline</code> character(s) may also be customized.
+							Set <code>quotes</code> to <code>true</code> to force enclosing each datum around quotes, or an array of true/false values correlating to specific to columns to force-quote. The <code>delimiter</code> can be any valid delimiting character. The <code>newline</code> character(s) may also be customized.
 						</li>
 					</ul>
 				</div>
@@ -318,17 +317,15 @@ var csv = Papa.unparse({
 	worker: false,
 	comments: false,
 	complete: undefined,
-	download: false
+	download: false,
+	keepEmptyRows: false,
+	chunk: undefined
 }</code>
 					<ul>
 						<li><code>delimiter</code> The delimiting character. Leave blank to auto-detect. If specified, it must be a string of length 1, and cannot be found in <a href="#extras">Papa.BAD_DELIMITERS</a>.</li>
 						<li><code>header</code> If true, the first row of parsed data will be interpreted as field names. Fields will be returned in the <a href="#meta">meta</a>, and each row will be an object of data keyed by field name. If false, the parser simply returns an array of arrays, including the first row.</li>
 						<li><code>dynamicTyping</code> If true, numeric and boolean data will be converted to their type instead of remaining strings.</li>
 						<li><code>preview</code> If > 0, only that many rows will be parsed.</li>
-					</ul>
-				</div>
-				<div class="grid-50">
-					<ul>
 						<li>
 							<code>step</code> To <a href="faq.html#streaming">stream</a> the input, define a callback function to receive <a href="#results">results</a> row-by-row rather than together at the end:
 <code class="block">step: function(results, parser) {
@@ -337,6 +334,10 @@ var csv = Papa.unparse({
 }</code>
 							You can call <code>parser.abort()</code> to halt parsing that input (not available if using a worker).
 						</li>
+					</ul>
+				</div>
+				<div class="grid-50">
+					<ul>
 						<li><code>encoding</code> The encoding to use when opening files locally.</li>
 						<li><code>worker</code> Whether or not to use a <a href="faq.html#workers">worker thread</a>. Using a worker will keep your page reactive, but may be slightly slower.</li>
 						<li><code>comments</code> Specify a comment character (like <code>"#"</code>) if your CSV file has commented lines, and Papa will skip them. This feature is disabled by default.</li>
@@ -348,7 +349,9 @@ var csv = Papa.unparse({
 </code>
 							If streaming, results will <i>not</i> be available in this function.
 						</li>
-						<li><code>download</code> If <code>true</code>, this indicates that the string you passed in is actually a URL from which to download a file and parse it.
+						<li><code>download</code> If <code>true</code>, this indicates that the string you passed in is actually a URL from which to download a file and parse it.</li>
+						<li><code>keepEmptyRows</code> If <code>true</code>, rows that are empty will be included in the results as an empty array. This is useful if you want to maintain line (or at least <i>row</i>) parity with the original input.</li>
+						<li><code>chunk</code> A callback, much like step, which activates streaming and is executed after every chunk (piece) is loaded and parsed. Works only with local and remote files. Do not use both chunk and step callbacks together. This function can be used to receive results one chunk at a time rather than one row at a time. If your file has a million rows, this results in, say, 10,000 function invocations rather than 1,000,000. In some cases, this may be faster.</li>
 					</ul>
 				</div>
 				<div class="clear"></div>
@@ -527,6 +530,20 @@ var csv = Papa.unparse({
 							Whether or not the browser supports HTML5 Web Workers. If false, <code>worker: true</code> will have no effect.
 						</li>
 					</ul>
+
+					<p>
+						Some settings you may change:
+					</p>
+
+					<ul>
+						<li>
+							<code>Papa.LocalChunkSize</code> &nbsp;
+							The size in bytes of each file chunk. Used when streaming files obtained from the DOM that exist on the local computer. Default 10 MB.
+						</li>
+						<li>
+							<code>Papa.RemoteChunkSize</code> &nbsp;
+							Same as LocalChunkSize, but for downloading files from remote locations. Default 5 MB.
+						</li>
 				</div>
 				<div class="grid-50">
 					<p>
