@@ -3,17 +3,11 @@
 var Parser = require('./src/Parser'),
 	ParserHandle = require('./src/ParserHandle'),
 	util = require('./src/util'),
-	CsvToJson = require('./src/CsvToJson'),
-	FileStreamer = require('./src/FileStreamer'),
-	JsonToCsv = require('./src/JsonToCsv'),
-	NetworkStreamer = require('./src/NetworkStreamer');
+	JsonToCsv = require('./src/JsonToCsv');
 
 global.Papa = {};
 
 module.exports = global.Papa;
-
-global.Papa.parse = CsvToJson;
-global.Papa.unparse = JsonToCsv;
 
 global.Papa.RECORD_SEP = String.fromCharCode(30);
 global.Papa.UNIT_SEP = String.fromCharCode(31);
@@ -25,11 +19,19 @@ global.Papa.WORKERS_SUPPORTED = !!global.Worker;
 global.Papa.LocalChunkSize = 1024 * 1024 * 10;	// 10 MB
 global.Papa.RemoteChunkSize = 1024 * 1024 * 5;	// 5 MB
 
+//TODO Refactor this tangle of config code. This is required to pass in chunk sizing
+var FileStreamer = require('./src/FileStreamer').setup(Papa),
+	NetworkStreamer = require('./src/NetworkStreamer').setup(Papa)
+
 // Exposed for testing and development only
 global.Papa.Parser = Parser;
 global.Papa.ParserHandle = ParserHandle;
 global.Papa.NetworkStreamer = NetworkStreamer;
 global.Papa.FileStreamer = FileStreamer;
+
+global.Papa.unparse = JsonToCsv;
+// TODO this is messy. Refactor worker code into module
+global.Papa.parse = require('./src/CsvToJson').setup(newWorker); 
 
 var SCRIPT_PATH;
 var IS_WORKER = util.isWorker();
@@ -137,17 +139,17 @@ else if (Papa.WORKERS_SUPPORTED){
 	SCRIPT_PATH = getScriptPath();
 }
 
-function getScriptPath()
-{
+function getScriptPath() {
 	var id = "worker" + String(Math.random()).substr(2);
-	document.write('<script id="'+id+'"></script>');
+	document.write('<script id="' + id + '"></script>');
 	return document.getElementById(id).previousSibling.src;
 }
 
 function newWorker()
 {
-	if (!Papa.WORKERS_SUPPORTED)
+	if (!Papa.WORKERS_SUPPORTED || !SCRIPT_PATH) {
 		return false;
+	}
 	var w = new global.Worker(SCRIPT_PATH);
 	w.onmessage = mainThreadReceivedMessage;
 	w.id = workerIdCounter++;
@@ -176,16 +178,18 @@ function mainThreadReceivedMessage(e)
 				});
 			}
 		}
-		else if (util.isFunction(worker.userChunk))
+		else if (util.isFunction(worker.userChunk)) {
 			worker.userChunk(msg.results, msg.file);
+		}
 
 		delete msg.results;	// free memory ASAP
 	}
 
 	if (msg.finished)
 	{
-		if (util.isFunction(workers[msg.workerId].userComplete))
+		if (util.isFunction(workers[msg.workerId].userComplete)) {
 			workers[msg.workerId].userComplete(msg.results);
+		}
 		workers[msg.workerId].terminate();
 		delete workers[msg.workerId];
 	}
@@ -196,8 +200,9 @@ function workerThreadReceivedMessage(e)
 {
 	var msg = e.data;
 
-	if (typeof Papa.WORKER_ID === 'undefined' && msg)
+	if (typeof Papa.WORKER_ID === 'undefined' && msg) {
 		Papa.WORKER_ID = msg.workerId;
+	}
 
 	if (typeof msg.input === 'string')
 	{

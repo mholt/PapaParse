@@ -1,6 +1,6 @@
 module.exports = {
-	isFunction: isFunction,
 	copy: copy,
+	isFunction: isFunction,
 	isWorker: isWorker
 }
 
@@ -8,16 +8,17 @@ function isFunction(func) {
 	return typeof func === 'function';
 }
 
-function copy(obj)
-{
-	if (typeof obj !== 'object')
+function copy(obj) {
+	if (typeof obj !== 'object') {
 		return obj;
+	}
 	var cpy = obj instanceof Array ? [] : {};
-	for (var key in obj)
+	for (var key in obj) {
 		cpy[key] = copy(obj[key]);
+	}
 	return cpy;
 }
 
-function isWorker(){
+function isWorker() {
 	return !global.document;
 }

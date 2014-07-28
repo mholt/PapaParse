@@ -8,17 +8,11 @@ Build: 2014-07-28 */
 var Parser = require('./src/Parser'),
 	ParserHandle = require('./src/ParserHandle'),
 	util = require('./src/util'),
-	CsvToJson = require('./src/CsvToJson'),
-	FileStreamer = require('./src/FileStreamer'),
-	JsonToCsv = require('./src/JsonToCsv'),
-	NetworkStreamer = require('./src/NetworkStreamer');
+	JsonToCsv = require('./src/JsonToCsv');
 
 global.Papa = {};
 
 module.exports = global.Papa;
-
-global.Papa.parse = CsvToJson;
-global.Papa.unparse = JsonToCsv;
 
 global.Papa.RECORD_SEP = String.fromCharCode(30);
 global.Papa.UNIT_SEP = String.fromCharCode(31);
@@ -30,11 +24,19 @@ global.Papa.WORKERS_SUPPORTED = !!global.Worker;
 global.Papa.LocalChunkSize = 1024 * 1024 * 10;	// 10 MB
 global.Papa.RemoteChunkSize = 1024 * 1024 * 5;	// 5 MB
 
+//TODO Refactor this tangle of config code. This is required to pass in chunk sizing
+var FileStreamer = require('./src/FileStreamer').setup(Papa),
+	NetworkStreamer = require('./src/NetworkStreamer').setup(Papa)
+
 // Exposed for testing and development only
 global.Papa.Parser = Parser;
 global.Papa.ParserHandle = ParserHandle;
 global.Papa.NetworkStreamer = NetworkStreamer;
 global.Papa.FileStreamer = FileStreamer;
+
+global.Papa.unparse = JsonToCsv;
+// TODO this is messy. Refactor worker code into module
+global.Papa.parse = require('./src/CsvToJson').setup(newWorker); 
 
 var SCRIPT_PATH;
 var IS_WORKER = util.isWorker();
@@ -142,17 +144,17 @@ else if (Papa.WORKERS_SUPPORTED){
 	SCRIPT_PATH = getScriptPath();
 }
 
-function getScriptPath()
-{
+function getScriptPath() {
 	var id = "worker" + String(Math.random()).substr(2);
-	document.write('<script id="'+id+'"></script>');
+	document.write('<script id="' + id + '"></script>');
 	return document.getElementById(id).previousSibling.src;
 }
 
 function newWorker()
 {
-	if (!Papa.WORKERS_SUPPORTED)
+	if (!Papa.WORKERS_SUPPORTED || !SCRIPT_PATH) {
 		return false;
+	}
 	var w = new global.Worker(SCRIPT_PATH);
 	w.onmessage = mainThreadReceivedMessage;
 	w.id = workerIdCounter++;
@@ -181,16 +183,18 @@ function mainThreadReceivedMessage(e)
 				});
 			}
 		}
-		else if (util.isFunction(worker.userChunk))
+		else if (util.isFunction(worker.userChunk)) {
 			worker.userChunk(msg.results, msg.file);
+		}
 
 		delete msg.results;	// free memory ASAP
 	}
 
 	if (msg.finished)
 	{
-		if (util.isFunction(workers[msg.workerId].userComplete))
+		if (util.isFunction(workers[msg.workerId].userComplete)) {
 			workers[msg.workerId].userComplete(msg.results);
+		}
 		workers[msg.workerId].terminate();
 		delete workers[msg.workerId];
 	}
@@ -201,8 +205,9 @@ function workerThreadReceivedMessage(e)
 {
 	var msg = e.data;
 
-	if (typeof Papa.WORKER_ID === 'undefined' && msg)
+	if (typeof Papa.WORKER_ID === 'undefined' && msg) {
 		Papa.WORKER_ID = msg.workerId;
+	}
 
 	if (typeof msg.input === 'string')
 	{
@@ -226,204 +231,212 @@ function workerThreadReceivedMessage(e)
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./src/CsvToJson":2,"./src/FileStreamer":3,"./src/JsonToCsv":4,"./src/NetworkStreamer":5,"./src/Parser":6,"./src/ParserHandle":7,"./src/util":9}],2:[function(require,module,exports){
-module.exports = CsvToJson;
+module.exports = {
+	setup: function(newWorker){
 
-var util = require('./util'),
-	configUtil = require('./config'),
-	ParserHandle = require('./ParserHandle');
+		var util = require('./util'),
+			configUtil = require('./config'),
+			FileStreamer = require('./FileStreamer'),
+			NetworkStreamer = require('./NetworkStreamer'),
+			ParserHandle = require('./ParserHandle');
 
-function CsvToJson(_input, _config)
-{
-	var config = util.isWorker() ? _config : configUtil.copyAndValidateConfig(_config);
-	var useWorker = config.worker && Papa.WORKERS_SUPPORTED && SCRIPT_PATH;
-
-	if (useWorker)
-	{
-		var w = newWorker();
-
-		w.userStep = config.step;
-		w.userChunk = config.chunk;
-		w.userComplete = config.complete;
-		w.userError = config.error;
-
-		config.step = util.isFunction(config.step);
-		config.chunk = util.isFunction(config.chunk);
-		config.complete = util.isFunction(config.complete);
-		config.error = util.isFunction(config.error);
-		delete config.worker;	// prevent infinite loop
-
-		w.postMessage({
-			input: _input,
-			config: config,
-			workerId: w.id
-		});
-	}
-	else
-	{
-		if (typeof _input === 'string')
+		function CsvToJson(_input, _config)
 		{
-			if (config.download)
-			{
-				var streamer = new NetworkStreamer(config);
-				streamer.stream(_input);
+			var config = util.isWorker() ? _config : configUtil.copyAndValidateConfig(_config);
+			var w = config.worker && util.isFunction(newWorker) ? newWorker() : false;
+
+			if (w) {
+				w.userStep = config.step;
+				w.userChunk = config.chunk;
+				w.userComplete = config.complete;
+				w.userError = config.error;
+
+				config.step = util.isFunction(config.step);
+				config.chunk = util.isFunction(config.chunk);
+				config.complete = util.isFunction(config.complete);
+				config.error = util.isFunction(config.error);
+				delete config.worker;	// prevent infinite loop
+
+				w.postMessage({
+					input: _input,
+					config: config,
+					workerId: w.id
+				});
 			}
 			else
 			{
-				var ph = new ParserHandle(config);
-				var results = ph.parse(_input);
-				if (util.isFunction(config.complete))
-					config.complete(results);
-				return results;
-			}
-		}
-		else if (_input instanceof File)
-		{
-			if (config.step || config.chunk)
-			{
-				var streamer = new FileStreamer(config);
-				streamer.stream(_input);
-			}
-			else
-			{
-				var ph = new ParserHandle(config);
-
-				if (util.isWorker())
+				if (typeof _input === 'string')
 				{
-					var reader = new FileReaderSync();
-					var input = reader.readAsText(_input, config.encoding);
-					return ph.parse(input);
-				}
-				else
-				{
-					reader = new FileReader();
-					reader.onload = function(event)
+					if (config.download)
+					{
+						var streamer = new NetworkStreamer(config);
+						streamer.stream(_input);
+					}
+					else
 					{
 						var ph = new ParserHandle(config);
-						var results = ph.parse(event.target.result);
+						var results = ph.parse(_input);
 						if (util.isFunction(config.complete))
 							config.complete(results);
-					};
-					reader.readAsText(_input, config.encoding);
+						return results;
+					}
+				}
+				else if (_input instanceof File)
+				{
+					if (config.step || config.chunk)
+					{
+						var streamer = new FileStreamer(config);
+						streamer.stream(_input);
+					}
+					else
+					{
+						var ph = new ParserHandle(config);
+
+						if (util.isWorker())
+						{
+							var reader = new FileReaderSync();
+							var input = reader.readAsText(_input, config.encoding);
+							return ph.parse(input);
+						}
+						else
+						{
+							reader = new FileReader();
+							reader.onload = function(event)
+							{
+								var ph = new ParserHandle(config);
+								var results = ph.parse(event.target.result);
+								if (util.isFunction(config.complete))
+									config.complete(results);
+							};
+							reader.readAsText(_input, config.encoding);
+						}
+					}
 				}
 			}
 		}
+
+		return CsvToJson;
 	}
-}
+};
 
 
-},{"./ParserHandle":7,"./config":8,"./util":9}],3:[function(require,module,exports){
+},{"./FileStreamer":3,"./NetworkStreamer":5,"./ParserHandle":7,"./config":8,"./util":9}],3:[function(require,module,exports){
 (function (global){
-module.exports = FileStreamer;
+module.exports = {
+	setup: function(Papa) {
 
-var util = require('./util');
+		var util = require('./util');
 
-
-function FileStreamer(config)
-{
-	config = config || {};
-	if (!config.chunkSize)
-		config.chunkSize = Papa.LocalChunkSize;
-	
-	var start = 0;
-	var aggregate = "";
-	var partialLine = "";
-	var reader, nextChunk, slice;
-	var handle = new ParserHandle(util.copy(config));
-
-	this.stream = function(file)
-	{
-		var slice = file.slice || file.webkitSlice || file.mozSlice;
-		
-		reader = new FileReader();	// Better than FileReaderSync (even in worker). See: http://stackoverflow.com/q/24708649/1048862
-		reader.onload = chunkLoaded;
-		reader.onerror = chunkError;
-
-		nextChunk();	// Starts streaming
-
-		function nextChunk()
+		function FileStreamer(config)
 		{
-			if (start < file.size)
-				readChunk();
-		}
-
-		function readChunk()
-		{
-			var end = Math.min(start + config.chunkSize, file.size);
-			var txt = reader.readAsText(slice.call(file, start, end), config.encoding);
-			start += config.chunkSize;
-			return txt;
-		}
-
-		function chunkLoaded(event)
-		{
-			// Rejoin the line we likely just split in two by chunking the file
-			aggregate += partialLine + event.target.result;
-			partialLine = "";
-
-			var finishedWithEntireFile = start >= file.size;
-
-			if (!finishedWithEntireFile)
-			{
-				var lastLineEnd = aggregate.lastIndexOf("\n");
-
-				if (lastLineEnd < 0)
-					lastLineEnd = aggregate.lastIndexOf("\r");
-
-				if (lastLineEnd > -1)
-				{
-					partialLine = aggregate.substring(lastLineEnd + 1);	// skip the line ending character
-					aggregate = aggregate.substring(0, lastLineEnd);
-				}
-				else
-				{
-					// For chunk sizes smaller than a line (a line could not fit in a single chunk)
-					// we simply build our aggregate by reading in the next chunk, until we find a newline
-					nextChunk();
-					return;
-				}
-			}
-
-			var results = handle.parse(aggregate);
-			aggregate = "";
-
-			if (util.isWorker())
-			{
-				global.postMessage({
-					results: results,
-					workerId: Papa.WORKER_ID,
-					finished: finishedWithEntireFile
-				});
-			}
-			else if (util.isFunction(config.chunk))
-			{
-				config.chunk(results, file);
-				results = undefined;
+			config = config || {};
+			if (!config.chunkSize) {
+				config.chunkSize = Papa.LocalChunkSize;
 			}
 			
-			if (finishedWithEntireFile && util.isFunction(config.complete))
-				config.complete(undefined, file);
-			else if (results && results.meta.aborted && util.isFunction(config.complete))	// TODO: Abort needs reworking like pause/resume need it (if streaming, no results object is returned, so it has no meta to say aborted: true...)
-				config.complete(results, file);
-			else if (!finishedWithEntireFile)
-				nextChunk();
-		}
+			var start = 0;
+			var aggregate = "";
+			var partialLine = "";
+			var reader, nextChunk, slice;
+			var handle = new ParserHandle(util.copy(config));
 
-		function chunkError()
-		{
-			if (util.isFunction(config.error))
-				config.error(reader.error, file);
-			else if (util.isWorker() && config.error)
+			this.stream = function(file)
 			{
-				global.postMessage({
-					workerId: Papa.WORKER_ID,
-					error: reader.error,
-					file: file,
-					finished: false
-				});
-			}
+				var slice = file.slice || file.webkitSlice || file.mozSlice;
+				
+				reader = new FileReader();	// Better than FileReaderSync (even in worker). See: http://stackoverflow.com/q/24708649/1048862
+				reader.onload = chunkLoaded;
+				reader.onerror = chunkError;
+
+				nextChunk();	// Starts streaming
+
+				function nextChunk()
+				{
+					if (start < file.size)
+						readChunk();
+				}
+
+				function readChunk()
+				{
+					var end = Math.min(start + config.chunkSize, file.size);
+					var txt = reader.readAsText(slice.call(file, start, end), config.encoding);
+					start += config.chunkSize;
+					return txt;
+				}
+
+				function chunkLoaded(event)
+				{
+					// Rejoin the line we likely just split in two by chunking the file
+					aggregate += partialLine + event.target.result;
+					partialLine = "";
+
+					var finishedWithEntireFile = start >= file.size;
+
+					if (!finishedWithEntireFile)
+					{
+						var lastLineEnd = aggregate.lastIndexOf("\n");
+
+						if (lastLineEnd < 0)
+							lastLineEnd = aggregate.lastIndexOf("\r");
+
+						if (lastLineEnd > -1)
+						{
+							partialLine = aggregate.substring(lastLineEnd + 1);	// skip the line ending character
+							aggregate = aggregate.substring(0, lastLineEnd);
+						}
+						else
+						{
+							// For chunk sizes smaller than a line (a line could not fit in a single chunk)
+							// we simply build our aggregate by reading in the next chunk, until we find a newline
+							nextChunk();
+							return;
+						}
+					}
+
+					var results = handle.parse(aggregate);
+					aggregate = "";
+
+					if (util.isWorker())
+					{
+						global.postMessage({
+							results: results,
+							workerId: Papa.WORKER_ID,
+							finished: finishedWithEntireFile
+						});
+					}
+					else if (util.isFunction(config.chunk))
+					{
+						config.chunk(results, file);
+						results = undefined;
+					}
+					
+					if (finishedWithEntireFile && util.isFunction(config.complete))
+						config.complete(undefined, file);
+					else if (results && results.meta.aborted && util.isFunction(config.complete))	// TODO: Abort needs reworking like pause/resume need it (if streaming, no results object is returned, so it has no meta to say aborted: true...)
+						config.complete(results, file);
+					else if (!finishedWithEntireFile)
+						nextChunk();
+				}
+
+				function chunkError()
+				{
+					if (util.isFunction(config.error))
+						config.error(reader.error, file);
+					else if (util.isWorker() && config.error)
+					{
+						global.postMessage({
+							workerId: Papa.WORKER_ID,
+							error: reader.error,
+							file: file,
+							finished: false
+						});
+					}
+				}
+			};
 		}
-	};
-}
+		return FileStreamer;
+	}
+};
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./util":9}],4:[function(require,module,exports){
@@ -583,156 +596,161 @@ function JsonToCsv(_input, _config)
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],5:[function(require,module,exports){
 (function (global){
-module.exports = NetworkStreamer;
+module.exports = {
+	setup: function(Papa) {
+		
+		var util = require('./util'),
+			ParserHandle = require('./ParserHandle');
 
-var util = require('./util');
-
-// NOTE/TODO: Many of the functions of NetworkStreamer and FileStreamer are the same. Consolidate?
-function NetworkStreamer(config)
-{
-	var IS_WORKER = util.isWorker();
-
-	config = config || {};
-	if (!config.chunkSize)
-		config.chunkSize = Papa.RemoteChunkSize;
-
-	var start = 0, fileSize = 0;
-	var aggregate = "";
-	var partialLine = "";
-	var xhr, nextChunk;
-	var handle = new ParserHandle(util.copy(config));
-
-	this.stream = function(url)
-	{
-		if (IS_WORKER)
+		// NOTE/TODO: Many of the functions of NetworkStreamer and FileStreamer are the same. Consolidate?
+		function NetworkStreamer(config)
 		{
-			nextChunk = function()
+			var IS_WORKER = util.isWorker();
+
+			config = config || {};
+			if (!config.chunkSize)
+				config.chunkSize = Papa.RemoteChunkSize;
+
+			var start = 0, fileSize = 0;
+			var aggregate = "";
+			var partialLine = "";
+			var xhr, nextChunk;
+			var handle = new ParserHandle(util.copy(config));
+
+			this.stream = function(url)
 			{
-				readChunk();
-				chunkLoaded();
-			};
-		}
-		else
-		{
-			nextChunk = function()
-			{
-				readChunk();
-			};
-		}
-
-		nextChunk();	// Starts streaming
-
-
-		function readChunk()
-		{
-			xhr = new XMLHttpRequest();
-			if (!IS_WORKER)
-			{
-				xhr.onload = chunkLoaded;
-				xhr.onerror = chunkError;
-			}
-			xhr.open("GET", url, !IS_WORKER);
-			if (config.step)
-			{
-				var end = start + config.chunkSize - 1;	// minus one because byte range is inclusive
-				if (fileSize && end > fileSize) // Hack around a Chrome bug: http://stackoverflow.com/q/24745095/1048862
-					end = fileSize;
-				xhr.setRequestHeader("Range", "bytes="+start+"-"+end);
-			}
-			xhr.send();
-			if (IS_WORKER && xhr.status == 0)
-				chunkError();
-			else
-				start += config.chunkSize;
-		}
-
-		function chunkLoaded()
-		{
-			if (xhr.readyState != 4)
-				return;
-
-			if (xhr.status < 200 || xhr.status >= 400)
-			{
-				chunkError();
-				return;
-			}
-
-			// Rejoin the line we likely just split in two by chunking the file
-			aggregate += partialLine + xhr.responseText;
-			partialLine = "";
-
-			var finishedWithEntireFile = !config.step || start > getFileSize(xhr);
-
-			if (!finishedWithEntireFile)
-			{
-				var lastLineEnd = aggregate.lastIndexOf("\n");
-
-				if (lastLineEnd < 0)
-					lastLineEnd = aggregate.lastIndexOf("\r");
-
-				if (lastLineEnd > -1)
+				if (IS_WORKER)
 				{
-					partialLine = aggregate.substring(lastLineEnd + 1);	// skip the line ending character
-					aggregate = aggregate.substring(0, lastLineEnd);
+					nextChunk = function()
+					{
+						readChunk();
+						chunkLoaded();
+					};
 				}
 				else
 				{
-					// For chunk sizes smaller than a line (a line could not fit in a single chunk)
-					// we simply build our aggregate by reading in the next chunk, until we find a newline
-					nextChunk();
-					return;
+					nextChunk = function()
+					{
+						readChunk();
+					};
 				}
-			}
 
-			var results = handle.parse(aggregate);
-			aggregate = "";
+				nextChunk();	// Starts streaming
 
-			if (IS_WORKER)
-			{
-				global.postMessage({
-					results: results,
-					workerId: Papa.WORKER_ID,
-					finished: finishedWithEntireFile
-				});
-			}
-			else if (util.isFunction(config.chunk))
-			{
-				config.chunk(results);	// TODO: Implement abort? (like step)
-				results = undefined;
-			}
-			
-			if (finishedWithEntireFile && util.isFunction(config.complete))
-				config.complete(results);
-			else if (results && results.meta.aborted && util.isFunction(config.complete))
-				config.complete(results);
-			else if (!finishedWithEntireFile)
-				nextChunk();
+
+				function readChunk()
+				{
+					xhr = new XMLHttpRequest();
+					if (!IS_WORKER)
+					{
+						xhr.onload = chunkLoaded;
+						xhr.onerror = chunkError;
+					}
+					xhr.open("GET", url, !IS_WORKER);
+					if (config.step)
+					{
+						var end = start + config.chunkSize - 1;	// minus one because byte range is inclusive
+						if (fileSize && end > fileSize) // Hack around a Chrome bug: http://stackoverflow.com/q/24745095/1048862
+							end = fileSize;
+						xhr.setRequestHeader("Range", "bytes="+start+"-"+end);
+					}
+					xhr.send();
+					if (IS_WORKER && xhr.status == 0)
+						chunkError();
+					else
+						start += config.chunkSize;
+				}
+
+				function chunkLoaded()
+				{
+					if (xhr.readyState != 4)
+						return;
+
+					if (xhr.status < 200 || xhr.status >= 400)
+					{
+						chunkError();
+						return;
+					}
+
+					// Rejoin the line we likely just split in two by chunking the file
+					aggregate += partialLine + xhr.responseText;
+					partialLine = "";
+
+					var finishedWithEntireFile = !config.step || start > getFileSize(xhr);
+
+					if (!finishedWithEntireFile)
+					{
+						var lastLineEnd = aggregate.lastIndexOf("\n");
+
+						if (lastLineEnd < 0)
+							lastLineEnd = aggregate.lastIndexOf("\r");
+
+						if (lastLineEnd > -1)
+						{
+							partialLine = aggregate.substring(lastLineEnd + 1);	// skip the line ending character
+							aggregate = aggregate.substring(0, lastLineEnd);
+						}
+						else
+						{
+							// For chunk sizes smaller than a line (a line could not fit in a single chunk)
+							// we simply build our aggregate by reading in the next chunk, until we find a newline
+							nextChunk();
+							return;
+						}
+					}
+
+					var results = handle.parse(aggregate);
+					aggregate = "";
+
+					if (IS_WORKER)
+					{
+						global.postMessage({
+							results: results,
+							workerId: Papa.WORKER_ID,
+							finished: finishedWithEntireFile
+						});
+					}
+					else if (util.isFunction(config.chunk))
+					{
+						config.chunk(results);	// TODO: Implement abort? (like step)
+						results = undefined;
+					}
+					
+					if (finishedWithEntireFile && util.isFunction(config.complete))
+						config.complete(results);
+					else if (results && results.meta.aborted && util.isFunction(config.complete))
+						config.complete(results);
+					else if (!finishedWithEntireFile)
+						nextChunk();
+				}
+
+				function chunkError()
+				{
+					if (util.isFunction(config.error))
+						config.error(xhr.statusText);
+					else if (IS_WORKER && config.error)
+					{
+						global.postMessage({
+							workerId: Papa.WORKER_ID,
+							error: xhr.statusText,
+							finished: false
+						});
+					}
+				}
+
+				function getFileSize(xhr)
+				{
+					var contentRange = xhr.getResponseHeader("Content-Range");
+					return parseInt(contentRange.substr(contentRange.lastIndexOf("/") + 1));
+				}
+			};
 		}
 
-		function chunkError()
-		{
-			if (util.isFunction(config.error))
-				config.error(xhr.statusText);
-			else if (IS_WORKER && config.error)
-			{
-				global.postMessage({
-					workerId: Papa.WORKER_ID,
-					error: xhr.statusText,
-					finished: false
-				});
-			}
-		}
-
-		function getFileSize(xhr)
-		{
-			var contentRange = xhr.getResponseHeader("Content-Range");
-			return parseInt(contentRange.substr(contentRange.lastIndexOf("/") + 1));
-		}
-	};
-}
-
+		return NetworkStreamer;
+	}
+};
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./util":9}],6:[function(require,module,exports){
+},{"./ParserHandle":7,"./util":9}],6:[function(require,module,exports){
 module.exports = Parser;
 
 var util = require('./util');
@@ -1305,8 +1323,8 @@ function copyAndValidateConfig(origConfig)
 },{"./util":9}],9:[function(require,module,exports){
 (function (global){
 module.exports = {
-	isFunction: isFunction,
 	copy: copy,
+	isFunction: isFunction,
 	isWorker: isWorker
 }
 
@@ -1314,17 +1332,18 @@ function isFunction(func) {
 	return typeof func === 'function';
 }
 
-function copy(obj)
-{
-	if (typeof obj !== 'object')
+function copy(obj) {
+	if (typeof obj !== 'object') {
 		return obj;
+	}
 	var cpy = obj instanceof Array ? [] : {};
-	for (var key in obj)
+	for (var key in obj) {
 		cpy[key] = copy(obj[key]);
+	}
 	return cpy;
 }
 
-function isWorker(){
+function isWorker() {
 	return !global.document;
 }
 
