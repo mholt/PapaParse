@@ -22,6 +22,7 @@
 		comments: false,
 		complete: undefined,
 		download: false,
+		chunk: undefined,
 		keepEmptyRows: false
 	};
 
