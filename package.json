@@ -1,0 +1,45 @@
+{
+  "name": "PapaParse",
+  "version": "3.0.2",
+  "description": "Papa is a powerful CSV (delimited text) parser",
+  "main": "main.js",
+  "devDependencies": {
+    "chai": "~1.9.1",
+    "grunt-browserify": "2.1.4",
+    "grunt-contrib-watch": "0.6.1",
+    "grunt-contrib-uglify": "0.5.1"
+  },
+  "directories": {
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mholt/PapaParse.git"
+  },
+  "keywords": [
+    "csv",
+    "parse",
+    "parsing",
+    "parser",
+    "delimited",
+    "text",
+    "data",
+    "auto-detect",
+    "comma",
+    "tab",
+    "pipe",
+    "file",
+    "filereader",
+    "stream",
+    "workers",
+    "ajax",
+    "threading",
+    "multi-threaded"
+  ],
+  "author": "Matthew Holt",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mholt/PapaParse/issues"
+  },
+  "homepage": "http://papaparse.com"
+}

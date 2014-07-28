@@ -1,6 +1,7 @@
 {
   "name": "Papa-Parse",
   "main": "papaparse.js",
+  "version": "3.0.2",
   "homepage": "http://papaparse.com",
   "authors": [
     "Matthew Holt"
