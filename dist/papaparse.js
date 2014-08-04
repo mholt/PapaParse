@@ -1,6 +1,6 @@
 /* PapaParse v3.0.2 
 http://papaparse.com 
-Build: 2014-07-28 */
+Build: 2014-08-04 */
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (global){
 'use strict';
@@ -36,7 +36,7 @@ global.Papa.FileStreamer = FileStreamer;
 
 global.Papa.unparse = JsonToCsv;
 // TODO this is messy. Refactor worker code into module
-global.Papa.parse = require('./src/CsvToJson').setup(newWorker); 
+global.Papa.parse = require('./src/CsvToJson').setup(newWorker, Papa); 
 
 var SCRIPT_PATH;
 var IS_WORKER = util.isWorker();
@@ -232,12 +232,12 @@ function workerThreadReceivedMessage(e)
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./src/CsvToJson":2,"./src/FileStreamer":3,"./src/JsonToCsv":4,"./src/NetworkStreamer":5,"./src/Parser":6,"./src/ParserHandle":7,"./src/util":9}],2:[function(require,module,exports){
 module.exports = {
-	setup: function(newWorker){
+	setup: function(newWorker, Papa){
 
 		var util = require('./util'),
 			configUtil = require('./config'),
-			FileStreamer = require('./FileStreamer'),
-			NetworkStreamer = require('./NetworkStreamer'),
+			FileStreamer = require('./FileStreamer').setup(Papa),
+			NetworkStreamer = require('./NetworkStreamer').setup(Papa),
 			ParserHandle = require('./ParserHandle');
 
 		function CsvToJson(_input, _config)

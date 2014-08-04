@@ -1,10 +1,10 @@
 module.exports = {
-	setup: function(newWorker){
+	setup: function(newWorker, Papa){
 
 		var util = require('./util'),
 			configUtil = require('./config'),
-			FileStreamer = require('./FileStreamer'),
-			NetworkStreamer = require('./NetworkStreamer'),
+			FileStreamer = require('./FileStreamer').setup(Papa),
+			NetworkStreamer = require('./NetworkStreamer').setup(Papa),
 			ParserHandle = require('./ParserHandle');
 
 		function CsvToJson(_input, _config)

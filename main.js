@@ -31,7 +31,7 @@ global.Papa.FileStreamer = FileStreamer;
 
 global.Papa.unparse = JsonToCsv;
 // TODO this is messy. Refactor worker code into module
-global.Papa.parse = require('./src/CsvToJson').setup(newWorker); 
+global.Papa.parse = require('./src/CsvToJson').setup(newWorker, Papa); 
 
 var SCRIPT_PATH;
 var IS_WORKER = util.isWorker();
