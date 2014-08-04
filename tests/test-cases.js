@@ -1,6 +1,7 @@
 var RECORD_SEP = String.fromCharCode(30);
 var UNIT_SEP = String.fromCharCode(31);
 
+//TODO nothing tests FileStreamer
 
 // Tests for Papa.parse() function (CSV to JSON)
 var PARSE_TESTS = [

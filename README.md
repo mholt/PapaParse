@@ -48,7 +48,11 @@ Contributing
 
 To discuss a new feature or ask a question, open an issue. To fix a bug, submit a pull request to be credited with the [contributors](https://github.com/mholt/PapaParse/graphs/contributors)! Remember, a pull request, *with test*, is best. (Especially all changes to the Parser component should be validated with tests.) You may also discuss on Twitter with [#PapaParse](https://twitter.com/search?q=%23PapaParse&src=typd&f=realtime) or directly to me, [@mholt6](https://twitter.com/mholt6).
 
+Building
+------------
+This project uses grunt. To build the project yourself, first run `npm install` to install dev dependencies, then `grunt dist` to rebuild the distributable JS files.
 
+(Note: if you are new to grunt, checkout their [guide](http://gruntjs.com/getting-started))
 
 Origins
 -------
