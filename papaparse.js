@@ -1187,11 +1187,13 @@
 						meta: msg.results.meta
 					});
 				}
+				delete msg.results;	// free memory ASAP
 			}
 			else if (isFunction(worker.userChunk))
+			{
 				worker.userChunk(msg.results, msg.file);
-
-			delete msg.results;	// free memory ASAP
+				delete msg.results;
+			}
 		}
 
 		if (msg.finished)
