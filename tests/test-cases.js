@@ -458,6 +458,43 @@ var PARSE_TESTS = [
 	}
 ];
 
+var PARSE_ASYNC_TESTS = [
+	{
+		description: "Simple worker",
+		input: "A,B,C\nX,Y,Z",
+		config: {
+			worker: true,
+		},
+		expected: {
+			data: [['A','B','C'],['X','Y','Z']],
+			errors: []
+		}
+	},
+	{
+		description: "Simple download",
+		input: "/tests/sample.csv",
+		config: {
+			download: true
+		},
+		expected: {
+			data: [['A','B','C'],['X','Y','Z']],
+			errors: []
+		}
+	},
+	{
+		description: "Simple download + worker",
+		input: "/tests/sample.csv",
+		config: {
+			worker: true,
+			download: true
+		},
+		expected: {
+			data: [['A','B','C'],['X','Y','Z']],
+			errors: []
+		}
+	}
+];
+
 
 
 

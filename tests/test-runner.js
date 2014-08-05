@@ -35,25 +35,25 @@ $(function()
 		$('.expanded .rvl', $testGroup).click();
 	});
 
+	function asyncDone() {
+		// Finally, show the overall status.
+		if (failCount == 0)
+			$('#status').addClass('status-pass').html("All <b>" + passCount + "</b> test" + (passCount == 1 ? "" : "s") + " passed");
+		else
+			$('#status').addClass('status-fail').html("<b>" + failCount + "</b> test" + (failCount == 1 ? "" : "s") + " failed; <b>" + passCount + "</b> passed");
+	}
 
 	// Next, run tests and render results!
-	runParseTests();
+	runParseTests(asyncDone);
 	runUnparseTests();
 
-
-	// Finally, show the overall status.
-	if (failCount == 0)
-		$('#status').addClass('status-pass').html("All <b>"+passCount+"</b> test"+(passCount == 1 ? "" : "s")+" passed");
-	else
-		$('#status').addClass('status-fail').html("<b>"+failCount+"</b> test"+(failCount == 1 ? "" : "s")+" failed; <b>"+passCount+"</b> passed");
 });
-
 
 
 
 // Executes all tests in PARSE_TESTS from test-cases.js
 // and renders results in the table.
-function runParseTests()
+function runParseTests(asyncDone)
 {
 	for (var i = 0; i < PARSE_TESTS.length; i++)
 	{
@@ -65,23 +65,59 @@ function runParseTests()
 			failCount++;
 	}
 
+	var asyncRemaining = PARSE_ASYNC_TESTS.length;
 
-	function runTest(test)
-	{
+	PARSE_ASYNC_TESTS.forEach(function(test) {
+		var config = test.config;
+		config.complete = function(actual) {
+
+			var results = compare(actual.data, actual.errors, test.expected);
+
+			displayResults(test, actual, results);
+
+			if (results.data.passed && results.errors.passed) {
+				passCount++;
+			} else {
+				failCount++;
+			}
+			if (--asyncRemaining === 0) {
+				asyncDone();
+			}
+		}
+		config.error = function(err) {
+			failCount++;
+			displayResults(test, {data:[],errors:err}, test.expected);
+			if (--asyncRemaining === 0) {
+				asyncDone();
+			}
+		}
+
+		Papa.parse(test.input, test.config);
+	});
+
+
+	function runTest(test) {
 		var actual;
 
-		try
-		{
+		try {
 			actual = Papa.parse(test.input, test.config);
-		}
-		catch (e)
-		{
+		} catch (e) {
+			if (e instanceof Error) {
+				throw e;
+			}
 			actual.data = [];
 			actual.errors = [e];
 		}
 
-		var testId = testCount++;
 		var results = compare(actual.data, actual.errors, test.expected);
+
+		displayResults(test, actual, results);
+
+		return results.data.passed && results.errors.passed
+	}
+
+	function displayResults(test, actual, results) {
+		var testId = testCount++;
 
 		var testDescription = (test.description || "");
 		if (testDescription.length > 0)
@@ -103,9 +139,8 @@ function runParseTests()
 		$('#tests-for-parse .results').append(tr);
 
 		if (!results.data.passed || !results.errors.passed)
-			$('#test-'+testId+' td.rvl').click();
+			$('#test-' + testId + ' td.rvl').click();
 
-		return results.data.passed && results.errors.passed
 	}
 
 
@@ -113,7 +148,7 @@ function runParseTests()
 	{
 		var data = compareData(actualData, expected.data);
 		var errors = compareErrors(actualErrors, expected.errors);
-		
+
 		return {
 			data: data,
 			errors: errors
@@ -124,26 +159,25 @@ function runParseTests()
 		{
 			var passed = true;
 
-			if (actual.length != expected.length)
+			if (actual.length != expected.length) {
 				passed = false;
-
-			for (var row = 0; row < expected.length; row++)
-			{
-				if (actual[row].length != expected[row].length)
-				{
-					passed = false;
-					break;
-				}
+			} else {
+				for (var row = 0; row < expected.length; row++) {
+					if (actual[row].length != expected[row].length) {
+						passed = false;
+						break;
+					}
 
 				for (var col = 0; col < expected[row].length; col++)
 				{
-					var expectedVal = expected[row][col];
-					var actualVal = actual[row][col];
+						var expectedVal = expected[row][col];
+						var actualVal = actual[row][col];
 
 					if (actualVal !== expectedVal)
 					{
-						passed = false;
-						break;
+							passed = false;
+							break;
+						}
 					}
 				}
 			}
@@ -197,6 +231,9 @@ function runUnparseTests()
 		}
 		catch (e)
 		{
+			if (e instanceof Error) {
+				throw e;
+			}
 			actual = e;
 		}
 
@@ -222,7 +259,7 @@ function runUnparseTests()
 		$('#tests-for-unparse .results').append(tr);
 
 		if (!results.passed)
-			$('#test-'+testId+' td.rvl').click();
+			$('#test-' + testId + ' td.rvl').click();
 
 		return results.passed;
 	}
