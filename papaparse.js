@@ -869,6 +869,7 @@
 		var _errors;	// Parse errors
 		var _rowIdx;	// Current row index within results (0-based)
 		var _colIdx;	// Current col index within result row (0-based)
+		var _runningRowIdx;		// Cumulative row index, used by the preview feature
 		var _aborted = false;	// Abort flag
 		var _paused = false;	// Pause flag
 
@@ -928,7 +929,7 @@
 			while (_i < _input.length)
 			{
 				if (_aborted) break;
-				if (_preview > 0 && _rowIdx >= _preview) break;
+				if (_preview > 0 && _runningRowIdx >= _preview) break;
 				if (_paused) return finishParsing();
 				
 				if (_ch == '"')
@@ -977,6 +978,8 @@
 
 		function parseInQuotes()
 		{
+			if (twoCharLineBreak(_i) || oneCharLineBreak(_i))
+				_lineNum++;
 			saveChar();
 		}
 
@@ -984,12 +987,12 @@
 		{
 			if (_ch == _delimiter)
 				newField();
-			else if (twoCharLineBreak())
+			else if (twoCharLineBreak(_i))
 			{
 				newRow();
 				nextChar();
 			}
-			else if (oneCharLineBreak())
+			else if (oneCharLineBreak(_i))
 				newRow();
 			else if (isCommentStart())
 				skipLine();
@@ -1010,8 +1013,8 @@
 
 		function skipLine()
 		{
-			while (!twoCharLineBreak()
-				&& !oneCharLineBreak()
+			while (!twoCharLineBreak(_i)
+				&& !oneCharLineBreak(_i)
 				&& _i < _input.length)
 			{
 				nextChar();
@@ -1034,6 +1037,7 @@
 			endRow();
 
 			_lineNum++;
+			_runningRowIdx++;
 			_data.push([]);
 			_rowIdx = _data.length - 1;
 			newField();
@@ -1064,8 +1068,6 @@
 
 		function twoCharLineBreak(i)
 		{
-			if (typeof i !== 'number')
-				i = _i;
 			return i < _input.length - 1 && 
 				((_input[i] == "\r" && _input[i+1] == "\n")
 				|| (_input[i] == "\n" && _input[i+1] == "\r"))
@@ -1073,8 +1075,6 @@
 
 		function oneCharLineBreak(i)
 		{
-			if (typeof i !== 'number')
-				i = _i;
 			return _input[i] == "\r" || _input[i] == "\n";
 		}
 
@@ -1118,8 +1118,7 @@
 		{
 			_input = input;
 			_inQuotes = false;
-			_lineNum = 1;
-			_i = 0;
+			_i = 0, _runningRowIdx = 0, _lineNum = 1;
 			clearErrorsAndData();
 			_data = [ [""] ];	// starting parsing requires an empty field
 			_ch = _input[_i];
