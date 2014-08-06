@@ -9,8 +9,8 @@ Papa Parse (formerly the jQuery Parse Plugin) is a robust and powerful CSV (char
 - Parse CSV files directly (local or over the network)
 - Stream large files (even via HTTP)
 - Reverse parsing (converts JSON to CSV)
-- Auto-detects the delimiter
-- Worker threads to keep your web page responsive
+- Auto-detect the delimiter
+- Worker threads to keep your web page reactive
 - Header row support
 - Can convert numbers and booleans to their types
 - Graceful and robust error handling
@@ -20,11 +20,34 @@ All are optional (except for being easy to use).
 
 
 
-[Demo](http://papaparse.com/demo.html)
-----
+Homepage & Demo
+----------------
 
-Visit **[PapaParse.com/demo.html](http://papaparse.com/demo.html)** to try Papa!
+- [Homepage](http://papaparse.com)
+- [Demo](http://papaparse.com/demo.html)
 
+
+Papa Parse for Node
+--------------------
+
+[Rich Harris](https://github.com/Rich-Harris) forked this project to make **[Baby Parse](https://github.com/Rich-Harris/BabyParse)** which runs in Node.js environments.
+
+```bash
+$ npm install babyparse
+```
+
+[Baby Parse on npm registry](https://www.npmjs.org/package/babyparse)
+
+Use it just like Papa Parse. However:
+
+- Files are not supported; strings only
+- Some config options are unavailable:
+	- worker
+	- download
+	- encoding
+	- chunk
+
+Otherwise, Baby Parse has nearly all the same functionality as Papa Parse, including the `unparse()` function.
 
 
 Get Started
@@ -39,18 +62,18 @@ For usage instructions, see the [homepage](http://papaparse.com) and, for more d
 Tests
 -----
 
-Papa Parse is under test (especially its core Parser). Download this repository and open `tests/tests.html` in your browser to run them.
+Papa Parse is under test. Download this repository and open `tests/tests.html` in your browser to run them.
 
 
 
 Contributing
 ------------
 
-To discuss a new feature or ask a question, open an issue. To fix a bug, submit a pull request to be credited with the [contributors](https://github.com/mholt/PapaParse/graphs/contributors)! Remember, a pull request, *with test*, is best. (Especially all changes to the Parser component should be validated with tests.) You may also discuss on Twitter with [#PapaParse](https://twitter.com/search?q=%23PapaParse&src=typd&f=realtime) or directly to me, [@mholt6](https://twitter.com/mholt6).
+To discuss a new feature or ask a question, open an issue. To fix a bug, submit a pull request to be credited with the [contributors](https://github.com/mholt/PapaParse/graphs/contributors)! Remember, a pull request, *with test*, is best.You may also discuss on Twitter with [#PapaParse](https://twitter.com/search?q=%23PapaParse&src=typd&f=realtime) or directly to me, [@mholt6](https://twitter.com/mholt6).
 
 
 
 Origins
 -------
 
-Papa Parse is the result of a successful experiment by [SmartyStreets](http://smartystreets.com) which matured into a fully-featured, independent Javascript library.
+Papa Parse is the result of a successful experiment by [SmartyStreets](http://smartystreets.com) which matured into an independent, fully-featured Javascript library.
