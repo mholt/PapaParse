@@ -13,14 +13,11 @@ Usage
 -----
 
 ```js
-// see http://papaparse.com/docs.html for config options
-parser = new Parser( config );
-
 // pass in the contents of a csv file
-parsed = parser.parse( csv );
+parsed = Baby.parse( csv );
 
 // voila
-rows = parser.results.rows;
+rows = parsed.data;
 ```
 
 

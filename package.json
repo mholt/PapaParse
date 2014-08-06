@@ -1,6 +1,6 @@
 {
 	"name": "babyparse",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"title": "BabyParse",
 	"description": "Fast and reliable CSV parser based on PapaParse",
 	"keywords": [
