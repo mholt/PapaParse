@@ -1,6 +1,6 @@
 /*
 	Baby Parse
-	v0.2.0
+	v0.2.1
 	https://github.com/Rich-Harris/BabyParse
 
 	based on Papa Parse v3.0.1
