@@ -28,5 +28,6 @@
 			"type": "MIT",
 			"url": "http://opensource.org/licenses/MIT"
 		}
-	]
+	],
+	"main": "babyparse.js"
 }
