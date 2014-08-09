@@ -547,13 +547,22 @@
 		var reader, nextChunk, slice;
 		var handle = new ParserHandle(copy(config));
 
+		// FileReader is better than FileReaderSync (even in worker) - see http://stackoverflow.com/q/24708649/1048862
+		// But Firefox is a pill, too - see issue #76: https://github.com/mholt/PapaParse/issues/76
+		var usingAsyncReader = typeof FileReader === 'function';
+
 		this.stream = function(file)
 		{
 			var slice = file.slice || file.webkitSlice || file.mozSlice;
-			
-			reader = new FileReader();	// Better than FileReaderSync (even in worker). See: http://stackoverflow.com/q/24708649/1048862
-			reader.onload = chunkLoaded;
-			reader.onerror = chunkError;
+
+			if (usingAsyncReader)
+			{
+				reader = new FileReader();		// Preferred method of reading files, even in workers
+				reader.onload = chunkLoaded;
+				reader.onerror = chunkError;
+			}
+			else
+				reader = new FileReaderSync();	// Hack for running in a web worker in Firefox
 
 			nextChunk();	// Starts streaming
 
@@ -567,12 +576,15 @@
 			{
 				var end = Math.min(start + config.chunkSize, file.size);
 				var txt = reader.readAsText(slice.call(file, start, end), config.encoding);
-				start += config.chunkSize;
-				return txt;
+				if (!usingAsyncReader)
+					chunkLoaded({ target: { result: txt } });	// mimic the async signature
 			}
 
 			function chunkLoaded(event)
 			{
+				// Very important to increment start each time before handling results
+				start += config.chunkSize;
+
 				// Rejoin the line we likely just split in two by chunking the file
 				aggregate += partialLine + event.target.result;
 				partialLine = "";
