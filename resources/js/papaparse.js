@@ -547,13 +547,22 @@
 		var reader, nextChunk, slice;
 		var handle = new ParserHandle(copy(config));
 
+		// FileReader is better than FileReaderSync (even in worker) - see http://stackoverflow.com/q/24708649/1048862
+		// But Firefox is a pill, too - see issue #76: https://github.com/mholt/PapaParse/issues/76
+		var usingAsyncReader = typeof FileReader === 'function';
+
 		this.stream = function(file)
 		{
 			var slice = file.slice || file.webkitSlice || file.mozSlice;
-			
-			reader = new FileReader();	// Better than FileReaderSync (even in worker). See: http://stackoverflow.com/q/24708649/1048862
-			reader.onload = chunkLoaded;
-			reader.onerror = chunkError;
+
+			if (usingAsyncReader)
+			{
+				reader = new FileReader();		// Preferred method of reading files, even in workers
+				reader.onload = chunkLoaded;
+				reader.onerror = chunkError;
+			}
+			else
+				reader = new FileReaderSync();	// Hack for running in a web worker in Firefox
 
 			nextChunk();	// Starts streaming
 
@@ -567,12 +576,15 @@
 			{
 				var end = Math.min(start + config.chunkSize, file.size);
 				var txt = reader.readAsText(slice.call(file, start, end), config.encoding);
-				start += config.chunkSize;
-				return txt;
+				if (!usingAsyncReader)
+					chunkLoaded({ target: { result: txt } });	// mimic the async signature
 			}
 
 			function chunkLoaded(event)
 			{
+				// Very important to increment start each time before handling results
+				start += config.chunkSize;
+
 				// Rejoin the line we likely just split in two by chunking the file
 				aggregate += partialLine + event.target.result;
 				partialLine = "";
@@ -869,6 +881,7 @@
 		var _errors;	// Parse errors
 		var _rowIdx;	// Current row index within results (0-based)
 		var _colIdx;	// Current col index within result row (0-based)
+		var _runningRowIdx;		// Cumulative row index, used by the preview feature
 		var _aborted = false;	// Abort flag
 		var _paused = false;	// Pause flag
 
@@ -928,7 +941,7 @@
 			while (_i < _input.length)
 			{
 				if (_aborted) break;
-				if (_preview > 0 && _rowIdx >= _preview) break;
+				if (_preview > 0 && _runningRowIdx >= _preview) break;
 				if (_paused) return finishParsing();
 				
 				if (_ch == '"')
@@ -977,6 +990,8 @@
 
 		function parseInQuotes()
 		{
+			if (twoCharLineBreak(_i) || oneCharLineBreak(_i))
+				_lineNum++;
 			saveChar();
 		}
 
@@ -984,12 +999,12 @@
 		{
 			if (_ch == _delimiter)
 				newField();
-			else if (twoCharLineBreak())
+			else if (twoCharLineBreak(_i))
 			{
 				newRow();
 				nextChar();
 			}
-			else if (oneCharLineBreak())
+			else if (oneCharLineBreak(_i))
 				newRow();
 			else if (isCommentStart())
 				skipLine();
@@ -1010,8 +1025,8 @@
 
 		function skipLine()
 		{
-			while (!twoCharLineBreak()
-				&& !oneCharLineBreak()
+			while (!twoCharLineBreak(_i)
+				&& !oneCharLineBreak(_i)
 				&& _i < _input.length)
 			{
 				nextChar();
@@ -1034,6 +1049,7 @@
 			endRow();
 
 			_lineNum++;
+			_runningRowIdx++;
 			_data.push([]);
 			_rowIdx = _data.length - 1;
 			newField();
@@ -1064,8 +1080,6 @@
 
 		function twoCharLineBreak(i)
 		{
-			if (typeof i !== 'number')
-				i = _i;
 			return i < _input.length - 1 && 
 				((_input[i] == "\r" && _input[i+1] == "\n")
 				|| (_input[i] == "\n" && _input[i+1] == "\r"))
@@ -1073,8 +1087,6 @@
 
 		function oneCharLineBreak(i)
 		{
-			if (typeof i !== 'number')
-				i = _i;
 			return _input[i] == "\r" || _input[i] == "\n";
 		}
 
@@ -1118,8 +1130,7 @@
 		{
 			_input = input;
 			_inQuotes = false;
-			_lineNum = 1;
-			_i = 0;
+			_i = 0, _runningRowIdx = 0, _lineNum = 1;
 			clearErrorsAndData();
 			_data = [ [""] ];	// starting parsing requires an empty field
 			_ch = _input[_i];
