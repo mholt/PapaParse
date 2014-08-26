@@ -238,10 +238,10 @@ function completeFn(results)
 	setTimeout(enableButton, 100);
 }
 
-function errorFn(err)
+function errorFn(err, file)
 {
 	end = now();
-	console.log("ERROR:", err);
+	console.log("ERROR:", err, file);
 	enableButton();
 }
 
