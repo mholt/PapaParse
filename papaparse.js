@@ -221,6 +221,11 @@
 							if (isFunction(config.complete))
 								config.complete(results);
 						};
+						reader.onerror = function()
+						{
+							if (isFunction(config.error))
+								config.error(reader.error, _input);
+						};
 						reader.readAsText(_input, config.encoding);
 					}
 				}

@@ -66,6 +66,7 @@ function buildConfig()
 		worker: $('#worker').prop('checked'),
 		comments: $('#comments').val(),
 		complete: completeFn,
+		error: errorFn,
 		download: $('#download').prop('checked'),
 		keepEmptyRows: $('#keepEmptyRows').prop('checked'),
 		chunk: $('#chunk').prop('checked') ? chunkFn : undefined
@@ -84,6 +85,11 @@ function chunkFn(results, file)
 		return;
 	chunks++;
 	rows += results.data.length;
+}
+
+function errorFn(error, file)
+{
+	console.log("ERROR:", error, file);
 }
 
 function completeFn()
