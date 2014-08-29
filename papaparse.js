@@ -364,7 +364,7 @@
 		// Encloses a value around quotes if needed (makes a value safe for CSV insertion)
 		function safe(str, col)
 		{
-			if (typeof str === "undefined")
+			if (typeof str === "undefined" || str === null)
 				return "";
 
 			str = str.toString().replace(/"/g, '""');
@@ -501,7 +501,7 @@
 					config.chunk(results);	// TODO: Implement abort? (like step)
 					results = undefined;
 				}
-				
+
 				if (finishedWithEntireFile && isFunction(config.complete))
 					config.complete(results);
 				else if (results && results.meta.aborted && isFunction(config.complete))
@@ -545,7 +545,7 @@
 		config = config || {};
 		if (!config.chunkSize)
 			config.chunkSize = Papa.LocalChunkSize;
-		
+
 		var start = 0;
 		var aggregate = "";
 		var partialLine = "";
@@ -633,7 +633,7 @@
 					config.chunk(results, file);
 					results = undefined;
 				}
-				
+
 				if (finishedWithEntireFile && isFunction(config.complete))
 					config.complete(undefined, file);
 				else if (results && results.meta.aborted && isFunction(config.complete))	// TODO: Abort needs reworking like pause/resume need it (if streaming, no results object is returned, so it has no meta to say aborted: true...)
@@ -948,7 +948,7 @@
 				if (_aborted) break;
 				if (_preview > 0 && _runningRowIdx >= _preview) break;
 				if (_paused) return finishParsing();
-				
+
 				if (_ch == '"')
 					parseQuotes();
 				else if (_inQuotes)
@@ -1085,7 +1085,7 @@
 
 		function twoCharLineBreak(i)
 		{
-			return i < _input.length - 1 && 
+			return i < _input.length - 1 &&
 				((_input[i] == "\r" && _input[i+1] == "\n")
 				|| (_input[i] == "\n" && _input[i+1] == "\r"))
 		}
