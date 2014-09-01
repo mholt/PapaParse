@@ -333,7 +333,7 @@ var PARSE_TESTS = [
 			errors: [{
 				"type": "Delimiter",
 				"code": "UndetectableDelimiter",
-				"message": "Unable to auto-detect delimiting character; defaulted to comma"
+				"message": "Unable to auto-detect delimiting character; defaulted to ','"
 			}]
 		}
 	},
@@ -354,7 +354,7 @@ var PARSE_TESTS = [
 				{
 					"type": "Delimiter",
 					"code": "UndetectableDelimiter",
-					"message": "Unable to auto-detect delimiting character; defaulted to comma"
+					"message": "Unable to auto-detect delimiting character; defaulted to ','"
 				}
 			]
 		}
@@ -451,7 +451,7 @@ var PARSE_TESTS = [
 				{
 					"type": "Delimiter",
 					"code": "UndetectableDelimiter",
-					"message": "Unable to auto-detect delimiting character; defaulted to comma"
+					"message": "Unable to auto-detect delimiting character; defaulted to ','"
 				}
 			]
 		}
