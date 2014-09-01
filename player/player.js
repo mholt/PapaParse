@@ -3,7 +3,7 @@ var start, end;
 
 $(function()
 {
-	$('#submit').click(function()
+	$('#submit-parse').click(function()
 	{
 		stepped = 0;
 		chunks = 0;
@@ -44,6 +44,21 @@ $(function()
 			var results = Papa.parse(txt, config);
 			console.log("Synchronous parse results:", results);
 		}
+	});
+
+	$('#submit-unparse').click(function()
+	{
+		var input = $('#input').val();
+		var delim = $('#delimiter').val();
+
+		var results = Papa.unparse(input, {
+			delimiter: delim
+		});
+
+		console.log("Unparse complete!");
+		console.log("--------------------------------------");
+		console.log(results);
+		console.log("--------------------------------------");
 	});
 
 	$('#insert-tab').click(function()
@@ -98,6 +113,6 @@ function completeFn()
 	if (arguments[0] && arguments[0].data)
 		rows = arguments[0].data.length;
 	
-	console.log("Finished input. Time:", end-start, arguments);
+	console.log("Finished input (async). Time:", end-start, arguments);
 	console.log("Rows:", rows, "Stepped:", stepped, "Chunks:", chunks);
 }

@@ -47,7 +47,7 @@ Use it just like Papa Parse. However:
 	- encoding
 	- chunk
 
-Otherwise, Baby Parse has nearly all the same functionality as Papa Parse, including the `unparse()` function.
+Otherwise, Baby Parse has nearly all the same functionality as Papa Parse 3.0, including the `unparse()` function.
 
 
 Get Started
