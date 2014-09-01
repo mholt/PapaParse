@@ -83,11 +83,7 @@
 			function parseNextFile()
 			{
 				if (queue.length == 0)
-				{
-					if (isFunction(options.complete))
-						options.complete();
 					return;
-				}
 
 				var f = queue[0];
 
@@ -191,8 +187,6 @@
 				{
 					var ph = new ParserHandle(config);
 					var results = ph.parse(_input);
-					if (isFunction(config.complete))
-						config.complete(results);
 					return results;
 				}
 			}
@@ -220,8 +214,6 @@
 						{
 							var ph = new ParserHandle(config);
 							var results = ph.parse(event.target.result);
-							if (isFunction(config.complete))
-								config.complete(results);
 						};
 						reader.onerror = function()
 						{
@@ -392,7 +384,7 @@
 
 
 
-	// NOTE/TODO: Many of the functions of NetworkStreamer and FileStreamer are the same. Consolidate?
+	// TODO: Many of the functions of NetworkStreamer and FileStreamer are similar or the same. Consolidate?
 	function NetworkStreamer(config)
 	{
 		config = config || {};
@@ -500,15 +492,11 @@
 				}
 				else if (isFunction(config.chunk))
 				{
-					config.chunk(results);	// TODO: Implement abort? (like step)
+					config.chunk(results);
 					results = undefined;
 				}
 
-				if (finishedWithEntireFile && isFunction(config.complete))
-					config.complete(results);
-				else if (results && results.meta.aborted && isFunction(config.complete))
-					config.complete(results);
-				else if (!finishedWithEntireFile)
+				if (!finishedWithEntireFile && !results.meta.paused)
 					nextChunk();
 			}
 
@@ -636,11 +624,7 @@
 					results = undefined;
 				}
 
-				if (finishedWithEntireFile && isFunction(config.complete))
-					config.complete(undefined, file);
-				else if (results && results.meta.aborted && isFunction(config.complete))	// TODO: Abort needs reworking like pause/resume need it (if streaming, no results object is returned, so it has no meta to say aborted: true...)
-					config.complete(results, file);
-				else if (!finishedWithEntireFile)
+				if (!finishedWithEntireFile && !results.meta.paused)
 					nextChunk();
 			}
 
@@ -671,6 +655,10 @@
 		// One goal is to minimize the use of regular expressions...
 		var FLOAT = /^\s*-?(\d*\.?\d+|\d+\.?\d*)(e[-+]?\d+)?\s*$/i;
 
+		var self = this;
+		var _input;				// The input being parsed
+		var _parser;			// The core parser being used
+		var _paused = false;	// Whether we are paused or not
 		var _delimiterError;	// Temporary state between delimiter detection and processing results
 		var _fields = [];		// Fields are from the header row of the input, if there is one
 		var _results = {		// The last results returned from the parser
@@ -699,21 +687,51 @@
 			if (isFunction(_config.step))
 			{
 				var userStep = _config.step;
-				_config.step = function(results, parser)
+				_config.step = function(results)
 				{
 					_results = results;
 					if (needsHeaderRow())
 						processResults();
 					else
-						userStep(processResults(), parser);
+						userStep(processResults(), self);
 				};
 			}
 
-			_results = new Parser(_config).parse(input);
-			return processResults();
 			if (_config.preview && _config.header)
 				_config.preview++;	// to compensate for header row
+
+			_input = input;
+			_parser = new Parser(_config);
+			_results = _parser.parse(_input);
+			processResults();
+			if (isFunction(_config.complete) && !_paused)
+				_config.complete(_results);
+			return _paused ? { meta: { paused: true } } : _results;
 		};
+
+		this.pause = function()
+		{
+			_paused = true;
+			_parser.abort();
+			_input = _input.substr(_parser.getCharIndex());
+		};
+
+		this.resume = function()
+		{
+			_paused = false;
+			_parser = new Parser(_config);
+			_parser.parse(_input);
+			if (isFunction(_config.complete) && !_paused)
+				_config.complete(_results);
+		};
+
+		this.abort = function()
+		{
+			_parser.abort();
+			if (isFunction(_config.complete))
+				_config.complete(_results);
+			_input = "";
+		}
 
 		function processResults()
 		{
@@ -873,7 +891,6 @@
 
 	function Parser(config)
 	{
-		var self = this;
 		var EMPTY = /^\s*$/;
 
 		var _input;		// The input text being parsed
@@ -892,7 +909,6 @@
 		var _colIdx;	// Current col index within result row (0-based)
 		var _runningRowIdx;		// Cumulative row index, used by the preview feature
 		var _aborted = false;	// Abort flag
-		var _paused = false;	// Pause flag
 
 		// Unpack the config object
 		config = config || {};
@@ -924,25 +940,15 @@
 			reset(input);
 			return parserLoop();
 		};
-/*
-		// TODO: Pause and resume just doesn't work well.
-		// I suspect this may need to be implemented at a higher-level
-		// scope than just this core Parser.
-		this.pause = function()
-		{
-			_paused = true;
-		};
 
-		this.resume = function()
-		{
-			_paused = false;
-			if (_i < _input.length)
-				return parserLoop();
-		};
-*/
 		this.abort = function()
 		{
 			_aborted = true;
+		};
+
+		this.getCharIndex = function()
+		{
+			 return _i;
 		};
 
 		function parserLoop()
@@ -951,7 +957,6 @@
 			{
 				if (_aborted) break;
 				if (_preview > 0 && _runningRowIdx >= _preview) break;
-				if (_paused) return finishParsing();
 
 				if (_ch == '"')
 					parseQuotes();
@@ -1070,7 +1075,7 @@
 			if (isFunction(_step))
 			{
 				if (_data[_rowIdx])
-					_step(returnable(), self);
+					_step(returnable());
 				clearErrorsAndData();
 			}
 		}

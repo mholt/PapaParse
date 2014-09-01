@@ -1,5 +1,6 @@
 var stepped = 0, chunks = 0, rows = 0;
 var start, end;
+var handle;
 
 $(function()
 {
@@ -88,10 +89,17 @@ function buildConfig()
 	};
 }
 
-function stepFn(results, parser)
+function stepFn(results, parserHandle)
 {
 	stepped++;
 	rows += results.data.length;
+	
+	if ($('#step-pause').prop('checked'))
+	{
+		handle = parserHandle
+		console.log(results, results.data[0]);
+		parserHandle.pause();
+	}
 }
 
 function chunkFn(results, file)
