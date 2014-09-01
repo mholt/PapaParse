@@ -414,6 +414,16 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Preview with header row",
+		notes: "Preview is defined to be number of rows of input not including header row",
+		input: 'a,b,c\r\nd,e,f\r\ng,h,i\r\nj,k,l',
+		config: { header: true, preview: 2 },
+		expected: {
+			data: [{"a": "d", "b": "e", "c": "f"}, {"a": "g", "b": "h", "c": "i"}],
+			errors: []
+		}
+	},
+	{
 		description: "Keep empty rows",
 		input: 'a,b,c\r\n\r\nd,e,f',
 		config: { keepEmptyRows: true },

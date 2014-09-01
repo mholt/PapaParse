@@ -709,6 +709,8 @@
 
 			_results = new Parser(_config).parse(input);
 			return processResults();
+			if (_config.preview && _config.header)
+				_config.preview++;	// to compensate for header row
 		};
 
 		function processResults()
