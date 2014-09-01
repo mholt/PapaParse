@@ -39,7 +39,7 @@
 						<a href="https://github.com/mholt/PapaParse/issues">
 							<i class="fa fa-bug fa-lg"></i> Issues
 						</a>
-						<a href="https://www.gittip.com/mholt/" class="donate">
+						<a href="https://www.gratipay.com/mholt/" class="donate">
 							<i class="fa fa-heart fa-lg"></i> Donate
 						</a>
 					</div>
@@ -329,11 +329,11 @@ var csv = Papa.unparse({
 						<li><code>preview</code> If > 0, only that many rows will be parsed.</li>
 						<li>
 							<code>step</code> To <a href="faq.html#streaming">stream</a> the input, define a callback function to receive <a href="#results">results</a> row-by-row rather than together at the end:
-<code class="block">step: function(results, parser) {
+<code class="block">step: function(results, handle) {
 	console.log("Row data:", results.data);
 	console.log("Row errors:", results.errors);
 }</code>
-							You can call <code>parser.abort()</code> to halt parsing that input (not available if using a worker).
+							Except when using a worker, you can call <code>handle.abort()</code> to stop parsing, <code>handle.pause()</code> to pause it, or <code>handle.resume()</code> to resume.
 						</li>
 					</ul>
 				</div>
@@ -468,6 +468,7 @@ var csv = Papa.unparse({
 	delimiter: <span class="comment">// Delimiter used</span>
 	aborted:   <span class="comment">// Whether process was aborted</span>
 	fields:    <span class="comment">// Array of field names</span>
+	truncated: <span class="comment">// Whether preview consumed all input</span>
 }</code>
 				</div>
 				<div class="grid-50">
@@ -545,6 +546,10 @@ var csv = Papa.unparse({
 						<li>
 							<code>Papa.RemoteChunkSize</code> &nbsp;
 							Same as LocalChunkSize, but for downloading files from remote locations. Default 5 MB.
+						</li>
+						<li>
+							<code>Papa.DefaultDelimiter</code> &nbsp;
+							The delimiter used when one is not specified and it cannot be detected automatically. Default is comma <code>","</code>.
 						</li>
 				</div>
 				<div class="grid-50">
