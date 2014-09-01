@@ -1157,7 +1157,8 @@
 				meta: {
 					lines: _lineNum,
 					delimiter: _delimiter,
-					aborted: _aborted
+					aborted: _aborted,
+					truncated: _preview > 0 && _i < _input.length
 				}
 			};
 		}
