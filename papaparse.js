@@ -40,6 +40,7 @@
 	// Configurable chunk sizes for local and remote files, respectively
 	global.Papa.LocalChunkSize = 1024 * 1024 * 10;	// 10 MB
 	global.Papa.RemoteChunkSize = 1024 * 1024 * 5;	// 5 MB
+	global.Papa.DefaultDelimiter = ",";				// Used if not specified and detection fails
 
 	// Exposed for testing and development only
 	global.Papa.Parser = Parser;
@@ -689,7 +690,7 @@
 				else
 				{
 					_delimiterError = true;	// add error after parsing (otherwise it would be overwritten)
-					_config.delimiter = ",";
+					_config.delimiter = Papa.DefaultDelimiter;
 				}
 				_results.meta.delimiter = _config.delimiter;
 			}
@@ -717,7 +718,7 @@
 		{
 			if (_results && _delimiterError)
 			{
-				addError("Delimiter", "UndetectableDelimiter", "Unable to auto-detect delimiting character; defaulted to comma");
+				addError("Delimiter", "UndetectableDelimiter", "Unable to auto-detect delimiting character; defaulted to '"+Papa.DefaultDelimiter+"'");
 				_delimiterError = false;
 			}
 
