@@ -21,6 +21,7 @@
 		worker: false,
 		comments: false,
 		complete: undefined,
+		error: undefined,
 		download: false,
 		chunk: undefined,
 		keepEmptyRows: false
@@ -1280,6 +1281,9 @@
 
 		if (typeof config.complete !== 'function')
 			config.complete = DEFAULTS.complete;
+
+		if (typeof config.error !== 'function')
+			config.error = DEFAULTS.error;
 
 		if (typeof config.encoding !== 'string')
 			config.encoding = DEFAULTS.encoding;
