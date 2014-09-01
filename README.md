@@ -1,7 +1,7 @@
 Parse CSV with Javascript
 ========================================
 
-[![mholt on Gittip](http://img.shields.io/badge/tips-accepted-brightgreen.svg?style=flat)](https://www.gittip.com/mholt/)
+[![mholt on Gratipay](http://img.shields.io/badge/tips-accepted-brightgreen.svg?style=flat)](https://www.gratipay.com/mholt/)
 
 Papa Parse (formerly the jQuery Parse Plugin) is a robust and powerful CSV (character-separated values) parser with these features:
 
@@ -12,12 +12,12 @@ Papa Parse (formerly the jQuery Parse Plugin) is a robust and powerful CSV (char
 - Auto-detect the delimiter
 - Worker threads to keep your web page reactive
 - Header row support
+- Pause, resume, abort
 - Can convert numbers and booleans to their types
 - Graceful and robust error handling
 - Minor jQuery integration to get files from `<input type="file">` elements
 
-All are optional (except for being easy to use).
-
+Papa Parse has **no dependencies** - not even jQuery.
 
 
 Homepage & Demo

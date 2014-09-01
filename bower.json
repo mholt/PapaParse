@@ -5,7 +5,7 @@
   "authors": [
     "Matthew Holt"
   ],
-  "description": "Papa is a powerful CSV (delimited text) parser",
+  "description": "Papa Parse is a powerful CSV (delimited text) parser for the browser. (A port for Node.js is available as Baby Parse.)",
   "keywords": [
     "csv",
     "parse",
