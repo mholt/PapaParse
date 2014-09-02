@@ -1,6 +1,6 @@
 /*
 	Papa Parse
-	v3.1.1
+	v3.1.2
 	https://github.com/mholt/PapaParse
 */
 (function(global)
@@ -806,7 +806,7 @@
 				}
 			}
 
-			if (_config.header && _results.meta);
+			if (_config.header && _results.meta)
 				_results.meta.fields = _fields;
 
 			return _results;
@@ -1245,7 +1245,7 @@
 			global.postMessage({
 				workerId: Papa.WORKER_ID,
 				results: Papa.parse(msg.input, msg.config),
-				finished: true,
+				finished: true
 			});
 		}
 		else if (msg.input instanceof File)
