@@ -50,7 +50,7 @@
 
 		<main>
 			<div class="grid-container">
-				<h2>Detailed FAQ</h2>
+				<h2>FAQ</h2>
 
 				<div class="prefix-20 grid-60 suffix-20">
 
@@ -67,11 +67,16 @@
 						Privacy advocates also use Papa Parse to avoid having to transmit sensitive files over the Internet. Now all the processing can be done locally on the client's computer. This is especially significant considering some organizations' policies.
 					</p>
 
-
-					<h4>Demo? Testing?</h4>
+					<h4>Can I use Papa Parse server-side with Node.js?</h4>
 
 					<p>
-						There's the <a href="demo.html">online demo</a> or you can download and use the player file in the GitHub repository for testing. You'll also find actual tests there that keep Papa strong.
+						There's a fork of Papa called <a href="https://github.com/Rich-Harris/BabyParse" target="_blank">Baby Parse</a> which is <a href="https://www.npmjs.org/package/babyparse">published on npm</a>. Some features are unavailable (like worker threads and file opening/downloading), but the core parser is fully functional.
+					</p>
+
+					<h4>Does Papa Parse have any dependencies?</h4>
+
+					<p>
+						No. Papa Parse has no dependencies. If jQuery is present, however, it plugs in to make it easier to select files from the DOM.
 					</p>
 
 
@@ -80,6 +85,7 @@
 					<p>
 						All modern, competent browsers should support all of the features. However, as usual, use IE at your own risk. It looks like IE 10+ and Safari 6+ should support all the features. Firefox and Chrome should work with all features back to versions 3 and 4. Opera 11 and up should be fine. If you really need to use Papa in old IE or Opera, then keep the fancy features off and you may be in luck.
 					</p>
+
 
 
 
@@ -149,6 +155,12 @@
 						Streaming remote files also requires the Content-Range header in the server's response. Most production-ready servers support this header, but for example, Python's SimpleHTTPServer does not.
 					</p>
 
+					<h4>Can I pause and resume parsing?</h4>
+
+					<p>
+						Yes, as long as you are streaming and not using a worker. Your <a href="/docs.html#step">step callback</a> is passed a ParserHandle which has pause, resume, and abort functions.
+					</p>
+
 
 
 
@@ -172,7 +184,7 @@
 
 					<h4>When should I use a worker?</h4>
 					<p>
-						That's up to you. The most typical reason to use a web worker is if your web page becomes unresponsive during parsing. In other words, it freezes: you can't click things or the scrolling becomes choppy. Some browsers, like Firefox, will warn the user that a script has become unresponsive or is taking a long time (even if it's working properly). If this happens to you or some of your users, consider using a web worker, at least for the large inputs.
+						That's up to you. The most typical reason to use a web worker is if your web page becomes unresponsive during parsing. In other words, if it freezes and you can't click things or the scrolling becomes choppy. If that happens, some browsers (like Firefox) will warn the user that a script has become unresponsive or is taking a long time (even if it's working properly). If this happens to you or some of your users, consider using a web worker, at least for the large inputs.
 					</p>
 
 					<p>

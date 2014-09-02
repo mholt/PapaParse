@@ -327,7 +327,7 @@ var csv = Papa.unparse({
 						<li><code>header</code> If true, the first row of parsed data will be interpreted as field names. Fields will be returned in the <a href="#meta">meta</a>, and each row will be an object of data keyed by field name. If false, the parser simply returns an array of arrays, including the first row.</li>
 						<li><code>dynamicTyping</code> If true, numeric and boolean data will be converted to their type instead of remaining strings.</li>
 						<li><code>preview</code> If > 0, only that many rows will be parsed.</li>
-						<li>
+						<li id="step">
 							<code>step</code> To <a href="faq.html#streaming">stream</a> the input, define a callback function to receive <a href="#results">results</a> row-by-row rather than together at the end:
 <code class="block">step: function(results, handle) {
 	console.log("Row data:", results.data);
