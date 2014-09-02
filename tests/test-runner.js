@@ -182,6 +182,9 @@ function runParseTests(asyncDone)
 				}
 			}
 
+			if (passed)	// final check will catch any other differences
+				passed = JSON.stringify(actual) == JSON.stringify(expected);
+
 			// We pass back an object right now, even though it only contains
 			// one value, because we might add details to the test results later
 			// (same with compareErrors below)
