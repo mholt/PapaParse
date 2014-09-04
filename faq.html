@@ -87,6 +87,13 @@
 					</p>
 
 
+					<h4>Can Papa Parse be loaded asynchronously (after the page loads)?</h4>
+
+					<p>
+						Not without some minor modifications. When Papa Parse loads, it has to obtain the script's relative path in order to facilitate worker threads. If you don't need this feature, Papa can be loaded asynchronously by removing or commenting a couple lines. If you do need workers, you can just hardcode the script's path. See <a href="https://github.com/mholt/PapaParse/issues/69#issuecomment-49886575">issue 69</a> and <a href="https://github.com/mholt/PapaParse/issues/87">issue 87</a> for more information.
+					</p>
+
+
 
 
 
