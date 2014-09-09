@@ -40,10 +40,10 @@ $ npm install babyparse
 
 Use it just like Papa Parse. However:
 
-- Files are not supported; strings only
+- Files are not supported; strings only (you can use Node's file facilities to load file contents yourself)
 - Some config options are unavailable:
 	- worker
-	- download
+	- download (you can use Node's network facilities to download files yourself)
 	- encoding
 	- chunk
 
