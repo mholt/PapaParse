@@ -2,6 +2,10 @@
 	"name": "babyparse",
 	"version": "0.2.1",
 	"title": "BabyParse",
+	"repository": {
+    		"type": "git",
+    		"url": "git@github.com:Rich-Harris/BabyParse.git"
+  	},
 	"description": "Fast and reliable CSV parser based on PapaParse",
 	"keywords": [
 		"csv",
