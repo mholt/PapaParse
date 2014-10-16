@@ -571,7 +571,7 @@ var PARSE_ASYNC_TESTS = [
 	},
 	{
 		description: "Simple download",
-		input: "/tests/sample.csv",
+		input: "sample.csv",
 		config: {
 			download: true
 		},
@@ -582,7 +582,7 @@ var PARSE_ASYNC_TESTS = [
 	},
 	{
 		description: "Simple download + worker",
-		input: "/tests/sample.csv",
+		input: "tests/sample.csv",
 		config: {
 			worker: true,
 			download: true
