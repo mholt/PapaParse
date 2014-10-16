@@ -58,47 +58,38 @@
 
 
 					<h4>Why use Papa Parse?</h4>
-
 					<p>
 						There's a thousand CSV libraries for Javascript. Papa is different. It's written with correctness and performance in mind. Papa is the first (and so far only) multi-threaded CSV parser that runs on web pages. It can parse files gigabytes in size without crashing the browser. It correctly handles malformed or edge-case CSV text. It can parse files on the local filesystem or download them over the Internet. Papa is boss.
 					</p>
-
 					<p>
 						Privacy advocates also use Papa Parse to avoid having to transmit sensitive files over the Internet. Now all the processing can be done locally on the client's computer. This is especially significant considering some organizations' policies.
 					</p>
 
 					<h4>Can I use Papa Parse server-side with Node.js?</h4>
-
 					<p>
 						There's a fork of Papa called <a href="https://github.com/Rich-Harris/BabyParse" target="_blank">Baby Parse</a> which is <a href="https://www.npmjs.org/package/babyparse">published on npm</a>. Some features are unavailable (like worker threads and file opening/downloading), but the core parser is fully functional.
 					</p>
 
 					<h4>Does Papa Parse have any dependencies?</h4>
-
 					<p>
 						No. Papa Parse has no dependencies. If jQuery is present, however, it plugs in to make it easier to select files from the DOM.
 					</p>
 
 
 					<h4>Which browsers is it compatible with?</h4>
-
 					<p>
 						All modern, competent browsers should support all of the features. However, as usual, use IE at your own risk. It looks like IE 10+ and Safari 6+ should support all the features. Firefox and Chrome should work with all features back to versions 3 and 4. Opera 11 and up should be fine. If you really need to use Papa in old IE or Opera, then keep the fancy features off and you may be in luck.
 					</p>
 
 
 					<h4>Can Papa Parse be loaded asynchronously (after the page loads)?</h4>
-
 					<p>
 						Not without some minor modifications. When Papa Parse loads, it has to obtain the script's relative path in order to facilitate worker threads. If you don't need this feature, Papa can be loaded asynchronously by removing or commenting a couple lines. If you do need workers, you can just hardcode the script's path. See <a href="https://github.com/mholt/PapaParse/issues/69#issuecomment-49886575">issue 69</a> and <a href="https://github.com/mholt/PapaParse/issues/87">issue 87</a> for more information.
 					</p>
 
 
 
-
-
 					<h4>Is it open source? (Can I contribute something?)</h4>
-
 					<p>
 						Yes, please! I don't want to do this all by myself. Head over to the <a href="https://github.com/mholt/PapaParse">GitHub project page</a> and hack away. If you're making a significant change, open an issue first so we can talk about it.
 					</p>
@@ -159,11 +150,10 @@
 					</p>
 
 					<p>
-						Streaming remote files also requires the Content-Range header in the server's response. Most production-ready servers support this header, but for example, Python's SimpleHTTPServer does not.
+						Streaming remote files also requires the Content-Range header in the server's response. Most production-ready servers support this header, but Python's SimpleHTTPServer does not. If you need a quick and easy server, <a href="https://github.com/rif/spark">spark</a> will do the trick. <code>./spark . -port=4100</code>
 					</p>
 
 					<h4>Can I pause and resume parsing?</h4>
-
 					<p>
 						Yes, as long as you are streaming and not using a worker. Your <a href="/docs.html#step">step callback</a> is passed a ParserHandle which has pause, resume, and abort functions.
 					</p>
@@ -193,7 +183,6 @@
 					<p>
 						That's up to you. The most typical reason to use a web worker is if your web page becomes unresponsive during parsing. In other words, if it freezes and you can't click things or the scrolling becomes choppy. If that happens, some browsers (like Firefox) will warn the user that a script has become unresponsive or is taking a long time (even if it's working properly). If this happens to you or some of your users, consider using a web worker, at least for the large inputs.
 					</p>
-
 					<p>
 						However, read the next answer for more info. Using workers has performance implications (both good and bad).
 					</p>
@@ -202,11 +191,9 @@
 					<p>
 						Using a worker will be a little slower. In Javascript, threads don't share memory. That's really annoying because sharing memory is the primary reason for multi-threading. As such, all parse results in a worker thread need to be <i>copied</i> to the main thread. And if you're parsing a string in a worker thread, that string also needs to be copied into the worker in the first place. (Files will be opened or downloaded by the worker itself, so the input doesn't need to be copied from the main thread in those cases.)
 					</p>
-
 					<p>
 						The process of sending data between the page and the worker thread can stall the main page for just a moment. Each thread must also wait for the data to finish sending before un-blocking.
 					</p>
-
 					<p>
 						Basically: if you don't have much time, don't use a worker. If you can afford a little extra time, use a worker. It will keep your page from appearing unresponsive and give users an overall better experience.
 					</p>

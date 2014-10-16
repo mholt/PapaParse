@@ -1,6 +1,6 @@
 /*
 	Papa Parse
-	v3.1.2
+	v3.1.3
 	https://github.com/mholt/PapaParse
 */
 (function(global)
@@ -394,11 +394,23 @@
 		var start = 0, fileSize = 0;
 		var aggregate = "";
 		var partialLine = "";
-		var xhr, nextChunk;
+		var xhr, url, nextChunk, finishedWithEntireFile;
 		var handle = new ParserHandle(copy(config));
+		handle.streamer = this;
 
-		this.stream = function(url)
+		this.resume = function()
 		{
+			nextChunk();
+		};
+
+		this.finished = function()
+		{
+			return finishedWithEntireFile;
+		};
+
+		this.stream = function(u)
+		{
+			url = u;
 			if (IS_WORKER)
 			{
 				nextChunk = function()
@@ -416,110 +428,116 @@
 			}
 
 			nextChunk();	// Starts streaming
-
-
-			function readChunk()
-			{
-				xhr = new XMLHttpRequest();
-				if (!IS_WORKER)
-				{
-					xhr.onload = chunkLoaded;
-					xhr.onerror = chunkError;
-				}
-				xhr.open("GET", url, !IS_WORKER);
-				if (config.step)
-				{
-					var end = start + config.chunkSize - 1;	// minus one because byte range is inclusive
-					if (fileSize && end > fileSize) // Hack around a Chrome bug: http://stackoverflow.com/q/24745095/1048862
-						end = fileSize;
-					xhr.setRequestHeader("Range", "bytes="+start+"-"+end);
-				}
-				xhr.send();
-				if (IS_WORKER && xhr.status == 0)
-					chunkError();
-				else
-					start += config.chunkSize;
-			}
-
-			function chunkLoaded()
-			{
-				if (xhr.readyState != 4)
-					return;
-
-				if (xhr.status < 200 || xhr.status >= 400)
-				{
-					chunkError();
-					return;
-				}
-
-				// Rejoin the line we likely just split in two by chunking the file
-				aggregate += partialLine + xhr.responseText;
-				partialLine = "";
-
-				var finishedWithEntireFile = !config.step || start > getFileSize(xhr);
-
-				if (!finishedWithEntireFile)
-				{
-					var lastLineEnd = aggregate.lastIndexOf("\n");
-
-					if (lastLineEnd < 0)
-						lastLineEnd = aggregate.lastIndexOf("\r");
-
-					if (lastLineEnd > -1)
-					{
-						partialLine = aggregate.substring(lastLineEnd + 1);	// skip the line ending character
-						aggregate = aggregate.substring(0, lastLineEnd);
-					}
-					else
-					{
-						// For chunk sizes smaller than a line (a line could not fit in a single chunk)
-						// we simply build our aggregate by reading in the next chunk, until we find a newline
-						nextChunk();
-						return;
-					}
-				}
-
-				var results = handle.parse(aggregate);
-				aggregate = "";
-
-				if (IS_WORKER)
-				{
-					global.postMessage({
-						results: results,
-						workerId: Papa.WORKER_ID,
-						finished: finishedWithEntireFile
-					});
-				}
-				else if (isFunction(config.chunk))
-				{
-					config.chunk(results);
-					results = undefined;
-				}
-
-				if (!finishedWithEntireFile && !results.meta.paused)
-					nextChunk();
-			}
-
-			function chunkError()
-			{
-				if (isFunction(config.error))
-					config.error(xhr.statusText);
-				else if (IS_WORKER && config.error)
-				{
-					global.postMessage({
-						workerId: Papa.WORKER_ID,
-						error: xhr.statusText,
-						finished: false
-					});
-				}
-			}
-
-			function getFileSize(xhr)
-			{
-				var contentRange = xhr.getResponseHeader("Content-Range");
-				return parseInt(contentRange.substr(contentRange.lastIndexOf("/") + 1));
-			}
 		};
+
+		function readChunk()
+		{
+			if (finishedWithEntireFile)
+			{
+				chunkLoaded();
+				return;
+			}
+
+			xhr = new XMLHttpRequest();
+			if (!IS_WORKER)
+			{
+				xhr.onload = chunkLoaded;
+				xhr.onerror = chunkError;
+			}
+			xhr.open("GET", url, !IS_WORKER);
+			if (config.step)
+			{
+				var end = start + config.chunkSize - 1;	// minus one because byte range is inclusive
+				if (fileSize && end > fileSize) // Hack around a Chrome bug: http://stackoverflow.com/q/24745095/1048862
+					end = fileSize;
+				xhr.setRequestHeader("Range", "bytes="+start+"-"+end);
+			}
+			xhr.send();
+			if (IS_WORKER && xhr.status == 0)
+				chunkError();
+			else
+				start += config.chunkSize;
+		}
+
+		function chunkLoaded()
+		{
+			if (xhr.readyState != 4)
+				return;
+
+			if (xhr.status < 200 || xhr.status >= 400)
+			{
+				chunkError();
+				return;
+			}
+
+			// Rejoin the line we likely just split in two by chunking the file
+			aggregate += partialLine + xhr.responseText;
+			partialLine = "";
+
+			finishedWithEntireFile = !config.step || start > getFileSize(xhr);
+
+			if (!finishedWithEntireFile)
+			{
+				var lastLineEnd = aggregate.lastIndexOf("\n");
+
+				if (lastLineEnd < 0)
+					lastLineEnd = aggregate.lastIndexOf("\r");
+
+				if (lastLineEnd > -1)
+				{
+					partialLine = aggregate.substring(lastLineEnd + 1);	// skip the line ending character
+					aggregate = aggregate.substring(0, lastLineEnd);
+				}
+				else
+				{
+					// For chunk sizes smaller than a line (a line could not fit in a single chunk)
+					// we simply build our aggregate by reading in the next chunk, until we find a newline
+					nextChunk();
+					return;
+				}
+			}
+
+			var results = handle.parse(aggregate);
+			aggregate = "";
+
+			if (IS_WORKER)
+			{
+				global.postMessage({
+					results: results,
+					workerId: Papa.WORKER_ID,
+					finished: finishedWithEntireFile
+				});
+			}
+			else if (isFunction(config.chunk))
+			{
+				console.log("CHUNKED");
+				config.chunk(results);
+				results = undefined;
+			}
+
+			if (!finishedWithEntireFile && !results.meta.paused)
+				nextChunk();
+		}
+
+		function chunkError()
+		{
+			if (isFunction(config.error))
+				config.error(xhr.statusText);
+			else if (IS_WORKER && config.error)
+			{
+				global.postMessage({
+					workerId: Papa.WORKER_ID,
+					error: xhr.statusText,
+					finished: false
+				});
+			}
+		}
+
+		function getFileSize(xhr)
+		{
+			var contentRange = xhr.getResponseHeader("Content-Range");
+			return parseInt(contentRange.substr(contentRange.lastIndexOf("/") + 1));
+		}
 	}
 
 
@@ -537,18 +555,22 @@
 			config.chunkSize = Papa.LocalChunkSize;
 
 		var start = 0;
+		var file;
+		var slice;
 		var aggregate = "";
 		var partialLine = "";
-		var reader, nextChunk, slice;
+		var reader, nextChunk, slice, finishedWithEntireFile;
 		var handle = new ParserHandle(copy(config));
+		handle.streamer = this;
 
 		// FileReader is better than FileReaderSync (even in worker) - see http://stackoverflow.com/q/24708649/1048862
 		// But Firefox is a pill, too - see issue #76: https://github.com/mholt/PapaParse/issues/76
 		var usingAsyncReader = typeof FileReader === 'function';
 
-		this.stream = function(file)
+		this.stream = function(f)
 		{
-			var slice = file.slice || file.webkitSlice || file.mozSlice;
+			file = f;
+			slice = file.slice || file.webkitSlice || file.mozSlice;
 
 			if (usingAsyncReader)
 			{
@@ -560,89 +582,100 @@
 				reader = new FileReaderSync();	// Hack for running in a web worker in Firefox
 
 			nextChunk();	// Starts streaming
-
-			function nextChunk()
-			{
-				if (start < file.size)
-					readChunk();
-			}
-
-			function readChunk()
-			{
-				var end = Math.min(start + config.chunkSize, file.size);
-				var txt = reader.readAsText(slice.call(file, start, end), config.encoding);
-				if (!usingAsyncReader)
-					chunkLoaded({ target: { result: txt } });	// mimic the async signature
-			}
-
-			function chunkLoaded(event)
-			{
-				// Very important to increment start each time before handling results
-				start += config.chunkSize;
-
-				// Rejoin the line we likely just split in two by chunking the file
-				aggregate += partialLine + event.target.result;
-				partialLine = "";
-
-				var finishedWithEntireFile = start >= file.size;
-
-				if (!finishedWithEntireFile)
-				{
-					var lastLineEnd = aggregate.lastIndexOf("\n");
-
-					if (lastLineEnd < 0)
-						lastLineEnd = aggregate.lastIndexOf("\r");
-
-					if (lastLineEnd > -1)
-					{
-						partialLine = aggregate.substring(lastLineEnd + 1);	// skip the line ending character
-						aggregate = aggregate.substring(0, lastLineEnd);
-					}
-					else
-					{
-						// For chunk sizes smaller than a line (a line could not fit in a single chunk)
-						// we simply build our aggregate by reading in the next chunk, until we find a newline
-						nextChunk();
-						return;
-					}
-				}
-
-				var results = handle.parse(aggregate);
-				aggregate = "";
-
-				if (IS_WORKER)
-				{
-					global.postMessage({
-						results: results,
-						workerId: Papa.WORKER_ID,
-						finished: finishedWithEntireFile
-					});
-				}
-				else if (isFunction(config.chunk))
-				{
-					config.chunk(results, file);
-					results = undefined;
-				}
-
-				if (!finishedWithEntireFile && !results.meta.paused)
-					nextChunk();
-			}
-
-			function chunkError()
-			{
-				if (isFunction(config.error))
-					config.error(reader.error, file);
-				else if (IS_WORKER && config.error)
-				{
-					global.postMessage({
-						workerId: Papa.WORKER_ID,
-						error: reader.error,
-						file: file,
-						finished: false
-					});
-				}
-			}
 		};
+
+		this.finished = function()
+		{
+			return finishedWithEntireFile;
+		};
+
+		this.resume = function()
+		{
+			nextChunk();
+		};
+
+		function nextChunk()
+		{
+			if (!finishedWithEntireFile)
+				readChunk();
+		}
+
+		function readChunk()
+		{
+			var end = Math.min(start + config.chunkSize, file.size);
+			var txt = reader.readAsText(slice.call(file, start, end), config.encoding);
+			if (!usingAsyncReader)
+				chunkLoaded({ target: { result: txt } });	// mimic the async signature
+		}
+
+		function chunkLoaded(event)
+		{
+			// Very important to increment start each time before handling results
+			start += config.chunkSize;
+
+			// Rejoin the line we likely just split in two by chunking the file
+			aggregate += partialLine + event.target.result;
+			partialLine = "";
+
+			finishedWithEntireFile = start >= file.size;
+
+			if (!finishedWithEntireFile)
+			{
+				var lastLineEnd = aggregate.lastIndexOf("\n");
+
+				if (lastLineEnd < 0)
+					lastLineEnd = aggregate.lastIndexOf("\r");
+
+				if (lastLineEnd > -1)
+				{
+					partialLine = aggregate.substring(lastLineEnd + 1);	// skip the line ending character
+					aggregate = aggregate.substring(0, lastLineEnd);
+				}
+				else
+				{
+					// For chunk sizes smaller than a line (a line could not fit in a single chunk)
+					// we simply build our aggregate by reading in the next chunk, until we find a newline
+					nextChunk();
+					return;
+				}
+			}
+
+			var results = handle.parse(aggregate);
+			aggregate = "";
+
+			if (IS_WORKER)
+			{
+				global.postMessage({
+					results: results,
+					workerId: Papa.WORKER_ID,
+					finished: finishedWithEntireFile
+				});
+			}
+			else if (isFunction(config.chunk))
+			{
+				config.chunk(results, file);
+				results = undefined;
+			}
+
+			if (!results || !results.meta.paused)
+				nextChunk();
+		}
+
+		function chunkError()
+		{
+			if (isFunction(config.error))
+				config.error(reader.error, file);
+			else if (IS_WORKER && config.error)
+			{
+				global.postMessage({
+					workerId: Papa.WORKER_ID,
+					error: reader.error,
+					file: file,
+					finished: false
+				});
+			}
+		}
+
 	}
 
 
@@ -656,6 +689,7 @@
 		var FLOAT = /^\s*-?(\d*\.?\d+|\d+\.?\d*)(e[-+]?\d+)?\s*$/i;
 
 		var self = this;
+		var _stepCounter = 0;	// Number of times step was called (number of rows parsed)
 		var _input;				// The input being parsed
 		var _parser;			// The core parser being used
 		var _paused = false;	// Whether we are paused or not
@@ -666,10 +700,29 @@
 			errors: [],
 			meta: {}
 		};
-		_config = copy(_config);
+
+		if (isFunction(_config.step))
+		{
+			var userStep = _config.step;
+			_config.step = function(results)
+			{
+				_results = results;
+				if (needsHeaderRow())
+					processResults();
+				else	// only call user's step function after header row
+				{
+					_stepCounter += results.data.length;
+					if (_config.preview && _stepCounter > _config.preview)
+						_parser.abort();
+					else
+						userStep(processResults(), self);
+				}
+			};
+		}
 
 		this.parse = function(input)
 		{
+			//_stepCounter = 0;
 			_delimiterError = false;
 			if (!_config.delimiter)
 			{
@@ -684,29 +737,17 @@
 				_results.meta.delimiter = _config.delimiter;
 			}
 
-			if (isFunction(_config.step))
-			{
-				var userStep = _config.step;
-				_config.step = function(results)
-				{
-					_results = results;
-					if (needsHeaderRow())
-						processResults();
-					else
-						userStep(processResults(), self);
-				};
-			}
-
+			var parserConfig = copy(_config);
 			if (_config.preview && _config.header)
-				_config.preview++;	// to compensate for header row
+				parserConfig.preview++;	// to compensate for header row
 
 			_input = input;
-			_parser = new Parser(_config);
+			_parser = new Parser(parserConfig);
 			_results = _parser.parse(_input);
 			processResults();
-			if (isFunction(_config.complete) && !_paused)
-				_config.complete(_results);
-			return _paused ? { meta: { paused: true } } : _results;
+			if (isFunction(_config.complete) && !_paused && (!self.streamer || self.streamer.finished()))
+				_config.complete(_results);	// TODO: In some cases, when chunk is specified, this executes before the chunk function...
+			return _paused ? { meta: { paused: true } } : (_results || { meta: { paused: false } });
 		};
 
 		this.pause = function()
@@ -721,8 +762,13 @@
 			_paused = false;
 			_parser = new Parser(_config);
 			_parser.parse(_input);
-			if (isFunction(_config.complete) && !_paused)
-				_config.complete(_results);
+			if (!_paused)
+			{
+				if (self.streamer && !self.streamer.finished())
+					self.streamer.resume();		// more of the file yet to come
+				else if (isFunction(_config.complete))
+					_config.complete(_results);
+			}
 		};
 
 		this.abort = function()
@@ -731,7 +777,7 @@
 			if (isFunction(_config.complete))
 				_config.complete(_results);
 			_input = "";
-		}
+		};
 
 		function processResults()
 		{
@@ -743,7 +789,6 @@
 
 			if (needsHeaderRow())
 				fillHeaderFields();
-
 			return applyHeaderAndDynamicTyping();
 		}
 
@@ -770,6 +815,7 @@
 			for (var i = 0; i < _results.data.length; i++)
 			{
 				var row = {};
+
 				for (var j = 0; j < _results.data[i].length; j++)
 				{
 					if (_config.dynamicTyping)
@@ -808,7 +854,6 @@
 
 			if (_config.header && _results.meta)
 				_results.meta.fields = _fields;
-
 			return _results;
 		}
 
