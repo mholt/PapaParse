@@ -722,7 +722,6 @@
 
 		this.parse = function(input)
 		{
-			//_stepCounter = 0;
 			_delimiterError = false;
 			if (!_config.delimiter)
 			{

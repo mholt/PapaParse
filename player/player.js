@@ -96,7 +96,7 @@ function stepFn(results, parserHandle)
 	
 	if ($('#step-pause').prop('checked'))
 	{
-		handle = parserHandle
+		handle = parserHandle;
 		console.log(results, results.data[0]);
 		parserHandle.pause();
 	}
@@ -118,7 +118,7 @@ function errorFn(error, file)
 function completeFn()
 {
 	end = performance.now();
-	if (arguments[0] && arguments[0].data)
+	if (!$('#stream').prop('checked') && arguments[0] && arguments[0].data)
 		rows = arguments[0].data.length;
 	
 	console.log("Finished input (async). Time:", end-start, arguments);
