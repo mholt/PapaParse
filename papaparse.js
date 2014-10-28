@@ -1223,7 +1223,7 @@
 	function getScriptPath()
 	{
 		var id = "worker" + String(Math.random()).substr(2);
-		document.write('<script id="'+id+'"></script>');
+		document.write('<script id="'+id+'"></s'+'cript>');
 		return document.getElementById(id).previousSibling.src;
 	}
 
