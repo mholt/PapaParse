@@ -114,7 +114,7 @@
 				}
 
 				// Wrap up the user's complete callback, if any, so that ours also gets executed
-				var userCompleteFunc = f.instanceConfig.complete;
+				var userCompleteFunc = options.complete;
 				f.instanceConfig.complete = function(results)
 				{
 					if (isFunction(userCompleteFunc))
