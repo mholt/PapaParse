@@ -190,7 +190,7 @@
 					return results;
 				}
 			}
-			else if (_input instanceof File)
+			else if ((global.File && _input instanceof File) || _input instanceof Object)	// ...Safari. (see issue #106)
 			{
 				if (config.step || config.chunk)
 				{
@@ -1292,7 +1292,7 @@
 				finished: true
 			});
 		}
-		else if (msg.input instanceof File)
+		else if ((global.File && msg.input instanceof File) || msg.input instanceof Object)	// thank you, Safari (see issue #106)
 		{
 			var results = Papa.parse(msg.input, msg.config);
 			if (results)
