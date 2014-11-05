@@ -565,7 +565,7 @@
 
 		// FileReader is better than FileReaderSync (even in worker) - see http://stackoverflow.com/q/24708649/1048862
 		// But Firefox is a pill, too - see issue #76: https://github.com/mholt/PapaParse/issues/76
-		var usingAsyncReader = typeof FileReader === 'function';
+		var usingAsyncReader = typeof FileReader !== 'undefined';	// Safari doesn't consider it a function (sigh...) - see issue #105
 
 		this.stream = function(f)
 		{
