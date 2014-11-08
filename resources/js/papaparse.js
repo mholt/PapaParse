@@ -1,6 +1,6 @@
 /*
 	Papa Parse
-	v3.1.3
+	v3.1.4
 	https://github.com/mholt/PapaParse
 */
 (function(global)
@@ -190,7 +190,7 @@
 					return results;
 				}
 			}
-			else if (_input instanceof File)
+			else if ((global.File && _input instanceof File) || _input instanceof Object)	// ...Safari. (see issue #106)
 			{
 				if (config.step || config.chunk)
 				{
@@ -565,7 +565,7 @@
 
 		// FileReader is better than FileReaderSync (even in worker) - see http://stackoverflow.com/q/24708649/1048862
 		// But Firefox is a pill, too - see issue #76: https://github.com/mholt/PapaParse/issues/76
-		var usingAsyncReader = typeof FileReader === 'function';
+		var usingAsyncReader = typeof FileReader !== 'undefined';	// Safari doesn't consider it a function (sigh...) - see issue #105
 
 		this.stream = function(f)
 		{
@@ -722,7 +722,6 @@
 
 		this.parse = function(input)
 		{
-			//_stepCounter = 0;
 			_delimiterError = false;
 			if (!_config.delimiter)
 			{
@@ -821,9 +820,9 @@
 					if (_config.dynamicTyping)
 					{
 						var value = _results.data[i][j];
-						if (value == "true")
+						if (value === "true" || value === "TRUE")
 							_results.data[i][j] = true;
-						else if (value == "false")
+						else if (value === "false" || value === "FALSE")
 							_results.data[i][j] = false;
 						else
 							_results.data[i][j] = tryParseFloat(value);
@@ -1224,7 +1223,7 @@
 	function getScriptPath()
 	{
 		var id = "worker" + String(Math.random()).substr(2);
-		document.write('<script id="'+id+'"></script>');
+		document.write('<script id="'+id+'"></s'+'cript>');
 		return document.getElementById(id).previousSibling.src;
 	}
 
@@ -1293,7 +1292,7 @@
 				finished: true
 			});
 		}
-		else if (msg.input instanceof File)
+		else if ((global.File && msg.input instanceof File) || msg.input instanceof Object)	// thank you, Safari (see issue #106)
 		{
 			var results = Papa.parse(msg.input, msg.config);
 			if (results)
