@@ -254,7 +254,7 @@ var PARSE_TESTS = [
 		input: 'true,false,T,F,TRUE,False',
 		config: { dynamicTyping: true },
 		expected: {
-			data: [[true, false, "T", "F", "TRUE", "False"]],
+			data: [[true, false, "T", "F", true, "False"]],
 			errors: []
 		}
 	},

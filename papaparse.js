@@ -1,6 +1,6 @@
 /*
 	Papa Parse
-	v3.1.3
+	v3.1.4
 	https://github.com/mholt/PapaParse
 */
 (function(global)
@@ -820,9 +820,9 @@
 					if (_config.dynamicTyping)
 					{
 						var value = _results.data[i][j];
-						if (value == "true")
+						if (value === "true" || value === "TRUE")
 							_results.data[i][j] = true;
-						else if (value == "false")
+						else if (value === "false" || value === "FALSE")
 							_results.data[i][j] = false;
 						else
 							_results.data[i][j] = tryParseFloat(value);
