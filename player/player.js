@@ -1,6 +1,8 @@
 var stepped = 0, chunks = 0, rows = 0;
 var start, end;
-var handle;
+var parser;
+var pauseChecked = false;
+var printStepChecked = false;
 
 $(function()
 {
@@ -21,10 +23,25 @@ $(function()
 			Papa.LocalChunkSize = localChunkSize;
 		if (remoteChunkSize)
 			Papa.RemoteChunkSize = remoteChunkSize;
-		
+
+		pauseChecked = $('#step-pause').prop('checked');
+		printStepChecked = $('#print-steps').prop('checked');
+
 
 		if (files.length > 0)
 		{
+			if (!$('#stream').prop('checked') && !$('#chunk').prop('checked'))
+			{
+				for (var i = 0; i < files.length; i++)
+				{
+					if (files[i].size > 1024 * 1024 * 10)
+					{
+						alert("A file you've selected is larger than 10 MB; please choose to stream or chunk the input to prevent the browser from crashing.");
+						return;
+					}
+				}
+			}
+
 			start = performance.now();
 			
 			$('#files').parse({
@@ -74,6 +91,7 @@ function buildConfig()
 {
 	return {
 		delimiter: $('#delimiter').val(),
+		newline: getLineEnding(),
 		header: $('#header').prop('checked'),
 		dynamicTyping: $('#dynamicTyping').prop('checked'),
 		preview: parseInt($('#preview').val() || 0),
@@ -84,30 +102,59 @@ function buildConfig()
 		complete: completeFn,
 		error: errorFn,
 		download: $('#download').prop('checked'),
-		keepEmptyRows: $('#keepEmptyRows').prop('checked'),
+		skipEmptyLines: $('#skipEmptyLines').prop('checked'),
 		chunk: $('#chunk').prop('checked') ? chunkFn : undefined
 	};
+
+	function getLineEnding()
+	{
+		if ($('#newline-n').is(':checked'))
+			return "\n";
+		else if ($('#newline-r').is(':checked'))
+			return "\r";
+		else if ($('#newline-rn').is(':checked'))
+			return "\r\n";
+		else
+			return "";
+	}
 }
 
 function stepFn(results, parserHandle)
 {
 	stepped++;
 	rows += results.data.length;
+
+	parser = parserHandle;
 	
-	if ($('#step-pause').prop('checked'))
+	if (pauseChecked)
 	{
-		handle = parserHandle;
 		console.log(results, results.data[0]);
 		parserHandle.pause();
+		return;
 	}
+	
+	if (printStepChecked)
+		console.log(results, results.data[0]);
 }
 
-function chunkFn(results, file)
+function chunkFn(results, streamer, file)
 {
 	if (!results)
 		return;
 	chunks++;
 	rows += results.data.length;
+
+	parser = streamer;
+
+	if (pauseChecked)
+	{
+		console.log("Pausing; " + results.data.length + " rows in chunk", file);
+		streamer.pause();
+		return;
+	}
+	
+	if (printStepChecked)
+		console.log(results.data.length + " rows in chunk", file);
 }
 
 function errorFn(error, file)
@@ -118,7 +165,10 @@ function errorFn(error, file)
 function completeFn()
 {
 	end = performance.now();
-	if (!$('#stream').prop('checked') && arguments[0] && arguments[0].data)
+	if (!$('#stream').prop('checked')
+			&& !$('#chunk').prop('checked')
+			&& arguments[0]
+			&& arguments[0].data)
 		rows = arguments[0].data.length;
 	
 	console.log("Finished input (async). Time:", end-start, arguments);

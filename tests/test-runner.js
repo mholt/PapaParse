@@ -35,7 +35,8 @@ $(function()
 		$('.expanded .rvl', $testGroup).click();
 	});
 
-	function asyncDone() {
+	function asyncDone()
+	{
 		// Finally, show the overall status.
 		if (failCount == 0)
 			$('#status').addClass('status-pass').html("All <b>" + passCount + "</b> test" + (passCount == 1 ? "" : "s") + " passed");
@@ -44,11 +45,35 @@ $(function()
 	}
 
 	// Next, run tests and render results!
+	runCoreParserTests();
 	runParseTests(asyncDone);
 	runUnparseTests();
 
 });
 
+
+// Executes all tests in CORE_PARSER_TESTS from test-cases.js
+// and renders results in the table.
+function runCoreParserTests()
+{
+	for (var i = 0; i < CORE_PARSER_TESTS.length; i++)
+	{
+		var test = CORE_PARSER_TESTS[i];
+		var passed = runTest(test);
+		if (passed)
+			passCount++;
+		else
+			failCount++;
+	}
+
+	function runTest(test)
+	{
+		var actual = new Papa.Parser(test.config).parse(test.input);
+		var results = compare(actual.data, actual.errors, test.expected);
+		displayResults('#tests-for-core-parser', test, actual, results);
+		return results.data.passed && results.errors.passed
+	}
+}
 
 
 // Executes all tests in PARSE_TESTS from test-cases.js
@@ -67,13 +92,14 @@ function runParseTests(asyncDone)
 
 	var asyncRemaining = PARSE_ASYNC_TESTS.length;
 
-	PARSE_ASYNC_TESTS.forEach(function(test) {
+	PARSE_ASYNC_TESTS.forEach(function(test)
+	{
 		var config = test.config;
-		config.complete = function(actual) {
-
+		config.complete = function(actual)
+		{
 			var results = compare(actual.data, actual.errors, test.expected);
 
-			displayResults(test, actual, results);
+			displayResults("tests-for-parse", test, actual, results);
 
 			if (results.data.passed && results.errors.passed) {
 				passCount++;
@@ -83,128 +109,126 @@ function runParseTests(asyncDone)
 			if (--asyncRemaining === 0) {
 				asyncDone();
 			}
-		}
-		config.error = function(err) {
+		};
+
+		config.error = function(err)
+		{
 			failCount++;
 			displayResults(test, {data:[],errors:err}, test.expected);
 			if (--asyncRemaining === 0) {
 				asyncDone();
 			}
-		}
+		};
 
-		Papa.parse(test.input, test.config);
+		Papa.parse(test.input, config);
 	});
 
 
-	function runTest(test) {
-		var actual;
-
-		try {
-			actual = Papa.parse(test.input, test.config);
-		} catch (e) {
-			if (e instanceof Error) {
-				throw e;
-			}
-			actual.data = [];
-			actual.errors = [e];
-		}
-
-		var results = compare(actual.data, actual.errors, test.expected);
-
-		displayResults(test, actual, results);
-
-		return results.data.passed && results.errors.passed
-	}
-
-	function displayResults(test, actual, results) {
-		var testId = testCount++;
-
-		var testDescription = (test.description || "");
-		if (testDescription.length > 0)
-			testDescription += '<br>';
-		if (test.notes)
-			testDescription += '<span class="notes">' + test.notes + '</span>';
-
-		var tr = '<tr class="collapsed" id="test-'+testId+'">'
-				+ '<td class="rvl">+</td>'
-				+ '<td>' + testDescription + '</td>'
-				+ passOrFailTd(results.data)
-				+ passOrFailTd(results.errors)
-				+ '<td class="revealable pre"><div class="revealer">condensed</div><div class="hidden">' + JSON.stringify(test.config, null, 2) + '</div></td>'
-				+ '<td class="revealable pre"><div class="revealer">condensed</div><div class="hidden">' + revealChars(test.input) + '</div></td>'
-				+ '<td class="revealable pre"><div class="revealer">condensed</div><div class="hidden">data: ' + JSON.stringify(test.expected.data, null, 4) + '\r\nerrors: ' + JSON.stringify(test.expected.errors, null, 4) + '</div></td>'
-				+ '<td class="revealable pre"><div class="revealer">condensed</div><div class="hidden">data: ' + JSON.stringify(actual.data, null, 4) + '\r\nerrors: ' + JSON.stringify(actual.errors, null, 4) + '</div></td>'
-			   + '</tr>';
-
-		$('#tests-for-parse .results').append(tr);
-
-		if (!results.data.passed || !results.errors.passed)
-			$('#test-' + testId + ' td.rvl').click();
-
-	}
-
-
-	function compare(actualData, actualErrors, expected)
+	function runTest(test)
 	{
-		var data = compareData(actualData, expected.data);
-		var errors = compareErrors(actualErrors, expected.errors);
-
-		return {
-			data: data,
-			errors: errors
-		}
-
-
-		function compareData(actual, expected)
-		{
-			var passed = true;
-
-			if (actual.length != expected.length) {
-				passed = false;
-			} else {
-				for (var row = 0; row < expected.length; row++) {
-					if (actual[row].length != expected[row].length) {
-						passed = false;
-						break;
-					}
-
-				for (var col = 0; col < expected[row].length; col++)
-				{
-						var expectedVal = expected[row][col];
-						var actualVal = actual[row][col];
-
-					if (actualVal !== expectedVal)
-					{
-							passed = false;
-							break;
-						}
-					}
-				}
-			}
-
-			if (passed)	// final check will catch any other differences
-				passed = JSON.stringify(actual) == JSON.stringify(expected);
-
-			// We pass back an object right now, even though it only contains
-			// one value, because we might add details to the test results later
-			// (same with compareErrors below)
-			return {
-				passed: passed
-			};
-		}
-
-
-		function compareErrors(actual, expected)
-		{
-			var passed = JSON.stringify(actual) == JSON.stringify(expected);
-
-			return {
-				passed: passed
-			};
-		}
+		var actual = Papa.parse(test.input, test.config);
+		var results = compare(actual.data, actual.errors, test.expected);
+		displayResults('#tests-for-parse', test, actual, results);
+		return results.data.passed && results.errors.passed
 	}
 }
 
+
+
+
+
+function displayResults(tableId, test, actual, results)
+{
+	var testId = testCount++;
+
+	var testDescription = (test.description || "");
+	if (testDescription.length > 0)
+		testDescription += '<br>';
+	if (test.notes)
+		testDescription += '<span class="notes">' + test.notes + '</span>';
+
+	var tr = '<tr class="collapsed" id="test-'+testId+'">'
+			+ '<td class="rvl">+</td>'
+			+ '<td>' + testDescription + '</td>'
+			+ passOrFailTd(results.data)
+			+ passOrFailTd(results.errors)
+			+ '<td class="revealable pre"><div class="revealer">condensed</div><div class="hidden">' + JSON.stringify(test.config, null, 2) + '</div></td>'
+			+ '<td class="revealable pre"><div class="revealer">condensed</div><div class="hidden">' + revealChars(test.input) + '</div></td>'
+			+ '<td class="revealable pre"><div class="revealer">condensed</div><div class="hidden">data: ' + JSON.stringify(test.expected.data, null, 4) + '\r\nerrors: ' + JSON.stringify(test.expected.errors, null, 4) + '</div></td>'
+			+ '<td class="revealable pre"><div class="revealer">condensed</div><div class="hidden">data: ' + JSON.stringify(actual.data, null, 4) + '\r\nerrors: ' + JSON.stringify(actual.errors, null, 4) + '</div></td>'
+		   + '</tr>';
+
+	$(tableId+' .results').append(tr);
+
+	if (!results.data.passed || !results.errors.passed)
+		$('#test-'+testId+' td.rvl').click();
+
+}
+
+
+function compare(actualData, actualErrors, expected)
+{
+	var data = compareData(actualData, expected.data);
+	var errors = compareErrors(actualErrors, expected.errors);
+
+	return {
+		data: data,
+		errors: errors
+	}
+
+
+	function compareData(actual, expected)
+	{
+		var passed = true;
+
+		if (actual.length != expected.length)
+			passed = false;
+		else
+		{
+			// The order is important, so we go through manually before using stringify to check everything else
+			for (var row = 0; row < expected.length; row++)
+			{
+				if (actual[row].length != expected[row].length)
+				{
+					passed = false;
+					break;
+				}
+
+				for (var col = 0; col < expected[row].length; col++)
+				{
+					var expectedVal = expected[row][col];
+					var actualVal = actual[row][col];
+
+					if (actualVal !== expectedVal)
+					{
+						passed = false;
+						break;
+					}
+				}
+			}
+		}
+
+		if (passed)	// final check will catch any other differences
+			passed = JSON.stringify(actual) == JSON.stringify(expected);
+
+		// We pass back an object right now, even though it only contains
+		// one value, because we might add details to the test results later
+		// (same with compareErrors below)
+		return {
+			passed: passed
+		};
+	}
+
+
+	function compareErrors(actual, expected)
+	{
+		var passed = JSON.stringify(actual) == JSON.stringify(expected);
+
+		return {
+			passed: passed
+		};
+	}
+}
 
 
 
