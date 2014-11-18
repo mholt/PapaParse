@@ -1115,7 +1115,10 @@
 					else
 						data.push(rows[i].split(delim));
 					if (preview && i >= preview)
+					{
+						data = data.slice(0, preview);
 						return returnable(true);
+					}
 				}
 				return returnable();
 			}
