@@ -453,12 +453,15 @@
 			}
 
 			xhr = new XMLHttpRequest();
+			
 			if (!IS_WORKER)
 			{
 				xhr.onload = chunkLoaded;
 				xhr.onerror = chunkError;
 			}
+
 			xhr.open("GET", url, !IS_WORKER);
+			
 			if (config.step)
 			{
 				var end = start + configCopy.chunkSize - 1;	// minus one because byte range is inclusive
@@ -466,7 +469,14 @@
 					end = fileSize;
 				xhr.setRequestHeader("Range", "bytes="+start+"-"+end);
 			}
-			xhr.send();
+
+			try {
+				xhr.send();
+			}
+			catch (err) {
+				chunkError(err.message);
+			}
+
 			if (IS_WORKER && xhr.status == 0)
 				chunkError();
 			else
@@ -535,15 +545,16 @@
 				nextChunk();
 		}
 
-		function chunkError()
+		function chunkError(errorMessage)
 		{
+			var errorText = xhr.statusText || errorMessage;
 			if (isFunction(config.error))
-				config.error(xhr.statusText);
+				config.error(errorText);
 			else if (IS_WORKER && config.error)
 			{
 				global.postMessage({
 					workerId: Papa.WORKER_ID,
-					error: xhr.statusText,
+					error: errorText,
 					finished: false
 				});
 			}
