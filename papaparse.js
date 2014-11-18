@@ -25,7 +25,8 @@
 		error: undefined,
 		download: false,
 		chunk: undefined,
-		skipEmptyLines: false
+		skipEmptyLines: false,
+		fastMode: false
 	};
 
 	global.Papa = {};
@@ -1050,6 +1051,7 @@
 		var comments = config.comments;
 		var step = config.step;
 		var preview = config.preview;
+		var fastMode = config.fastMode;
 
 		// Delimiter must be valid
 		if (typeof delim !== 'string'
@@ -1091,11 +1093,35 @@
 			// Establish starting state
 			cursor = 0;
 			var data = [], errors = [], row = [];
-			var nextDelim = input.indexOf(delim, cursor);
-			var nextNewline = input.indexOf(newline, cursor);
 
 			if (!input)
 				return returnable();
+
+			if (fastMode)
+			{
+				// Fast mode assumes there are no quoted fields in the input
+				var rows = input.split(newline);
+				for (var i = 0; i < rows.length; i++)
+				{
+					if (comments && rows[i].substr(0, commentsLen) == comments)
+						continue;
+					if (stepIsFunction)
+					{
+						data = [ rows[i].split(delim) ];
+						doStep();
+						if (aborted)
+							return returnable();
+					}
+					else
+						data.push(rows[i].split(delim));
+					if (preview && i >= preview)
+						return returnable(true);
+				}
+				return returnable();
+			}
+
+			var nextDelim = input.indexOf(delim, cursor);
+			var nextNewline = input.indexOf(newline, cursor);
 
 			// Parser loop
 			for (;;)
@@ -1435,6 +1461,9 @@
 
 		if (typeof config.skipEmptyLines !== 'boolean')
 			config.skipEmptyLines = DEFAULTS.skipEmptyLines;
+
+		if (typeof config.fastMode !== 'boolean')
+			config.fastMode = DEFAULTS.fastMode;
 
 		return config;
 	}
