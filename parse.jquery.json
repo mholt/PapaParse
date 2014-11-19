@@ -1,8 +1,8 @@
 {
 	"name": "parse",
-	"version": "3.1.4",
+	"version": "4.0.0",
 	"title": "Papa Parse",
-	"description": "Powerful CSV parser that converts CSV to JSON and JSON to CSV. Supports web workers and streaming large files. Gracefully handles malformed input.",
+	"description": "Powerful CSV parser that converts CSV to JSON and JSON to CSV. Supports web workers and streaming large files. Fastest CSV parser for JavaScript.",
 	"keywords": [
 		"csv",
 		"parse",

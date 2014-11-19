@@ -1,0 +1,39 @@
+{
+	"name": "papaparse",
+	"version": "4.0.0",
+	"description": "Fast and powerful CSV parser for the browser that supports web workers and streaming large files. Converts CSV to JSON and JSON to CSV.",
+	"keywords": [
+		"csv",
+		"parser",
+		"parse",
+		"parsing",
+		"delimited",
+		"text",
+		"data",
+		"auto-detect",
+		"comma",
+		"tab",
+		"pipe",
+		"file",
+		"filereader",
+		"stream",
+		"worker",
+		"workers",
+		"thread",
+		"threading",
+		"multi-threaded",
+		"jquery-plugin"
+	],
+	"homepage": "http://papaparse.com",
+	"author": {
+		"name": "Matthew Holt",
+		"url": "https://twitter.com/mholt6"
+	},
+	"licenses": [
+		{
+			"type": "MIT",
+			"url": "http://opensource.org/licenses/MIT"
+		}
+	],
+	"main": "papaparse.js"
+}
