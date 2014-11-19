@@ -177,6 +177,14 @@ var CORE_PARSER_TESTS = [
 		}
 	},
 	{
+		description: "Quoted field at end of row (but not at EOF) has quotes",
+		input: 'a,b,"c""c"""\nd,e,f',
+		expected: {
+			data: [['a', 'b', 'c"c"'], ['d', 'e', 'f']],
+			errors: []
+		}
+	},
+	{
 		description: "Empty input string",
 		input: '',
 		expected: {
@@ -189,6 +197,14 @@ var CORE_PARSER_TESTS = [
 		input: ',',
 		expected: {
 			data: [['', '']],
+			errors: []
+		}
+	},
+	{
+		description: "Input is just empty fields",
+		input: ',,\n,,,',
+		expected: {
+			data: [['', '', ''], ['', '', '', '']],
 			errors: []
 		}
 	},
