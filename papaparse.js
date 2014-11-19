@@ -1,6 +1,6 @@
 /*
 	Papa Parse
-	v4.0.2
+	v4.0.3
 	https://github.com/mholt/PapaParse
 */
 (function(global)
@@ -1064,7 +1064,7 @@
 			delim = ",";
 
 		// Comment character must be valid
-		if (comments == delim)
+		if (comments === delim)
 			throw "Comment character same as delimiter";
 		else if (comments === true)
 			comments = "#";
