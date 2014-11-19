@@ -306,27 +306,39 @@ var csv = Papa.unparse({
 
 
 				<div class="grid-50">
-					<h4 id="unparse">Default config</h4>
+					<h4 id="config-default">Default config</h4>
 <code class="block">{
-	delimiter: "",
+	delimiter: "",	// auto-detect
+	newline: "",	// auto-detect
 	header: false,
 	dynamicTyping: false,
 	preview: 0,
-	step: undefined,
 	encoding: "",
 	worker: false,
 	comments: false,
+	step: undefined,
 	complete: undefined,
 	error: undefined,
 	download: false,
-	keepEmptyRows: false,
-	chunk: undefined
+	skipEmptyLines: false,
+	chunk: undefined,
+	fastMode: false
 }</code>
+					<h4 id="config-details">Config options</h4>
+
 					<ul>
 						<li><code>delimiter</code> The delimiting character. Leave blank to auto-detect. If specified, it must be a string of length 1, and cannot be found in <a href="#extras">Papa.BAD_DELIMITERS</a>.</li>
+						<li><code>newline</code> The newline sequence. Leave blank to auto-detect. Must be one of \r, \n, or \r\n.</li>
 						<li><code>header</code> If true, the first row of parsed data will be interpreted as field names. Fields will be returned in the <a href="#meta">meta</a>, and each row will be an object of data keyed by field name. If false, the parser simply returns an array of arrays, including the first row.</li>
 						<li><code>dynamicTyping</code> If true, numeric and boolean data will be converted to their type instead of remaining strings.</li>
 						<li><code>preview</code> If > 0, only that many rows will be parsed.</li>
+						<li><code>encoding</code> The encoding to use when opening files locally.</li>
+						<li><code>worker</code> Whether or not to use a <a href="faq.html#workers">worker thread</a>. Using a worker will keep your page reactive, but may be slightly slower.</li>
+						<li><code>comments</code> Specify a string that indicates a comment (like "#" or "//"). If your CSV file has commented lines, and Papa will skip them. This feature is disabled by default.</li>
+					</ul>
+				</div>
+				<div class="grid-50">
+					<ul>
 						<li id="step">
 							<code>step</code> To <a href="faq.html#streaming">stream</a> the input, define a callback function to receive <a href="#results">results</a> row-by-row rather than together at the end:
 <code class="block">step: function(results, handle) {
@@ -335,13 +347,6 @@ var csv = Papa.unparse({
 }</code>
 							Except when using a worker, you can call <code>handle.abort()</code> to stop parsing, <code>handle.pause()</code> to pause it, or <code>handle.resume()</code> to resume.
 						</li>
-					</ul>
-				</div>
-				<div class="grid-50">
-					<ul>
-						<li><code>encoding</code> The encoding to use when opening files locally.</li>
-						<li><code>worker</code> Whether or not to use a <a href="faq.html#workers">worker thread</a>. Using a worker will keep your page reactive, but may be slightly slower.</li>
-						<li><code>comments</code> Specify a comment character (like <code>"#"</code>) if your CSV file has commented lines, and Papa will skip them. This feature is disabled by default.</li>
 						<li>
 							<code>complete</code> A callback to execute when parsing is complete. Results are passed in, and if parsing a file, the file is, too:
 <code class="block">complete: function(results, file) {
@@ -353,7 +358,8 @@ var csv = Papa.unparse({
 						<li><code>error</code> A callback to execute if FileReader encounters an error. The function should receive two arguments: the error and the File.</li>
 						<li><code>download</code> If true, this indicates that the string you passed in is actually a URL from which to download a file and parse it.</li>
 						<li><code>keepEmptyRows</code> If true, rows that are empty will be included in the results as an empty array. This is useful if you want to maintain line (or at least <i>row</i>) parity with the original input.</li>
-						<li><code>chunk</code> A callback, much like step, which activates streaming and is executed after every chunk (piece) is loaded and parsed. Works only with local and remote files. Do not use both chunk and step callbacks together. This function can be used to receive results one chunk at a time rather than one row at a time. If your file has a million rows, this results in, say, 10,000 function invocations rather than 1,000,000. In some cases, this may be faster.</li>
+						<li><code>chunk</code> A callback, much like step, which activates streaming and is executed after every whole chunk of the file is loaded and parsed, rather than every row. Works only with local and remote files. Do not use both chunk and step callbacks together. As arguments, it receives the results, the streamer, and if parsing a local file, the File object. You can pause, resume, and abort parsing from within this function.</li>
+						<li><code>fastMode</code> When enabled, fast mode executes parsing much more quickly. Only use this if you know your input won't have quoted fields.
 					</ul>
 				</div>
 				<div class="clear"></div>
@@ -445,17 +451,16 @@ var csv = Papa.unparse({
 	type: "",     <span class="comment">// A generalization of the error</span>
 	code: "",     <span class="comment">// Standardized error code</span>
 	message: "",  <span class="comment">// Human-readable details</span>
-	line: 0,      <span class="comment">// Line of original input</span>
 	row: 0,       <span class="comment">// Row index of parsed data where error is</span>
-	index: 0      <span class="comment">// Character index within original input</span>
+	<!--index: 0      <span class="comment">// Character index within original input</span>-->
 }</code>
 				</div>
 				<div class="grid-50">
 					<ul>
-						<li>The error <code>type</code> will be one of "Abort", "Quotes", "Delimiter", or "FieldMismatch".</li>
-						<li>The <code>code</code> may be "ParseAbort", "MissingQuotes", "UnexpectedQuotes", "UndetectableDelimiter", "TooFewFields", or "TooManyFields" (depending on the error type).</li>
-						<li><code>line</code> and <code>index</code> may not be available on all error messages because some errors are only generated after parsing is already complete.</li>
-						<li>Just because errors are generated does not necessarily mean that parsing failed! Papa is strong, and usually parsing only bombs hard if the input has sloppy quotes.</li>
+						<li>The error <code>type</code> will be one of "Quotes", "Delimiter", or "FieldMismatch".</li>
+						<li>The <code>code</code> may be "MissingQuotes", "UndetectableDelimiter", "TooFewFields", or "TooManyFields" (depending on the error type).</li>
+						<!--<li><code>index</code> may not be available on all error messages because some errors are only generated after parsing is already complete.</li>-->
+						<li>Just because errors are generated does not necessarily mean that parsing failed! Papa is strong, and usually parsing only bombs hard if the input has sloppy quotes. In other words, MissingQuotes is usually a bad sign.</li>
 					</ul>
 				</div>
 				<div class="clear"></div>
@@ -464,8 +469,8 @@ var csv = Papa.unparse({
 				<div class="grid-50">
 					<h4 id="meta">results.meta</h4>
 <code class="block">{
-	lines:     <span class="comment">// Number of lines parsed</span>
 	delimiter: <span class="comment">// Delimiter used</span>
+	linebreak: <span class="comment">// Line break sequence used</span>
 	aborted:   <span class="comment">// Whether process was aborted</span>
 	fields:    <span class="comment">// Array of field names</span>
 	truncated: <span class="comment">// Whether preview consumed all input</span>
@@ -477,17 +482,6 @@ var csv = Papa.unparse({
 					</ul>
 				</div>
 				<div class="clear"></div>
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -559,7 +553,7 @@ var csv = Papa.unparse({
 					<ul>
 						<li>
 							<code>Papa.Parser</code> &nbsp;
-							The core parsing component.
+							The core parsing component. Careful, it's fast.
 						</li>
 						<li>
 							<code>Papa.ParserHandle</code> &nbsp;

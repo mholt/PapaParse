@@ -66,10 +66,13 @@
 						<div class="ticker">
 							<h2>
 								<div class="ticker-statement current">
+									Now the <a href="http://jsperf.com/javascript-csv-parsers/3">fastest</a> JavaScript CSV parser for the browser
+								</div>
+								<div class="ticker-statement">
 									The world's first multi-threaded CSV parser for the browser
 								</div>
 								<div class="ticker-statement">
-									Use Papa when performance, privacy, and correctness matter to you.
+									Use Papa when performance, privacy, and correctness matter to you
 								</div>
 								<div class="ticker-statement">
 									Papa is easy to use:
@@ -107,6 +110,7 @@
 							<li><a href="#header">Header row</a> support</li>
 							<li>Number/boolean <a href="#type-conversion">type conversion</a></li>
 							<li>Skip <a href="#comments">commented lines</a></li>
+							<li>Fast mode for input without quoted fields</li>
 							<li><a href="#errors">Gracefully handles</a> malformed input</li>
 							<li>Just <a href="#jquery">a sprinkle</a> of jQuery (optional)</li>
 						</ul>
@@ -178,10 +182,11 @@ Papa.parse(fileOrString, {
 					</div>
 					<div class="grid-55">
 						<code class="block">var results = Papa.parse(csvString);
+console.log(results);
 <span class="comment">/*
 	{
-		data: ...
-		errors: ...
+		data: [ ... ]
+		errors: [ ... ]
 		meta: {
 			delimiter: "\t",
 			...
@@ -198,7 +203,7 @@ Papa.parse(fileOrString, {
 						<div class="note" id="local-files">Parse local files</div>
 						<h4>"Great, but I have a <i>file</i> to parse."</h4>
 						<p>
-							Just give Papa a <a href="https://developer.mozilla.org/en-US/docs/Web/API/File">File</a> instead of a string. Oh, and a callback.
+							Just give Papa a <a href="https://developer.mozilla.org/en-US/docs/Web/API/File">File</a> instead of a string. And a callback.
 						</p>
 					</div>
 					<div class="grid-55">
@@ -218,7 +223,7 @@ Papa.parse(fileOrString, {
 						<div class="note" id="remote-files">Parse remote files</div>
 						<h4>"No, you don't understand. The file isn't local."</h4>
 						<p>
-							Ah. Then give Papa the URL and, of course, a callback.
+							Well then just give Papa the URL and&mdash;of course&mdash;a callback.
 						</p>
 					</div>
 					<div class="grid-55">
@@ -237,7 +242,7 @@ Papa.parse(fileOrString, {
 						<div class="note" id="stream">Streaming</div>
 						<h4>"Did I mention the file is huge?"</h4>
 						<p>
-							That's what streaming is for. Just specify a <code>step</code> callback to receive the results row-by-row. This way, you won't load the whole file into memory and crash the browser.
+							That's what streaming is for. Specify a <code>step</code> callback to receive the results row-by-row. This way, you won't load the whole file into memory and crash the browser.
 						</p>
 					</div>
 					<div class="grid-55">
@@ -282,9 +287,9 @@ Papa.parse(fileOrString, {
 
 					<div class="grid-40 suffix-5">
 						<div class="note" id="header">Header Rows</div>
-						<h4>"Rad! What if I want data keyed by field name?"</h4>
+						<h4>"Great! Now I want data keyed by field name."</h4>
 						<p>
-							All you have to do is tell Papa that there is a header row. This is a convenience, however, which comes at a slight performance cost, negligible for most inputs.
+							You can tell Papa that there is a header row.
 						</p>
 					</div>
 					<div class="grid-55">
@@ -302,7 +307,7 @@ var results = Papa.parse(csv, {
 						<div class="note" id="type-conversion">Type Conversion</div>
 						<h4>"Hey, these numbers are all parsed as strings."</h4>
 						<p>
-							Everything is parsed as strings. If you need the convenience, you can have numeric and boolean data automatically converted to the number and boolean types, respectively.
+							Everything is parsed as strings. If you need the convenience, you can have numeric and boolean data automatically converted to number and boolean types.
 						</p>
 					</div>
 					<div class="grid-55">
@@ -341,20 +346,18 @@ var results = Papa.parse(csv, {
 
 					<div class="grid-40 suffix-5">
 						<div class="note" id="errors">Error handling</div>
-						<h4>"Are we done yet? I'm&mdash;aw, shoot. Errors."</h4>
+						<h4>"I'm getting tired, are we done&mdash;aw, shoot. Errors."</h4>
 						<p>
-							(Almost done!) Fortunately, Papa can handle errors pretty well. The <a href="http://tools.ietf.org/html/rfc4180">CSV standard</a> is somewhat <strike>loose</strike> ambiguous, so Papa tries to consider the edge cases. For example, unescaped quotes aren't always the end of the world.
+							Yeah, almost done. Fortunately, Papa handles errors pretty well. The <a href="http://tools.ietf.org/html/rfc4180">CSV standard</a> is somewhat <strike>loose</strike> ambiguous, so Papa tries to consider the edge cases. For example, mismatched fields aren't always the end of the world.
 						</p>
 					</div>
 					<div class="grid-55">
 						<code class="block"><span class="comment">// Example error:</span>
 {
-	type: "Quotes",
-	code: "UnexpectedQuotes",
-	message: "Unexpected quotes",
-	line: 2,
-	row: 1,
-	index: 83
+	type: "FieldMismatch",
+	code: "TooManyFields",
+	message: "Expected 3 fields, but parsed 4",
+	row: 1
 }</code>
 					</div>
 					<div class="clear"></div>

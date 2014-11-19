@@ -57,41 +57,51 @@
 					<h3 id="general">General</h3>
 
 
-					<h4>Why use Papa Parse?</h4>
+					<h4 id="why">Why use Papa Parse?</h4>
 					<p>
-						There's a thousand CSV libraries for Javascript. Papa is different. It's written with correctness and performance in mind. Papa is the first (and so far only) multi-threaded CSV parser that runs on web pages. It can parse files gigabytes in size without crashing the browser. It correctly handles malformed or edge-case CSV text. It can parse files on the local filesystem or download them over the Internet. Papa is boss.
+						There's a thousand CSV libraries for Javascript. Papa is different. It's written with correctness and performance in mind. Papa is the first (and so far only) multi-threaded CSV parser that runs on web pages. It can parse files gigabytes in size without crashing the browser. It correctly handles malformed or edge-case CSV text. It can parse files on the local file system or download them over the Internet. Papa is boss.
 					</p>
 					<p>
 						Privacy advocates also use Papa Parse to avoid having to transmit sensitive files over the Internet. Now all the processing can be done locally on the client's computer. This is especially significant considering some organizations' policies.
 					</p>
-
-					<h4>Can I use Papa Parse server-side with Node.js?</h4>
 					<p>
-						There's a fork of Papa called <a href="https://github.com/Rich-Harris/BabyParse" target="_blank">Baby Parse</a> which is <a href="https://www.npmjs.org/package/babyparse">published on npm</a>. Some features are unavailable (like worker threads and file opening/downloading), but the core parser is fully functional.
+						As of version 4, Papa Parse is the <a href="http://jsperf.com/javascript-csv-parsers/3">fastest CSV parser</a> for the browser, whereas it used to be the slowest.
 					</p>
 
-					<h4>Does Papa Parse have any dependencies?</h4>
+					<h4 id="nodejs">Can I use Papa Parse server-side with Node.js?</h4>
+					<p>
+						There's a fork of Papa called <a href="https://github.com/Rich-Harris/BabyParse" target="_blank">Baby Parse</a> which is <a href="https://www.npmjs.org/package/babyparse">published on npm</a>. Some features are unavailable (like worker threads and file opening/downloading), but the core parser is functional.
+					</p>
+
+					<h4 id="dependencies">Does Papa Parse have any dependencies?</h4>
 					<p>
 						No. Papa Parse has no dependencies. If jQuery is present, however, it plugs in to make it easier to select files from the DOM.
 					</p>
 
 
-					<h4>Which browsers is it compatible with?</h4>
+					<h4 id="browsers">Which browsers is it compatible with?</h4>
 					<p>
 						All modern, competent browsers should support all of the features. However, as usual, use IE at your own risk. It looks like IE 10+ and Safari 6+ should support all the features. Firefox and Chrome should work with all features back to versions 3 and 4. Opera 11 and up should be fine. If you really need to use Papa in old IE or Opera, then keep the fancy features off and you may be in luck.
 					</p>
 
 
-					<h4>Can Papa Parse be loaded asynchronously (after the page loads)?</h4>
+					<h4 id="async">Can Papa Parse be loaded asynchronously (after the page loads)?</h4>
 					<p>
 						Not without some minor modifications. When Papa Parse loads, it has to obtain the script's relative path in order to facilitate worker threads. If you don't need this feature, Papa can be loaded asynchronously by removing or commenting a couple lines. If you do need workers, you can just hardcode the script's path. See <a href="https://github.com/mholt/PapaParse/issues/69#issuecomment-49886575">issue 69</a> and <a href="https://github.com/mholt/PapaParse/issues/87">issue 87</a> for more information.
 					</p>
 
 
 
-					<h4>Is it open source? (Can I contribute something?)</h4>
+					<h4 id="open-source">Is it open source? (Can I contribute something?)</h4>
 					<p>
 						Yes, please! I don't want to do this all by myself. Head over to the <a href="https://github.com/mholt/PapaParse">GitHub project page</a> and hack away. If you're making a significant change, open an issue first so we can talk about it.
+					</p>
+
+
+
+					<h4 id="fast-mode">Why wouldn't I always enable fast mode?</h4>
+					<p>
+						Fast mode makes Papa Parse screaming fast, but you wouldn't want to use it if there are (or may be) quoted fields in your input. Fast mode is fast because it makes one major assumption: no quoted fields. But if you know that your input has no quotes, turn that sucker on. With fast mode on, 1 GB files can be parsed in about 20 seconds.
 					</p>
 
 

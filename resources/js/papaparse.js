@@ -1,6 +1,6 @@
 /*
 	Papa Parse
-	v3.1.4
+	v4.0.0
 	https://github.com/mholt/PapaParse
 */
 (function(global)
@@ -13,6 +13,7 @@
 	// A configuration object from which to draw default settings
 	var DEFAULTS = {
 		delimiter: "",	// empty: auto-detect
+		newline: "",	// empty: auto-detect
 		header: false,
 		dynamicTyping: false,
 		preview: 0,
@@ -24,7 +25,8 @@
 		error: undefined,
 		download: false,
 		chunk: undefined,
-		keepEmptyRows: false
+		skipEmptyLines: false,
+		fastMode: false
 	};
 
 	global.Papa = {};
@@ -190,7 +192,7 @@
 					return results;
 				}
 			}
-			else if ((global.File && _input instanceof File) || _input instanceof Object)	// ...Safari. (see issue #106)
+			else if (_input instanceof File)
 			{
 				if (config.step || config.chunk)
 				{
@@ -395,17 +397,30 @@
 		var aggregate = "";
 		var partialLine = "";
 		var xhr, url, nextChunk, finishedWithEntireFile;
-		var handle = new ParserHandle(copy(config));
-		handle.streamer = this;
+		var userComplete, handle, configCopy;
+		replaceConfig(config);
 
 		this.resume = function()
 		{
+			paused = false;
 			nextChunk();
 		};
 
 		this.finished = function()
 		{
 			return finishedWithEntireFile;
+		};
+
+		this.pause = function()
+		{
+			paused = true;
+		};
+
+		this.abort = function()
+		{
+			finishedWithEntireFile = true;
+			if (isFunction(userComplete))
+				userComplete({ data: [], errors: [], meta: { aborted: true } });
 		};
 
 		this.stream = function(u)
@@ -439,24 +454,34 @@
 			}
 
 			xhr = new XMLHttpRequest();
+			
 			if (!IS_WORKER)
 			{
 				xhr.onload = chunkLoaded;
 				xhr.onerror = chunkError;
 			}
+
 			xhr.open("GET", url, !IS_WORKER);
+			
 			if (config.step)
 			{
-				var end = start + config.chunkSize - 1;	// minus one because byte range is inclusive
+				var end = start + configCopy.chunkSize - 1;	// minus one because byte range is inclusive
 				if (fileSize && end > fileSize) // Hack around a Chrome bug: http://stackoverflow.com/q/24745095/1048862
 					end = fileSize;
 				xhr.setRequestHeader("Range", "bytes="+start+"-"+end);
 			}
-			xhr.send();
+
+			try {
+				xhr.send();
+			}
+			catch (err) {
+				chunkError(err.message);
+			}
+
 			if (IS_WORKER && xhr.status == 0)
 				chunkError();
 			else
-				start += config.chunkSize;
+				start += configCopy.chunkSize;
 		}
 
 		function chunkLoaded()
@@ -478,12 +503,12 @@
 
 			if (!finishedWithEntireFile)
 			{
-				var lastLineEnd = aggregate.lastIndexOf("\n");
+				var lastLineEnd = aggregate.lastIndexOf("\r");
 
-				if (lastLineEnd < 0)
-					lastLineEnd = aggregate.lastIndexOf("\r");
+				if (lastLineEnd == -1)
+					lastLineEnd = aggregate.lastIndexOf("\n");
 
-				if (lastLineEnd > -1)
+				if (lastLineEnd != -1)
 				{
 					partialLine = aggregate.substring(lastLineEnd + 1);	// skip the line ending character
 					aggregate = aggregate.substring(0, lastLineEnd);
@@ -510,24 +535,27 @@
 			}
 			else if (isFunction(config.chunk))
 			{
-				console.log("CHUNKED");
-				config.chunk(results);
+				config.chunk(results, handle);
 				results = undefined;
 			}
+
+			if (finishedWithEntireFile && isFunction(userComplete))
+				userComplete(results);
 
 			if (!finishedWithEntireFile && !results.meta.paused)
 				nextChunk();
 		}
 
-		function chunkError()
+		function chunkError(errorMessage)
 		{
+			var errorText = xhr.statusText || errorMessage;
 			if (isFunction(config.error))
-				config.error(xhr.statusText);
+				config.error(errorText);
 			else if (IS_WORKER && config.error)
 			{
 				global.postMessage({
 					workerId: Papa.WORKER_ID,
-					error: xhr.statusText,
+					error: errorText,
 					finished: false
 				});
 			}
@@ -537,6 +565,20 @@
 		{
 			var contentRange = xhr.getResponseHeader("Content-Range");
 			return parseInt(contentRange.substr(contentRange.lastIndexOf("/") + 1));
+		}
+
+		function replaceConfig(config)
+		{
+			// Deep-copy the config so we can edit it; we need
+			// to call the complete function if we are to ensure
+			// that the last chunk callback, if any, will be called
+			// BEFORE the complete function.
+			configCopy = copy(config);
+			userComplete = configCopy.complete;
+			configCopy.complete = undefined;
+			configCopy.chunkSize = parseInt(configCopy.chunkSize);	// VERY important so we don't concatenate strings!
+			handle = new ParserHandle(configCopy);
+			handle.streamer = this;
 		}
 	}
 
@@ -559,13 +601,15 @@
 		var slice;
 		var aggregate = "";
 		var partialLine = "";
+		var paused = false;
+		var self = this;
 		var reader, nextChunk, slice, finishedWithEntireFile;
-		var handle = new ParserHandle(copy(config));
-		handle.streamer = this;
+		var userComplete, handle, configCopy;
+		replaceConfig(config);
 
 		// FileReader is better than FileReaderSync (even in worker) - see http://stackoverflow.com/q/24708649/1048862
 		// But Firefox is a pill, too - see issue #76: https://github.com/mholt/PapaParse/issues/76
-		var usingAsyncReader = typeof FileReader !== 'undefined';	// Safari doesn't consider it a function (sigh...) - see issue #105
+		var usingAsyncReader = typeof FileReader === 'function';
 
 		this.stream = function(f)
 		{
@@ -589,9 +633,22 @@
 			return finishedWithEntireFile;
 		};
 
+		this.pause = function()
+		{
+			paused = true;
+		};
+
 		this.resume = function()
 		{
+			paused = false;
 			nextChunk();
+		};
+
+		this.abort = function()
+		{
+			finishedWithEntireFile = true;
+			if (isFunction(userComplete))
+				userComplete({ data: [], errors: [], meta: { aborted: true } });
 		};
 
 		function nextChunk()
@@ -602,7 +659,7 @@
 
 		function readChunk()
 		{
-			var end = Math.min(start + config.chunkSize, file.size);
+			var end = Math.min(start + configCopy.chunkSize, file.size);
 			var txt = reader.readAsText(slice.call(file, start, end), config.encoding);
 			if (!usingAsyncReader)
 				chunkLoaded({ target: { result: txt } });	// mimic the async signature
@@ -611,7 +668,7 @@
 		function chunkLoaded(event)
 		{
 			// Very important to increment start each time before handling results
-			start += config.chunkSize;
+			start += configCopy.chunkSize;
 
 			// Rejoin the line we likely just split in two by chunking the file
 			aggregate += partialLine + event.target.result;
@@ -621,14 +678,14 @@
 
 			if (!finishedWithEntireFile)
 			{
-				var lastLineEnd = aggregate.lastIndexOf("\n");
+				var lastLineEnd = aggregate.lastIndexOf("\r");	// TODO: Use an auto-detected line ending?
 
-				if (lastLineEnd < 0)
-					lastLineEnd = aggregate.lastIndexOf("\r");
+				if (lastLineEnd == -1)
+					lastLineEnd = aggregate.lastIndexOf("\n");
 
-				if (lastLineEnd > -1)
+				if (lastLineEnd != -1)
 				{
-					partialLine = aggregate.substring(lastLineEnd + 1);	// skip the line ending character
+					partialLine = aggregate.substring(lastLineEnd + 1);	// skip the line ending character (TODO: Not always length 1? \r\n...)
 					aggregate = aggregate.substring(0, lastLineEnd);
 				}
 				else
@@ -653,9 +710,14 @@
 			}
 			else if (isFunction(config.chunk))
 			{
-				config.chunk(results, file);
+				config.chunk(results, self, file);
+				if (paused)
+					return;
 				results = undefined;
 			}
+
+			if (finishedWithEntireFile && isFunction(userComplete))
+				userComplete(results);
 
 			if (!results || !results.meta.paused)
 				nextChunk();
@@ -674,6 +736,20 @@
 					finished: false
 				});
 			}
+		}
+
+		function replaceConfig(config)
+		{
+			// Deep-copy the config so we can edit it; we need
+			// to call the complete function if we are to ensure
+			// that the last chunk callback, if any, will be called
+			// BEFORE the complete function.
+			configCopy = copy(config);
+			userComplete = configCopy.complete;
+			configCopy.complete = undefined;
+			configCopy.chunkSize = parseInt(configCopy.chunkSize);	// VERY important so we don't concatenate strings!
+			handle = new ParserHandle(configCopy);
+			handle.streamer = this;
 		}
 
 	}
@@ -707,21 +783,31 @@
 			_config.step = function(results)
 			{
 				_results = results;
+
 				if (needsHeaderRow())
 					processResults();
 				else	// only call user's step function after header row
 				{
+					processResults();
+
+					// It's possbile that this line was empty and there's no row here after all
+					if (_results.data.length == 0)
+						return;
+
 					_stepCounter += results.data.length;
 					if (_config.preview && _stepCounter > _config.preview)
 						_parser.abort();
 					else
-						userStep(processResults(), self);
+						userStep(_results, self);
 				}
 			};
 		}
 
 		this.parse = function(input)
 		{
+			if (!_config.newline)
+				_config.newline = guessLineEndings(input);
+
 			_delimiterError = false;
 			if (!_config.delimiter)
 			{
@@ -745,7 +831,7 @@
 			_results = _parser.parse(_input);
 			processResults();
 			if (isFunction(_config.complete) && !_paused && (!self.streamer || self.streamer.finished()))
-				_config.complete(_results);	// TODO: In some cases, when chunk is specified, this executes before the chunk function...
+				_config.complete(_results);
 			return _paused ? { meta: { paused: true } } : (_results || { meta: { paused: false } });
 		};
 
@@ -786,8 +872,16 @@
 				_delimiterError = false;
 			}
 
+			if (_config.skipEmptyLines)
+			{
+				for (var i = 0; i < _results.data.length; i++)
+					if (_results.data[i].length == 1 && _results.data[i][0] == "")
+						_results.data.splice(i--, 1);
+			}
+
 			if (needsHeaderRow())
 				fillHeaderFields();
+
 			return applyHeaderAndDynamicTyping();
 		}
 
@@ -820,9 +914,9 @@
 					if (_config.dynamicTyping)
 					{
 						var value = _results.data[i][j];
-						if (value === "true" || value === "TRUE")
+						if (value == "true")
 							_results.data[i][j] = true;
-						else if (value === "false" || value === "FALSE")
+						else if (value == "false")
 							_results.data[i][j] = false;
 						else
 							_results.data[i][j] = tryParseFloat(value);
@@ -907,6 +1001,25 @@
 			}
 		}
 
+		function guessLineEndings(input)
+		{
+			input = input.substr(0, 1024*1024);	// max length 1 MB
+
+			var r = input.split('\r');
+
+			if (r.length == 1)
+				return '\n';
+
+			var numWithN = 0;
+			for (var i = 0; i < r.length; i++)
+			{
+				if (r[i][0] == '\n')
+					numWithN++;
+			}
+
+			return numWithN >= r.length / 2 ? '\r\n' : '\r';
+		}
+
 		function tryParseFloat(val)
 		{
 			var isNumber = FLOAT.test(val);
@@ -928,302 +1041,302 @@
 
 
 
-
-
-
-
-
-
+	// The core parser implements speedy and correct CSV parsing
 	function Parser(config)
 	{
-		var EMPTY = /^\s*$/;
-
-		var _input;		// The input text being parsed
-		var _delimiter;	// The delimiting character
-		var _comments;	// Comment character (default '#') or boolean
-		var _step;		// The step (streaming) function
-		var _callback;	// The callback to invoke when finished
-		var _preview;	// Maximum number of lines (not rows) to parse
-		var _ch;		// Current character
-		var _i;			// Current character's positional index
-		var _inQuotes;	// Whether in quotes or not
-		var _lineNum;	// Current line number (1-based indexing)
-		var _data;		// Parsed data (results)
-		var _errors;	// Parse errors
-		var _rowIdx;	// Current row index within results (0-based)
-		var _colIdx;	// Current col index within result row (0-based)
-		var _runningRowIdx;		// Cumulative row index, used by the preview feature
-		var _aborted = false;	// Abort flag
-
 		// Unpack the config object
 		config = config || {};
-		_delimiter = config.delimiter;
-		_comments = config.comments;
-		_step = config.step;
-		_preview = config.preview;
+		var delim = config.delimiter;
+		var newline = config.newline;
+		var comments = config.comments;
+		var step = config.step;
+		var preview = config.preview;
+		var fastMode = config.fastMode;
 
-		// Delimiter integrity check
-		if (typeof _delimiter !== 'string'
-			|| _delimiter.length != 1
-			|| Papa.BAD_DELIMITERS.indexOf(_delimiter) > -1)
-			_delimiter = ",";
+		// Delimiter must be valid
+		if (typeof delim !== 'string'
+			|| delim.length != 1
+			|| Papa.BAD_DELIMITERS.indexOf(delim) > -1)
+			delim = ",";
 
-		// Comment character integrity check
-		if (_comments === true)
-			_comments = "#";
-		else if (typeof _comments !== 'string'
-			|| _comments.length != 1
-			|| Papa.BAD_DELIMITERS.indexOf(_comments) > -1
-			|| _comments == _delimiter)
-			_comments = false;
+		// Comment character must be valid
+		if (comments == delim)
+			throw "Comment character same as delimiter";
+		else if (comments === true)
+			comments = "#";
+		else if (typeof comments !== 'string'
+			|| Papa.BAD_DELIMITERS.indexOf(comments) > -1)
+			comments = false;
 
+		// Newline must be valid: \r, \n, or \r\n
+		if (newline != '\n' && newline != '\r' && newline != '\r\n')
+			newline = '\n';
+
+		// We're gonna need these at the Parser scope
+		var cursor = 0;
+		var aborted = false;
 
 		this.parse = function(input)
 		{
+			// For some reason, in Chrome, this speeds things up (!?)
 			if (typeof input !== 'string')
 				throw "Input must be a string";
-			reset(input);
-			return parserLoop();
+
+			// We don't need to compute these every time parse() is called,
+			// but having them in a more local scope seems to perform better
+			var inputLen = input.length,
+				delimLen = delim.length,
+				newlineLen = newline.length,
+				commentsLen = comments.length;
+			var stepIsFunction = typeof step === 'function';
+
+			// Establish starting state
+			cursor = 0;
+			var data = [], errors = [], row = [];
+
+			if (!input)
+				return returnable();
+
+			if (fastMode)
+			{
+				// Fast mode assumes there are no quoted fields in the input
+				var rows = input.split(newline);
+				for (var i = 0; i < rows.length; i++)
+				{
+					if (comments && rows[i].substr(0, commentsLen) == comments)
+						continue;
+					if (stepIsFunction)
+					{
+						data = [ rows[i].split(delim) ];
+						doStep();
+						if (aborted)
+							return returnable();
+					}
+					else
+						data.push(rows[i].split(delim));
+					if (preview && i >= preview)
+					{
+						data = data.slice(0, preview);
+						return returnable(true);
+					}
+				}
+				return returnable();
+			}
+
+			var nextDelim = input.indexOf(delim, cursor);
+			var nextNewline = input.indexOf(newline, cursor);
+
+			// Parser loop
+			for (;;)
+			{
+				// Field has opening quote
+				if (input[cursor] == '"')
+				{
+					// Start our search for the closing quote where the cursor is
+					var quoteSearch = cursor;
+
+					// Skip the opening quote
+					cursor++;
+
+					for (;;)
+					{
+						// Find closing quote
+						var quoteSearch = input.indexOf('"', quoteSearch+1);
+
+						if (quoteSearch == -1)
+						{
+							// No closing quote... what a pity
+							errors.push({
+								type: "Quotes",
+								code: "MissingQuotes",
+								message: "Quoted field unterminated",
+								row: data.length,	// row has yet to be inserted
+								index: cursor
+							});
+							return finish();
+						}
+
+						if (quoteSearch == inputLen-1 && hasCloseQuote(input.substring(cursor, quoteSearch+1)))
+						{
+							// Closing quote at EOF
+							row.push(input.substring(cursor, quoteSearch).replace(/""/g, '"'));
+							data.push(row);
+							if (stepIsFunction)
+								doStep();
+							return returnable();
+						}
+
+						// If this quote is escaped, it's part of the data; skip it
+						if (input[quoteSearch+1] == '"')
+							continue;
+
+						if (input[quoteSearch+1] == delim && hasCloseQuote(input.substring(cursor, quoteSearch+1)))
+						{
+							// Closing quote followed by delimiter
+							row.push(input.substring(cursor, quoteSearch).replace(/""/g, '"'));
+							cursor = quoteSearch + 1 + delimLen;
+							nextDelim = input.indexOf(delim, cursor);
+							nextNewline = input.indexOf(newline, cursor);
+							break;
+						}
+
+						if (input.substr(quoteSearch+1, newlineLen) == newline && hasCloseQuote(input.substring(cursor, quoteSearch+1)))
+						{
+							// Closing quote followed by newline
+							saveRow(quoteSearch, quoteSearch + 1 + newlineLen);
+
+							if (stepIsFunction)
+							{
+								doStep();
+								if (aborted)
+									return returnable();
+							}
+							
+							if (preview && data.length >= preview)
+								return returnable(true);
+
+							break;
+						}
+					}
+
+					continue;
+				}
+
+				// Comment found at start of new line
+				if (comments && row.length == 0 && input.substr(cursor, commentsLen) == comments)
+				{
+					if (nextNewline == -1)	// Comment ends at EOF
+						return returnable();
+					cursor = nextNewline + newlineLen;
+					nextNewline = input.indexOf(newline, cursor);
+					nextDelim = input.indexOf(delim, cursor);
+					continue;
+				}
+
+				// Next delimiter comes before next newline, so we've reached end of field
+				if (nextDelim != -1 && (nextDelim < nextNewline || nextNewline == -1))
+				{
+					row.push(input.substring(cursor, nextDelim));
+					cursor = nextDelim + delimLen;
+					nextDelim = input.indexOf(delim, cursor);
+					continue;
+				}
+
+				// End of row
+				if (nextNewline != -1)
+				{
+					saveRow(nextNewline, nextNewline + newlineLen);
+
+					if (stepIsFunction)
+					{
+						doStep();
+						if (aborted)
+							return returnable();
+					}
+
+					if (preview && data.length >= preview)
+						return returnable(true);
+
+					continue;
+				}
+
+				break;
+			}
+
+
+			return finish();
+
+
+			// Appends the remaining input from cursor to the end into
+			// row, saves the row, calls step, and returns the results.
+			function finish()
+			{
+				row.push(input.substr(cursor));
+				data.push(row);
+				cursor = inputLen;	// important in case parsing is paused
+				if (stepIsFunction)
+					doStep();
+				return returnable();
+			}
+
+			// Appends input from cursor to fromCursorToHere to row,
+			// then appends the row to the results. It sets the cursor
+			// to newCursor and finds the nextNewline. The caller should
+			// take care to execute user's step function and check for
+			// preview and end parsing if necessary.
+			function saveRow(fromCursorToHere, newCursor)
+			{
+				row.push(input.substring(cursor, fromCursorToHere));
+				data.push(row);
+				row = [];
+				cursor = newCursor;
+				nextNewline = input.indexOf(newline, cursor);
+			}
+
+			// Returns an object with the results, errors, and meta.
+			function returnable(stopped)
+			{
+				return {
+					data: data,
+					errors: errors,
+					meta: {
+						delimiter: delim,
+						linebreak: newline,
+						aborted: aborted,
+						truncated: !!stopped
+					}
+				};
+			}
+
+			// Executes the user's step function and resets data & errors.
+			function doStep()
+			{
+				step(returnable());
+				data = [], errors = [];
+			}
 		};
 
+		// Sets the abort flag
 		this.abort = function()
 		{
-			_aborted = true;
+			aborted = true;
 		};
 
+		// Gets the cursor position
 		this.getCharIndex = function()
 		{
-			 return _i;
+			return cursor;
 		};
 
-		function parserLoop()
+		// hasCloseQuote determines if a field has a closing quote.
+		// field should be a string without the opening quote
+		// but with the closing quote (which might not actually be
+		// a closing quote).
+		function hasCloseQuote(field)
 		{
-			while (_i < _input.length)
-			{
-				if (_aborted) break;
-				if (_preview > 0 && _runningRowIdx >= _preview) break;
-
-				if (_ch == '"')
-					parseQuotes();
-				else if (_inQuotes)
-					parseInQuotes();
-				else
-					parseNotInQuotes();
-
-				nextChar();
-			}
-
-			return finishParsing();
-		}
-
-		function nextChar()
-		{
-			_i++;
-			_ch = _input[_i];
-		}
-
-		function finishParsing()
-		{
-			if (_aborted)
-				addError("Abort", "ParseAbort", "Parsing was aborted by the user's step function");
-			if (_inQuotes)
-				addError("Quotes", "MissingQuotes", "Unescaped or mismatched quotes");
-			endRow();	// End of input is also end of the last row
-			if (!isFunction(_step))
-				return returnable();
-		}
-
-		function parseQuotes()
-		{
-			if (quotesOnBoundary() && !quotesEscaped())
-				_inQuotes = !_inQuotes;
-			else
-			{
-				saveChar();
-				if (_inQuotes && quotesEscaped())
-					_i++
-				else
-					addError("Quotes", "UnexpectedQuotes", "Unexpected quotes");
-			}
-		}
-
-		function parseInQuotes()
-		{
-			if (twoCharLineBreak(_i) || oneCharLineBreak(_i))
-				_lineNum++;
-			saveChar();
-		}
-
-		function parseNotInQuotes()
-		{
-			if (_ch == _delimiter)
-				newField();
-			else if (twoCharLineBreak(_i))
-			{
-				newRow();
-				nextChar();
-			}
-			else if (oneCharLineBreak(_i))
-				newRow();
-			else if (isCommentStart())
-				skipLine();
-			else
-				saveChar();
-		}
-
-		function isCommentStart()
-		{
-			if (!_comments)
+			if (field.length == 0)
 				return false;
 
-			var firstCharOfLine = _i == 0
-									|| oneCharLineBreak(_i-1)
-									|| twoCharLineBreak(_i-2);
-			return firstCharOfLine && _input[_i] === _comments;
-		}
+			if (field[field.length-1] != '"')
+				return false;
 
-		function skipLine()
-		{
-			while (!twoCharLineBreak(_i)
-				&& !oneCharLineBreak(_i)
-				&& _i < _input.length)
-			{
-				nextChar();
-			}
-		}
+			if (field.length > 2)
+				return field[field.length-2] != '"' || field[field.length-3] == '"';
 
-		function saveChar()
-		{
-			_data[_rowIdx][_colIdx] += _ch;
-		}
+			if (field.length > 1)
+				return field[field.length-2] != '"';
 
-		function newField()
-		{
-			_data[_rowIdx].push("");
-			_colIdx = _data[_rowIdx].length - 1;
-		}
-
-		function newRow()
-		{
-			endRow();
-
-			_lineNum++;
-			_runningRowIdx++;
-			_data.push([]);
-			_rowIdx = _data.length - 1;
-			newField();
-		}
-
-		function endRow()
-		{
-			trimEmptyLastRow();
-			if (isFunction(_step))
-			{
-				if (_data[_rowIdx])
-					_step(returnable());
-				clearErrorsAndData();
-			}
-		}
-
-		function trimEmptyLastRow()
-		{
-			if (_data[_rowIdx].length == 1 && EMPTY.test(_data[_rowIdx][0]))
-			{
-				if (config.keepEmptyRows)
-					_data[_rowIdx].splice(0, 1);	// leave row, but no fields
-				else
-					_data.splice(_rowIdx, 1);		// cut out row entirely
-				_rowIdx = _data.length - 1;
-			}
-		}
-
-		function twoCharLineBreak(i)
-		{
-			return i < _input.length - 1 &&
-				((_input[i] == "\r" && _input[i+1] == "\n")
-				|| (_input[i] == "\n" && _input[i+1] == "\r"))
-		}
-
-		function oneCharLineBreak(i)
-		{
-			return _input[i] == "\r" || _input[i] == "\n";
-		}
-
-		function quotesEscaped()
-		{
-			// Quotes as data cannot be on boundary, for example: ,"", are not escaped quotes
-			return !quotesOnBoundary() && _i < _input.length - 1 && _input[_i+1] == '"';
-		}
-
-		function quotesOnBoundary()
-		{
-			return (!_inQuotes && isBoundary(_i-1)) || isBoundary(_i+1);
-		}
-
-		function isBoundary(i)
-		{
-			if (typeof i != 'number')
-				i = _i;
-
-			var ch = _input[i];
-
-			return (i <= -1 || i >= _input.length)
-				|| (ch == _delimiter
-					|| ch == "\r"
-					|| ch == "\n");
-		}
-
-		function addError(type, code, msg)
-		{
-			_errors.push({
-				type: type,
-				code: code,
-				message: msg,
-				line: _lineNum,
-				row: _rowIdx,
-				index: _i
-			});
-		}
-
-		function reset(input)
-		{
-			_input = input;
-			_inQuotes = false;
-			_i = 0, _runningRowIdx = 0, _lineNum = 1;
-			clearErrorsAndData();
-			_data = [ [""] ];	// starting parsing requires an empty field
-			_ch = _input[_i];
-		}
-
-		function clearErrorsAndData()
-		{
-			_data = [];
-			_errors = [];
-			_rowIdx = 0;
-			_colIdx = 0;
-		}
-
-		function returnable()
-		{
-			return {
-				data: _data,
-				errors: _errors,
-				meta: {
-					lines: _lineNum,
-					delimiter: _delimiter,
-					aborted: _aborted,
-					truncated: _preview > 0 && _i < _input.length
-				}
-			};
+			return true;
 		}
 	}
 
 
-
+	// If you need to load Papa Parse asynchronously and you also need worker threads, hard-code
+	// the script path here. See: https://github.com/mholt/PapaParse/issues/87#issuecomment-57885358
 	function getScriptPath()
 	{
 		var id = "worker" + String(Math.random()).substr(2);
-		document.write('<script id="'+id+'"></s'+'cript>');
+		document.write('<script id="'+id+'"></script>');
 		return document.getElementById(id).previousSibling.src;
 	}
 
@@ -1292,7 +1405,7 @@
 				finished: true
 			});
 		}
-		else if ((global.File && msg.input instanceof File) || msg.input instanceof Object)	// thank you, Safari (see issue #106)
+		else if (msg.input instanceof File)
 		{
 			var results = Papa.parse(msg.input, msg.config);
 			if (results)
@@ -1316,6 +1429,11 @@
 			|| config.delimiter.length != 1
 			|| Papa.BAD_DELIMITERS.indexOf(config.delimiter) > -1)
 			config.delimiter = DEFAULTS.delimiter;
+
+		if (config.newline != '\n'
+			&& config.newline != '\r'
+			&& config.newline != '\r\n')
+			config.newline = DEFAULTS.newline;
 
 		if (typeof config.header !== 'boolean')
 			config.header = DEFAULTS.header;
@@ -1344,8 +1462,11 @@
 		if (typeof config.download !== 'boolean')
 			config.download = DEFAULTS.download;
 
-		if (typeof config.keepEmptyRows !== 'boolean')
-			config.keepEmptyRows = DEFAULTS.keepEmptyRows;
+		if (typeof config.skipEmptyLines !== 'boolean')
+			config.skipEmptyLines = DEFAULTS.skipEmptyLines;
+
+		if (typeof config.fastMode !== 'boolean')
+			config.fastMode = DEFAULTS.fastMode;
 
 		return config;
 	}
