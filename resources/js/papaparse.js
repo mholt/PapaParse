@@ -1,6 +1,6 @@
 /*
 	Papa Parse
-	v4.0.1
+	v4.0.2
 	https://github.com/mholt/PapaParse
 */
 (function(global)
@@ -1187,7 +1187,8 @@
 						if (input.substr(quoteSearch+1, newlineLen) == newline && hasCloseQuote(input.substring(cursor, quoteSearch+1)))
 						{
 							// Closing quote followed by newline
-							saveRow(quoteSearch, quoteSearch + 1 + newlineLen);
+							row.push(input.substring(cursor, quoteSearch).replace(/""/g, '"'));
+							saveRow(quoteSearch + 1 + newlineLen);
 
 							if (stepIsFunction)
 							{
@@ -1229,7 +1230,8 @@
 				// End of row
 				if (nextNewline != -1)
 				{
-					saveRow(nextNewline, nextNewline + newlineLen);
+					row.push(input.substring(cursor, nextNewline));
+					saveRow(nextNewline + newlineLen);
 
 					if (stepIsFunction)
 					{
@@ -1263,14 +1265,12 @@
 				return returnable();
 			}
 
-			// Appends input from cursor to fromCursorToHere to row,
-			// then appends the row to the results. It sets the cursor
+			// Appends the current row to the results. It sets the cursor
 			// to newCursor and finds the nextNewline. The caller should
 			// take care to execute user's step function and check for
 			// preview and end parsing if necessary.
-			function saveRow(fromCursorToHere, newCursor)
+			function saveRow(newCursor)
 			{
-				row.push(input.substring(cursor, fromCursorToHere));
 				data.push(row);
 				row = [];
 				cursor = newCursor;
