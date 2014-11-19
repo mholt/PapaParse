@@ -1,6 +1,6 @@
 /*
 	Papa Parse
-	v4.0.0
+	v4.0.1
 	https://github.com/mholt/PapaParse
 */
 (function(global)
@@ -85,7 +85,11 @@
 			function parseNextFile()
 			{
 				if (queue.length == 0)
+				{
+					if (isFunction(options.complete))
+						options.complete();
 					return;
+				}
 
 				var f = queue[0];
 
