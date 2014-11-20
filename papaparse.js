@@ -1,6 +1,6 @@
 /*
 	Papa Parse
-	v4.0.3
+	v4.0.4
 	https://github.com/mholt/PapaParse
 */
 (function(global)
@@ -397,7 +397,7 @@
 		if (!config.chunkSize)
 			config.chunkSize = Papa.RemoteChunkSize;
 
-		var start = 0, fileSize = 0;
+		var start = 0, fileSize = 0, rowCount = 0;
 		var aggregate = "";
 		var partialLine = "";
 		var xhr, url, nextChunk, finishedWithEntireFile;
@@ -467,10 +467,10 @@
 
 			xhr.open("GET", url, !IS_WORKER);
 			
-			if (config.step)
+			if (config.step || config.chunk)
 			{
 				var end = start + configCopy.chunkSize - 1;	// minus one because byte range is inclusive
-				if (fileSize && end > fileSize) // Hack around a Chrome bug: http://stackoverflow.com/q/24745095/1048862
+				if (fileSize && end > fileSize)	// Hack around a Chrome bug: http://stackoverflow.com/q/24745095/1048862
 					end = fileSize;
 				xhr.setRequestHeader("Range", "bytes="+start+"-"+end);
 			}
@@ -503,7 +503,7 @@
 			aggregate += partialLine + xhr.responseText;
 			partialLine = "";
 
-			finishedWithEntireFile = !config.step || start > getFileSize(xhr);
+			finishedWithEntireFile = (!config.step && !config.chunk) || start > getFileSize(xhr);
 
 			if (!finishedWithEntireFile)
 			{
@@ -528,13 +528,17 @@
 
 			var results = handle.parse(aggregate);
 			aggregate = "";
+			if (results && results.data)
+				rowCount += results.data.length;
+
+			var finishedIncludingPreview = finishedWithEntireFile || (configCopy.preview && rowCount >= configCopy.preview);
 
 			if (IS_WORKER)
 			{
 				global.postMessage({
 					results: results,
 					workerId: Papa.WORKER_ID,
-					finished: finishedWithEntireFile
+					finished: finishedIncludingPreview
 				});
 			}
 			else if (isFunction(config.chunk))
@@ -543,10 +547,10 @@
 				results = undefined;
 			}
 
-			if (finishedWithEntireFile && isFunction(userComplete))
+			if (isFunction(userComplete) && finishedIncludingPreview)
 				userComplete(results);
 
-			if (!finishedWithEntireFile && !results.meta.paused)
+			if (!finishedIncludingPreview && (!results || !results.meta.paused))
 				nextChunk();
 		}
 
@@ -605,6 +609,7 @@
 		var slice;
 		var aggregate = "";
 		var partialLine = "";
+		var rowCount = 0;
 		var paused = false;
 		var self = this;
 		var reader, nextChunk, slice, finishedWithEntireFile;
@@ -657,7 +662,7 @@
 
 		function nextChunk()
 		{
-			if (!finishedWithEntireFile)
+			if (!finishedWithEntireFile && (!configCopy.preview || rowCount < configCopy.preview))
 				readChunk();
 		}
 
@@ -703,13 +708,17 @@
 
 			var results = handle.parse(aggregate);
 			aggregate = "";
+			if (results && results.data)
+				rowCount += results.data.length;
+
+			var finishedIncludingPreview = finishedWithEntireFile || (configCopy.preview && rowCount >= configCopy.preview);
 
 			if (IS_WORKER)
 			{
 				global.postMessage({
 					results: results,
 					workerId: Papa.WORKER_ID,
-					finished: finishedWithEntireFile
+					finished: finishedIncludingPreview
 				});
 			}
 			else if (isFunction(config.chunk))
@@ -720,10 +729,10 @@
 				results = undefined;
 			}
 
-			if (finishedWithEntireFile && isFunction(userComplete))
+			if (isFunction(userComplete) && finishedIncludingPreview)
 				userComplete(results);
 
-			if (!results || !results.meta.paused)
+			if (!finishedIncludingPreview && (!results || !results.meta.paused))
 				nextChunk();
 		}
 
