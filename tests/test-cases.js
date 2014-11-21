@@ -77,6 +77,14 @@ var CORE_PARSER_TESTS = [
 		}
 	},
 	{
+		description: "Quoted fields at end of row with delimiter and line break",
+		input: 'a,b,"c,c\nc"\nd,e,f',
+		expected: {
+			data: [['a', 'b', 'c,c\nc'], ['d', 'e', 'f']],
+			errors: []
+		}
+	},
+	{
 		description: "Quoted field with escaped quotes",
 		input: 'A,"B""B""B",C',
 		expected: {
