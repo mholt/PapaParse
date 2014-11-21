@@ -1,6 +1,6 @@
 /*
 	Papa Parse
-	v4.0.4
+	v4.0.5
 	https://github.com/mholt/PapaParse
 */
 (function(global)
@@ -1198,6 +1198,7 @@
 							// Closing quote followed by newline
 							row.push(input.substring(cursor, quoteSearch).replace(/""/g, '"'));
 							saveRow(quoteSearch + 1 + newlineLen);
+							nextDelim = input.indexOf(delim, cursor);	// because we may have skipped the nextDelim in the quoted field
 
 							if (stepIsFunction)
 							{
