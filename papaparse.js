@@ -1,6 +1,6 @@
 /*
 	Papa Parse
-	v4.0.5
+	v4.0.6
 	https://github.com/mholt/PapaParse
 */
 (function(global)
@@ -196,7 +196,7 @@
 					return results;
 				}
 			}
-			else if (_input instanceof File)
+			else if ((global.File && _input instanceof File) || _input instanceof Object)	// ...Safari. (see issue #106)
 			{
 				if (config.step || config.chunk)
 				{
@@ -618,7 +618,7 @@
 
 		// FileReader is better than FileReaderSync (even in worker) - see http://stackoverflow.com/q/24708649/1048862
 		// But Firefox is a pill, too - see issue #76: https://github.com/mholt/PapaParse/issues/76
-		var usingAsyncReader = typeof FileReader === 'function';
+		var usingAsyncReader = typeof FileReader !== 'undefined';	// Safari doesn't consider it a function - see issue #105
 
 		this.stream = function(f)
 		{
@@ -1419,7 +1419,7 @@
 				finished: true
 			});
 		}
-		else if (msg.input instanceof File)
+		else if ((global.File && msg.input instanceof File) || msg.input instanceof Object)	// thank you, Safari (see issue #106)
 		{
 			var results = Papa.parse(msg.input, msg.config);
 			if (results)
