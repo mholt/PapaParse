@@ -65,7 +65,7 @@
 						Privacy advocates also use Papa Parse to avoid having to transmit sensitive files over the Internet. Now all the processing can be done locally on the client's computer. This is especially significant considering some organizations' policies.
 					</p>
 					<p>
-						As of version 4, Papa Parse is the <a href="http://jsperf.com/javascript-csv-parsers/3">fastest CSV parser</a> for the browser, whereas it used to be the slowest.
+						As of version 4, Papa Parse is the <a href="http://jsperf.com/javascript-csv-parsers/4">fastest CSV parser</a> for the browser, whereas it used to be the slowest.
 					</p>
 
 					<h4 id="nodejs">Can I use Papa Parse server-side with Node.js?</h4>
@@ -101,7 +101,7 @@
 
 					<h4 id="fast-mode">Why wouldn't I always enable fast mode?</h4>
 					<p>
-						Fast mode makes Papa Parse screaming fast, but you wouldn't want to use it if there are (or may be) quoted fields in your input. Fast mode is fast because it makes one major assumption: no quoted fields. But if you know that your input has no quotes, turn that sucker on. With fast mode on, 1 GB files can be parsed in about 20 seconds.
+						Fast mode makes <a href="http://jsperf.com/javascript-csv-parsers/3">Papa Parse screaming fast</a>, but you wouldn't want to use it if there are (or may be) quoted fields in your input. Fast mode is fast because it makes one major assumption: no quoted fields. But if you know that your input has no quotes, turn that sucker on. With fast mode on, 1 GB files can be parsed in about 20 seconds.
 					</p>
 
 
