@@ -137,6 +137,15 @@ var CORE_PARSER_TESTS = [
 		}
 	},
 	{
+		description: "Quoted field with 5 quotes in a row and a delimiter in there, too",
+		input: '"1","cnonce="""",nc=""""","2"',
+		notes: "Actual input reported in issue #121",
+		expected: {
+			data: [['1', 'cnonce="",nc=""', '2']],
+			errors: []
+		}
+	},
+	{
 		description: "Quoted field with whitespace around quotes",
 		input: 'A, "B" ,C',
 		notes: "The quotes must be immediately adjacent to the delimiter to indicate a quoted field",

@@ -1,6 +1,6 @@
 /*
 	Papa Parse
-	v4.0.6
+	v4.0.7
 	https://github.com/mholt/PapaParse
 */
 (function(global)
@@ -1169,7 +1169,7 @@
 							return finish();
 						}
 
-						if (quoteSearch == inputLen-1 && hasCloseQuote(input.substring(cursor, quoteSearch+1)))
+						if (quoteSearch == inputLen-1)
 						{
 							// Closing quote at EOF
 							row.push(input.substring(cursor, quoteSearch).replace(/""/g, '"'));
@@ -1181,9 +1181,12 @@
 
 						// If this quote is escaped, it's part of the data; skip it
 						if (input[quoteSearch+1] == '"')
+						{
+							quoteSearch++;
 							continue;
+						}
 
-						if (input[quoteSearch+1] == delim && hasCloseQuote(input.substring(cursor, quoteSearch+1)))
+						if (input[quoteSearch+1] == delim)
 						{
 							// Closing quote followed by delimiter
 							row.push(input.substring(cursor, quoteSearch).replace(/""/g, '"'));
@@ -1193,7 +1196,7 @@
 							break;
 						}
 
-						if (input.substr(quoteSearch+1, newlineLen) == newline && hasCloseQuote(input.substring(cursor, quoteSearch+1)))
+						if (input.substr(quoteSearch+1, newlineLen) == newline)
 						{
 							// Closing quote followed by newline
 							row.push(input.substring(cursor, quoteSearch).replace(/""/g, '"'));
@@ -1321,27 +1324,6 @@
 		{
 			return cursor;
 		};
-
-		// hasCloseQuote determines if a field has a closing quote.
-		// field should be a string without the opening quote
-		// but with the closing quote (which might not actually be
-		// a closing quote).
-		function hasCloseQuote(field)
-		{
-			if (field.length == 0)
-				return false;
-
-			if (field[field.length-1] != '"')
-				return false;
-
-			if (field.length > 2)
-				return field[field.length-2] != '"' || field[field.length-3] == '"';
-
-			if (field.length > 1)
-				return field[field.length-2] != '"';
-
-			return true;
-		}
 	}
 
 
