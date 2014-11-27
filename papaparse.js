@@ -1095,7 +1095,7 @@
 			if (typeof input !== 'string')
 				throw "Input must be a string";
 
-			// We don't need to compute these every time parse() is called,
+			// We don't need to compute some of these every time parse() is called,
 			// but having them in a more local scope seems to perform better
 			var inputLen = input.length,
 				delimLen = delim.length,
@@ -1156,7 +1156,7 @@
 						// Find closing quote
 						var quoteSearch = input.indexOf('"', quoteSearch+1);
 
-						if (quoteSearch == -1)
+						if (quoteSearch === -1)
 						{
 							// No closing quote... what a pity
 							errors.push({
@@ -1169,7 +1169,7 @@
 							return finish();
 						}
 
-						if (quoteSearch == inputLen-1)
+						if (quoteSearch === inputLen-1)
 						{
 							// Closing quote at EOF
 							row.push(input.substring(cursor, quoteSearch).replace(/""/g, '"'));
@@ -1196,7 +1196,7 @@
 							break;
 						}
 
-						if (input.substr(quoteSearch+1, newlineLen) == newline)
+						if (input.substr(quoteSearch+1, newlineLen) === newline)
 						{
 							// Closing quote followed by newline
 							row.push(input.substring(cursor, quoteSearch).replace(/""/g, '"'));
@@ -1221,7 +1221,7 @@
 				}
 
 				// Comment found at start of new line
-				if (comments && row.length == 0 && input.substr(cursor, commentsLen) == comments)
+				if (comments && row.length === 0 && input.substr(cursor, commentsLen) === comments)
 				{
 					if (nextNewline == -1)	// Comment ends at EOF
 						return returnable();
@@ -1232,7 +1232,7 @@
 				}
 
 				// Next delimiter comes before next newline, so we've reached end of field
-				if (nextDelim != -1 && (nextDelim < nextNewline || nextNewline == -1))
+				if (nextDelim !== -1 && (nextDelim < nextNewline || nextNewline === -1))
 				{
 					row.push(input.substring(cursor, nextDelim));
 					cursor = nextDelim + delimLen;
@@ -1241,7 +1241,7 @@
 				}
 
 				// End of row
-				if (nextNewline != -1)
+				if (nextNewline !== -1)
 				{
 					row.push(input.substring(cursor, nextNewline));
 					saveRow(nextNewline + newlineLen);

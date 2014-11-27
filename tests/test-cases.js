@@ -202,6 +202,14 @@ var CORE_PARSER_TESTS = [
 		}
 	},
 	{
+		description: "Multiple consecutive empty fields",
+		input: 'a,b,,,c,d\n,,e,,,f',
+		expected: {
+			data: [['a', 'b', '', '', 'c', 'd'], ['', '', 'e', '', '', 'f']],
+			errors: []
+		}
+	},
+	{
 		description: "Empty input string",
 		input: '',
 		expected: {
