@@ -20,10 +20,10 @@
 						<a href="https://github.com/mholt/PapaParse">
 							<i class="fa fa-github fa-lg"></i> GitHub
 						</a>
-						<a href="/demo.html">
+						<a href="/demo">
 							<i class="fa fa-magic fa-lg"></i> Demo
 						</a>
-						<a href="/docs.html">
+						<a href="/docs">
 							<i class="fa fa-book fa-lg"></i> Docs
 						</a>
 					</div>
@@ -33,7 +33,7 @@
 				</div>
 				<div class="grid-40 mobile-grid-50 text-right">
 					<div class="links">
-						<a href="/faq.html">
+						<a href="/faq">
 							<i class="fa fa-question fa-lg"></i> FAQ
 						</a>
 						<a href="https://github.com/mholt/PapaParse/issues">
@@ -333,14 +333,14 @@ var csv = Papa.unparse({
 						<li><code>dynamicTyping</code> If true, numeric and boolean data will be converted to their type instead of remaining strings.</li>
 						<li><code>preview</code> If > 0, only that many rows will be parsed.</li>
 						<li><code>encoding</code> The encoding to use when opening files locally.</li>
-						<li><code>worker</code> Whether or not to use a <a href="faq.html#workers">worker thread</a>. Using a worker will keep your page reactive, but may be slightly slower.</li>
+						<li><code>worker</code> Whether or not to use a <a href="/faq#workers">worker thread</a>. Using a worker will keep your page reactive, but may be slightly slower.</li>
 						<li><code>comments</code> Specify a string that indicates a comment (like "#" or "//"). If your CSV file has commented lines, and Papa will skip them. This feature is disabled by default.</li>
 					</ul>
 				</div>
 				<div class="grid-50">
 					<ul>
 						<li id="step">
-							<code>step</code> To <a href="faq.html#streaming">stream</a> the input, define a callback function to receive <a href="#results">results</a> row-by-row rather than together at the end:
+							<code>step</code> To <a href="/faq#streaming">stream</a> the input, define a callback function to receive <a href="#results">results</a> row-by-row rather than together at the end:
 <code class="block">step: function(results, handle) {
 	console.log("Row data:", results.data);
 	console.log("Row errors:", results.errors);
@@ -357,7 +357,7 @@ var csv = Papa.unparse({
 						</li>
 						<li><code>error</code> A callback to execute if FileReader encounters an error. The function should receive two arguments: the error and the File.</li>
 						<li><code>download</code> If true, this indicates that the string you passed in is actually a URL from which to download a file and parse it.</li>
-						<li><code>keepEmptyRows</code> If true, rows that are empty will be included in the results as an empty array. This is useful if you want to maintain line (or at least <i>row</i>) parity with the original input.</li>
+						<li><code>skipEmptyLines</code> If true, lines that are completely empty will be skipped. An empty line is defined to be one which evaluates to empty string.</li>
 						<li><code>chunk</code> A callback, much like step, which activates streaming and is executed after every whole chunk of the file is loaded and parsed, rather than every row. Works only with local and remote files. Do not use both chunk and step callbacks together. As arguments, it receives the results, the streamer, and if parsing a local file, the File object. You can pause, resume, and abort parsing from within this function.</li>
 						<li><code>fastMode</code> When enabled, fast mode executes parsing much more quickly. Only use this if you know your input won't have quoted fields.
 					</ul>
