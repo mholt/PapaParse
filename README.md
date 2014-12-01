@@ -67,7 +67,7 @@ For usage instructions, see the [homepage](http://papaparse.com) and, for more d
 Tests
 -----
 
-Papa Parse is under test. Download this repository and open `tests/tests.html` in your browser to run them.
+Papa Parse is under test. Download this repository, run `npm install`, and run `npm test` to run the tests in your browser.
 
 
 
