@@ -7,7 +7,7 @@
 {
 	"use strict";
 
-	var IS_WORKER = !global.document, IS_SYNC = false, AUTO_SCRIPT_PATH;
+	var IS_WORKER = !global.document, LOADED_SYNC = false, AUTO_SCRIPT_PATH;
 	var workers = {}, workerIdCounter = 0;
 
 	// A configuration object from which to draw default settings
@@ -156,9 +156,17 @@
 	{
 		AUTO_SCRIPT_PATH = getScriptPath();
 		// Check if the script was loaded synchronously
-		document.body.addEventListener('load', function () {
-			IS_SYNC = true;
-		}, true);
+		if ( document.body )
+		{
+			document.body.addEventListener('load', function () {
+				LOADED_SYNC = true;
+			}, true);
+		}
+		else
+		{
+			// Body doesn't exist yet, must be synchronous
+			LOADED_SYNC = true;
+		}
 	}
 
 
@@ -1367,7 +1375,7 @@
 	{
 		if (!Papa.WORKERS_SUPPORTED)
 			return false;
-		if (!IS_SYNC && Papa.SCRIPT_PATH === null)
+		if (!LOADED_SYNC && Papa.SCRIPT_PATH === null)
 			throw new Error(
 				'Script path cannot be determined automatically when Papa Parse is loaded asynchronously. ' +
 				'You need to set Papa.SCRIPT_PATH manually.'
