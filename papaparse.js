@@ -156,16 +156,13 @@
 	{
 		AUTO_SCRIPT_PATH = getScriptPath();
 		// Check if the script was loaded synchronously
-		if ( document.body )
-		{
-			document.body.addEventListener('load', function () {
-				LOADED_SYNC = true;
-			}, true);
-		}
-		else
-		{
+		if ( !document.body ) {
 			// Body doesn't exist yet, must be synchronous
 			LOADED_SYNC = true;
+		} else {
+			document.addEventListener('DOMContentLoaded', function () {
+				LOADED_SYNC = true;
+			}, true);
 		}
 	}
 
@@ -175,7 +172,7 @@
 	function CsvToJson(_input, _config)
 	{
 		var config = IS_WORKER ? _config : copyAndValidateConfig(_config);
-		var useWorker = config.worker && Papa.WORKERS_SUPPORTED && (Papa.SCRIPT_PATH || AUTO_SCRIPT_PATH);
+		var useWorker = config.worker && Papa.WORKERS_SUPPORTED;
 
 		if (useWorker)
 		{
