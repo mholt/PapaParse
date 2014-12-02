@@ -35,5 +35,13 @@
 			"url": "http://opensource.org/licenses/MIT"
 		}
 	],
-	"main": "papaparse.js"
+	"main": "papaparse.js",
+	"devDependencies": {
+		"connect": "^3.3.3",
+		"open": "0.0.5",
+		"serve-static": "^1.7.1"
+	},
+	"scripts": {
+		"test": "node tests/test.js"
+	}
 }

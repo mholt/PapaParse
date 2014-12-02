@@ -3,7 +3,7 @@
 	v4.0.7
 	https://github.com/mholt/PapaParse
 */
-(function(global)
+(function closure(global)
 {
 	"use strict";
 
@@ -44,6 +44,10 @@
 	global.Papa.LocalChunkSize = 1024 * 1024 * 10;	// 10 MB
 	global.Papa.RemoteChunkSize = 1024 * 1024 * 5;	// 5 MB
 	global.Papa.DefaultDelimiter = ",";				// Used if not specified and detection fails
+
+	// Configurable worker script loading
+	global.Papa.getScriptPath = getScriptPath;
+	global.Papa.getFakeScriptPath = getFakeScriptPath;
 
 	// Exposed for testing and development only
 	global.Papa.Parser = Parser;
@@ -149,7 +153,7 @@
 	if (IS_WORKER)
 		global.onmessage = workerThreadReceivedMessage;
 	else if (Papa.WORKERS_SUPPORTED)
-		SCRIPT_PATH = getScriptPath();
+		SCRIPT_PATH = global.Papa.getScriptPath();
 
 
 
@@ -173,6 +177,10 @@
 			config.complete = isFunction(config.complete);
 			config.error = isFunction(config.error);
 			delete config.worker;	// prevent infinite loop
+
+			if (config.download && _input.indexOf(':') === -1) {
+				_input = global.location.protocol + '//' + global.location.host + '/' + _input;
+			}
 
 			w.postMessage({
 				input: _input,
@@ -1334,6 +1342,14 @@
 		var id = "worker" + String(Math.random()).substr(2);
 		document.write('<script id="'+id+'"></script>');
 		return document.getElementById(id).previousSibling.src;
+	}
+
+	// not supported in IE10
+	function getFakeScriptPath()
+	{
+		var source = closure.toString();
+		var blob = new Blob(['(', source, ')(this)'], {type: 'text/javascript'});
+		return global.URL.createObjectURL(blob);
 	}
 
 	function newWorker()
