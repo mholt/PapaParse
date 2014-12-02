@@ -1000,3 +1000,130 @@ var UNPARSE_TESTS = [
 		expected: 'Col1,Col2,Col3\r\na,,c'
 	}
 ];
+
+
+
+var CUSTOM_TESTS = [
+	{
+		description: "Step is called for each row",
+		expected: 2,
+		run: function(callback) {
+			var callCount = 0;
+			Papa.parse('A,b,c\nd,E,f', {
+				step: function() {
+					callCount++;
+				},
+				complete: function() {
+					callback(callCount);
+				}
+			});
+		}
+	},
+	{
+		description: "Step is called with the contents of the row",
+		expected: ['A', 'b', 'c'],
+		run: function(callback) {
+			Papa.parse('A,b,c', {
+				step: function(response) {
+					callback(response.data[0]);
+				}
+			});
+		}
+	},
+	{
+		description: "Step is called with the last cursor position",
+		expected: [6, 12, 17],
+		run: function(callback) {
+			var updates = [];
+			Papa.parse('A,b,c\nd,E,f\nG,h,i', {
+				step: function(response) {
+					updates.push(response.meta.cursor);
+				}, complete: function() {
+					callback(updates);
+				}
+			});
+		}
+	},
+	{
+		description: "Step exposes cursor for files",
+		expected: [129,	287, 452, 595, 727, 865, 1031, 1209],
+		run: function(callback) {
+			var updates = [];
+			Papa.parse("/tests/long-sample.csv", {
+				download: true,
+				step: function(response) {
+					updates.push(response.meta.cursor);
+				}, complete: function() {
+					callback(updates);
+				}
+			});
+		}
+	},
+	{
+		description: "Step exposes cursor for chunked files",
+		// Tiny inconsistency: the last full row in each chunk will not see a newline.
+		expected: [129, 287, 451, 595, 727, 864, 1031, 1209],
+		run: function(callback) {
+			var updates = [];
+			Papa.parse("/tests/long-sample.csv", {
+				download: true,
+				chunkSize: 500,
+				step: function(response) {
+					updates.push(response.meta.cursor);
+				}, complete: function() {
+					callback(updates);
+				}
+			});
+		}
+	},
+	{
+		description: "Step exposes cursor for workers",
+		// You're only really getting chunk cursors here.
+		expected: [451, 451, 451, 864, 864, 864, 1209, 1209],
+		run: function(callback) {
+			var updates = [];
+			Papa.parse("/tests/long-sample.csv", {
+				download: true,
+				chunkSize: 500,
+				worker: true,
+				step: function(response) {
+					updates.push(response.meta.cursor);
+				}, complete: function() {
+					callback(updates);
+				}
+			});
+		}
+	},
+	{
+		description: "Chunk is called for each chunk",
+		expected: [3, 3, 2],
+		run: function(callback) {
+			var updates = [];
+			Papa.parse("/tests/long-sample.csv", {
+				download: true,
+				chunkSize: 500,
+				chunk: function(response) {
+					updates.push(response.data.length);
+				}, complete: function() {
+					callback(updates);
+				}
+			});
+		}
+	},
+	{
+		description: "Chunk is called with cursor position",
+		expected: [451, 864, 1209],
+		run: function(callback) {
+			var updates = [];
+			Papa.parse("/tests/long-sample.csv", {
+				download: true,
+				chunkSize: 500,
+				chunk: function(response) {
+					updates.push(response.meta.cursor);
+				}, complete: function() {
+					callback(updates);
+				}
+			});
+		}
+	},
+];
