@@ -7,7 +7,7 @@
 {
 	"use strict";
 
-	var IS_WORKER = !global.document, SCRIPT_PATH;
+	var IS_WORKER = !global.document, LOADED_SYNC = false, AUTO_SCRIPT_PATH;
 	var workers = {}, workerIdCounter = 0;
 
 	// A configuration object from which to draw default settings
@@ -39,6 +39,8 @@
 	global.Papa.BYTE_ORDER_MARK = "\ufeff";
 	global.Papa.BAD_DELIMITERS = ["\r", "\n", "\"", global.Papa.BYTE_ORDER_MARK];
 	global.Papa.WORKERS_SUPPORTED = !!global.Worker;
+	// Must be set externally if using workers and Papa Parse is loaded asynchronously
+	global.Papa.SCRIPT_PATH = null;
 
 	// Configurable chunk sizes for local and remote files, respectively
 	global.Papa.LocalChunkSize = 1024 * 1024 * 10;	// 10 MB
@@ -147,9 +149,22 @@
 
 
 	if (IS_WORKER)
+	{
 		global.onmessage = workerThreadReceivedMessage;
+	}
 	else if (Papa.WORKERS_SUPPORTED)
-		SCRIPT_PATH = getScriptPath();
+	{
+		AUTO_SCRIPT_PATH = getScriptPath();
+		// Check if the script was loaded synchronously
+		if ( !document.body ) {
+			// Body doesn't exist yet, must be synchronous
+			LOADED_SYNC = true;
+		} else {
+			document.addEventListener('DOMContentLoaded', function () {
+				LOADED_SYNC = true;
+			}, true);
+		}
+	}
 
 
 
@@ -157,7 +172,7 @@
 	function CsvToJson(_input, _config)
 	{
 		var config = IS_WORKER ? _config : copyAndValidateConfig(_config);
-		var useWorker = config.worker && Papa.WORKERS_SUPPORTED && SCRIPT_PATH;
+		var useWorker = config.worker && Papa.WORKERS_SUPPORTED;
 
 		if (useWorker)
 		{
@@ -1331,16 +1346,20 @@
 	// the script path here. See: https://github.com/mholt/PapaParse/issues/87#issuecomment-57885358
 	function getScriptPath()
 	{
-		var id = "worker" + String(Math.random()).substr(2);
-		document.write('<script id="'+id+'"></script>');
-		return document.getElementById(id).previousSibling.src;
+		var scripts = document.getElementsByTagName('script');
+		return scripts.length ? scripts[scripts.length - 1].src : '';
 	}
 
 	function newWorker()
 	{
 		if (!Papa.WORKERS_SUPPORTED)
 			return false;
-		var w = new global.Worker(SCRIPT_PATH);
+		if (!LOADED_SYNC && Papa.SCRIPT_PATH === null)
+			throw new Error(
+				'Script path cannot be determined automatically when Papa Parse is loaded asynchronously. ' +
+				'You need to set Papa.SCRIPT_PATH manually.'
+			);
+		var w = new global.Worker(Papa.SCRIPT_PATH || AUTO_SCRIPT_PATH);
 		w.onmessage = mainThreadReceivedMessage;
 		w.id = workerIdCounter++;
 		workers[w.id] = w;
