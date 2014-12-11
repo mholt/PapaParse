@@ -1,5 +1,10 @@
 var RECORD_SEP = String.fromCharCode(30);
 var UNIT_SEP = String.fromCharCode(31);
+var FILES_ENABLED = false;
+try {
+  new File([""], "");
+  FILES_ENABLED = true;
+} catch (e) {} // safari, ie
 
 // Tests for the core parser using new Papa.Parser().parse() (CSV to JSON)
 var CORE_PARSER_TESTS = [
@@ -845,7 +850,28 @@ var PARSE_ASYNC_TESTS = [
 			data: [['A','B','C'],['X','Y','Z']],
 			errors: []
 		}
-	}
+	},
+  {
+    description: "Simple file",
+    input: FILES_ENABLED ? new File(["A,B,C\nX,Y,Z"], "sample.csv") : false,
+		config: {
+		},
+		expected: {
+			data: [['A','B','C'],['X','Y','Z']],
+			errors: []
+		}
+  },
+  {
+    description: "Simple file + worker",
+    input: FILES_ENABLED ? new File(["A,B,C\nX,Y,Z"], "sample.csv") : false,
+		config: {
+			worker: true,
+		},
+		expected: {
+			data: [['A','B','C'],['X','Y','Z']],
+			errors: []
+		}
+  }
 ];
 
 
@@ -1045,7 +1071,7 @@ var CUSTOM_TESTS = [
 		}
 	},
 	{
-		description: "Step exposes cursor for files",
+		description: "Step exposes cursor for downloads",
 		expected: [129,	287, 452, 595, 727, 865, 1031, 1209],
 		run: function(callback) {
 			var updates = [];
@@ -1060,9 +1086,8 @@ var CUSTOM_TESTS = [
 		}
 	},
 	{
-		description: "Step exposes cursor for chunked files",
-		// Tiny inconsistency: the last full row in each chunk will not see a newline.
-		expected: [129, 287, 451, 595, 727, 864, 1031, 1209],
+		description: "Step exposes cursor for chunked downloads",
+		expected: [129,	287, 452, 595, 727, 865, 1031, 1209],
 		run: function(callback) {
 			var updates = [];
 			Papa.parse("/tests/long-sample.csv", {
@@ -1078,8 +1103,7 @@ var CUSTOM_TESTS = [
 	},
 	{
 		description: "Step exposes cursor for workers",
-		// You're only really getting chunk cursors here.
-		expected: [451, 451, 451, 864, 864, 864, 1209, 1209],
+		expected: [452, 452, 452, 865, 865, 865, 1209, 1209],
 		run: function(callback) {
 			var updates = [];
 			Papa.parse("/tests/long-sample.csv", {
@@ -1112,7 +1136,7 @@ var CUSTOM_TESTS = [
 	},
 	{
 		description: "Chunk is called with cursor position",
-		expected: [451, 864, 1209],
+		expected: [452, 865, 1209],
 		run: function(callback) {
 			var updates = [];
 			Papa.parse("/tests/long-sample.csv", {
@@ -1126,4 +1150,52 @@ var CUSTOM_TESTS = [
 			});
 		}
 	},
+	{
+		description: "Step exposes indexes for files",
+		expected: [6, 12, 17],
+		disabled: !FILES_ENABLED,
+		run: function(callback) {
+			var updates = [];
+			Papa.parse(new File(['A,b,c\nd,E,f\nG,h,i'], 'sample.csv'), {
+				download: true,
+				step: function(response) {
+					updates.push(response.indexes[0]);
+				}, complete: function() {
+					callback(updates);
+				}
+			});
+		}
+	},
+	{
+		description: "Step exposes indexes for chunked files",
+		expected: [6, 12, 17],
+		disabled: !FILES_ENABLED,
+		run: function(callback) {
+			var updates = [];
+			Papa.parse(new File(['A,b,c\nd,E,f\nG,h,i'], 'sample.csv'), {
+				chunkSize: 3,
+				step: function(response) {
+					updates.push(response.indexes[0]);
+				}, complete: function() {
+					callback(updates);
+				}
+			});
+		}
+	},
+	{
+		description: "Quoted line breaks near chunk boundaries are handled",
+		expected: [['A', 'B', 'C'], ['X', 'Y\n1\n2\n3', 'Z']],
+		disabled: !FILES_ENABLED,
+		run: function(callback) {
+			var updates = [];
+			Papa.parse(new File(['A,B,C\nX,"Y\n1\n2\n3",Z'], 'sample.csv'), {
+				chunkSize: 3,
+				step: function(response) {
+					updates.push(response.data[0]);
+				}, complete: function() {
+					callback(updates);
+				}
+			});
+		}
+	}
 ];

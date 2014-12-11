@@ -522,34 +522,16 @@
 
 			finishedWithEntireFile = (!config.step && !config.chunk) || start > getFileSize(xhr);
 
-			var lastLineEnd;
+			var results = handle.parse(aggregate, baseIndex, !finishedWithEntireFile);
+			var lastIndex = results.meta.cursor;
 			if (!finishedWithEntireFile)
 			{
-				lastLineEnd = aggregate.lastIndexOf("\r");
-
-				if (lastLineEnd == -1)
-					lastLineEnd = aggregate.lastIndexOf("\n");
-
-				if (lastLineEnd != -1)
-				{
-					partialLine = aggregate.substring(lastLineEnd + 1);	// skip the line ending character
-					aggregate = aggregate.substring(0, lastLineEnd);
-				}
-				else
-				{
-					// For chunk sizes smaller than a line (a line could not fit in a single chunk)
-					// we simply build our aggregate by reading in the next chunk, until we find a newline
-					nextChunk();
-					return;
-				}
+				partialLine = aggregate.substring(lastIndex - baseIndex);
+				baseIndex = lastIndex;
 			}
-
-			var results = handle.parse(aggregate, baseIndex);
-			aggregate = "";
-			if (!finishedWithEntireFile)
-				baseIndex += lastLineEnd + 1;
 			if (results && results.data)
 				rowCount += results.data.length;
+			aggregate = "";
 
 			var finishedIncludingPreview = finishedWithEntireFile || (configCopy.preview && rowCount >= configCopy.preview);
 
@@ -705,34 +687,16 @@
 
 			finishedWithEntireFile = start >= file.size;
 
-			var lastLineEnd;
+			var results = handle.parse(aggregate, baseIndex, !finishedWithEntireFile);
+			var lastIndex = results.meta.cursor;
 			if (!finishedWithEntireFile)
 			{
-				lastLineEnd = aggregate.lastIndexOf("\r");	// TODO: Use an auto-detected line ending?
-
-				if (lastLineEnd == -1)
-					lastLineEnd = aggregate.lastIndexOf("\n");
-
-				if (lastLineEnd != -1)
-				{
-					partialLine = aggregate.substring(lastLineEnd + 1);	// skip the line ending character (TODO: Not always length 1? \r\n...)
-					aggregate = aggregate.substring(0, lastLineEnd);
-				}
-				else
-				{
-					// For chunk sizes smaller than a line (a line could not fit in a single chunk)
-					// we simply build our aggregate by reading in the next chunk, until we find a newline
-					nextChunk();
-					return;
-				}
+				partialLine = aggregate.substring(lastIndex - baseIndex);
+				baseIndex = lastIndex;
 			}
-
-			var results = handle.parse(aggregate, baseIndex);
-			aggregate = "";
-			if (!finishedWithEntireFile)
-				baseIndex += lastLineEnd + 1;
 			if (results && results.data)
 				rowCount += results.data.length;
+			aggregate = "";
 
 			var finishedIncludingPreview = finishedWithEntireFile || (configCopy.preview && rowCount >= configCopy.preview);
 
@@ -839,7 +803,7 @@
 			};
 		}
 
-		this.parse = function(input, baseIndex)
+		this.parse = function(input, baseIndex, ignoreLastRow)
 		{
 			if (!_config.newline)
 				_config.newline = guessLineEndings(input);
@@ -864,7 +828,7 @@
 
 			_input = input;
 			_parser = new Parser(parserConfig);
-			_results = _parser.parse(_input, baseIndex);
+			_results = _parser.parse(_input, baseIndex, ignoreLastRow);
 			processResults();
 			if (isFunction(_config.complete) && !_paused && (!self.streamer || self.streamer.finished()))
 				_config.complete(_results);
@@ -1112,7 +1076,7 @@
 		var cursor = 0;
 		var aborted = false;
 
-		this.parse = function(input, baseIndex)
+		this.parse = function(input, baseIndex, ignoreLastRow)
 		{
 			// For some reason, in Chrome, this speeds things up (!?)
 			if (typeof input !== 'string')
@@ -1182,25 +1146,24 @@
 
 						if (quoteSearch === -1)
 						{
-							// No closing quote... what a pity
-							errors.push({
-								type: "Quotes",
-								code: "MissingQuotes",
-								message: "Quoted field unterminated",
-								row: data.length,	// row has yet to be inserted
-								index: cursor
-							});
+							if (!ignoreLastRow) {
+								// No closing quote... what a pity
+								errors.push({
+									type: "Quotes",
+									code: "MissingQuotes",
+									message: "Quoted field unterminated",
+									row: data.length,	// row has yet to be inserted
+									index: cursor
+								});
+							}
 							return finish();
 						}
 
 						if (quoteSearch === inputLen-1)
 						{
 							// Closing quote at EOF
-							row.push(input.substring(cursor, quoteSearch).replace(/""/g, '"'));
-							pushRow(row);
-							if (stepIsFunction)
-								doStep();
-							return returnable();
+							var value = input.substring(cursor, quoteSearch).replace(/""/g, '"');
+							return finish(value);
 						}
 
 						// If this quote is escaped, it's part of the data; skip it
@@ -1298,9 +1261,13 @@
 
 			// Appends the remaining input from cursor to the end into
 			// row, saves the row, calls step, and returns the results.
-			function finish()
+			function finish(value)
 			{
-				row.push(input.substr(cursor));
+				if (ignoreLastRow)
+					return returnable();
+				if (!value)
+					value = input.substr(cursor);
+				row.push(value);
 				cursor = inputLen;	// important in case parsing is paused
 				pushRow(row);
 				if (stepIsFunction)
