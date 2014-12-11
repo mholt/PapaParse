@@ -1197,5 +1197,78 @@ var CUSTOM_TESTS = [
 				}
 			});
 		}
+	},
+	{
+		description: "Step functions can abort parsing",
+		expected: [['A', 'b', 'c']],
+		run: function(callback) {
+			var updates = [];
+			Papa.parse('A,b,c\nd,E,f\nG,h,i', {
+				step: function(response, handle) {
+					updates.push(response.data[0]);
+					handle.abort();
+				}
+			});
+			setTimeout(function() {
+				callback(updates);
+			}, 100);
+		}
+	},
+	{
+		description: "Step functions can pause parsing",
+		expected: [['A', 'b', 'c']],
+		run: function(callback) {
+			var updates = [];
+			Papa.parse('A,b,c\nd,E,f\nG,h,i', {
+				step: function(response, handle) {
+					updates.push(response.data[0]);
+					handle.pause();
+				}
+			});
+			setTimeout(function() {
+				callback(updates);
+			}, 100);
+		}
+	},
+	{
+		description: "Step functions can resume parsing",
+		expected: [['A', 'b', 'c'], ['d', 'E', 'f'], ['G', 'h', 'i']],
+		run: function(callback) {
+			var updates = [];
+			var handle = null;
+			var first = true;
+			Papa.parse('A,b,c\nd,E,f\nG,h,i', {
+				step: function(response, h) {
+					updates.push(response.data[0]);
+					if (!first) return;
+					handle = h;
+					handle.pause();
+					first = false;
+				}, complete: function() {
+					callback(updates);
+				}
+			});
+			setTimeout(function() {
+				handle.resume();
+			}, 100);
+		}
+	},
+	{
+		description: "Step functions can abort workers",
+		expected: 1,
+		run: function(callback) {
+			var updates = 0;
+			Papa.parse("/tests/long-sample.csv", {
+				worker: true,
+				chunkSize: 500,
+				step: function(response, handle) {
+					updates++;
+					handle.abort();
+				},
+				complete: function() {
+					callback(updates);
+				}
+			});
+		}
 	}
 ];
