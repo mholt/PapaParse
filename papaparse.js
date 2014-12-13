@@ -52,6 +52,7 @@
 	global.Papa.ParserHandle = ParserHandle;
 	global.Papa.NetworkStreamer = NetworkStreamer;
 	global.Papa.FileStreamer = FileStreamer;
+	global.Papa.StringStreamer = StringStreamer;
 
 	if (global.jQuery)
 	{
@@ -194,58 +195,22 @@
 				config: config,
 				workerId: w.id
 			});
-		}
-		else
-		{
-			if (typeof _input === 'string')
-			{
-				if (config.download)
-				{
-					var streamer = new NetworkStreamer(config);
-					streamer.stream(_input);
-				}
-				else
-				{
-					var ph = new ParserHandle(config);
-					var results = ph.parse(_input);
-					return results;
-				}
-			}
-			else if ((global.File && _input instanceof File) || _input instanceof Object)	// ...Safari. (see issue #106)
-			{
-				if (config.step || config.chunk)
-				{
-					var streamer = new FileStreamer(config);
-					streamer.stream(_input);
-				}
-				else
-				{
-					var ph = new ParserHandle(config);
 
-					if (IS_WORKER)
-					{
-						var reader = new FileReaderSync();
-						var input = reader.readAsText(_input, config.encoding);
-						return ph.parse(input);
-					}
-					else
-					{
-						reader = new FileReader();
-						reader.onload = function(event)
-						{
-							var ph = new ParserHandle(config);
-							var results = ph.parse(event.target.result);
-						};
-						reader.onerror = function()
-						{
-							if (isFunction(config.error))
-								config.error(reader.error, _input);
-						};
-						reader.readAsText(_input, config.encoding);
-					}
-				}
-			}
+			return;
 		}
+
+		var streamer = null;
+		if (typeof _input === 'string')
+		{
+			if (config.download)
+				streamer = new NetworkStreamer(config);
+			else
+				streamer = new StringStreamer(config);
+		}
+		else if ((global.File && _input instanceof File) || _input instanceof Object)	// ...Safari. (see issue #106)
+			streamer = new FileStreamer(config);
+
+		return streamer.stream(_input);
 	}
 
 
@@ -448,12 +413,13 @@
 
 		this._nextChunk = null;
 
-		this._parseChunk = function(chunk) {
+		this.parseChunk = function(chunk) {
 			// Rejoin the line we likely just split in two by chunking the file
 			var aggregate = this._partialLine + chunk;
 			this._partialLine = "";
 
 			var results = this._handle.parse(aggregate, this._baseIndex, !this._finished);
+			if (this._handle.paused()) return;
 			var lastIndex = results.meta.cursor;
 			if (!this._finished)
 			{
@@ -486,6 +452,8 @@
 
 			if (!finishedIncludingPreview && (!results || !results.meta.paused))
 				this._nextChunk();
+
+			return results;
 		};
 
 		this._sendError = function(error)
@@ -600,7 +568,7 @@
 			}
 
 			this._finished = (!this._config.step && !this._config.chunk) || this._start > getFileSize(xhr);
-			this._parseChunk(xhr.responseText);
+			this.parseChunk(xhr.responseText);
 		}
 
 		this._chunkError = function(errorMessage)
@@ -669,7 +637,7 @@
 			// Very important to increment start each time before handling results
 			this._start += this._config.chunkSize;
 			this._finished = this._start >= this._input.size;
-			this._parseChunk(event.target.result);
+			this.parseChunk(event.target.result);
 		}
 
 		this._chunkError = function()
@@ -682,6 +650,31 @@
 	FileStreamer.prototype.constructor = FileStreamer;
 
 
+	function StringStreamer(config)
+	{
+		config = config || {};
+		ChunkStreamer.call(this, config);
+
+		var string;
+		var remaining;
+		this.stream = function(s)
+		{
+			string = s;
+			remaining = s;
+			return this._nextChunk();
+		}
+		this._nextChunk = function()
+		{
+			if (this._finished) return;
+			var size = this._config.chunkSize;
+			var chunk = size ? remaining.substr(0, size) : remaining;
+			remaining = size ? remaining.substr(size) : '';
+			this._finished = !remaining;
+			return this.parseChunk(chunk);
+		}
+	}
+	StringStreamer.prototype = Object.create(StringStreamer.prototype);
+	StringStreamer.prototype.constructor = StringStreamer;
 
 
 
@@ -757,9 +750,14 @@
 			_parser = new Parser(parserConfig);
 			_results = _parser.parse(_input, baseIndex, ignoreLastRow);
 			processResults();
-			if (isFunction(_config.complete) && !_paused && (!self.streamer || self.streamer.finished()))
+			if (isFunction(_config.complete) && !_paused && self.streamer.finished())
 				_config.complete(_results);
 			return _paused ? { meta: { paused: true } } : (_results || { meta: { paused: false } });
+		};
+
+		this.paused = function()
+		{
+			return _paused;
 		};
 
 		this.pause = function()
@@ -772,15 +770,7 @@
 		this.resume = function()
 		{
 			_paused = false;
-			_parser = new Parser(_config);
-			_parser.parse(_input);
-			if (!_paused)
-			{
-				if (self.streamer && !self.streamer.finished())
-					self.streamer.resume();		// more of the file yet to come
-				else if (isFunction(_config.complete))
-					_config.complete(_results);
-			}
+			self.streamer.parseChunk(_input);
 		};
 
 		this.abort = function()
