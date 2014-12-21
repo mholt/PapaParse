@@ -1,6 +1,6 @@
 {
 	"name": "babyparse",
-	"version": "0.2.1",
+	"version": "0.4.0",
 	"title": "BabyParse",
 	"repository": {
     		"type": "git",
@@ -18,9 +18,6 @@
 		"auto-detect",
 		"comma",
 		"tab",
-		"pipe",
-		"file",
-		"filereader",
 		"stream"
 	],
 	"author": {
