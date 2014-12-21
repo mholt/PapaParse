@@ -1,6 +1,6 @@
 /*
 	Baby Parse
-	v0.4.0
+	v0.4.1
 	https://github.com/Rich-Harris/BabyParse
 
 	Created by Rich Harris
