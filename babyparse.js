@@ -1,25 +1,29 @@
 /*
 	Baby Parse
-	v0.2.1
+	v0.4.0
 	https://github.com/Rich-Harris/BabyParse
 
-	based on Papa Parse v3.0.1
+	Created by Rich Harris
+	Maintained by Matt Holt
+
+	Based on Papa Parse v4.0.7 by Matt Holt
 	https://github.com/mholt/PapaParse
 */
-
-
-(function ( global ) {
+(function(global)
+{
 
 	// A configuration object from which to draw default settings
 	var DEFAULTS = {
 		delimiter: "",	// empty: auto-detect
+		newline: "",	// empty: auto-detect
 		header: false,
 		dynamicTyping: false,
 		preview: 0,
 		step: undefined,
 		comments: false,
 		complete: undefined,
-		keepEmptyRows: false
+		skipEmptyLines: false,
+		fastMode: false
 	};
 
 	var Baby = {};
@@ -29,6 +33,9 @@
 	Baby.UNIT_SEP = String.fromCharCode(31);
 	Baby.BYTE_ORDER_MARK = "\ufeff";
 	Baby.BAD_DELIMITERS = ["\r", "\n", "\"", Baby.BYTE_ORDER_MARK];
+	Baby.DefaultDelimiter = ",";		// Used if not specified and detection fails
+	Baby.Parser = Parser;				// For testing/dev only
+	Baby.ParserHandle = ParserHandle;	// For testing/dev only
 
 
 	function CsvToJson(_input, _config)
@@ -170,7 +177,7 @@
 		// Encloses a value around quotes if needed (makes a value safe for CSV insertion)
 		function safe(str, col)
 		{
-			if (typeof str === "undefined")
+			if (typeof str === "undefined" || str === null)
 				return "";
 
 			str = str.toString().replace(/"/g, '""');
@@ -205,6 +212,11 @@
 		// One goal is to minimize the use of regular expressions...
 		var FLOAT = /^\s*-?(\d*\.?\d+|\d+\.?\d*)(e[-+]?\d+)?\s*$/i;
 
+		var self = this;
+		var _stepCounter = 0;	// Number of times step was called (number of rows parsed)
+		var _input;				// The input being parsed
+		var _parser;			// The core parser being used
+		var _paused = false;	// Whether we are paused or not
 		var _delimiterError;	// Temporary state between delimiter detection and processing results
 		var _fields = [];		// Fields are from the header row of the input, if there is one
 		var _results = {		// The last results returned from the parser
@@ -212,10 +224,38 @@
 			errors: [],
 			meta: {}
 		};
-		_config = copy(_config);
+
+		if (isFunction(_config.step))
+		{
+			var userStep = _config.step;
+			_config.step = function(results)
+			{
+				_results = results;
+
+				if (needsHeaderRow())
+					processResults();
+				else	// only call user's step function after header row
+				{
+					processResults();
+
+					// It's possbile that this line was empty and there's no row here after all
+					if (_results.data.length == 0)
+						return;
+
+					_stepCounter += results.data.length;
+					if (_config.preview && _stepCounter > _config.preview)
+						_parser.abort();
+					else
+						userStep(_results, self);
+				}
+			};
+		}
 
 		this.parse = function(input)
 		{
+			if (!_config.newline)
+				_config.newline = guessLineEndings(input);
+
 			_delimiterError = false;
 			if (!_config.delimiter)
 			{
@@ -225,34 +265,66 @@
 				else
 				{
 					_delimiterError = true;	// add error after parsing (otherwise it would be overwritten)
-					_config.delimiter = ",";
+					_config.delimiter = Baby.DefaultDelimiter;
 				}
 				_results.meta.delimiter = _config.delimiter;
 			}
 
-			if (isFunction(_config.step))
-			{
-				var userStep = _config.step;
-				_config.step = function(results, parser)
-				{
-					_results = results;
-					if (needsHeaderRow())
-						processResults();
-					else
-						userStep(processResults(), parser);
-				};
-			}
+			var parserConfig = copy(_config);
+			if (_config.preview && _config.header)
+				parserConfig.preview++;	// to compensate for header row
 
-			_results = new Parser(_config).parse(input);
-			return processResults();
+			_input = input;
+			_parser = new Parser(parserConfig);
+			_results = _parser.parse(_input);
+			processResults();
+			if (isFunction(_config.complete) && !_paused && (!self.streamer || self.streamer.finished()))
+				_config.complete(_results);
+			return _paused ? { meta: { paused: true } } : (_results || { meta: { paused: false } });
+		};
+
+		this.pause = function()
+		{
+			_paused = true;
+			_parser.abort();
+			_input = _input.substr(_parser.getCharIndex());
+		};
+
+		this.resume = function()
+		{
+			_paused = false;
+			_parser = new Parser(_config);
+			_parser.parse(_input);
+			if (!_paused)
+			{
+				if (self.streamer && !self.streamer.finished())
+					self.streamer.resume();		// more of the file yet to come
+				else if (isFunction(_config.complete))
+					_config.complete(_results);
+			}
+		};
+
+		this.abort = function()
+		{
+			_parser.abort();
+			if (isFunction(_config.complete))
+				_config.complete(_results);
+			_input = "";
 		};
 
 		function processResults()
 		{
 			if (_results && _delimiterError)
 			{
-				addError("Delimiter", "UndetectableDelimiter", "Unable to auto-detect delimiting character; defaulted to comma");
+				addError("Delimiter", "UndetectableDelimiter", "Unable to auto-detect delimiting character; defaulted to '"+Baby.DefaultDelimiter+"'");
 				_delimiterError = false;
+			}
+
+			if (_config.skipEmptyLines)
+			{
+				for (var i = 0; i < _results.data.length; i++)
+					if (_results.data[i].length == 1 && _results.data[i][0] == "")
+						_results.data.splice(i--, 1);
 			}
 
 			if (needsHeaderRow())
@@ -284,6 +356,7 @@
 			for (var i = 0; i < _results.data.length; i++)
 			{
 				var row = {};
+
 				for (var j = 0; j < _results.data[i].length; j++)
 				{
 					if (_config.dynamicTyping)
@@ -305,7 +378,8 @@
 								row["__parsed_extra"] = [];
 							row["__parsed_extra"].push(_results.data[i][j]);
 						}
-						row[_fields[j]] = _results.data[i][j];
+						else
+							row[_fields[j]] = _results.data[i][j];
 					}
 				}
 
@@ -319,9 +393,8 @@
 				}
 			}
 
-			if (_config.header && _results.meta);
+			if (_config.header && _results.meta)
 				_results.meta.fields = _fields;
-
 			return _results;
 		}
 
@@ -376,6 +449,25 @@
 			}
 		}
 
+		function guessLineEndings(input)
+		{
+			input = input.substr(0, 1024*1024);	// max length 1 MB
+
+			var r = input.split('\r');
+
+			if (r.length == 1)
+				return '\n';
+
+			var numWithN = 0;
+			for (var i = 0; i < r.length; i++)
+			{
+				if (r[i][0] == '\n')
+					numWithN++;
+			}
+
+			return numWithN >= r.length / 2 ? '\r\n' : '\r';
+		}
+
 		function tryParseFloat(val)
 		{
 			var isNumber = FLOAT.test(val);
@@ -398,287 +490,280 @@
 
 
 
-
+	// The core parser implements speedy and correct CSV parsing
 	function Parser(config)
 	{
-		var self = this;
-		var EMPTY = /^\s*$/;
-
-		var _input;		// The input text being parsed
-		var _delimiter;	// The delimiting character
-		var _comments;	// Comment character (default '#') or boolean
-		var _step;		// The step (streaming) function
-		var _callback;	// The callback to invoke when finished
-		var _preview;	// Maximum number of lines (not rows) to parse
-		var _ch;		// Current character
-		var _i;			// Current character's positional index
-		var _inQuotes;	// Whether in quotes or not
-		var _lineNum;	// Current line number (1-based indexing)
-		var _data;		// Parsed data (results)
-		var _errors;	// Parse errors
-		var _rowIdx;	// Current row index within results (0-based)
-		var _colIdx;	// Current col index within result row (0-based)
-		var _runningRowIdx;		// Cumulative row index, used by the preview feature
-		var _aborted = false;	// Abort flag
-		var _paused = false;	// Pause flag
-
 		// Unpack the config object
 		config = config || {};
-		_delimiter = config.delimiter;
-		_comments = config.comments;
-		_step = config.step;
-		_preview = config.preview;
+		var delim = config.delimiter;
+		var newline = config.newline;
+		var comments = config.comments;
+		var step = config.step;
+		var preview = config.preview;
+		var fastMode = config.fastMode;
 
-		// Delimiter integrity check
-		if (typeof _delimiter !== 'string'
-			|| _delimiter.length != 1
-			|| Baby.BAD_DELIMITERS.indexOf(_delimiter) > -1)
-			_delimiter = ",";
+		// Delimiter must be valid
+		if (typeof delim !== 'string'
+			|| delim.length != 1
+			|| Baby.BAD_DELIMITERS.indexOf(delim) > -1)
+			delim = ",";
 
-		// Comment character integrity check
-		if (_comments === true)
-			_comments = "#";
-		else if (typeof _comments !== 'string'
-			|| _comments.length != 1
-			|| Baby.BAD_DELIMITERS.indexOf(_comments) > -1
-			|| _comments == _delimiter)
-			_comments = false;
+		// Comment character must be valid
+		if (comments === delim)
+			throw "Comment character same as delimiter";
+		else if (comments === true)
+			comments = "#";
+		else if (typeof comments !== 'string'
+			|| Baby.BAD_DELIMITERS.indexOf(comments) > -1)
+			comments = false;
 
+		// Newline must be valid: \r, \n, or \r\n
+		if (newline != '\n' && newline != '\r' && newline != '\r\n')
+			newline = '\n';
+
+		// We're gonna need these at the Parser scope
+		var cursor = 0;
+		var aborted = false;
 
 		this.parse = function(input)
 		{
+			// For some reason, in Chrome, this speeds things up (!?)
 			if (typeof input !== 'string')
 				throw "Input must be a string";
-			reset(input);
-			return parserLoop();
+
+			// We don't need to compute some of these every time parse() is called,
+			// but having them in a more local scope seems to perform better
+			var inputLen = input.length,
+				delimLen = delim.length,
+				newlineLen = newline.length,
+				commentsLen = comments.length;
+			var stepIsFunction = typeof step === 'function';
+
+			// Establish starting state
+			cursor = 0;
+			var data = [], errors = [], row = [];
+
+			if (!input)
+				return returnable();
+
+			if (fastMode)
+			{
+				// Fast mode assumes there are no quoted fields in the input
+				var rows = input.split(newline);
+				for (var i = 0; i < rows.length; i++)
+				{
+					if (comments && rows[i].substr(0, commentsLen) == comments)
+						continue;
+					if (stepIsFunction)
+					{
+						data = [ rows[i].split(delim) ];
+						doStep();
+						if (aborted)
+							return returnable();
+					}
+					else
+						data.push(rows[i].split(delim));
+					if (preview && i >= preview)
+					{
+						data = data.slice(0, preview);
+						return returnable(true);
+					}
+				}
+				return returnable();
+			}
+
+			var nextDelim = input.indexOf(delim, cursor);
+			var nextNewline = input.indexOf(newline, cursor);
+
+			// Parser loop
+			for (;;)
+			{
+				// Field has opening quote
+				if (input[cursor] == '"')
+				{
+					// Start our search for the closing quote where the cursor is
+					var quoteSearch = cursor;
+
+					// Skip the opening quote
+					cursor++;
+
+					for (;;)
+					{
+						// Find closing quote
+						var quoteSearch = input.indexOf('"', quoteSearch+1);
+
+						if (quoteSearch === -1)
+						{
+							// No closing quote... what a pity
+							errors.push({
+								type: "Quotes",
+								code: "MissingQuotes",
+								message: "Quoted field unterminated",
+								row: data.length,	// row has yet to be inserted
+								index: cursor
+							});
+							return finish();
+						}
+
+						if (quoteSearch === inputLen-1)
+						{
+							// Closing quote at EOF
+							row.push(input.substring(cursor, quoteSearch).replace(/""/g, '"'));
+							data.push(row);
+							if (stepIsFunction)
+								doStep();
+							return returnable();
+						}
+
+						// If this quote is escaped, it's part of the data; skip it
+						if (input[quoteSearch+1] == '"')
+						{
+							quoteSearch++;
+							continue;
+						}
+
+						if (input[quoteSearch+1] == delim)
+						{
+							// Closing quote followed by delimiter
+							row.push(input.substring(cursor, quoteSearch).replace(/""/g, '"'));
+							cursor = quoteSearch + 1 + delimLen;
+							nextDelim = input.indexOf(delim, cursor);
+							nextNewline = input.indexOf(newline, cursor);
+							break;
+						}
+
+						if (input.substr(quoteSearch+1, newlineLen) === newline)
+						{
+							// Closing quote followed by newline
+							row.push(input.substring(cursor, quoteSearch).replace(/""/g, '"'));
+							saveRow(quoteSearch + 1 + newlineLen);
+							nextDelim = input.indexOf(delim, cursor);	// because we may have skipped the nextDelim in the quoted field
+
+							if (stepIsFunction)
+							{
+								doStep();
+								if (aborted)
+									return returnable();
+							}
+							
+							if (preview && data.length >= preview)
+								return returnable(true);
+
+							break;
+						}
+					}
+
+					continue;
+				}
+
+				// Comment found at start of new line
+				if (comments && row.length === 0 && input.substr(cursor, commentsLen) === comments)
+				{
+					if (nextNewline == -1)	// Comment ends at EOF
+						return returnable();
+					cursor = nextNewline + newlineLen;
+					nextNewline = input.indexOf(newline, cursor);
+					nextDelim = input.indexOf(delim, cursor);
+					continue;
+				}
+
+				// Next delimiter comes before next newline, so we've reached end of field
+				if (nextDelim !== -1 && (nextDelim < nextNewline || nextNewline === -1))
+				{
+					row.push(input.substring(cursor, nextDelim));
+					cursor = nextDelim + delimLen;
+					nextDelim = input.indexOf(delim, cursor);
+					continue;
+				}
+
+				// End of row
+				if (nextNewline !== -1)
+				{
+					row.push(input.substring(cursor, nextNewline));
+					saveRow(nextNewline + newlineLen);
+
+					if (stepIsFunction)
+					{
+						doStep();
+						if (aborted)
+							return returnable();
+					}
+
+					if (preview && data.length >= preview)
+						return returnable(true);
+
+					continue;
+				}
+
+				break;
+			}
+
+
+			return finish();
+
+
+			// Appends the remaining input from cursor to the end into
+			// row, saves the row, calls step, and returns the results.
+			function finish()
+			{
+				row.push(input.substr(cursor));
+				data.push(row);
+				cursor = inputLen;	// important in case parsing is paused
+				if (stepIsFunction)
+					doStep();
+				return returnable();
+			}
+
+			// Appends the current row to the results. It sets the cursor
+			// to newCursor and finds the nextNewline. The caller should
+			// take care to execute user's step function and check for
+			// preview and end parsing if necessary.
+			function saveRow(newCursor)
+			{
+				data.push(row);
+				row = [];
+				cursor = newCursor;
+				nextNewline = input.indexOf(newline, cursor);
+			}
+
+			// Returns an object with the results, errors, and meta.
+			function returnable(stopped)
+			{
+				return {
+					data: data,
+					errors: errors,
+					meta: {
+						delimiter: delim,
+						linebreak: newline,
+						aborted: aborted,
+						truncated: !!stopped
+					}
+				};
+			}
+
+			// Executes the user's step function and resets data & errors.
+			function doStep()
+			{
+				step(returnable());
+				data = [], errors = [];
+			}
 		};
 
+		// Sets the abort flag
 		this.abort = function()
 		{
-			_aborted = true;
+			aborted = true;
 		};
 
-		function parserLoop()
+		// Gets the cursor position
+		this.getCharIndex = function()
 		{
-			while (_i < _input.length)
-			{
-				if (_aborted) break;
-				if (_preview > 0 && _runningRowIdx >= _preview) break;
-				if (_paused) return finishParsing();
-
-				if (_ch == '"')
-					parseQuotes();
-				else if (_inQuotes)
-					parseInQuotes();
-				else
-					parseNotInQuotes();
-
-				nextChar();
-			}
-
-			return finishParsing();
-		}
-
-		function nextChar()
-		{
-			_i++;
-			_ch = _input[_i];
-		}
-
-		function finishParsing()
-		{
-			if (_aborted)
-				addError("Abort", "ParseAbort", "Parsing was aborted by the user's step function");
-			if (_inQuotes)
-				addError("Quotes", "MissingQuotes", "Unescaped or mismatched quotes");
-			endRow();	// End of input is also end of the last row
-			if (!isFunction(_step))
-				return returnable();
-		}
-
-		function parseQuotes()
-		{
-			if (quotesOnBoundary() && !quotesEscaped())
-				_inQuotes = !_inQuotes;
-			else
-			{
-				saveChar();
-				if (_inQuotes && quotesEscaped())
-					_i++
-				else
-					addError("Quotes", "UnexpectedQuotes", "Unexpected quotes");
-			}
-		}
-
-		function parseInQuotes()
-		{
-			if (twoCharLineBreak(_i) || oneCharLineBreak(_i))
-				_lineNum++;
-			saveChar();
-		}
-
-		function parseNotInQuotes()
-		{
-			if (_ch == _delimiter)
-				newField();
-			else if (twoCharLineBreak(_i))
-			{
-				newRow();
-				nextChar();
-			}
-			else if (oneCharLineBreak(_i))
-				newRow();
-			else if (isCommentStart())
-				skipLine();
-			else
-				saveChar();
-		}
-
-		function isCommentStart()
-		{
-			if (!_comments)
-				return false;
-
-			var firstCharOfLine = _i == 0
-									|| oneCharLineBreak(_i-1)
-									|| twoCharLineBreak(_i-2);
-			return firstCharOfLine && _input[_i] === _comments;
-		}
-
-		function skipLine()
-		{
-			while (!twoCharLineBreak(_i)
-				&& !oneCharLineBreak(_i)
-				&& _i < _input.length)
-			{
-				nextChar();
-			}
-		}
-
-		function saveChar()
-		{
-			_data[_rowIdx][_colIdx] += _ch;
-		}
-
-		function newField()
-		{
-			_data[_rowIdx].push("");
-			_colIdx = _data[_rowIdx].length - 1;
-		}
-
-		function newRow()
-		{
-			endRow();
-
-			_lineNum++;
-			_runningRowIdx++;
-			_data.push([]);
-			_rowIdx = _data.length - 1;
-			newField();
-		}
-
-		function endRow()
-		{
-			trimEmptyLastRow();
-			if (isFunction(_step))
-			{
-				if (_data[_rowIdx])
-					_step(returnable(), self);
-				clearErrorsAndData();
-			}
-		}
-
-		function trimEmptyLastRow()
-		{
-			if (_data[_rowIdx].length == 1 && EMPTY.test(_data[_rowIdx][0]))
-			{
-				if (config.keepEmptyRows)
-					_data[_rowIdx].splice(0, 1);	// leave row, but no fields
-				else
-					_data.splice(_rowIdx, 1);		// cut out row entirely
-				_rowIdx = _data.length - 1;
-			}
-		}
-
-		function twoCharLineBreak(i)
-		{
-			return i < _input.length - 1 &&
-				((_input[i] == "\r" && _input[i+1] == "\n")
-				|| (_input[i] == "\n" && _input[i+1] == "\r"))
-		}
-
-		function oneCharLineBreak(i)
-		{
-			return _input[i] == "\r" || _input[i] == "\n";
-		}
-
-		function quotesEscaped()
-		{
-			// Quotes as data cannot be on boundary, for example: ,"", are not escaped quotes
-			return !quotesOnBoundary() && _i < _input.length - 1 && _input[_i+1] == '"';
-		}
-
-		function quotesOnBoundary()
-		{
-			return (!_inQuotes && isBoundary(_i-1)) || isBoundary(_i+1);
-		}
-
-		function isBoundary(i)
-		{
-			if (typeof i != 'number')
-				i = _i;
-
-			var ch = _input[i];
-
-			return (i <= -1 || i >= _input.length)
-				|| (ch == _delimiter
-					|| ch == "\r"
-					|| ch == "\n");
-		}
-
-		function addError(type, code, msg)
-		{
-			_errors.push({
-				type: type,
-				code: code,
-				message: msg,
-				line: _lineNum,
-				row: _rowIdx,
-				index: _i
-			});
-		}
-
-		function reset(input)
-		{
-			_input = input;
-			_inQuotes = false;
-			_i = 0, _runningRowIdx = 0, _lineNum = 1;
-			clearErrorsAndData();
-			_data = [ [""] ];	// starting parsing requires an empty field
-			_ch = _input[_i];
-		}
-
-		function clearErrorsAndData()
-		{
-			_data = [];
-			_errors = [];
-			_rowIdx = 0;
-			_colIdx = 0;
-		}
-
-		function returnable()
-		{
-			return {
-				data: _data,
-				errors: _errors,
-				meta: {
-					lines: _lineNum,
-					delimiter: _delimiter,
-					aborted: _aborted
-				}
-			};
-		}
+			return cursor;
+		};
 	}
+
+
+
 
 	// Replaces bad config values with good, default ones
 	function copyAndValidateConfig(origConfig)
@@ -692,6 +777,11 @@
 			|| config.delimiter.length != 1
 			|| Baby.BAD_DELIMITERS.indexOf(config.delimiter) > -1)
 			config.delimiter = DEFAULTS.delimiter;
+
+		if (config.newline != '\n'
+			&& config.newline != '\r'
+			&& config.newline != '\r\n')
+			config.newline = DEFAULTS.newline;
 
 		if (typeof config.header !== 'boolean')
 			config.header = DEFAULTS.header;
@@ -708,8 +798,11 @@
 		if (typeof config.complete !== 'function')
 			config.complete = DEFAULTS.complete;
 
-		if (typeof config.keepEmptyRows !== 'boolean')
-			config.keepEmptyRows = DEFAULTS.keepEmptyRows;
+		if (typeof config.skipEmptyLines !== 'boolean')
+			config.skipEmptyLines = DEFAULTS.skipEmptyLines;
+
+		if (typeof config.fastMode !== 'boolean')
+			config.fastMode = DEFAULTS.fastMode;
 
 		return config;
 	}
@@ -749,6 +842,4 @@
 		global.Baby = Baby;
 	}
 
-
-
-}( typeof window !== 'undefined' ? window : this ));
+})(typeof window !== 'undefined' ? window : this);
