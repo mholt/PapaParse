@@ -1,250 +1,300 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>Papa Parse - Powerful CSV parser for Javascript</title>
+		<title>Papa Parse - Powerful CSV Parser for JavaScript</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, maximum-scale=1.0">
 		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css">
-		<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700,400italic|Lato:300,400,700,900|Arvo">
+		<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Arvo|Source+Sans+Pro:400,400italic,700|Lato:300,400">
 		<link rel="stylesheet" href="/resources/css/unsemantic.css">
+		<link rel="stylesheet" href="/resources/css/tomorrow.highlight.css">
 		<link rel="stylesheet" href="/resources/css/common.css">
 		<link rel="stylesheet" href="/resources/css/home.css">
 		<script src="/resources/js/jquery.min.js"></script>
+		<script src="/resources/js/skrollr.min.js"></script>
+		<script src="/resources/js/highlight.min.js"></script>
+		<script src="/resources/js/lovers.js"></script>
 		<script src="/resources/js/common.js"></script>
 		<script src="/resources/js/home.js"></script>
 	</head>
 	<body>
-		<div id="top-image"></div>
-		<div class="content">
-			<div id="top">
-				<h1>Papa Parse</h1>
-				<h2>A powerful, in-browser CSV parser for big boys and girls</h2>
-			</div>
+		<div id="top" data-top="bottom: 0px; opacity: 1;" data-top-bottom="bottom: -350px; opacity: .3;">
+			<div class="grid-container">
+				<div class="grid-100">
+					<div id="title-main">
+						<h1>Papa Parse</h1>
+						<h2>The powerful, in-browser CSV parser for big boys and girls</h2>
 
-			<main>
-				<header>
-					<div class="grid-container">
-						<div class="grid-40 mobile-grid-50">
-							<div class="links">
-								<a href="https://github.com/mholt/PapaParse">
-									<i class="fa fa-github fa-lg"></i> GitHub
-								</a>
-								<a href="/demo">
-									<i class="fa fa-magic fa-lg"></i> Demo
-								</a>
-								<a href="/docs">
-									<i class="fa fa-book fa-lg"></i> Docs
-								</a>
-							</div>
-						</div>
-						<div class="grid-20 hide-on-mobile text-center">
-							<a href="/" class="text-logo">Papa Parse</a>
-						</div>
-						<div class="grid-40 mobile-grid-50 text-right">
-							<div class="links">
-								<a href="/faq">
-									<i class="fa fa-question fa-lg"></i> FAQ
-								</a>
-								<a href="https://github.com/mholt/PapaParse/issues">
-									<i class="fa fa-bug fa-lg"></i> Issues
-								</a>
-								<a href="https://www.gratipay.com/mholt/" class="donate">
-									<i class="fa fa-heart fa-lg"></i> Donate
-								</a>
-							</div>
-						</div>
-					</div>
-				</header>
-
-				<div class="insignia">
-					<div class="firefox-hack">P</div>
-				</div>
-
-
-				<div class="grid-container">
-					<div class="grid-100">
-						<div class="ticker">
-							<h2>
-								<div class="ticker-statement current">
-									Now the <a href="http://jsperf.com/javascript-csv-parsers/4">fastest</a> JavaScript CSV parser for the browser
-								</div>
-								<div class="ticker-statement">
-									The world's first multi-threaded CSV parser for the browser
-								</div>
-								<div class="ticker-statement">
-									Use Papa when performance, privacy, and correctness matter to you
-								</div>
-								<div class="ticker-statement">
-									Papa is easy to use:
-									<br>
-									<code>var results = Papa.parse(csv);</code>
-								</div>
-								<div class="ticker-statement">
-									Convert JSON to CSV:
-									<br>
-									<code>var csv = Papa.unparse(json);</code>
-								</div>
-								<div class="ticker-statement">
-									Companies trust Papa to help alleviate privacy concerns related to uploading files.
-								</div>
-								<div class="ticker-statement">
-									Malformed CSV is handled gracefully with a detailed error report.
-								</div>
-							</h2>
-						</div>
+						<a href="https://github.com/mholt/PapaParse/archive/4.0.7.zip" class="button">
+							<i class="fa fa-download"></i>&nbsp; Download
+						</a>
+						<a href="/demo" class="button red">
+							<i class="fa fa-magic"></i>&nbsp; Demo
+						</a>
+						<a href="/docs" class="button gray">
+							<i class="fa fa-book"></i>&nbsp; Documentation
+						</a>
 					</div>
 
+					<div id="title-code">
+						<pre><code class="language-javascript">// Parse CSV string
+var data = Papa.parse(csv);
 
-					<div class="clear"></div>
+// Convert back to CSV
+var csv = Papa.unparse(data);
 
-
-					<div class="grid-40">
-						<h3>Features</h3>
-						<ul>
-							<li>CSV &#8594; JSON and <a href="#unparse">JSON &#8594; CSV</a></li>
-							<li>Auto-detect <a href="#delimiter">delimiter</a></li>
-							<li><a href="#local-files">Open local files</a></li>
-							<li><a href="#remote-files">Download remote files</a></li>
-							<li><a href="#stream">Stream</a> local or remote files</li>
-							<li><a href="#worker">Multi-threaded</a></li>
-							<li><a href="#header">Header row</a> support</li>
-							<li>Number/boolean <a href="#type-conversion">type conversion</a></li>
-							<li>Skip <a href="#comments">commented lines</a></li>
-							<li>Fast mode for input without quoted fields</li>
-							<li><a href="#errors">Gracefully handles</a> malformed input</li>
-							<li>Just <a href="#jquery">a sprinkle</a> of jQuery (optional)</li>
-						</ul>
-						And Papa's <a href="http://jsperf.com/javascript-csv-parsers/4">blazing fast</a>!
-					</div>
-
-					<div class="grid-60">
-						<code class="block"><span class="comment">// Convert CSV to JSON</span>
-var results = Papa.parse(csv);
-
-<span class="comment">// Parse local CSV files</span>
-$('input[type=file]').parse({
-	config: {
-		complete: function(results) {
-			console.log("Parse results:", results.data);
-		}
+// Parse local CSV file
+Papa.parse(file, {
+	complete: function(results) {
+		console.log("Finished:", results.data);
 	}
 });
 
-<span class="comment">// In a worker thread</span>
-Papa.parse(fileOrString, {
+// Stream big file in worker thread
+Papa.parse(bigFile, {
 	worker: true,
-	complete: function(results) {
-		console.log("Parse results:", results.data);
+	step: function(results) {
+		console.log("Row:", results.data);
 	}
-});</code>
+});</code></pre>
 					</div>
+				</div>
+			</div>
+		</div>
 
-					<div class="clear"></div>
-
-
-					<div class="grid-100 text-center pad-50">
-						<div class="showcase">
-							<div class="showcase-title">
-								People <i class="fa fa-heart" title="Love"></i> Papa
-							</div>
-							<div class="showcase-images">
-								<a href="https://smartystreets.com" title="SmartyStreets" class="showcase-image smartystreets">
-									<img src="/resources/images/smartystreets.png" title="Fast, easy address verification">
-								</a>
-								<a href="javascript:" title="Add yours" class="showcase-image" id="showcase-add-link">
-									<i class="fa fa-plus fa-lg"></i>
-								</a>
-							</div>
-							<div class="showcase-add">
-								If you love your Papa, <a href="http://matt.life/contact">let me know</a> and we'll get your logo added to this page.
-							</div>
+		<main>
+			<header>
+				<div class="grid-container">
+					<div class="grid-40 mobile-grid-50">
+						<div class="links">
+							<a href="/demo">
+								<i class="fa fa-magic fa-lg"></i> Demo
+							</a>
+							<a href="/docs">
+								<i class="fa fa-book fa-lg"></i> Docs
+							</a>
+							<a href="/faq">
+								<i class="fa fa-question fa-lg"></i> FAQ
+							</a>
 						</div>
+					</div>
+					<div class="grid-20 hide-on-mobile text-center">
+						<a href="/" class="text-logo">Papa Parse 4</a>
+					</div>
+					<div class="grid-40 mobile-grid-50 text-right">
+						<div class="links">
+							<a href="https://github.com/mholt/PapaParse">
+								<i class="fa fa-github fa-lg"></i> GitHub
+							</a>
+							<a href="http://stackoverflow.com/questions/tagged/papaparse">
+								<i class="fa fa-stack-overflow fa-lg"></i> Help
+							</a>
+							<a href="https://gratipay.com/mholt" class="donate">
+								<i class="fa fa-heart fa-lg"></i> Donate
+							</a>
+						</div>
+					</div>
+				</div>
+			</header>
 
+			<div class="insignia">
+				<div class="firefox-hack"><div id="version-intro">Version</div><div id="version">4.0</div></div>
+			</div>
+
+
+			<section style="padding-top: 0;">
+
+				<div class="grid-container">
+					<div class="grid-100">
+						<h3>Features</h3>
+					</div>
+				</div>
+
+
+				<div id="ticker">
+					<div class="ticker-item current">
+						Now the <a href="http://jsperf.com/javascript-csv-parsers/4">fastest</a> JavaScript CSV parser for the browser
+					</div>
+					<div class="ticker-item">
+						The world's first multi-threaded CSV parser for the browser
+					</div>
+					<div class="ticker-item">
+						Papa can handle files gigabytes in size without crashing
+					</div>
+					<div class="ticker-item">
+						Use Papa when performance, privacy, and correctness matter to you
+					</div>
+					<div class="ticker-item">
+						Papa alleviates privacy concerns related to uploading files
+					</div>
+					<div class="ticker-item">
+						Malformed CSV is handled gracefully with a detailed error report
+					</div>
+				</div>
+
+
+				<div class="grid-container">					
+					<div class="grid-33">
+						<li>CSV&#8594;JSON and <a href="#unparse">JSON&#8594;CSV</a></li>
+						<li>Auto-detect <a href="#delimiter">delimiter</a></li>
+						<li><a href="#local-files">Open local files</a></li>
+						<li><a href="#remote-files">Download remote files</a></li>
+					</div>
+					<div class="grid-33">
+						<li><a href="#stream">Stream</a> local and remote files</li>
+						<li><a href="#worker">Multi-threaded</a></li>
+						<li><a href="#header">Header row</a> support</li>
+						<li><a href="#type-conversion">Type conversion</a></li>
+					</div>
+					<div class="grid-33">
+						<li>Skip <a href="#comments">commented lines</a></li>
+						<li>Fast mode</li>
+						<li>Graceful <a href="#errors">error</a> handling</li>
+						<li>Optional <a href="#jquery">sprinkle</a> of jQuery</li>
+					</div>
+
+					<div class="clear"></div>
+
+					<br>
+					<br>
+
+					<div class="grid-100 text-center">
 						<a href="https://github.com/mholt/PapaParse" class="button">
-							<i class="fa fa-download"></i>&nbsp; Get Papa Parse on GitHub
+							<i class="fa fa-github"></i>&nbsp; GitHub
 						</a>
-						<a href="/demo" class="button red">
-							<i class="fa fa-bolt"></i>&nbsp; Try the demo
+						<a href="/demo" class="button gray">
+							<i class="fa fa-book"></i>&nbsp; Documentation
 						</a>
 					</div>
-					<div class="clear"></div>
+				</div>
+			</section>
 
 
+			<section>
+				<div class="grid-container">
+					<div class="grid-100 text-center">
+						<h3>People <i class="fa fa-heart"></i> Papa</h3>
+					</div>
 
-					<div class="grid-40 suffix-5">
-						<div class="note" id="delimiter">Delimeter auto-detect</div>
-						<h4>"I don't know the delimiter..."</h4>
-						<p>
-							That's okay. Papa will scan the first few rows of input to find the right delimiter for you. You can also set the delimiting character manually. Either way, the delimiter used is returned with every result set.
+					<div class="grid-33">
+						<p class="lover">
+							<a href="https://smartystreets.com">SmartyStreets</a> verifies addresses, many of which are in CSV files. Papa Parse can process huge files in the browser. <i>"We rapidly built an awesome client-side file processor with Papa Parse."</i>
 						</p>
 					</div>
-					<div class="grid-55">
-						<code class="block">var results = Papa.parse(csvString);
-console.log(results);
-<span class="comment">/*
-	{
-		data: [ ... ]
-		errors: [ ... ]
-		meta: {
-			delimiter: "\t",
-			...
-		}
+					<div class="grid-33">
+						<p class="lover">
+							<a href="http://jannah.github.io/MetaReader/">MetaReader</a> helps you see your data from a meta level before you start detailed analysis. <i>"Papa Parse made it very easy to load and ready user CSV files in the browser on the client side."</i>
+						</p>
+					</div>
+					<div class="grid-33">
+						<p class="lover">
+							<a href="http://jannah.github.io/MetaReader/">EpiML</a> is an agent-based mathematical model for the web, still in its early stages of development. <i>"Papa makes it so easy to use CSV, which is good for scientists."</i>
+						</p>
+					</div>
+
+					<div class="clear"></div>
+
+					<div class="grid-100 text-center">
+						<br>
+						<b><a href="https://github.com/mholt/PapaParse/blob/gh-pages/resources/js/lovers.js" class="add-lover-link subheader"><i class="fa fa-plus-square"></i> Add your link (it's free)</a></b>
+					</div>
+				</div>
+			</section>
+
+
+			<section id="parse">
+				<div class="grid-container narrow-grid">
+					<div class="grid-100">
+						<h4>CSV Parsing</h4>
+						<h5>"Isn't parsing CSV just <code>String.split(',')</code>?"</h5>
+
+						<p>Heavens, no. Papa does it right. Just pass in the CSV string with an optional <a href="/docs#config">configuration</a>.</p>
+
+						<pre><code class="language-javascript">var results = Papa.parse(csvString, <a href="/docs#config">config</a>);
+/*
+	results = {
+		data: [ ... ],    // parsed data
+		errors: [ ... ],  // errors encountered
+		meta: {	... }     // extra parse info
 	}
-*/</span></code>
+*/</code></pre>
 					</div>
-					<div class="clear"></div>
-					<hr>
+				</div>
+			</section>
 
 
 
-					<div class="grid-40 suffix-5">
-						<div class="note" id="local-files">Parse local files</div>
-						<h4>"Great, but I have a <i>file</i> to parse."</h4>
-						<p>
-							Just give Papa a <a href="https://developer.mozilla.org/en-US/docs/Web/API/File">File</a> instead of a string. And a callback.
-						</p>
+			<section id="delimiter">
+				<div class="grid-container narrow-grid">
+					<div class="grid-100">
+						<h4>Delimiter Detection</h4>
+						<h5>"But I don't know the delimiter..."</h5>
+
+						<p>That's okay. Papa will scan the first few rows to find the right delimiter.</p>
+
+						<pre><code class="language-javascript">var results = Papa.parse(csvString);
+console.log(results.meta.delimiter);
+// "\t"</code></pre>
 					</div>
-					<div class="grid-55">
-						<code class="block">Papa.parse(file, {
+				</div>
+			</section>
+
+
+
+			<section id="local-files">
+				<div class="grid-container narrow-grid">
+					<div class="grid-100">
+						<h4>Local Files</h4>
+						<h5>"Great, but I have a <i>file</i> to parse."</h5>
+
+						<p>Then give Papa a <a href="https://developer.mozilla.org/en-US/docs/Web/API/File">File</a>  instead of a string. Since file parsing is asynchronous, don't forget a callback.</p>
+
+						<pre><code class="language-javascript">var results = Papa.parse(fileInput.files[0], {
 	complete: function(results) {
 		console.log(results);
 	}
-});</code>
+});</code></pre>
 					</div>
-					<div class="clear"></div>
-					<hr>
+				</div>
+			</section>
 
 
 
 
-					<div class="grid-40 suffix-5">
-						<div class="note" id="remote-files">Parse remote files</div>
-						<h4>"No, you don't understand. The file isn't local."</h4>
-						<p>
-							Well then just give Papa the URL and&mdash;of course&mdash;a callback.
-						</p>
-					</div>
-					<div class="grid-55">
-						<code class="block">Papa.parse("http://example.com/foo.csv", {
+
+			<section id="remote-files">
+				<div class="grid-container narrow-grid">
+					<div class="grid-100">
+						<h4>Remote Files</h4>
+						<h5>"No&mdash;I mean, the file isn't on my computer."</h5>
+
+						<p>Oh, well then just pass in the URL and&mdash;of course&mdash;a callback.</p>
+
+						<pre><code class="language-javascript">Papa.parse("http://example.com/file.csv", {
 	download: true,
 	complete: function(results) {
-		console.log("Remote file parsed!", results);
+		console.log(results);
 	}
-});</code>
+});</code></pre>
 					</div>
-					<div class="clear"></div>
-					<hr>
+				</div>
+			</section>
 
 
-					<div class="grid-40 suffix-5">
-						<div class="note" id="stream">Streaming</div>
-						<h4>"Did I mention the file is huge?"</h4>
-						<p>
-							That's what streaming is for. Specify a <code>step</code> callback to receive the results row-by-row. This way, you won't load the whole file into memory and crash the browser.
-						</p>
-					</div>
-					<div class="grid-55">
-						<code class="block">Papa.parse("http://example.com/bigfoo.csv", {
+
+
+
+
+
+			<section id="stream">
+				<div class="grid-container narrow-grid">
+					<div class="grid-100">
+						<h4>Streaming</h4>
+						<h5>"Did I mention the file is huge?"</h5>
+
+						<p>That's what streaming is for. Specify a step callback to receive the results row-by-row. This way, you won't load the whole file into memory and crash the browser.</p>
+
+						<pre><code class="language-javascript">Papa.parse("http://example.com/big.csv", {
 	download: true,
 	step: function(row) {
 		console.log("Row:", row.data);
@@ -252,23 +302,22 @@ console.log(results);
 	complete: function() {
 		console.log("All done!");
 	}
-});</code>
+});</code></pre>
 					</div>
-					<div class="clear"></div>
-					<hr>
+				</div>
+			</section>
 
 
 
+			<section id="worker">
+				<div class="grid-container narrow-grid">
+					<div class="grid-100">
+						<h4>Multi-Threading</h4>
+						<h5>"Lovely. Now my web page locked up."</h5>
 
-					<div class="grid-40 suffix-5">
-						<div class="note" id="worker">Multi-threading</div>
-						<h4>"Lovely. Now my web page locked up."</h4>
-						<p>
-							Oh. Yeah, that happens when a long-running script is executing in the same thread. Use a <a href="https://developer.mozilla.org/en-US/docs/Web/API/Worker">Worker</a> thread by specifying <code>worker: true</code>. It may take slightly longer, but your page will stay reactive.
-						</p>
-					</div>
-					<div class="grid-55">
-						<code class="block">Papa.parse(bigFile, {
+						<p>That happens when a long-running script is executing in the same thread as the page. Use a <a href="https://developer.mozilla.org/en-US/docs/Web/API/Worker">Worker</a> thread by specifying <code>worker: true</code>. It may take slightly longer, but your page will stay reactive.</p>
+
+						<pre><code class="language-javascript">Papa.parse(bigFile, {
 	worker: true,
 	step: function(row) {
 		console.log("Row:", row.data);
@@ -276,174 +325,220 @@ console.log(results);
 	complete: function() {
 		console.log("All done!");
 	}
-});</code>
+});</code></pre>
 					</div>
-					<div class="clear"></div>
-					<hr>
+				</div>
+			</section>
 
 
 
-					<div class="grid-40 suffix-5">
-						<div class="note" id="header">Header Rows</div>
-						<h4>"Great! Now I want data keyed by field name."</h4>
-						<p>
-							You can tell Papa that there is a header row.
-						</p>
-					</div>
-					<div class="grid-55">
-						<code class="block"><span class="comment">// Key data by field name instead of index/position</span>
+
+			<section id="header">
+				<div class="grid-container narrow-grid">
+					<div class="grid-100">
+						<h4>Header Row</h4>
+						<h5>"Great! Now I want data keyed by field name."</h5>
+
+						<p>If you tell Papa there is a header row, each row will be organized by field name instead of index.</p>
+
+						<pre><code class="language-javascript">// Key data by field name instead of index/position
 var results = Papa.parse(csv, {
 	header: true
-});</code>
+});</code></pre>
 					</div>
-					<div class="clear"></div>
-					<hr>
+				</div>
+			</section>
 
 
 
-					<div class="grid-40 suffix-5">
-						<div class="note" id="type-conversion">Type Conversion</div>
-						<h4>"Hey, these numbers are all parsed as strings."</h4>
-						<p>
-							Everything is parsed as strings. If you need the convenience, you can have numeric and boolean data automatically converted to number and boolean types.
-						</p>
-					</div>
-					<div class="grid-55">
-						<code class="block"><span class="comment">// All parsed data is normally returned as a string.
-// Dynamic typing converts numbers to numbers
-// and booleans to booleans.</span>
+
+			<section id="type-conversion">
+				<div class="grid-container narrow-grid">
+					<div class="grid-100">
+						<h4>Type Conversion</h4>
+						<h5>"Hey, these numbers are parsed as strings."</h5>
+
+						<p><i>Everything</i> is parsed as strings. If you want numbers and booleans, you can enable dynamic typing to do the conversion for you.</p>
+
+						<pre><code class="language-javascript">// Converts numeric/boolean data
 var results = Papa.parse(csv, {
 	dynamicTyping: true
-});</code>
+});</code></pre>
 					</div>
-					<div class="clear"></div>
-					<hr>
+				</div>
+			</section>
 
 
 
 
-					<div class="grid-40 suffix-5">
-						<div class="note" id="comments">Comments</div>
-						<h4>"I forgot to mention: my CSV files have comments in them."</h4>
-						<p>
-							Okay, first off: that's really weird. But you can skip those lines... just specify the comment character.
-						</p>
-					</div>
-					<div class="grid-55">
-						<code class="block"><span class="comment">// Mostly found in academia, some CSV files
-// may have commented lines in them</span>
+
+
+			<section id="comments">
+				<div class="grid-container narrow-grid">
+					<div class="grid-100">
+						<h4>Comments</h4>
+						<h5>"I forgot to mention: my CSV files have comments in them."</h5>
+
+						<p>Okay, first off: that's really weird. But fortunately, you can skip those lines... just specify the comment string.</p>
+
+						<pre><code class="language-javascript">// Mostly found in academia, some CSV files
+// may have commented lines in them
 var results = Papa.parse(csv, {
 	comments: "#"
-});</code>
+});</code></pre>
 					</div>
-					<div class="clear"></div>
-					<hr>
+				</div>
+			</section>
 
 
 
 
-					<div class="grid-40 suffix-5">
-						<div class="note" id="errors">Error handling</div>
-						<h4>"I'm getting tired, are we done&mdash;aw, shoot. Errors."</h4>
-						<p>
-							Yeah, almost done. Fortunately, Papa handles errors pretty well. The <a href="http://tools.ietf.org/html/rfc4180">CSV standard</a> is somewhat <strike>loose</strike> ambiguous, so Papa tries to consider the edge cases. For example, mismatched fields aren't always the end of the world.
-						</p>
-					</div>
-					<div class="grid-55">
-						<code class="block"><span class="comment">// Example error:</span>
+
+			<section id="errors">
+				<div class="grid-container narrow-grid">
+					<div class="grid-100">
+						<h4>Error Handling</h4>
+						<h5>"Aw, shoot. Errors."</h5>
+
+						<p>Papa handles errors pretty well. The <a href="http://tools.ietf.org/html/rfc4180">CSV standard</a> is somewhat <strike>loose</strike> ambiguous, so Papa is designed for edge cases. For example, mismatched fields won't break parsing.</p>
+
+						<pre><code class="language-javascript">// Example error:
 {
 	type: "FieldMismatch",
 	code: "TooManyFields",
 	message: "Expected 3 fields, but parsed 4",
 	row: 1
-}</code>
+}</code></pre>
 					</div>
-					<div class="clear"></div>
-					<hr>
+				</div>
+			</section>
 
 
 
-					<div class="grid-40 suffix-5">
-						<div class="note" id="jquery">jQuery Plugin</div>
-						<h4>"Can I use Papa with jQuery?"</h4>
-						<p>
-							Sure, but it's not required. You can use jQuery to select file input elements and then parse their files. Papa exposes its file parsing API as a jQuery plugin only when jQuery is defined. Papa Parse has <b>no dependencies</b>.
-						</p>
-					</div>
-					<div class="grid-55">
-						<code class="block">$("input[type=file]").parse({
+
+			<section id="jquery">
+				<div class="grid-container narrow-grid">
+					<div class="grid-100">
+						<h4>jQuery Plugin</h4>
+						<h5>"Can I use Papa with jQuery?"</h5>
+
+						<p>Sure, but it's not required. You can use jQuery to select file input elements and then parse their files. Papa exposes its file parsing API as a jQuery plugin only when jQuery is defined. Papa Parse has <b>no dependencies</b>.</p>
+
+						<pre><code class="language-javascript">$("input[type=file]").parse({
 	config: {
 		complete: function(results, file) {
-			console.log("File done:", file, results);
+			console.log("This file done:", file, results);
 		}
 	},
 	complete: function() {
 		console.log("All files done!");
 	}
-});</code>
+});</code></pre>
 					</div>
-					<div class="clear"></div>
-					<hr>
-
-
-
-					<div class="grid-40 suffix-5">
-						<div class="note" id="unparse">JSON to CSV</div>
-						<h4>"Last thing: what about converting JSON to CSV?"</h4>
-						<p>
-							Call <code>unparse()</code> instead of <code>parse()</code>, passing in your array of arrays or array of objects. Papa will figure it out.
-						</p>
-					</div>
-					<div class="grid-55">
-						<code class="block"><span class="comment">// Output is a properly-formatted CSV string.
-// See <a href="/docs#json-to-csv">the docs</a> for more configurability.</span>
-var csv = Papa.unparse(yourData);</code>
-					</div>
-					<div class="clear"></div>
-					<hr>
+				</div>
+			</section>
 
 
 
 
-
+			<section id="unparse">
+				<div class="grid-container narrow-grid">
 					<div class="grid-100">
-						<h3 class="text-center">Who's your Papa?</h3>
+						<h4>JSON to CSV</h4>
+						<h5>"Last thing: what about converting JSON to CSV?"</h5>
+
+						<p>Call <code>unparse()</code> instead of <code>parse()</code>, passing in your array of arrays or array of objects. Papa will figure it out.</p>
+
+						<pre><code class="language-javascript">// Output is a properly-formatted CSV string.
+// See <a href="/docs#json-to-csv">the docs</a> for more configurability.
+var csv = Papa.unparse(yourData);</code></pre>
+					</div>
+				</div>
+			</section>
+
+
+
+			<section id="download">
+				<div class="grid-container">
+					<div class="grid-100">
+						<h3>Who's Your Papa?</h3>
 					</div>
 
 					<div class="grid-45 suffix-5 mini-papa">
-						<b><a href="https://github.com/mholt/PapaParse/blob/master/papaparse.min.js">Mini Papa</a></b> for production use
+						<p>
+							<b><a href="https://github.com/mholt/PapaParse/blob/master/papaparse.min.js">Lil' Papa</a></b>
+							(minified) for production use
+						</p>
 					</div>
 
 					<div class="grid-45 prefix-5">
-						<b><a href="https://github.com/mholt/PapaParse/blob/master/papaparse.js">Fat Papa</a></b> for debug and development
+						<p>
+							<b><a href="https://github.com/mholt/PapaParse/blob/master/papaparse.js">Fat Papa</a></b>
+							(un-minified) for development
+						</p>
 					</div>
 
 					<div class="clear"></div>
 
-					<div class="grid-100 text-center pad-75">
+					<div class="grid-100 text-center">
 						<a href="https://github.com/mholt/PapaParse" class="button">
-							<i class="fa fa-download"></i>&nbsp; Get Papa Parse on GitHub
+							<i class="fa fa-github"></i>&nbsp; GitHub
 						</a>
 						<a href="/demo" class="button red">
-							<i class="fa fa-bolt"></i>&nbsp; Try the demo
+							<i class="fa fa-magic"></i>&nbsp; Demo
+						</a>
+						<a href="/docs" class="button gray">
+							<i class="fa fa-book"></i>&nbsp; Documentation
 						</a>
 					</div>
-					<div class="clear"></div>
-
-				</div>
-
-			</main>
+			</section>
 
 
-			<footer>
+		</main>
+
+
+		<footer>
+			<!--<div class="footer-top">
+				<h3>Make Your Papa Proud</h3>
+				<h4><a href="https://github.com/mholt/PapaParse">Star</a> and <a href="https://github.com/mholt/PapaParse/blob/gh-pages/resources/js/lovers.js">shout</a> if you love #PapaParse</h4>
+			</div>-->
+			<div class="footer-main">
 				<div class="grid-container">
-					<div class="grid-100 text-center">
-						&copy; 2013-2014
+					<div class="grid-40 text-center">
+						<div class="logo">P</div>
+						<br><br>
+						Papa Parse by <a href="https://twitter.com/mholt6">Matt Holt</a>
 						<br>
-						Thanks to all <a href="https://github.com/mholt/jquery.parse/graphs/contributors">contributors</a>!
+						&copy; 2013-2015
+					</div>
+					<div class="grid-15 mobile-grid-50 links">
+						<h5>Learn</h5>
+						<a href="/demo">Demo</a>
+						<a href="/docs">Documentation</a>
+						<a href="/faq">FAQ</a>
+					</div>
+					<div class="grid-15 mobile-grid-50 links">
+						<h5>Project</h5>
+						<a href="https://gratipay.com/mholt">Donate</a>
+						<a href="https://github.com/mholt/PapaParse">GitHub</a>
+						<a href="https://twitter.com/search?q=%23PapaParse">Share</a>
+					</div>
+					<div class="clear hide-on-desktop"></div>
+					<div class="grid-15 mobile-grid-50 links">
+						<h5>Download</h5>
+						<a href="https://github.com/mholt/PapaParse/archive/master.zip">Latest (master)</a>
+						<hr>
+						<a href="https://github.com/mholt/PapaParse/blob/master/papaparse.min.js">Lil' Papa</a>
+						<a href="https://github.com/mholt/PapaParse/blob/master/papaparse.js">Fat Papa</a>
+					</div>
+					<div class="grid-15 mobile-grid-50 links">
+						<h5>Community</h5>
+						<a href="https://twitter.com/search?q=%23PapaParse">Twitter</a>
+						<a href="http://stackoverflow.com/questions/tagged/papaparse">Stack Overflow</a>
 					</div>
 				</div>
-			</footer>
-		</div>
+			</div>
+		</footer>
+
 	</body>
 </html>

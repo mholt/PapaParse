@@ -1,37 +1,80 @@
-#top-image {
-	position: fixed;
-	width: 100%;
-	height: 100%;
-	overflow: hidden;
-	top: 0;
-	left: 0;
+#top {
+	padding: 6% 0 8%;
+	color: #1D80AB;
+	background: #FFF;
+	position: relative;
 	z-index: 0;
 
-	background-image: url('../images/papers.jpg');
-	background-repeat: no-repeat;
-	background-position: 50% -100px; 
-	background-size: 100% 100%;
+	/*
+		For better performance, trigger 3D graphics acceleration.
+		This reduces lag/jitter considerably, esp. in Chrome.
+	*/
+	-webkit-transform: translateZ(0);
+	-webkit-backface-visibility: hidden;
+
+	transform-origin: 100% 100%;
 }
 
-.content {
-	position: relative;
-	z-index: 1;
+#top code {
+	background: none;
 }
 
-#top {
-	padding: 5% 0;
-	margin: 0 auto;
-	color: #FFF;
-	
-	text-shadow: 0 2px 1px rgba(0, 0, 0, .7);
-	background: rgba(0, 0, 0, .4);
-	max-width: 1200px;
-	box-shadow: 0 0 80px 50px rgba(0, 0, 0, .4);
+h1 {
+	text-align: left;
+	font-family: Arvo;
+	font-size: 100px;
+	line-height: 1em;
+	margin-top: 8%;
+	margin-bottom: 40px;
+	letter-spacing: -5px;
 }
 
-#top h2 {
-	margin-bottom: 90px;
-	font-size: 42px;
+h2 {
+	font-size: 24px;
+	text-align: left;
+	margin-bottom: 50px;
+}
+
+
+/* Switch around h4 and h5 for homepage... */
+h4 {
+	font-size: 12px;
+	letter-spacing: 2px;
+	margin-bottom: 10px;
+	text-transform: uppercase;
+	color: #A1B2C2;
+	line-height: 1em;
+}
+
+h5 {
+	font-size: 28px;
+	margin-bottom: 50px;
+	line-height: 1.25em;
+	text-transform: none;
+	color: inherit;
+	letter-spacing: 0;
+	margin-top: 0;
+}
+
+#title-main {
+	float: left;
+}
+
+#title-code {
+	float: right;
+}
+
+
+main {
+	padding-top: 0;
+}
+
+.fa-heart {
+	color: #F00;
+}
+
+header {
+	border-top-width: 1px;
 }
 
 header,
@@ -44,6 +87,9 @@ header,
 	margin-bottom: -150px;
 }
 
+header .fa-heart {
+	color: inherit;
+}
 
 .insignia {
 	display: block;
@@ -53,135 +99,146 @@ header,
 	border-radius: 50%;
 	margin: 0 auto;
 	text-align: center;
-	font: 170px/250px Arvo, sans-serif;
-	text-shadow: 0 3px 2px rgba(0, 0, 0, .5);
-	color: #FFF;
+	color: #1D80AB;
 	z-index: 2;
 	margin-bottom: 30px;
+	border-width: 1px;
 }
 
-main {
-	padding-top: 0;
-	box-shadow: 0 -2px 15px rgba(0, 0, 0, .5);
+#version-intro {
+	position: absolute;
+	font-size: 12px;
+	top: 18%;
+	width: 100%;
+	font-family: 'Source Sans Pro', sans-serif;
+	text-transform: uppercase;
+	letter-spacing: 2px;
 }
+
+#version {
+	text-shadow: 0 3px 2px rgba(169, 169, 169, 0.5);
+	font: 100px/250px Arvo, sans-serif;
+}
+
 
 .firefox-hack {
 	position: absolute;
 	width: 100%;
 }
 
-h3 {
-	text-align: left;
+.lover {
+	margin-bottom: 0;
 }
 
-.showcase {
-	text-align: left;
-	margin-bottom: 40px;
-	background: #1D2933;
-	clear: both;
+.grid-container.narrow-grid {
+	max-width: 850px;
 }
 
-.showcase a {
-	color: #668B99;
+.mini-papa {
+	text-align: right;
 }
 
-.showcase-title {
-	color: #FFF;
-	font-size: 14px;
-	text-transform: uppercase;
-	padding: 10px 0;
-	background: #2C4252;
-	text-align: center;
-}
-
-.showcase .fa-heart {
-	color: #F00;
-	margin: 0 2px;
-}
-
-.showcase-image img {
+#ticker {
 	width: 90%;
-	vertical-align: middle;
+	max-width: 800px;
+	margin: 0 auto;
+	height: 80px;
+	position: relative;
 }
 
-.showcase-image .fa-plus {
-	padding: 20px 35px;
-	border: 4px dashed #2C4252;
-}
-
-.showcase-image {
-	width: 200px;
-	height: 100px;
-	line-height: 100px;
+.ticker-item {
+	font-size: 24px;
+	color: #565656;
 	text-align: center;
-	display: inline-block;
-	transition: background .4s;
+	font-family: Lato;
+	font-weight: 300;
+	line-height: 1.25em;
+	width: 100%;
+	position: absolute;
+	top: 0;
+	transition: transform .25s;
+	transform: scale(0);
 }
 
-.showcase-image:hover {
-	background: #375A77;	/* default */
+.ticker-item.current {
+	transform: scale(1);
 }
 
-
-
-
-
-.showcase-image.smartystreets:hover {
-	background: #FFC200;
+.add-lover-link {
+	text-decoration: none;
 }
 
-.showcase-image.maxcdn:hover {
-	background: #F37121;
-}
-
-.showcase-image.maxcdn img {
-	width: auto;
-	max-height: 20px;
+footer {
+	margin-top: 0;
 }
 
 
+@media (max-width: 1150px) {
+	#title-main h1 {
+		font-size: 85px;
+	}
 
+	#title-main h2 {
+		font-size: 20px;
+		margin-bottom: 30px;
+	}
 
+	#title-code code {
+		font-size: 12px;
+	}
 
+	button,
+	.button {
+		padding: 8px 20px;
+		font-size: 14px;
+	}
 
-.showcase-add {
-	display: none;
-	color: #DDD;
-	padding: 10px 0;
-	font-size: 16px;
-	text-align: center;
-	border-top: 1px solid #337BAC;
-}
-
-
-
-
-
-@media (max-width: 900px) {
 	header,
 	.sticky-wrapper {
 		margin-bottom: -120px;
 	}
 
 	.insignia {
-		font-size: 100px;
 		width: 175px;
 		height: 175px;
+	}
+
+	#version {
+		font-size: 70px;
 		line-height: 175px;
 	}
 }
 
+@media (max-width: 950px) {
+	#title-code {
+		display: none;
+	}
+
+	#top {
+		padding-top: 0;
+	}
+
+	#title-main,
+	#title-main h1,
+	#title-main h2 {
+		width: 100%;
+		text-align: center;
+	}
+
+	#title-main {
+		padding-bottom: 50px;
+	}
+}
 
 @media (max-width: 767px) {
 	/* mobile */
 
-	#top-image {
-		background-position: 50% 50%;
-		background-size: auto 100%;
-	}
-
 	#top h2 {
 		margin-bottom: 20px;
+	}
+
+	#title-main {
+		padding-bottom: 10px;
 	}
 	
 	.stuck {
@@ -192,14 +249,15 @@ h3 {
 		display: none;
 	}
 
-
-
-
-	.showcase-image {
-		width: 49%;
+	#ticker {
+		height: 120px;
 	}
 
-	.showcase img {
-		max-width: 200px;
+	.lover {
+		margin-bottom: 25px;
+	}
+
+	.mini-papa {
+		text-align: left;
 	}
 }

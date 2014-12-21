@@ -5,56 +5,57 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, maximum-scale=1.0">
 		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css">
-		<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700,400italic|Lato:300,400,700,900|Arvo">
+		<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Arvo|Source+Sans+Pro:400,400italic,700|Lato:300,400">
 		<link rel="stylesheet" href="/resources/css/unsemantic.css">
+		<link rel="stylesheet" href="/resources/css/tomorrow.highlight.css">
 		<link rel="stylesheet" href="/resources/css/common.css">
 		<script src="/resources/js/jquery.min.js"></script>
+		<script src="/resources/js/highlight.min.js"></script>
 		<script src="/resources/js/common.js"></script>
+		<script>hljs.initHighlightingOnLoad();</script>
 	</head>
 	<body>
 
-		<header>
-			<div class="grid-container">
-				<div class="grid-40 mobile-grid-50">
-					<div class="links">
-						<a href="https://github.com/mholt/PapaParse">
-							<i class="fa fa-github fa-lg"></i> GitHub
-						</a>
-						<a href="/demo">
-							<i class="fa fa-magic fa-lg"></i> Demo
-						</a>
-						<a href="/docs">
-							<i class="fa fa-book fa-lg"></i> Docs
-						</a>
-					</div>
-				</div>
-				<div class="grid-20 hide-on-mobile text-center">
-					<a href="/" class="text-logo">Papa Parse</a>
-				</div>
-				<div class="grid-40 mobile-grid-50 text-right">
-					<div class="links">
-						<a href="/faq">
-							<i class="fa fa-question fa-lg"></i> FAQ
-						</a>
-						<a href="https://github.com/mholt/PapaParse/issues">
-							<i class="fa fa-bug fa-lg"></i> Issues
-						</a>
-						<a href="https://www.gratipay.com/mholt/" class="donate">
-							<i class="fa fa-heart fa-lg"></i> Donate
-						</a>
-					</div>
-				</div>
-			</div>
-		</header>
-
-
 		<main>
-			<div class="grid-container">
-				<h2>Documentation</h2>
+			<header>
+				<div class="grid-container">
+					<div class="grid-40 mobile-grid-50">
+						<div class="links">
+							<a href="/demo">
+								<i class="fa fa-magic fa-lg"></i> Demo
+							</a>
+							<a href="/docs">
+								<i class="fa fa-book fa-lg"></i> Docs
+							</a>
+							<a href="/faq">
+								<i class="fa fa-question fa-lg"></i> FAQ
+							</a>
+						</div>
+					</div>
+					<div class="grid-20 hide-on-mobile text-center">
+						<a href="/" class="text-logo">Papa Parse 4</a>
+					</div>
+					<div class="grid-40 mobile-grid-50 text-right">
+						<div class="links">
+							<a href="https://github.com/mholt/PapaParse">
+								<i class="fa fa-github fa-lg"></i> GitHub
+							</a>
+							<a href="http://stackoverflow.com/questions/tagged/papaparse">
+								<i class="fa fa-stack-overflow fa-lg"></i> Help
+							</a>
+							<a href="https://gratipay.com/mholt" class="donate">
+								<i class="fa fa-heart fa-lg"></i> Donate
+							</a>
+						</div>
+					</div>
+				</div>
+			</header>
 
+			<h1>Documentation</h1>
+
+			<div class="grid-container">
 				<div class="prefix-33 grid-33 suffix-33">
-					<h4>Contents</h4>
-					<ol style="margin-top: 10px;">
+					<ol>
 						<li>
 							<a href="#csv-to-json">Convert CSV to JSON</a>
 							<ul>
@@ -77,87 +78,86 @@
 						<li><a href="#extras">Extras</a></li>
 					</ol>
 				</div>
-				<div class="clear"></div>
+			</div>
+
+
+			<section>
+				<div class="grid-container">
+
+					<div class="grid-100">
+						<h4 id="csv-to-json">Convert CSV to JSON</h4>
+
+						<p>
+							Delimited data can be parsed out of strings or files. Files that are parsed can be local or remote. Local files are opened with FileReader, and remote files are downloaded with XMLHttpRequest.
+						</p>
+					</div>
+
+
+					<div class="grid-100">
+						<h5 id="strings">Parse string</h5>
+					</div>
+
+					<div class="grid-50">
+						<pre><code class="language-javascript">Papa.parse(csvString<i>[, <a href="#config">config</a>]</i>)</pre></code>
+					</div>
+
+					<div class="grid-50">
+						<ul>
+							<li><code>csvString</code> is a string of delimited text to be parsed.</li>
+							<li><code>config</code> is an optional <a href="#config">config object</a>.</li>
+							<li>Returns a <a href="#results">parse results</a> object (if not streaming or using worker).</li>
+						</ul>
+					</div>
+					<div class="clear"></div>
 
 
 
+					<div class="grid-100">
+						<h5 id="local-files">Parse local files</h5>
+					</div>
+
+					<div class="grid-50">
+						<pre><code class="language-javascript">Papa.parse(file, <a href="#config">config</a>)</code></pre>
+					</div>
+
+					<div class="grid-50">
+						<ul>
+							<li><code>file</code> is a <a href="https://developer.mozilla.org/en-US/docs/Web/API/File">File</a> object obtained from the DOM.</li>
+							<li><code>config</code> is a <a href="#config">config object</a> which contains a callback.</li>
+							<li>Doesn't return anything. Results are provided asynchronously to a callback function.</li>
+						</ul>
+					</div>
+					<div class="clear"></div>
+
+
+					<div class="grid-100">
+						<h5 id="remote-files">Parse remote file</h5>
+					</div>
+
+
+					<div class="grid-50">
+						<pre><code class="language-javascript">Papa.parse(url, {
+	download: true,
+	// rest of config ...
+})</code></pre>
+					</div>
+					<div class="grid-50">
+						<ul>
+							<li><code>url</code> is the path or URL to the file to download.</li>
+							<li>The second argument is a <a href="#config">config object</a> where <code>download: true</code> is set.</li>
+							<li>Doesn't return anything. Results are provided asynchronously to a callback function.</li>
+						</ul>
+					</div>
+					<div class="clear"></div>
 
 
 
+					<div class="grid-100">
+						<h5 id="jquery">Using jQuery to select files</h5>
+					</div>
 
-
-
-
-
-
-
-
-
-
-
-
-				<hr>
-
-				<div class="grid-100">
-					<h3 id="csv-to-json">Convert CSV to JSON</h3>
-
-					<p>Delimited data can be parsed out of strings or files. Files that are parsed can be local or remote. Local files are opened with FileReader, and remote files are downloaded with XMLHttpRequest.</p>
-				</div>
-
-
-				<div class="grid-50">
-					<h4 id="strings">Parse string</h4>
-					<code class="block">Papa.parse(csvString<i>[, <a href="#config">config</a>]</i>)</code>
-				</div>
-				<div class="grid-50">
-					<ul>
-						<li><code>csvString</code> is a string of delimited text to be parsed.</li>
-						<li><code>config</code> is an optional <a href="#config">config object</a>.</li>
-						<li>Returns a <a href="#results">parse results</a> object (if not streaming or using worker).</li>
-					</ul>
-				</div>
-				<div class="clear"></div>
-
-
-
-
-				<div class="grid-50">
-					<h4 id="local-files">Parse local file</h4>
-					<code class="block">Papa.parse(file, <a href="#config">config</a>)</code>
-				</div>
-				<div class="grid-50">
-					<ul>
-						<li><code>file</code> is a <a href="https://developer.mozilla.org/en-US/docs/Web/API/File">File</a> object obtained from the DOM.</li>
-						<li><code>config</code> is a <a href="#config">config object</a> which contains a callback.</li>
-						<li>Doesn't return anything. Results are provided asynchronously to a callback function.</li>
-					</ul>
-				</div>
-				<div class="clear"></div>
-
-
-
-				<div class="grid-50">
-					<h4 id="remote-files">Parse remote file</h4>
-<code class="block">Papa.parse(url, {
-	download: true
-	<span class="comment">// config ...</span>
-})</code>
-				</div>
-				<div class="grid-50">
-					<ul>
-						<li><code>url</code> is the path or URL to the file to download.</li>
-						<li>The second argument is a <a href="#config">config object</a> where <code>download: true</code> is set.</li>
-						<li>Doesn't return anything. Results are provided asynchronously to a callback function.</li>
-					</ul>
-				</div>
-				<div class="clear"></div>
-
-
-
-
-				<div class="grid-50">
-					<h4 id="jquery">Using jQuery to select files</h4>
-<code class="block">$('input[type=file]').parse({
+					<div class="grid-50">
+						<pre><code class="language-javascript">$('input[type=file]').parse({
 	config: {
 		<span class="comment">// base <a href="#config">config</a> to use for each file</span>
 	},
@@ -175,24 +175,26 @@
 	{
 		<span class="comment">// executed after all files are complete</span>
 	}
-});</code>
-				</div>
-				<div class="grid-50">
-					<ul>
-						<li>Select the file input elements containing files you want to parse.</li>
-						<li>
-							<code>before</code> is an optional callback that lets you inspect each file before parsing begins. Return an object like:
-<code class="block">{
+});</code></pre>
+					</div>
+					<div class="grid-50">
+						<ul>
+							<li>Select the file input elements with files you want to parse.</li>
+							<li>
+								<code>before</code> is an optional callback that lets you inspect each file before parsing begins. Return an object like:
+<pre><code class="language-javascript">{
 	action: "abort",
 	reason: "Some reason",
 	config: <span class="comment">// altered config...</span>
-}</code>
-							to alter the flow of parsing. Actions can be <code>"abort"</code> to skip this and all other files in the queue, <code>"skip"</code> to skip just this file, or <code>"continue"</code> to carry on (equivalent to returning nothing). <code>reason</code> can be a reason for aborting. <code>config</code> can be a modified <a href="#config">configuration</a> for parsing just this file.
-						</li>
-						<li>The <code>complete</code> callback shown here is executed after <i>all</i> files are finished and does not receive any data. Use the complete callback in <a href="#config">config</a> for per-file results.
-					</ul>
+}</code></pre>
+								to alter the flow of parsing. Actions can be <code>"abort"</code> to skip this and all other files in the queue, <code>"skip"</code> to skip just this file, or <code>"continue"</code> to carry on (equivalent to returning nothing). <code>reason</code> can be a reason for aborting. <code>config</code> can be a modified <a href="#config">configuration</a> for parsing just this file.</li>
+							</li>
+							<li>The <code>complete</code> callback shown here is executed after <i>all</i> files are finished and does not receive any data. Use the complete callback in <a href="#config">config</a> for per-file results.</li>
+						</ul>
+					</div>
+					<div class="clear"></div>
 				</div>
-				<div class="clear"></div>
+			</section>
 
 
 
@@ -208,32 +210,65 @@
 
 
 
+			<section>
+				<div class="grid-container">
+
+					<div class="grid-100">
+						<h4 id="json-to-csv">Convert JSON to CSV</h4>
+
+						<p>
+							Papa's <code>unparse</code> utility writes out correct delimited text strings given an array of arrays or an array of objects.
+						</p>
+					</div>
+
+					<div class="grid-100">
+						<h5 id="unparse">Unparse</h5>
+					</div>
 
 
+					<div class="grid-50">
+						<pre><code class="language-javascript">Papa.unparse(data<i>[, config]</i>)</code></pre>
+					</div>
 
+					<div class="grid-50">
+						<ul>
+							<li>Returns the resulting delimited text as a string.</li>
+							<li>
+								<code>data</code> can be one of:
+								<ul>
+									<li>An array of arrays</li>
+									<li>An array of objects</li>
+									<li>An object explicitly defining <code>fields</code> and <code>data</code></li>
+								</ul>
+							</li>
+							<li>
+								<code>config</code> is an optional object with any of these properties:
+								<pre><code class="language-javascript">// defaults shown
+{
+	quotes: false,
+	delimiter: ",",
+	newline: "\r\n"
+}</code></pre>
+								Set <code>quotes</code> to <code>true</code> to always enclose each field in quotes, or an array of true/false values correlating to specific to columns to force-quote. The <code>delimiter</code> can be any valid delimiting character. The <code>newline</code> character(s) may also be customized.
+							</li>
+						</ul>
+					</div>
+					<div class="clear"></div>
 
-				<hr>
+					<div class="grid-100">
+						<h5 id="unparse-examples">Examples</h5>
+					</div>
 
-
-				<div class="grid-100">
-					<h3 id="json-to-csv">Convert JSON to CSV</h3>
-
-					<p>Papa's <code>unparse</code> utility correctly writes out delimited text strings given an array of arrays or an array of objects.</p>
-				</div>
-
-
-				<div class="grid-50">
-					<h4 id="unparse">Unparse</h4>
-					<code class="block">Papa.unparse(data<i>[, config]</i>)</code>
-
-					<h4 id="unparse-examples">Examples</h4>
-<code class="block"><span class="comment">// Two-line, comma-delimited file</span>
+					<div class="grid-33">
+						<pre><code class="language-javascript">// Two-line, comma-delimited file
 var csv = Papa.unparse([
 	["1-1", "1-2", "1-3"],
 	["2-1", "2-2", "2-3"]
-]);
+]);</code></pre>
+					</div>
 
-<span class="comment">// With header row (all objects should look alike)</span>
+					<div class="grid-33">
+						<pre><code class="language-javascript">// With implicit header row
 var csv = Papa.unparse([
 	{
 		"Column 1": "foo",
@@ -243,42 +278,23 @@ var csv = Papa.unparse([
 		"Column 1": "abc",
 		"Column 2": "def"
 	}
-]);
+]);</code></pre>
+					</div>
 
-<span class="comment">// Specifying fields and data manually</span>
+					<div class="grid-33">
+						<pre><code class="language-javascript">// Specifying fields and data explicitly
 var csv = Papa.unparse({
 	fields: ["Column 1", "Column 2"],
 	data: [
 		["foo", "bar"],
 		["abc", "def"]
 	]
-});
-</code>
+});</code></pre>
+					</div>
+					<div class="clear"></div>
+
 				</div>
-				<div class="grid-50">
-					<ul>
-						<li>Returns the resulting delimited text as a string.<br><br></li>
-						<li>
-							<code>data</code> can be one of:
-							<ul>
-								<li>An array of arrays</li>
-								<li>An array of objects</li>
-								<li>An object with <code>fields</code> and <code>data</code></li>
-							</ul><br>
-						</li>
-						<li>
-							<code>config</code> is an object with any of these properties:
-<code class="block"><span class="comment">// defaults shown</span>
-{
-	quotes: false,
-	delimiter: ",",
-	newline: "\r\n"
-}</code>
-							Set <code>quotes</code> to <code>true</code> to force enclosing each datum around quotes, or an array of true/false values correlating to specific to columns to force-quote. The <code>delimiter</code> can be any valid delimiting character. The <code>newline</code> character(s) may also be customized.
-						</li>
-					</ul>
-				</div>
-				<div class="clear"></div>
+			</section>
 
 
 
@@ -295,19 +311,25 @@ var csv = Papa.unparse({
 
 
 
-				<hr>
+
+			<section>
+				<div class="grid-container">
+
+					<div class="grid-100">
+						<h4 id="config">The Parse Config Object</h4>
+
+						<p>
+							The <code>parse</code> function may be passed a configuration object. It defines settings, behavior, and callbacks used during parsing. Any properties left unspecified will resort to their default values.
+						</p>
+					</div>
+
+					<div class="grid-100">
+						<h5 id="config-default">Default Config With All Options</h5>
+					</div>
 
 
-				<div class="grid-100">
-					<h3 id="config">The Config Object</h3>
-
-					<p>Every call to <code>parse</code> receives a configuration object. Its properties define settings, behavior, and callbacks used during parsing.</p>
-				</div>
-
-
-				<div class="grid-50">
-					<h4 id="config-default">Default config</h4>
-<code class="block">{
+					<div class="prefix-25 grid-50 suffix-25">
+						<pre><code class="language-javascript">{
 	delimiter: "",	// auto-detect
 	newline: "",	// auto-detect
 	header: false,
@@ -323,46 +345,154 @@ var csv = Papa.unparse({
 	skipEmptyLines: false,
 	chunk: undefined,
 	fastMode: false
-}</code>
-					<h4 id="config-details">Config options</h4>
+}</code></pre>
+					</div>
+					<div class="clear"></div>
 
-					<ul>
-						<li><code>delimiter</code> The delimiting character. Leave blank to auto-detect. If specified, it must be a string of length 1, and cannot be found in <a href="#extras">Papa.BAD_DELIMITERS</a>.</li>
-						<li><code>newline</code> The newline sequence. Leave blank to auto-detect. Must be one of \r, \n, or \r\n.</li>
-						<li><code>header</code> If true, the first row of parsed data will be interpreted as field names. Fields will be returned in the <a href="#meta">meta</a>, and each row will be an object of data keyed by field name. If false, the parser simply returns an array of arrays, including the first row.</li>
-						<li><code>dynamicTyping</code> If true, numeric and boolean data will be converted to their type instead of remaining strings.</li>
-						<li><code>preview</code> If > 0, only that many rows will be parsed.</li>
-						<li><code>encoding</code> The encoding to use when opening files locally.</li>
-						<li><code>worker</code> Whether or not to use a <a href="/faq#workers">worker thread</a>. Using a worker will keep your page reactive, but may be slightly slower.</li>
-						<li><code>comments</code> Specify a string that indicates a comment (like "#" or "//"). If your CSV file has commented lines, and Papa will skip them. This feature is disabled by default.</li>
-					</ul>
-				</div>
-				<div class="grid-50">
-					<ul>
-						<li id="step">
-							<code>step</code> To <a href="/faq#streaming">stream</a> the input, define a callback function to receive <a href="#results">results</a> row-by-row rather than together at the end:
-<code class="block">step: function(results, handle) {
+					<div class="grid-100">
+						<h5 id="config-details">Config Options</h5>
+					</div>
+
+					<div class="grid-100" style="overflow-x: auto;">
+						<table>
+							<tr>
+								<th style="width: 20%;">Option</th>
+								<th style="width: 80%;">Explanation</th>
+							</tr>
+							<tr>
+								<td>
+									<code>delimiter</code>
+								</td>
+								<td>
+									The delimiting character. Leave blank to auto-detect. If specified, it must be a string of length 1 which cannot be found in <a href="#readonly">Papa.BAD_DELIMITERS</a>.
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<code>newline</code>
+								</td>
+								<td>
+									The newline sequence. Leave blank to auto-detect. Must be one of \r, \n, or \r\n.
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<code>header</code>
+								</td>
+								<td>
+									If true, the first row of parsed data will be interpreted as field names. Fields will be returned in the <a href="#meta">meta</a>, and each row will be an object of data keyed by field name. If false, the parser simply returns an array of arrays, including the first row.
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<code>dynamicTyping</code>
+								</td>
+								<td>
+									If true, numeric and boolean data will be converted to their type instead of remaining strings.
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<code>preview</code>
+								</td>
+								<td>
+									If > 0, only that many rows will be parsed.
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<code>encoding</code>
+								</td>
+								<td>
+									The encoding to use when opening local files. If specified, it must be a value supported by the FileReader API.
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<code>worker</code>
+								</td>
+								<td>
+									Whether or not to use a <a href="/faq#workers">worker thread</a>. Using a worker will keep your page reactive, but may be slightly slower.
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<code>comments</code>
+								</td>
+								<td>
+									A string that indicates a comment (for example, "#" or "//"). When Papa encounters a line starting with this string, it will skip the line.
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<code>step</code>
+								</td>
+								<td>
+									To <a href="/faq#streaming">stream</a> the input, define a callback function:
+									<pre><code class="language-javascript">step: function(<a href="#results">results</a>, handle) {
 	console.log("Row data:", results.data);
 	console.log("Row errors:", results.errors);
-}</code>
-							Except when using a worker, you can call <code>handle.abort()</code> to stop parsing, <code>handle.pause()</code> to pause it, or <code>handle.resume()</code> to resume.
-						</li>
-						<li>
-							<code>complete</code> A callback to execute when parsing is complete. Results are passed in, and if parsing a file, the file is, too:
-<code class="block">complete: function(results, file) {
+}</code></pre>
+									Streaming is necessary for large files which would otherwise crash the browser. Except when using a <a href="/faq#worker">Web Worker</a>, you can call <code>handle.abort()</code> to stop parsing, <code>handle.pause()</code> to pause it, or <code>handle.resume()</code> to resume.
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<code>complete</code>
+								</td>
+								<td>
+									The callback to execute when parsing is complete. It receives the parse <a href="#results">results</a>. If parsing a local file, the <a href="https://developer.mozilla.org/en-US/docs/Web/API/File">File</a> is passed in, too:
+
+									<pre><code class="language-javascript">complete: function(results, file) {
 	console.log("Parsing complete:", results, file);
-}
-</code>
-							If streaming, results will <i>not</i> be available in this function.
-						</li>
-						<li><code>error</code> A callback to execute if FileReader encounters an error. The function should receive two arguments: the error and the File.</li>
-						<li><code>download</code> If true, this indicates that the string you passed in is actually a URL from which to download a file and parse it.</li>
-						<li><code>skipEmptyLines</code> If true, lines that are completely empty will be skipped. An empty line is defined to be one which evaluates to empty string.</li>
-						<li><code>chunk</code> A callback, much like step, which activates streaming and is executed after every whole chunk of the file is loaded and parsed, rather than every row. Works only with local and remote files. Do not use both chunk and step callbacks together. As arguments, it receives the results, the streamer, and if parsing a local file, the File object. You can pause, resume, and abort parsing from within this function.</li>
-						<li><code>fastMode</code> When enabled, fast mode executes parsing much more quickly. Only use this if you know your input won't have quoted fields.
-					</ul>
+}</code></pre>
+									When streaming, parse results are <i>not</i> available in this callback.
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<code>error</code>
+								</td>
+								<td>
+									A callback to execute if FileReader encounters an error. The function is passed two arguments: the error and the File.
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<code>download</code>
+								</td>
+								<td>
+									If true, this indicates that the string you passed as the first argument to <code>parse()</code> is actually a URL from which to download a file and parse its contents.
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<code>skipEmptyLines</code>
+								</td>
+								<td>
+									If true, lines that are completely empty will be skipped. An empty line is defined to be one which evaluates to empty string.
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<code>chunk</code>
+								</td>
+								<td>
+									A callback function, identical to step, which activates streaming. However, this function is executed after every <i>chunk</i> of the file is loaded and parsed rather than every row. Works only with local and remote files. Do not use both chunk and step callbacks together. For the function signature, see the documentation for the step function.
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<code>fastMode</code>
+								</td>
+								<td>
+									When enabled, fast mode executes parsing much more quickly. However, this only works for input without quoted fields. If you cannot guarantee that, do not enable fast mode.
+								</td>
+							</tr>
+						</table>
+					</div>
 				</div>
-				<div class="clear"></div>
+			</section>
 
 
 
@@ -385,45 +515,55 @@ var csv = Papa.unparse({
 
 
 
-				<hr>
+
+			<section>
+				<div class="grid-container">
+
+					<div class="grid-100">
+						<h4 id="results">The Parse Result Object</h4>
+
+						<p>
+							A parse result always contains three objects: data, errors, and meta. Data and errors are arrays, and meta is an object. In the step callback, the data array will only contain one element.
+						</p>
+					</div>
 
 
-				<div class="grid-100">
-					<h3 id="results">The Results Object</h3>
-
-					<p>Parse results are always (even when streaming) provided in a roughly consistent format: an object with data, errors, and meta. When streaming, <code>results.data</code> contains only one row.</p>
-				</div>
+					<div class="grid-100">
+						<h5 id="results-structure">Result Structure</h5>
+					</div>
 
 
-				<div class="grid-50">
-					<h4 id="results-structure">Results structure</h4>
-<code class="block">{
-	data:   <span class="comment">// array of parse results</span>
-	errors: <span class="comment">// array of errors</span>
-	meta:   <span class="comment">// object with extra info</span>
-}</code>
-				</div>
-				<div class="grid-50">
-					<ul>
-						<li><code>data</code> is an array of rows. Rows are either arrays (if <code>header: false</code>) or objects (if <code>header: true</code>). Inside a <a href="#config">step</a> function, data will only contain one row.</li>
-						<li><code>errors</code> is an array of errors.</li>
-						<li><code>meta</code> contains extra information about the parse, such as delimiter used, number of lines, whether the process was aborted, etc.
-					</ul>
-				</div>
-				<div class="clear"></div>
+					<div class="grid-50">
+						<pre><code class="language-javascript">{
+	data:   // array of parsed data
+	errors: // array of errors
+	meta:   // object with extra info
+}</code></pre>
+					</div>
+					<div class="grid-50">
+						<ul>
+							<li><code>data</code> is an array of rows. If header is false, rows are arrays; otherwise they are objects of data keyed by the field name.</li>
+							<li><code>errors</code> is an array of <a href="#errors">errors</a>.</li>
+							<li><code>meta</code> contains extra information about the parse, such as delimiter used, the newline sequence, whether the process was aborted, etc. Properties in this object are not guaranteed to exist in all situations.</li>
+						</ul>
+					</div>
+					<div class="clear"></div>
+					
+
+					<div class="grid-100">
+						<h5 id="data">Data</h5>
+					</div>
 
 
-
-				<div class="grid-50">
-					<h4 id="data">results.data</h4>
-<code class="block"><span class="comment">// Example (without header)</span>
+					<div class="grid-50">
+						<pre><code class="language-javascript">// Example (header: false)
 [
 	["Column 1", "Column 2"],
 	["foo", "bar"],
 	["abc", "def"]
 ]
 
-<span class="comment">// Example (with header)</span>
+// Example (header: true)
 [
 	{
 		"Column 1": "foo",
@@ -433,155 +573,255 @@ var csv = Papa.unparse({
 		"Column 1": "abc",
 		"Column 2": "def"
 	}
-]</code>
-				</div>
-				<div class="grid-50">
-					<ul>
-						<li>If header row is enabled, and more fields are found on a row of data than in the header row, an extra field will appear in the results called <code>__parsed_extra</code>. It contains an array of all data parsed from that row that was wider than the header row.</li>
-						<li>Using <code>dynamicTyping: true</code> will turn numeric and boolean data into number and boolean types, respectively. Otherwise, all parsed data is string.</li>
-					</ul>
-				</div>
-				<div class="clear"></div>
+]</code></pre>
+					</div>
+					<div class="grid-50">
+						<ul>
+							<li>If header row is enabled and more fields are found on a row of data than in the header row, an extra field will appear in that row called <code>__parsed_extra</code>. It contains an array of all data parsed from that row that extended beyond the header row.</li>
+						</ul>
+					</div>
+					<div class="clear"></div>
+
+					<div class="grid-100">
+						<h5 id="errors">Errors</h5>
+					</div>
 
 
-				<div class="grid-50">
-					<h4 id="errors">results.errors</h4>
-<code class="block"><span class="comment">// Error structure</span>
+					<div class="grid-50">
+						<pre><code class="language-javascript">// Error structure
 {
-	type: "",     <span class="comment">// A generalization of the error</span>
-	code: "",     <span class="comment">// Standardized error code</span>
-	message: "",  <span class="comment">// Human-readable details</span>
-	row: 0,       <span class="comment">// Row index of parsed data where error is</span>
-	<!--index: 0      <span class="comment">// Character index within original input</span>-->
-}</code>
+	type: "",     // A generalization of the error
+	code: "",     // Standardized error code
+	message: "",  // Human-readable details
+	row: 0,       // Row index of parsed data where error is
+	<!--index: 0      // Character index within original input-->
+}</code></pre>
+					</div>
+					<div class="grid-50">
+						<ul>
+							<li>The error <code>type</code> will be one of "Quotes", "Delimiter", or "FieldMismatch".</li>
+							<li>The <code>code</code> may be "MissingQuotes", "UndetectableDelimiter", "TooFewFields", or "TooManyFields" (depending on the error type).</li>
+							<!--<li><code>index</code> may not be available on all error messages because some errors are only generated after parsing is already complete.</li>-->
+							<li>Just because errors are generated does not necessarily mean that parsing failed. The worst error you can get is probably MissingQuotes.</li>
+						</ul>
+					</div>
+					<div class="clear"></div>
+
+					<div class="grid-100">
+						<h5 id="meta">Meta</h5>
+					</div>
+
+
+					<div class="grid-50">
+						<pre><code class="language-javascript">{
+	delimiter: // Delimiter used
+	linebreak: // Line break sequence used
+	aborted:   // Whether process was aborted
+	fields:    // Array of field names
+	truncated: // Whether preview consumed all input
+}</code></pre>
+					</div>
+					<div class="grid-50">
+						<ul>
+							<li>Not all meta properties will always be available. For instance, <code>fields</code> is only given when header row is enabled.</li>
+						</ul>
+					</div>
+					<div class="clear"></div>
+
 				</div>
-				<div class="grid-50">
-					<ul>
-						<li>The error <code>type</code> will be one of "Quotes", "Delimiter", or "FieldMismatch".</li>
-						<li>The <code>code</code> may be "MissingQuotes", "UndetectableDelimiter", "TooFewFields", or "TooManyFields" (depending on the error type).</li>
-						<!--<li><code>index</code> may not be available on all error messages because some errors are only generated after parsing is already complete.</li>-->
-						<li>Just because errors are generated does not necessarily mean that parsing failed! Papa is strong, and usually parsing only bombs hard if the input has sloppy quotes. In other words, MissingQuotes is usually a bad sign.</li>
-					</ul>
+			</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+			<section style="border-bottom: 0; padding-bottom: 0;">
+				<div class="grid-container">
+
+					<div class="grid-100">
+						<h4 id="extras">Extras</h4>
+
+						<p>
+							There's a few other things that Papa exposes to you that weren't explained above.
+						</p>
+					</div>
+
+					<div class="grid-100">
+						<h5 id="readonly">Read-Only</h5>
+					</div>
+
+
+					<div class="grid-100">
+						<table>
+							<tr>
+								<th>Read-Only Property</th>
+								<th>Explanation</th>
+							</tr>
+							<tr>
+								<td><code>Papa.BAD_DELIMITERS</code></td>
+								<td>
+									An array of characters that are not allowed as delimiters.
+								</td>
+							</tr>
+							<tr>
+								<td><code>Papa.RECORD_SEP</code></td>
+								<td>
+									The true delimiter. Invisible. ASCII code 30. Should be doing the job we strangely rely upon commas and tabs for.
+								</td>
+							</tr>
+							<tr>
+								<td><code>Papa.UNIT_SEP</code></td>
+								<td>
+									Also sometimes used as a delimiting character. ASCII code 31.
+								</td>
+							</tr>
+							<tr>
+								<td><code>Papa.WORKERS_SUPPORTED</code></td>
+								<td>
+									Whether or not the browser supports HTML5 Web Workers. If false, <code>worker: true</code> will have no effect.
+								</td>
+							</tr>
+							<tr>
+								<td><code>Papa.SCRIPT_PATH</code></td>
+								<td>
+									The relative path to Papa Parse. This is automatically detected when Papa Parse is loaded synchronously. However, if you load Papa Parse asynchronously (e.g. with RequireJS), you need to set this variable manually in order to use Web Workers.
+								</td>
+							</tr>
+						</table>
+					</div>
+
+
+					<div class="grid-100">
+						<h5 id="configurable">Configurable</h5>
+					</div>
+
+
+					<div class="grid-100">
+						<table>
+							<tr>
+								<th>Configurable Property</th>
+								<th>Explanation</th>
+							</tr>
+							<tr>
+								<td><code>Papa.LocalChunkSize</code></td>
+								<td>
+									The size in bytes of each file chunk. Used when streaming files obtained from the DOM that exist on the local computer. Default 10 MB.
+								</td>
+							</tr>
+							<tr>
+								<td><code>Papa.RemoteChunkSize</code></td>
+								<td>
+									Same as LocalChunkSize, but for downloading files from remote locations. Default 5 MB.
+								</td>
+							</tr>
+							<tr>
+								<td><code>Papa.DefaultDelimiter</code></td>
+								<td>
+									The delimiter used when one is not specified and it cannot be detected automatically. Default is comma.
+								</td>
+							</tr>
+							<tr>
+								<td><code>Papa.WORKERS_SUPPORTED</code></td>
+								<td>
+									Whether or not the browser supports HTML5 Web Workers. If false, <code>worker: true</code> will have no effect.
+								</td>
+							</tr>
+						</table>
+					</div>
+
+					<div class="grid-100">
+						<h5 id="internal">For Internal Use Only</h5>
+					</div>
+
+					<div class="grid-100">
+						<table>
+							<tr>
+								<th>Internal Property</th>
+								<th>Explanation</th>
+							</tr>
+							<tr>
+								<td><code>Papa.Parser</code></td>
+								<td>
+									The core parsing component. Careful, it's fast and under rigorous test.
+								</td>
+							</tr>
+							<tr>
+								<td><code>Papa.ParserHandle</code></td>
+								<td>
+									A wrapper over the Parser which provides dynamic typing and header row support.
+								</td>
+							</tr>
+							<tr>
+								<td><code>Papa.NetworkStreamer</code></td>
+								<td>
+									Facilitates downloading and parsing files in chunks over the network with XMLHttpRequest.
+								</td>
+							</tr>
+							<tr>
+								<td><code>Papa.FileStreamer</code></td>
+								<td>
+									Similar to NetworkStreamer, but for local files, and using the HTML5 FileReader.
+								</td>
+							</tr>
+						</table>
+					</div>
+					<div class="clear"></div>
+
 				</div>
-				<div class="clear"></div>
+			</section>
 
-
-				<div class="grid-50">
-					<h4 id="meta">results.meta</h4>
-<code class="block">{
-	delimiter: <span class="comment">// Delimiter used</span>
-	linebreak: <span class="comment">// Line break sequence used</span>
-	aborted:   <span class="comment">// Whether process was aborted</span>
-	fields:    <span class="comment">// Array of field names</span>
-	truncated: <span class="comment">// Whether preview consumed all input</span>
-}</code>
-				</div>
-				<div class="grid-50">
-					<ul>
-						<li>Not all meta properties will always be available. For instance, <code>fields</code> is only given when <code>header: true</code> is set.</li>
-					</ul>
-				</div>
-				<div class="clear"></div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-				<hr>
-
-
-				<div class="grid-100">
-					<h3 id="extras">Extras</h3>
-
-					<p>There's a few other things that Papa exposes for you that weren't explained above.</p>
-				</div>
-
-
-				<div class="grid-50">
-					<p>
-						These are provided as a convenience and should remain read-only, but <b>feel free to use them</b>:
-					</p>
-					<ul>
-						<li>
-							<code>Papa.BAD_DELIMITERS</code> &nbsp;
-							An array of characters that are not allowed as delimiters (or comment characters).
-						</li>
-						<li>
-							<code>Papa.RECORD_SEP</code> &nbsp;
-							The true delimiter. Invisible. ASCII code 30. Should be doing the job we strangely rely upon commas and tabs for.
-						</li>
-						<li>
-							<code>Papa.UNIT_SEP</code> &nbsp;
-							Also sometimes used as a delimiting character. ASCII code 31.
-						</li>
-						<li>
-							<code>Papa.WORKERS_SUPPORTED</code> &nbsp;
-							Whether or not the browser supports HTML5 Web Workers. If false, <code>worker: true</code> will have no effect.
-						</li>
-					</ul>
-
-					<p>
-						Some settings you may change:
-					</p>
-
-					<ul>
-						<li>
-							<code>Papa.LocalChunkSize</code> &nbsp;
-							The size in bytes of each file chunk. Used when streaming files obtained from the DOM that exist on the local computer. Default 10 MB.
-						</li>
-						<li>
-							<code>Papa.RemoteChunkSize</code> &nbsp;
-							Same as LocalChunkSize, but for downloading files from remote locations. Default 5 MB.
-						</li>
-						<li>
-							<code>Papa.DefaultDelimiter</code> &nbsp;
-							The delimiter used when one is not specified and it cannot be detected automatically. Default is comma <code>","</code>.
-						</li>
-				</div>
-				<div class="grid-50">
-					<p>
-						The following items are for internal use and testing only. <b>It is not recommended that you use them unless you're familiar with the underlying code base:</b>
-					</p>
-					<ul>
-						<li>
-							<code>Papa.Parser</code> &nbsp;
-							The core parsing component. Careful, it's fast.
-						</li>
-						<li>
-							<code>Papa.ParserHandle</code> &nbsp;
-							A wrapper over the Parser which provides dynamic typing and header row support.
-						</li>
-						<li>
-							<code>Papa.NetworkStreamer</code> &nbsp;
-							Facilitates downloading and parsing files in chunks over the network with XMLHttpRequest.
-						</li>
-						<li>
-							<code>Papa.FileStreamer</code> &nbsp;
-							Similar to NetworkStreamer, but for local files, and using the HTML5 FileReader.
-						</li>
-					</ul>
-				</div>
-				<div class="clear"></div>
-
-
-			</div>
 		</main>
 
 
+
 		<footer>
-			<div class="grid-container">
-				<div class="grid-100 text-center">
-					&copy; 2013-2014
-					<br>
-					Thanks to all <a href="https://github.com/mholt/jquery.parse/graphs/contributors">contributors</a>!
+			<!--<div class="footer-top">
+				<h3>Make Your Papa Proud</h3>
+				<h4><a href="https://github.com/mholt/PapaParse">Star</a> and <a href="https://github.com/mholt/PapaParse/blob/gh-pages/resources/js/lovers.js">shout</a> if you love #PapaParse</h4>
+			</div>-->
+			<div class="footer-main">
+				<div class="grid-container">
+					<div class="grid-40 text-center">
+						<div class="logo">P</div>
+						<br><br>
+						Papa Parse by <a href="https://twitter.com/mholt6">Matt Holt</a>
+						<br>
+						&copy; 2013-2015
+					</div>
+					<div class="grid-15 mobile-grid-50 links">
+						<h5>Learn</h5>
+						<a href="/demo">Demo</a>
+						<a href="/docs">Documentation</a>
+						<a href="/faq">FAQ</a>
+					</div>
+					<div class="grid-15 mobile-grid-50 links">
+						<h5>Project</h5>
+						<a href="https://gratipay.com/mholt">Donate</a>
+						<a href="https://github.com/mholt/PapaParse">GitHub</a>
+						<a href="https://twitter.com/search?q=%23PapaParse">Share</a>
+					</div>
+					<div class="clear hide-on-desktop"></div>
+					<div class="grid-15 mobile-grid-50 links">
+						<h5>Download</h5>
+						<a href="https://github.com/mholt/PapaParse/archive/master.zip">Latest (master)</a>
+						<hr>
+						<a href="https://github.com/mholt/PapaParse/blob/master/papaparse.min.js">Lil' Papa</a>
+						<a href="https://github.com/mholt/PapaParse/blob/master/papaparse.js">Fat Papa</a>
+					</div>
+					<div class="grid-15 mobile-grid-50 links">
+						<h5>Community</h5>
+						<a href="https://twitter.com/search?q=%23PapaParse">Twitter</a>
+						<a href="http://stackoverflow.com/questions/tagged/papaparse">Stack Overflow</a>
+					</div>
 				</div>
 			</div>
 		</footer>
