@@ -1,4 +1,4 @@
-Parse CSV with Javascript
+Parse CSV with JavaScript
 ========================================
 
 [![mholt on Gratipay](http://img.shields.io/badge/tips-accepted-brightgreen.svg?style=flat)](https://www.gratipay.com/mholt/)
@@ -15,7 +15,7 @@ Papa Parse is the [fastest](http://jsperf.com/javascript-csv-parsers/4) in-brows
 - Header row support
 - Pause, resume, abort
 - Can convert numbers and booleans to their types
-- Small jQuery integration to get files from `<input type="file">` elements
+- Optional jQuery integration to get files from `<input type="file">` elements
 
 Papa Parse has **no dependencies** - not even jQuery.
 
@@ -34,7 +34,7 @@ To learn how to use Papa Parse:
 Papa Parse for Node
 --------------------
 
-[Rich Harris](https://github.com/Rich-Harris) forked this project to make **[Baby Parse](https://github.com/Rich-Harris/BabyParse)** which runs in Node.js environments. However, it is using an older version of the parser which is very slow and has some bugs.
+[Rich Harris](https://github.com/Rich-Harris) forked this project to make **[Baby Parse](https://github.com/Rich-Harris/BabyParse)** which runs in Node.js environments.
 
 ```bash
 $ npm install babyparse
@@ -44,7 +44,6 @@ $ npm install babyparse
 
 Use it just like Papa Parse. However:
 
-- It is not up to date with the latest parser, so it is slower and has bugs.
 - Files are not supported; strings only (you can use Node's file facilities to load file contents yourself)
 - Some config options are unavailable:
 	- worker
@@ -52,7 +51,7 @@ Use it just like Papa Parse. However:
 	- encoding
 	- chunk
 
-Otherwise, Baby Parse has nearly all the same functionality as Papa Parse 3.0, including the `unparse()` function.
+Otherwise, Baby Parse has nearly all the same functionality as Papa Parse 4.0, including the `unparse()` utility.
 
 
 Get Started
@@ -67,11 +66,11 @@ For usage instructions, see the [homepage](http://papaparse.com) and, for more d
 Tests
 -----
 
-Papa Parse is under test. Download this repository, run `npm install`, and run `npm test` to run the tests in your browser.
+Papa Parse is under test. Download this repository, run `npm install`, then `npm test` to run the tests in your browser.
 
 
 
 Contributing
 ------------
 
-To discuss a new feature or ask a question, open an issue. To fix a bug, submit a pull request to be credited with the [contributors](https://github.com/mholt/PapaParse/graphs/contributors)! Remember, a pull request, *with test*, is best.You may also discuss on Twitter with [#PapaParse](https://twitter.com/search?q=%23PapaParse&src=typd&f=realtime) or directly to me, [@mholt6](https://twitter.com/mholt6).
+To discuss a new feature or ask a question, open an issue. To fix a bug, submit a pull request to be credited with the [contributors](https://github.com/mholt/PapaParse/graphs/contributors)! Remember, a pull request, *with test*, is best. You may also discuss on Twitter with [#PapaParse](https://twitter.com/search?q=%23PapaParse&src=typd&f=realtime) or directly to me, [@mholt6](https://twitter.com/mholt6).
