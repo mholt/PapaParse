@@ -1,4 +1,4 @@
-/*
+/*!
 	Papa Parse
 	v4.0.7
 	https://github.com/mholt/PapaParse
