@@ -48,6 +48,7 @@ $(function()
 	runCoreParserTests();
 	runParseTests(asyncDone);
 	runUnparseTests();
+	runCustomTests(asyncDone);
 
 });
 
@@ -303,6 +304,72 @@ function runUnparseTests()
 
 
 
+// Executes all tests in CUSTOM_TESTS from test-cases.js
+// and renders results in the table.
+function runCustomTests(asyncDone)
+{
+	var asyncRemaining = CUSTOM_TESTS.length;
+	for (var i = 0; i < CUSTOM_TESTS.length; i++)
+	{
+		runTest(CUSTOM_TESTS[i]);
+	}
+
+	function runTest(test)
+	{
+		try
+		{
+			test.run(function(actual) {
+				displayResults(test, actual);
+			});
+		}
+		catch (e)
+		{
+			displayResults(test, e);
+		}
+	}
+
+	function displayResults(test, actual)
+	{
+		var testId = testCount++;
+		var results = compare(actual, test.expected);
+
+		var testDescription = (test.description || "");
+		if (testDescription.length > 0)
+			testDescription += '<br>';
+		if (test.notes)
+			testDescription += '<span class="notes">' + test.notes + '</span>';
+
+		var tr = '<tr class="collapsed" id="test-'+testId+'">'
+				+ '<td class="rvl">+</td>'
+				+ '<td>' + testDescription + '</td>'
+				+ passOrFailTd(results)
+				+ '<td class="revealable pre"><div class="revealer">condensed</div><div class="hidden">' + test.expected + '</div></td>'
+				+ '<td class="revealable pre"><div class="revealer">condensed</div><div class="hidden">' + actual + '</div></td>'
+				+ '</tr>';
+
+		$('#custom-tests .results').append(tr);
+
+		if (!results.passed)
+			$('#test-' + testId + ' td.rvl').click();
+
+		if (results.passed) {
+			passCount++;
+		} else {
+			failCount++;
+		}
+		if (--asyncRemaining === 0) {
+			asyncDone();
+		}
+	}
+
+
+	function compare(actual, expected)
+	{
+		return {
+			passed: JSON.stringify(actual) === JSON.stringify(expected)
+		};
+	}
+}
 
 
 

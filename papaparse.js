@@ -412,9 +412,10 @@
 		if (!config.chunkSize)
 			config.chunkSize = Papa.RemoteChunkSize;
 
-		var start = 0, fileSize = 0, rowCount = 0;
+		var start = 0, baseIndex = 0, fileSize = 0, rowCount = 0;
 		var aggregate = "";
 		var partialLine = "";
+		var self = this;
 		var xhr, url, nextChunk, finishedWithEntireFile;
 		var userComplete, handle, configCopy;
 		replaceConfig(config);
@@ -488,6 +489,7 @@
 				if (fileSize && end > fileSize)	// Hack around a Chrome bug: http://stackoverflow.com/q/24745095/1048862
 					end = fileSize;
 				xhr.setRequestHeader("Range", "bytes="+start+"-"+end);
+				xhr.setRequestHeader("If-None-Match", "webkit-no-cache"); // https://bugs.webkit.org/show_bug.cgi?id=82672
 			}
 
 			try {
@@ -520,9 +522,10 @@
 
 			finishedWithEntireFile = (!config.step && !config.chunk) || start > getFileSize(xhr);
 
+			var lastLineEnd;
 			if (!finishedWithEntireFile)
 			{
-				var lastLineEnd = aggregate.lastIndexOf("\r");
+				lastLineEnd = aggregate.lastIndexOf("\r");
 
 				if (lastLineEnd == -1)
 					lastLineEnd = aggregate.lastIndexOf("\n");
@@ -541,8 +544,10 @@
 				}
 			}
 
-			var results = handle.parse(aggregate);
+			var results = handle.parse(aggregate, baseIndex);
 			aggregate = "";
+			if (!finishedWithEntireFile)
+				baseIndex += lastLineEnd + 1;
 			if (results && results.data)
 				rowCount += results.data.length;
 
@@ -601,7 +606,7 @@
 			configCopy.complete = undefined;
 			configCopy.chunkSize = parseInt(configCopy.chunkSize);	// VERY important so we don't concatenate strings!
 			handle = new ParserHandle(configCopy);
-			handle.streamer = this;
+			handle.streamer = self;
 		}
 	}
 
@@ -619,7 +624,7 @@
 		if (!config.chunkSize)
 			config.chunkSize = Papa.LocalChunkSize;
 
-		var start = 0;
+		var start = 0, baseIndex = 0;
 		var file;
 		var slice;
 		var aggregate = "";
@@ -700,9 +705,10 @@
 
 			finishedWithEntireFile = start >= file.size;
 
+			var lastLineEnd;
 			if (!finishedWithEntireFile)
 			{
-				var lastLineEnd = aggregate.lastIndexOf("\r");	// TODO: Use an auto-detected line ending?
+				lastLineEnd = aggregate.lastIndexOf("\r");	// TODO: Use an auto-detected line ending?
 
 				if (lastLineEnd == -1)
 					lastLineEnd = aggregate.lastIndexOf("\n");
@@ -721,8 +727,10 @@
 				}
 			}
 
-			var results = handle.parse(aggregate);
+			var results = handle.parse(aggregate, baseIndex);
 			aggregate = "";
+			if (!finishedWithEntireFile)
+				baseIndex += lastLineEnd + 1;
 			if (results && results.data)
 				rowCount += results.data.length;
 
@@ -777,7 +785,7 @@
 			configCopy.complete = undefined;
 			configCopy.chunkSize = parseInt(configCopy.chunkSize);	// VERY important so we don't concatenate strings!
 			handle = new ParserHandle(configCopy);
-			handle.streamer = this;
+			handle.streamer = self;
 		}
 
 	}
@@ -831,7 +839,7 @@
 			};
 		}
 
-		this.parse = function(input)
+		this.parse = function(input, baseIndex)
 		{
 			if (!_config.newline)
 				_config.newline = guessLineEndings(input);
@@ -856,7 +864,7 @@
 
 			_input = input;
 			_parser = new Parser(parserConfig);
-			_results = _parser.parse(_input);
+			_results = _parser.parse(_input, baseIndex);
 			processResults();
 			if (isFunction(_config.complete) && !_paused && (!self.streamer || self.streamer.finished()))
 				_config.complete(_results);
@@ -1104,7 +1112,7 @@
 		var cursor = 0;
 		var aborted = false;
 
-		this.parse = function(input)
+		this.parse = function(input, baseIndex)
 		{
 			// For some reason, in Chrome, this speeds things up (!?)
 			if (typeof input !== 'string')
@@ -1120,7 +1128,7 @@
 
 			// Establish starting state
 			cursor = 0;
-			var data = [], errors = [], row = [];
+			var data = [], errors = [], row = [], lastCursor = 0;
 
 			if (!input)
 				return returnable();
@@ -1135,13 +1143,14 @@
 						continue;
 					if (stepIsFunction)
 					{
-						data = [ rows[i].split(delim) ];
+						data = [];
+						pushRow(rows[i].split(delim));
 						doStep();
 						if (aborted)
 							return returnable();
 					}
 					else
-						data.push(rows[i].split(delim));
+						pushRow(rows[i].split(delim));
 					if (preview && i >= preview)
 					{
 						data = data.slice(0, preview);
@@ -1188,7 +1197,7 @@
 						{
 							// Closing quote at EOF
 							row.push(input.substring(cursor, quoteSearch).replace(/""/g, '"'));
-							data.push(row);
+							pushRow(row);
 							if (stepIsFunction)
 								doStep();
 							return returnable();
@@ -1281,13 +1290,19 @@
 			return finish();
 
 
+			function pushRow(row)
+			{
+				data.push(row);
+				lastCursor = cursor;
+			}
+
 			// Appends the remaining input from cursor to the end into
 			// row, saves the row, calls step, and returns the results.
 			function finish()
 			{
 				row.push(input.substr(cursor));
-				data.push(row);
 				cursor = inputLen;	// important in case parsing is paused
+				pushRow(row);
 				if (stepIsFunction)
 					doStep();
 				return returnable();
@@ -1299,9 +1314,9 @@
 			// preview and end parsing if necessary.
 			function saveRow(newCursor)
 			{
-				data.push(row);
-				row = [];
 				cursor = newCursor;
+				pushRow(row);
+				row = [];
 				nextNewline = input.indexOf(newline, cursor);
 			}
 
@@ -1315,7 +1330,8 @@
 						delimiter: delim,
 						linebreak: newline,
 						aborted: aborted,
-						truncated: !!stopped
+						truncated: !!stopped,
+						cursor: lastCursor + (baseIndex || 0)
 					}
 				};
 			}
