@@ -1354,11 +1354,22 @@
 	{
 		var msg = e.data;
 		var worker = workers[msg.workerId];
+		var aborted = false;
 
 		if (msg.error)
 			worker.userError(msg.error, msg.file);
 		else if (msg.results && msg.results.data)
 		{
+			var abort = function() {
+				aborted = true;
+				completeWorker(msg.workerId, { data: [], errors: [], meta: { aborted: true } });
+			}
+			var handle = {
+				abort: abort,
+				pause: abort,
+				resume: notImplemented
+			};
+
 			if (isFunction(worker.userStep))
 			{
 				for (var i = 0; i < msg.results.data.length; i++)
@@ -1367,7 +1378,9 @@
 						data: [msg.results.data[i]],
 						errors: msg.results.errors,
 						meta: msg.results.meta
-					});
+					}, handle);
+					if (aborted)
+						break;
 				}
 				delete msg.results;	// free memory ASAP
 			}
@@ -1378,13 +1391,22 @@
 			}
 		}
 
-		if (msg.finished)
+		if (msg.finished && !aborted)
 		{
-			if (isFunction(workers[msg.workerId].userComplete))
-				workers[msg.workerId].userComplete(msg.results);
-			workers[msg.workerId].terminate();
-			delete workers[msg.workerId];
+			completeWorker(msg.workerId, msg.results);
 		}
+	}
+
+	function completeWorker(workerId, results) {
+		var worker = workers[workerId];
+		if (isFunction(worker.userComplete))
+			worker.userComplete(results);
+		worker.terminate();
+		delete workers[workerId];
+	}
+
+	function notImplemented() {
+		throw "Not implemented.";
 	}
 
 	// Callback when worker thread receives a message
