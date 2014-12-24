@@ -1159,7 +1159,7 @@ var CUSTOM_TESTS = [
 			Papa.parse(new File(['A,b,c\nd,E,f\nG,h,i'], 'sample.csv'), {
 				download: true,
 				step: function(response) {
-					updates.push(response.indexes[0]);
+					updates.push(response.meta.cursor);
 				}, complete: function() {
 					callback(updates);
 				}
@@ -1175,7 +1175,7 @@ var CUSTOM_TESTS = [
 			Papa.parse(new File(['A,b,c\nd,E,f\nG,h,i'], 'sample.csv'), {
 				chunkSize: 3,
 				step: function(response) {
-					updates.push(response.indexes[0]);
+					updates.push(response.meta.cursor);
 				}, complete: function() {
 					callback(updates);
 				}
