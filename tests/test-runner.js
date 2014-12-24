@@ -100,7 +100,7 @@ function runParseTests(asyncDone)
 		{
 			var results = compare(actual.data, actual.errors, test.expected);
 
-			displayResults("tests-for-parse", test, actual, results);
+			displayResults("#tests-for-parse", test, actual, results);
 
 			if (results.data.passed && results.errors.passed) {
 				passCount++;
@@ -115,7 +115,7 @@ function runParseTests(asyncDone)
 		config.error = function(err)
 		{
 			failCount++;
-			displayResults(test, {data:[],errors:err}, test.expected);
+			displayResults("#tests-for-parse", test, {data:[],errors:err}, test.expected);
 			if (--asyncRemaining === 0) {
 				asyncDone();
 			}
@@ -308,7 +308,7 @@ function runUnparseTests()
 // and renders results in the table.
 function runCustomTests(asyncDone)
 {
-	var asyncRemaining = CUSTOM_TESTS.length;
+	var asyncRemaining = 0;
 	for (var i = 0; i < CUSTOM_TESTS.length; i++)
 	{
 		runTest(CUSTOM_TESTS[i]);
@@ -316,6 +316,9 @@ function runCustomTests(asyncDone)
 
 	function runTest(test)
 	{
+		if (test.disabled)
+			return;
+		asyncRemaining++;
 		try
 		{
 			test.run(function(actual) {
@@ -391,6 +394,9 @@ function passOrFailTd(result)
 // Reveals some hidden, whitespace, or invisible characters
 function revealChars(txt)
 {
+	if (typeof txt != 'string')
+		return '(file)';
+
 	// Make spaces and tabs more obvious when glancing
 	txt = txt.replace(/( |\t)/ig, '<span class="whitespace-char">$1</span>');
 	txt = txt.replace(/(\r\n|\n\r|\r|\n)/ig, '<span class="whitespace-char special-char">$1</span>$1');
