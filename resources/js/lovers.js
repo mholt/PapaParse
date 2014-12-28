@@ -45,7 +45,7 @@ var peopleLovePapa = [
 		quote: "Papa makes it so easy to use CSV, which is good for scientists."
 	},
 	{
-		link: "https://wikipedia.org",
+		link: "https://www.mediawiki.org/wiki/VisualEditor",
 		name: "Wikipedia",
 		description: "uses Papa Parse in VisualEditor to help article editors effortlessly build data tables from text files."
 	}
