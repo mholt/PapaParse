@@ -39,25 +39,25 @@
 
 						<div id="title-code">
 							<pre><code class="language-javascript">// Parse CSV string
-	var data = Papa.parse(csv);
+var data = Papa.parse(csv);
 
-	// Convert back to CSV
-	var csv = Papa.unparse(data);
+// Convert back to CSV
+var csv = Papa.unparse(data);
 
-	// Parse local CSV file
-	Papa.parse(file, {
-		complete: function(results) {
-			console.log("Finished:", results.data);
-		}
-	});
+// Parse local CSV file
+Papa.parse(file, {
+	complete: function(results) {
+		console.log("Finished:", results.data);
+	}
+});
 
-	// Stream big file in worker thread
-	Papa.parse(bigFile, {
-		worker: true,
-		step: function(results) {
-			console.log("Row:", results.data);
-		}
-	});</code></pre>
+// Stream big file in worker thread
+Papa.parse(bigFile, {
+	worker: true,
+	step: function(results) {
+		console.log("Row:", results.data);
+	}
+});</code></pre>
 						</div>
 					</div>
 				</div>
@@ -212,13 +212,13 @@
 							<p>Heavens, no. Papa does it right. Just pass in the CSV string with an optional <a href="/docs#config">configuration</a>.</p>
 
 							<pre><code class="language-javascript">var results = Papa.parse(csvString, <a href="/docs#config">config</a>);
-	/*
-		results = {
-			data: [ ... ],    // parsed data
-			errors: [ ... ],  // errors encountered
-			meta: {	... }     // extra parse info
-		}
-	*/</code></pre>
+/*
+	results = {
+		data: [ ... ],    // parsed data
+		errors: [ ... ],  // errors encountered
+		meta: {	... }     // extra parse info
+	}
+*/</code></pre>
 						</div>
 					</div>
 				</section>
@@ -234,8 +234,8 @@
 							<p>That's okay. Papa will scan the first few rows to find the right delimiter.</p>
 
 							<pre><code class="language-javascript">var results = Papa.parse(csvString);
-	console.log(results.meta.delimiter);
-	// "\t"</code></pre>
+console.log(results.meta.delimiter);
+// "\t"</code></pre>
 						</div>
 					</div>
 				</section>
@@ -251,10 +251,10 @@
 							<p>Then give Papa a <a href="https://developer.mozilla.org/en-US/docs/Web/API/File">File</a>  instead of a string. Since file parsing is asynchronous, don't forget a callback.</p>
 
 							<pre><code class="language-javascript">var results = Papa.parse(fileInput.files[0], {
-		complete: function(results) {
-			console.log(results);
-		}
-	});</code></pre>
+	complete: function(results) {
+		console.log(results);
+	}
+});</code></pre>
 						</div>
 					</div>
 				</section>
@@ -272,11 +272,11 @@
 							<p>Oh, well then just pass in the URL and&mdash;of course&mdash;a callback.</p>
 
 							<pre><code class="language-javascript">Papa.parse("http://example.com/file.csv", {
-		download: true,
-		complete: function(results) {
-			console.log(results);
-		}
-	});</code></pre>
+	download: true,
+	complete: function(results) {
+		console.log(results);
+	}
+});</code></pre>
 						</div>
 					</div>
 				</section>
@@ -296,14 +296,14 @@
 							<p>That's what streaming is for. Specify a step callback to receive the results row-by-row. This way, you won't load the whole file into memory and crash the browser.</p>
 
 							<pre><code class="language-javascript">Papa.parse("http://example.com/big.csv", {
-		download: true,
-		step: function(row) {
-			console.log("Row:", row.data);
-		},
-		complete: function() {
-			console.log("All done!");
-		}
-	});</code></pre>
+	download: true,
+	step: function(row) {
+		console.log("Row:", row.data);
+	},
+	complete: function() {
+		console.log("All done!");
+	}
+});</code></pre>
 						</div>
 					</div>
 				</section>
@@ -319,14 +319,14 @@
 							<p>That happens when a long-running script is executing in the same thread as the page. Use a <a href="https://developer.mozilla.org/en-US/docs/Web/API/Worker">Worker</a> thread by specifying <code>worker: true</code>. It may take slightly longer, but your page will stay reactive.</p>
 
 							<pre><code class="language-javascript">Papa.parse(bigFile, {
-		worker: true,
-		step: function(row) {
-			console.log("Row:", row.data);
-		},
-		complete: function() {
-			console.log("All done!");
-		}
-	});</code></pre>
+	worker: true,
+	step: function(row) {
+		console.log("Row:", row.data);
+	},
+	complete: function() {
+		console.log("All done!");
+	}
+});</code></pre>
 						</div>
 					</div>
 				</section>
@@ -343,9 +343,9 @@
 							<p>If you tell Papa there is a header row, each row will be organized by field name instead of index.</p>
 
 							<pre><code class="language-javascript">// Key data by field name instead of index/position
-	var results = Papa.parse(csv, {
-		header: true
-	});</code></pre>
+var results = Papa.parse(csv, {
+	header: true
+});</code></pre>
 						</div>
 					</div>
 				</section>
@@ -362,9 +362,9 @@
 							<p><i>Everything</i> is parsed as strings. If you want numbers and booleans, you can enable dynamic typing to do the conversion for you.</p>
 
 							<pre><code class="language-javascript">// Converts numeric/boolean data
-	var results = Papa.parse(csv, {
-		dynamicTyping: true
-	});</code></pre>
+var results = Papa.parse(csv, {
+	dynamicTyping: true
+});</code></pre>
 						</div>
 					</div>
 				</section>
@@ -383,10 +383,10 @@
 							<p>Okay, first off: that's really weird. But fortunately, you can skip those lines... just specify the comment string.</p>
 
 							<pre><code class="language-javascript">// Mostly found in academia, some CSV files
-	// may have commented lines in them
-	var results = Papa.parse(csv, {
-		comments: "#"
-	});</code></pre>
+// may have commented lines in them
+var results = Papa.parse(csv, {
+	comments: "#"
+});</code></pre>
 						</div>
 					</div>
 				</section>
@@ -404,12 +404,12 @@
 							<p>Papa handles errors pretty well. The <a href="http://tools.ietf.org/html/rfc4180">CSV standard</a> is somewhat <strike>loose</strike> ambiguous, so Papa is designed for edge cases. For example, mismatched fields won't break parsing.</p>
 
 							<pre><code class="language-javascript">// Example error:
-	{
-		type: "FieldMismatch",
-		code: "TooManyFields",
-		message: "Expected 3 fields, but parsed 4",
-		row: 1
-	}</code></pre>
+{
+	type: "FieldMismatch",
+	code: "TooManyFields",
+	message: "Expected 3 fields, but parsed 4",
+	row: 1
+}</code></pre>
 						</div>
 					</div>
 				</section>
@@ -426,15 +426,15 @@
 							<p>Sure, but it's not required. You can use jQuery to select file input elements and then parse their files. Papa exposes its file parsing API as a jQuery plugin only when jQuery is defined. Papa Parse has <b>no dependencies</b>.</p>
 
 							<pre><code class="language-javascript">$("input[type=file]").parse({
-		config: {
-			complete: function(results, file) {
-				console.log("This file done:", file, results);
-			}
-		},
-		complete: function() {
-			console.log("All files done!");
+	config: {
+		complete: function(results, file) {
+			console.log("This file done:", file, results);
 		}
-	});</code></pre>
+	},
+	complete: function() {
+		console.log("All files done!");
+	}
+});</code></pre>
 						</div>
 					</div>
 				</section>
@@ -451,8 +451,8 @@
 							<p>Call <code>unparse()</code> instead of <code>parse()</code>, passing in your array of arrays or array of objects. Papa will figure it out.</p>
 
 							<pre><code class="language-javascript">// Output is a properly-formatted CSV string.
-	// See <a href="/docs#json-to-csv">the docs</a> for more configurability.
-	var csv = Papa.unparse(yourData);</code></pre>
+// See <a href="/docs#json-to-csv">the docs</a> for more configurability.
+var csv = Papa.unparse(yourData);</code></pre>
 						</div>
 					</div>
 				</section>
