@@ -380,7 +380,7 @@ var csv = Papa.unparse({
 									<code>header</code>
 								</td>
 								<td>
-									If true, the first row of parsed data will be interpreted as field names. An array of field names will be returned in <a href="#meta">meta</a>, and each row of data will be an object of values keyed by field name instead of a simple array. Warning: Duplicate field names will overwrite values in previous fields having the same name.
+									If true, the first row of parsed data will be interpreted as field names. An array of field names will be returned in <a href="#meta">meta</a>, and each row of data will be an object of values keyed by field name instead of a simple array. Rows with a different number of fields from the header row will produce an error. Warning: Duplicate field names will overwrite values in previous fields having the same name.
 								</td>
 							</tr>
 							<tr>
