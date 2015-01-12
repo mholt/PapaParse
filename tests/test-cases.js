@@ -2,8 +2,8 @@ var RECORD_SEP = String.fromCharCode(30);
 var UNIT_SEP = String.fromCharCode(31);
 var FILES_ENABLED = false;
 try {
-  new File([""], "");
-  FILES_ENABLED = true;
+	new File([""], "");
+	FILES_ENABLED = true;
 } catch (e) {} // safari, ie
 
 // Tests for the core parser using new Papa.Parser().parse() (CSV to JSON)
@@ -851,19 +851,21 @@ var PARSE_ASYNC_TESTS = [
 			errors: []
 		}
 	},
-  {
-    description: "Simple file",
-    input: FILES_ENABLED ? new File(["A,B,C\nX,Y,Z"], "sample.csv") : false,
+	{
+		description: "Simple file",
+		disabled: !FILES_ENABLED,
+		input: FILES_ENABLED ? new File(["A,B,C\nX,Y,Z"], "sample.csv") : false,
 		config: {
 		},
 		expected: {
 			data: [['A','B','C'],['X','Y','Z']],
 			errors: []
 		}
-  },
-  {
-    description: "Simple file + worker",
-    input: FILES_ENABLED ? new File(["A,B,C\nX,Y,Z"], "sample.csv") : false,
+	},
+	{
+		description: "Simple file + worker",
+		disabled: !FILES_ENABLED,
+		input: FILES_ENABLED ? new File(["A,B,C\nX,Y,Z"], "sample.csv") : false,
 		config: {
 			worker: true,
 		},
@@ -871,7 +873,7 @@ var PARSE_ASYNC_TESTS = [
 			data: [['A','B','C'],['X','Y','Z']],
 			errors: []
 		}
-  }
+	}
 ];
 
 
@@ -1207,11 +1209,10 @@ var CUSTOM_TESTS = [
 				step: function(response, handle) {
 					updates.push(response.data[0]);
 					handle.abort();
+				}, complete: function() {
+					callback(updates);
 				}
 			});
-			setTimeout(function() {
-				callback(updates);
-			}, 100);
 		}
 	},
 	{
@@ -1223,11 +1224,11 @@ var CUSTOM_TESTS = [
 				step: function(response, handle) {
 					updates.push(response.data[0]);
 					handle.pause();
+					callback(updates);
+				}, complete: function() {
+					callback('incorrect complete callback');
 				}
 			});
-			setTimeout(function() {
-				callback(updates);
-			}, 100);
 		}
 	},
 	{
@@ -1250,7 +1251,7 @@ var CUSTOM_TESTS = [
 			});
 			setTimeout(function() {
 				handle.resume();
-			}, 100);
+			}, 500);
 		}
 	},
 	{

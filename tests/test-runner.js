@@ -91,10 +91,13 @@ function runParseTests(asyncDone)
 			failCount++;
 	}
 
-	var asyncRemaining = PARSE_ASYNC_TESTS.length;
+	var asyncRemaining = 0;
 
 	PARSE_ASYNC_TESTS.forEach(function(test)
 	{
+		if (test.disabled)
+			return;
+		asyncRemaining++;
 		var config = test.config;
 		config.complete = function(actual)
 		{
@@ -321,9 +324,7 @@ function runCustomTests(asyncDone)
 		asyncRemaining++;
 		try
 		{
-			test.run(function(actual) {
-				displayResults(test, actual);
-			});
+			displayAsyncTest(test);
 		}
 		catch (e)
 		{
@@ -331,10 +332,10 @@ function runCustomTests(asyncDone)
 		}
 	}
 
-	function displayResults(test, actual)
+	function displayAsyncTest(test)
 	{
 		var testId = testCount++;
-		var results = compare(actual, test.expected);
+		test.testId = testId;
 
 		var testDescription = (test.description || "");
 		if (testDescription.length > 0)
@@ -345,12 +346,43 @@ function runCustomTests(asyncDone)
 		var tr = '<tr class="collapsed" id="test-'+testId+'">'
 				+ '<td class="rvl">+</td>'
 				+ '<td>' + testDescription + '</td>'
-				+ passOrFailTd(results)
+				+ '<td class="status pending">pending</td>'
 				+ '<td class="revealable pre"><div class="revealer">condensed</div><div class="hidden">' + test.expected + '</div></td>'
-				+ '<td class="revealable pre"><div class="revealer">condensed</div><div class="hidden">' + actual + '</div></td>'
+				+ '<td class="revealable pre"><div class="revealer">condensed</div><div class="hidden actual"></div></td>'
 				+ '</tr>';
 
 		$('#custom-tests .results').append(tr);
+
+		test.run(function(actual)
+		{
+			displayAsyncResults(test, actual);
+		});
+
+		setTimeout(function()
+		{
+			if (test.complete) return;
+			displayAsyncResults(test, '(incomplete)');
+		}, 2000);
+	}
+
+	function displayAsyncResults(test, actual)
+	{
+		var testId = test.testId;
+		if (test.complete)
+		{
+			asyncRemaining++;
+			actual = '(multiple results from test)';
+		}
+		test.complete = true;
+		var results = compare(actual, test.expected);
+
+		var tr = $('#test-'+testId);
+		tr.find('.actual').text(actual);
+
+		var status = $(passOrFailTd(results));
+		var oldStatus = tr.find('.status');
+		oldStatus.attr('class', status.attr('class'));
+		oldStatus.text(status.text());
 
 		if (!results.passed)
 			$('#test-' + testId + ' td.rvl').click();
@@ -385,9 +417,9 @@ function runCustomTests(asyncDone)
 function passOrFailTd(result)
 {
 	if (result.passed)
-		return '<td class="ok">OK</td>';
+		return '<td class="status ok">OK</td>';
 	else
-		return '<td class="fail">FAIL</td>';
+		return '<td class="status fail">FAIL</td>';
 }
 
 
