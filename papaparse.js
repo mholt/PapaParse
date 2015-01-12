@@ -750,8 +750,6 @@
 			_parser = new Parser(parserConfig);
 			_results = _parser.parse(_input, baseIndex, ignoreLastRow);
 			processResults();
-			if (isFunction(_config.complete) && !_paused && self.streamer.finished())
-				_config.complete(_results);
 			return _paused ? { meta: { paused: true } } : (_results || { meta: { paused: false } });
 		};
 
