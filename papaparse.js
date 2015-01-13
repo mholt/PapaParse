@@ -967,24 +967,29 @@
 			if (!input)
 				return returnable();
 
-			if (fastMode)
+			if (fastMode || input.indexOf('"') === -1)
 			{
-				// Fast mode assumes there are no quoted fields in the input
 				var rows = input.split(newline);
 				for (var i = 0; i < rows.length; i++)
 				{
-					if (comments && rows[i].substr(0, commentsLen) == comments)
+					var row = rows[i];
+					cursor += row.length;
+					if (i !== rows.length - 1)
+						cursor += newline.length;
+					else if (ignoreLastRow)
+						return returnable();
+					if (comments && row.substr(0, commentsLen) == comments)
 						continue;
 					if (stepIsFunction)
 					{
 						data = [];
-						pushRow(rows[i].split(delim));
+						pushRow(row.split(delim));
 						doStep();
 						if (aborted)
 							return returnable();
 					}
 					else
-						pushRow(rows[i].split(delim));
+						pushRow(row.split(delim));
 					if (preview && i >= preview)
 					{
 						data = data.slice(0, preview);
