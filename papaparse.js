@@ -172,27 +172,26 @@
 
 	function CsvToJson(_input, _config)
 	{
-		var config = IS_WORKER ? _config : copyAndValidateConfig(_config);
-		var useWorker = config.worker && Papa.WORKERS_SUPPORTED;
+		_config = _config || {};
 
-		if (useWorker)
+		if (_config.worker && Papa.WORKERS_SUPPORTED)
 		{
 			var w = newWorker();
 
-			w.userStep = config.step;
-			w.userChunk = config.chunk;
-			w.userComplete = config.complete;
-			w.userError = config.error;
+			w.userStep = _config.step;
+			w.userChunk = _config.chunk;
+			w.userComplete = _config.complete;
+			w.userError = _config.error;
 
-			config.step = isFunction(config.step);
-			config.chunk = isFunction(config.chunk);
-			config.complete = isFunction(config.complete);
-			config.error = isFunction(config.error);
-			delete config.worker;	// prevent infinite loop
+			_config.step = isFunction(_config.step);
+			_config.chunk = isFunction(_config.chunk);
+			_config.complete = isFunction(_config.complete);
+			_config.error = isFunction(_config.error);
+			delete _config.worker;	// prevent infinite loop
 
 			w.postMessage({
 				input: _input,
-				config: config,
+				config: _config,
 				workerId: w.id
 			});
 
@@ -202,13 +201,13 @@
 		var streamer = null;
 		if (typeof _input === 'string')
 		{
-			if (config.download)
-				streamer = new NetworkStreamer(config);
+			if (_config.download)
+				streamer = new NetworkStreamer(_config);
 			else
-				streamer = new StringStreamer(config);
+				streamer = new StringStreamer(_config);
 		}
 		else if ((global.File && _input instanceof File) || _input instanceof Object)	// ...Safari. (see issue #106)
-			streamer = new FileStreamer(config);
+			streamer = new FileStreamer(_config);
 
 		return streamer.stream(_input);
 	}
@@ -1352,60 +1351,7 @@
 		}
 	}
 
-	// Replaces bad config values with good, default ones
-	function copyAndValidateConfig(origConfig)
-	{
-		if (typeof origConfig !== 'object')
-			origConfig = {};
-
-		var config = copy(origConfig);
-
-		if (typeof config.delimiter !== 'string'
-			|| config.delimiter.length != 1
-			|| Papa.BAD_DELIMITERS.indexOf(config.delimiter) > -1)
-			config.delimiter = DEFAULTS.delimiter;
-
-		if (config.newline != '\n'
-			&& config.newline != '\r'
-			&& config.newline != '\r\n')
-			config.newline = DEFAULTS.newline;
-
-		if (typeof config.header !== 'boolean')
-			config.header = DEFAULTS.header;
-
-		if (typeof config.dynamicTyping !== 'boolean')
-			config.dynamicTyping = DEFAULTS.dynamicTyping;
-
-		if (typeof config.preview !== 'number')
-			config.preview = DEFAULTS.preview;
-
-		if (typeof config.step !== 'function')
-			config.step = DEFAULTS.step;
-
-		if (typeof config.complete !== 'function')
-			config.complete = DEFAULTS.complete;
-
-		if (typeof config.error !== 'function')
-			config.error = DEFAULTS.error;
-
-		if (typeof config.encoding !== 'string')
-			config.encoding = DEFAULTS.encoding;
-
-		if (typeof config.worker !== 'boolean')
-			config.worker = DEFAULTS.worker;
-
-		if (typeof config.download !== 'boolean')
-			config.download = DEFAULTS.download;
-
-		if (typeof config.skipEmptyLines !== 'boolean')
-			config.skipEmptyLines = DEFAULTS.skipEmptyLines;
-
-		if (typeof config.fastMode !== 'boolean')
-			config.fastMode = DEFAULTS.fastMode;
-
-		return config;
-	}
-
+	// Makes a deep copy of an array or object (mostly)
 	function copy(obj)
 	{
 		if (typeof obj !== 'object')
