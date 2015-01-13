@@ -387,14 +387,13 @@ function runCustomTests(asyncDone)
 		if (!results.passed)
 			$('#test-' + testId + ' td.rvl').click();
 
-		if (results.passed) {
+		if (results.passed)
 			passCount++;
-		} else {
+		else
 			failCount++;
-		}
-		if (--asyncRemaining === 0) {
+
+		if (--asyncRemaining === 0)
 			asyncDone();
-		}
 	}
 
 

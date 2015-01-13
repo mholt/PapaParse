@@ -39,8 +39,7 @@
 	global.Papa.BYTE_ORDER_MARK = "\ufeff";
 	global.Papa.BAD_DELIMITERS = ["\r", "\n", "\"", global.Papa.BYTE_ORDER_MARK];
 	global.Papa.WORKERS_SUPPORTED = !!global.Worker;
-	// Must be set externally if using workers and Papa Parse is loaded asynchronously
-	global.Papa.SCRIPT_PATH = null;
+	global.Papa.SCRIPT_PATH = null;	// Must be set manually if using workers and Papa Parse is loaded asynchronously
 
 	// Configurable chunk sizes for local and remote files, respectively
 	global.Papa.LocalChunkSize = 1024 * 1024 * 10;	// 10 MB
@@ -156,11 +155,15 @@
 	else if (Papa.WORKERS_SUPPORTED)
 	{
 		AUTO_SCRIPT_PATH = getScriptPath();
+
 		// Check if the script was loaded synchronously
-		if ( !document.body ) {
+		if (!document.body)
+		{
 			// Body doesn't exist yet, must be synchronous
 			LOADED_SYNC = true;
-		} else {
+		}
+		else
+		{
 			document.addEventListener('DOMContentLoaded', function () {
 				LOADED_SYNC = true;
 			}, true);
@@ -367,64 +370,39 @@
 		}
 	}
 
-	function bindFunction(f, self)
-	{
-		return function() {
-			f.apply(self, arguments);
-		}
-	}
-
+	// ChunkStreamer is the base prototype for various streamer implementations.
 	function ChunkStreamer(config)
 	{
 		this._handle = null;
 		this._paused = false;
 		this._finished = false;
-		this._userComplete = null;
 		this._input = null;
 		this._baseIndex = 0;
 		this._partialLine = "";
 		this._rowCount = 0;
 		this._start = 0;
-		this._config = replaceConfig.call(this, config);
-
-		this.resume = function()
-		{
-			this._paused = false;
-			this._nextChunk();
-		};
-
-		this.finished = function()
-		{
-			return this._finished;
-		};
-
-		this.pause = function()
-		{
-			this._paused = true;
-		};
-
-		this.abort = function()
-		{
-			this._finished = true;
-			if (isFunction(this._userComplete))
-				this._userComplete({ data: [], errors: [], meta: { aborted: true } });
-		};
-
 		this._nextChunk = null;
+		replaceConfig.call(this, config);
 
-		this.parseChunk = function(chunk) {
+		this.parseChunk = function(chunk)
+		{
 			// Rejoin the line we likely just split in two by chunking the file
 			var aggregate = this._partialLine + chunk;
 			this._partialLine = "";
 
 			var results = this._handle.parse(aggregate, this._baseIndex, !this._finished);
-			if (this._handle.paused()) return;
+			
+			if (this._handle.paused())
+				return;
+			
 			var lastIndex = results.meta.cursor;
+			
 			if (!this._finished)
 			{
 				this._partialLine = aggregate.substring(lastIndex - this._baseIndex);
 				this._baseIndex = lastIndex;
 			}
+
 			if (results && results.data)
 				this._rowCount += results.data.length;
 
@@ -446,9 +424,9 @@
 				results = undefined;
 			}
 
-			if (isFunction(this._userComplete) && finishedIncludingPreview)
-				this._userComplete(results);
-
+			if (finishedIncludingPreview && isFunction(this._config.complete) && (!results || !results.meta.aborted))
+				this._config.complete(results);
+			
 			if (!finishedIncludingPreview && (!results || !results.meta.paused))
 				this._nextChunk();
 
@@ -471,17 +449,12 @@
 
 		function replaceConfig(config)
 		{
-			// Deep-copy the config so we can edit it; we need
-			// to call the complete function if we are to ensure
-			// that the last chunk callback, if any, will be called
-			// BEFORE the complete function.
+			// Deep-copy the config so we can edit it
 			var configCopy = copy(config);
-			this._userComplete = configCopy.complete;
-			configCopy.complete = undefined;
 			configCopy.chunkSize = parseInt(configCopy.chunkSize);	// VERY important so we don't concatenate strings!
 			this._handle = new ParserHandle(configCopy);
 			this._handle.streamer = this;
-			return configCopy;
+			this._config = configCopy;	// persist the copy to the caller
 		}
 	}
 
@@ -592,7 +565,6 @@
 		if (!config.chunkSize)
 			config.chunkSize = Papa.LocalChunkSize;
 		ChunkStreamer.call(this, config);
-
 
 		var reader, slice;
 
@@ -722,6 +694,9 @@
 			};
 		}
 
+		// Parses input. Most users won't need, and shouldn't mess with, the baseIndex
+		// and ignoreLastRow parameters. They are used by streamers (wrapper functions)
+		// when an input comes in multiple chunks, like from a file.
 		this.parse = function(input, baseIndex, ignoreLastRow)
 		{
 			if (!_config.newline)
@@ -1277,10 +1252,11 @@
 			var abort = function() {
 				aborted = true;
 				completeWorker(msg.workerId, { data: [], errors: [], meta: { aborted: true } });
-			}
+			};
+
 			var handle = {
 				abort: abort,
-				pause: abort,
+				pause: notImplemented,
 				resume: notImplemented
 			};
 
@@ -1300,15 +1276,13 @@
 			}
 			else if (isFunction(worker.userChunk))
 			{
-				worker.userChunk(msg.results, msg.file);
+				worker.userChunk(msg.results, handle, msg.file);
 				delete msg.results;
 			}
 		}
 
 		if (msg.finished && !aborted)
-		{
 			completeWorker(msg.workerId, msg.results);
-		}
 	}
 
 	function completeWorker(workerId, results) {
@@ -1360,6 +1334,13 @@
 		for (var key in obj)
 			cpy[key] = copy(obj[key]);
 		return cpy;
+	}
+
+	function bindFunction(f, self)
+	{
+		return function() {
+			f.apply(self, arguments);
+		}
 	}
 
 	function isFunction(func)

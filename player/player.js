@@ -149,13 +149,13 @@ function chunkFn(results, streamer, file)
 
 	if (pauseChecked)
 	{
-		console.log("Pausing; " + results.data.length + " rows in chunk", file);
+		console.log("Pausing; " + results.data.length + " rows in chunk; file:", file);
 		streamer.pause();
 		return;
 	}
 	
 	if (printStepChecked)
-		console.log(results.data.length + " rows in chunk", file);
+		console.log("Chunk data:", results.data.length, results);
 }
 
 function errorFn(error, file)

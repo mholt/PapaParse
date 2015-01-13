@@ -1066,7 +1066,8 @@ var CUSTOM_TESTS = [
 			Papa.parse('A,b,c\nd,E,f\nG,h,i', {
 				step: function(response) {
 					updates.push(response.meta.cursor);
-				}, complete: function() {
+				},
+				complete: function() {
 					callback(updates);
 				}
 			});
@@ -1081,7 +1082,8 @@ var CUSTOM_TESTS = [
 				download: true,
 				step: function(response) {
 					updates.push(response.meta.cursor);
-				}, complete: function() {
+				},
+				complete: function() {
 					callback(updates);
 				}
 			});
@@ -1097,7 +1099,8 @@ var CUSTOM_TESTS = [
 				chunkSize: 500,
 				step: function(response) {
 					updates.push(response.meta.cursor);
-				}, complete: function() {
+				},
+				complete: function() {
 					callback(updates);
 				}
 			});
@@ -1114,7 +1117,8 @@ var CUSTOM_TESTS = [
 				worker: true,
 				step: function(response) {
 					updates.push(response.meta.cursor);
-				}, complete: function() {
+				},
+				complete: function() {
 					callback(updates);
 				}
 			});
@@ -1130,7 +1134,8 @@ var CUSTOM_TESTS = [
 				chunkSize: 500,
 				chunk: function(response) {
 					updates.push(response.data.length);
-				}, complete: function() {
+				},
+				complete: function() {
 					callback(updates);
 				}
 			});
@@ -1146,7 +1151,8 @@ var CUSTOM_TESTS = [
 				chunkSize: 500,
 				chunk: function(response) {
 					updates.push(response.meta.cursor);
-				}, complete: function() {
+				},
+				complete: function() {
 					callback(updates);
 				}
 			});
@@ -1162,7 +1168,8 @@ var CUSTOM_TESTS = [
 				download: true,
 				step: function(response) {
 					updates.push(response.meta.cursor);
-				}, complete: function() {
+				},
+				complete: function() {
 					callback(updates);
 				}
 			});
@@ -1178,7 +1185,8 @@ var CUSTOM_TESTS = [
 				chunkSize: 3,
 				step: function(response) {
 					updates.push(response.meta.cursor);
-				}, complete: function() {
+				},
+				complete: function() {
 					callback(updates);
 				}
 			});
@@ -1194,7 +1202,8 @@ var CUSTOM_TESTS = [
 				chunkSize: 3,
 				step: function(response) {
 					updates.push(response.data[0]);
-				}, complete: function() {
+				},
+				complete: function() {
 					callback(updates);
 				}
 			});
@@ -1209,7 +1218,8 @@ var CUSTOM_TESTS = [
 				step: function(response, handle) {
 					updates.push(response.data[0]);
 					handle.abort();
-				}, complete: function() {
+				},
+				complete: function() {
 					callback(updates);
 				}
 			});
@@ -1225,7 +1235,8 @@ var CUSTOM_TESTS = [
 					updates.push(response.data[0]);
 					handle.pause();
 					callback(updates);
-				}, complete: function() {
+				},
+				complete: function() {
 					callback('incorrect complete callback');
 				}
 			});
@@ -1245,7 +1256,8 @@ var CUSTOM_TESTS = [
 					handle = h;
 					handle.pause();
 					first = false;
-				}, complete: function() {
+				},
+				complete: function() {
 					callback(updates);
 				}
 			});
