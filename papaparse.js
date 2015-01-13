@@ -10,25 +10,6 @@
 	var IS_WORKER = !global.document, LOADED_SYNC = false, AUTO_SCRIPT_PATH;
 	var workers = {}, workerIdCounter = 0;
 
-	// A configuration object from which to draw default settings
-	var DEFAULTS = {
-		delimiter: "",	// empty: auto-detect
-		newline: "",	// empty: auto-detect
-		header: false,
-		dynamicTyping: false,
-		preview: 0,
-		step: undefined,
-		encoding: "",	// browser should default to "UTF-8"
-		worker: false,
-		comments: false,
-		complete: undefined,
-		error: undefined,
-		download: false,
-		chunk: undefined,
-		skipEmptyLines: false,
-		fastMode: false
-	};
-
 	global.Papa = {};
 
 	global.Papa.parse = CsvToJson;
