@@ -967,7 +967,7 @@
 			if (!input)
 				return returnable();
 
-			if (fastMode || input.indexOf('"') === -1)
+			if (fastMode || (fastMode !== false && input.indexOf('"') === -1))
 			{
 				var rows = input.split(newline);
 				for (var i = 0; i < rows.length; i++)
