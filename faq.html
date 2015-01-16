@@ -100,7 +100,6 @@
 					</p>
 
 
-
 					<h6 id="open-source">Is it open source? (Can I contribute something?)</h6>
 					<p>
 						Yes, please! I don't want to do this all by myself. Head over to the <a href="https://github.com/mholt/PapaParse">GitHub project page</a> and hack away. If you're making a significant change, open an issue first so we can talk about it.
@@ -108,9 +107,9 @@
 
 
 
-					<h6 id="fast-mode">Why wouldn't I always enable fast mode?</h6>
+					<h6 id="fast-mode">What's the deal with fast mode?</h6>
 					<p>
-						Fast mode makes <a href="http://jsperf.com/javascript-csv-parsers/3">Papa Parse screaming fast</a>, but you wouldn't want to use it if there are (or may be) quoted fields in your input. Fast mode is fast because it makes one major assumption: no quoted fields. But if you know that your input has no quotes, turn that sucker on. With fast mode on, 1 GB files can be parsed in about 20 seconds.
+						Fast mode makes <a href="http://jsperf.com/javascript-csv-parsers/3">Papa Parse screaming fast</a>, but you wouldn't want to use it if there are quoted fields in your input. Fast mode is fast because it makes one major assumption: no quoted fields. If you don't specify fastMode either way, fast mode will be turned on automatically if there are no quote characters in the input. With fast mode on, 1 GB files can be parsed in about 20 seconds.
 					</p>
 
 
@@ -126,12 +125,17 @@
 
 					<h6>Can Papa load and parse huge files?</h6>
 					<p>
-						Yes. Parsing huge text files is facilitated by <i>streaming</i>, where the file is loaded a little bit at a time, parsed, and the results are sent to your <a href="/docs#config">step</a> callback function, row-by-row.
+						Yes. Parsing huge text files is facilitated by <i>streaming</i>, where the file is loaded a little bit at a time, parsed, and the results are sent to your <a href="/docs#config">step</a> callback function, row-by-row. You can also get results chunk-by-chunk (which is usually faster) by using the <code>chunk</code> callback function in the same way.
 					</p>
 
 					<h6>How do I stream my input?</h6>
 					<p>
 						Just specify a <a href="/docs#config">step</a> callback function. Results will <i>not</i> be available after parsing is finished, however. You have to inspect the results one row at a time.
+					</p>
+
+					<h6>What if I want more than 1 row at a time?</h6>
+					<p>
+						Use the <code>chunk</code> callback instead. It works just like step, but you get an entire chunk of the file at a time, rather than a single row. Don't try to use step and chunk together (the behavior is undefined).
 					</p>
 
 					<h6>What is a stream and when should I stream files?</h6>
@@ -172,7 +176,7 @@
 
 					<h6>Can I pause and resume parsing?</h6>
 					<p>
-						Yes, as long as you are streaming and not using a worker. Your <a href="/docs#step">step callback</a> is passed a ParserHandle which has pause, resume, and abort functions.
+						Yes, as long as you are streaming and not using a worker. Your <a href="/docs#step">step callback</a> (same with the <code>chunk</code> callback) is passed a parser which has pause, resume, and abort functions. This is exceptionally useful when performing asynchronous actions during parsing, for example, AJAX requests. You can always abort parsing in your callback, even when using workers, but pause and resume is only available without a worker.
 					</p>
 
 
@@ -216,6 +220,11 @@
 					<h6>Can I stream and use a worker at the same time?</h6>
 					<p>
 						Yup. If the input is too large to fit in memory (or large enough to crash the browser), streaming is <i>always</i> the answer, even in a worker thread. Workers keep the page reactive. Streaming makes it able to fit in memory. Use both if you need to.
+					</p>
+
+					<h6>Can I pause/resume workers?</h6>
+					<p>
+						No. This would drastically slow down parsing, as it would require the worker to wait after every chunk for a "continue" signal from the main thread. But you <i>can</i> abort workers by calling <code>.abort()</code> on the parser that gets passed to your callback function.
 					</p>
 				</div>
 			</div>

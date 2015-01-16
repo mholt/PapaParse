@@ -344,7 +344,7 @@ var csv = Papa.unparse({
 	download: false,
 	skipEmptyLines: false,
 	chunk: undefined,
-	fastMode: false
+	fastMode: undefined
 }</code></pre>
 					</div>
 					<div class="clear"></div>
@@ -388,7 +388,7 @@ var csv = Papa.unparse({
 									<code>dynamicTyping</code>
 								</td>
 								<td>
-									If true, numeric and boolean data will be converted to their type instead of remaining strings.
+									If true, numeric and boolean data will be converted to their type instead of remaining strings. Numeric data must conform to the definition of a decimal literal. (European-formatted numbers must have commas and dots swapped.)
 								</td>
 							</tr>
 							<tr>
@@ -429,11 +429,11 @@ var csv = Papa.unparse({
 								</td>
 								<td>
 									To <a href="/faq#streaming">stream</a> the input, define a callback function:
-									<pre><code class="language-javascript">step: function(<a href="#results">results</a>, handle) {
+									<pre><code class="language-javascript">step: function(<a href="#results">results</a>, parser) {
 	console.log("Row data:", results.data);
 	console.log("Row errors:", results.errors);
 }</code></pre>
-									Streaming is necessary for large files which would otherwise crash the browser. Except when using a <a href="/faq#worker">Web Worker</a>, you can call <code>handle.abort()</code> to stop parsing, <code>handle.pause()</code> to pause it, or <code>handle.resume()</code> to resume.
+									Streaming is necessary for large files which would otherwise crash the browser. You can call <code>parser.abort()</code> to abort parsing. And, except when using a <a href="/faq#worker">Web Worker</a>, you can call <code>parser.pause()</code> to pause it, and <code>parser.resume()</code> to resume.
 								</td>
 							</tr>
 							<tr>
@@ -486,7 +486,7 @@ var csv = Papa.unparse({
 									<code>fastMode</code>
 								</td>
 								<td>
-									When enabled, fast mode executes parsing much more quickly. However, this only works for input without quoted fields. If you cannot guarantee that, do not enable fast mode.
+									Fast mode speeds up parsing significantly for large inputs. However, it only works when the input has no quoted fields. Fast mode will automatically be enabled if no <code>"</code> characters appear in the input. You can force fast mode either way by setting it to <code>true</code> or <code>false</code>.
 								</td>
 							</tr>
 						</table>
@@ -693,7 +693,7 @@ var csv = Papa.unparse({
 							<tr>
 								<td><code>Papa.SCRIPT_PATH</code></td>
 								<td>
-									The relative path to Papa Parse. This is automatically detected when Papa Parse is loaded synchronously. However, if you load Papa Parse asynchronously (e.g. with RequireJS), you need to set this variable manually in order to use Web Workers. (In those cases, this variable is <i>not</i> read-only.)
+									The relative path to Papa Parse. This is automatically detected when Papa Parse is loaded synchronously. However, if you load Papa Parse asynchronously (e.g. with RequireJS), you need to set this variable manually in order to use Web Workers. (In those cases, this variable is <i>not</i> read-only and you should set it!)
 								</td>
 							</tr>
 						</table>
@@ -726,48 +726,12 @@ var csv = Papa.unparse({
 							<tr>
 								<td><code>Papa.DefaultDelimiter</code></td>
 								<td>
-									The delimiter used when one is not specified and it cannot be detected automatically. Default is comma.
+									The delimiter used when it is left unspecified and cannot be detected automatically. Default is comma.
 								</td>
 							</tr>
 						</table>
 					</div>
 
-					<div class="grid-100">
-						<h5 id="internal">For Internal Use Only</h5>
-					</div>
-
-					<div class="grid-100">
-						<table>
-							<tr>
-								<th>Internal Property</th>
-								<th>Explanation</th>
-							</tr>
-							<tr>
-								<td><code>Papa.Parser</code></td>
-								<td>
-									The core parsing component. Careful, it's fast and under rigorous test.
-								</td>
-							</tr>
-							<tr>
-								<td><code>Papa.ParserHandle</code></td>
-								<td>
-									A wrapper over the Parser which provides dynamic typing and header row support.
-								</td>
-							</tr>
-							<tr>
-								<td><code>Papa.NetworkStreamer</code></td>
-								<td>
-									Facilitates downloading and parsing files in chunks over the network with XMLHttpRequest.
-								</td>
-							</tr>
-							<tr>
-								<td><code>Papa.FileStreamer</code></td>
-								<td>
-									Similar to NetworkStreamer, but for local files, and using the HTML5 FileReader.
-								</td>
-							</tr>
-						</table>
-					</div>
 					<div class="clear"></div>
 
 				</div>
