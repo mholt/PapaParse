@@ -1,12 +1,11 @@
 {
-  "name": "Papa-Parse",
-  "version": "4.0.7",
+  "name": "papaparse",
   "main": "papaparse.js",
   "homepage": "http://papaparse.com",
   "authors": [
     "Matthew Holt"
   ],
-  "description": "Fast and powerful CSV (delimited text) parser for the browser that converts CSV to JSON and JSON to CSV. Supports web workers and streaming large files.",
+  "description": "Fast and powerful CSV parser for the browser. Converts CSV->JSON and JSON->CSV. Supports web workers and streaming large files.",
   "keywords": [
     "csv",
     "parse",
