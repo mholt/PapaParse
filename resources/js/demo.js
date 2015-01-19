@@ -190,7 +190,7 @@ function buildConfig()
 		delimiter: $('#delimiter').val(),
 		header: $('#header').prop('checked'),
 		dynamicTyping: $('#dynamicTyping').prop('checked'),
-		fastMode: $('#fastMode').prop('checked'),
+		skipEmptyLines: $('#skipEmptyLines').prop('checked'),
 		preview: parseInt($('#preview').val() || 0),
 		step: $('#stream').prop('checked') ? stepFn : undefined,
 		encoding: $('#encoding').val(),
