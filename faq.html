@@ -82,6 +82,11 @@
 						No. Papa Parse has no dependencies. If jQuery is present, however, it plugs in to make it easier to select files from the DOM.
 					</p>
 
+					<h6 id="combine">Can I put other libraries in the same file as Papa Parse?</h6>
+					<p>
+						Yes, but then don't use the Web Worker feature unless your other dependencies are battle-hardened for worker threads. A worker thread loads an entire file, not just a function, so all those dependencies would be executed in an environment without a DOM and other <code>window</code> features. If any of those dependencies crash (<code>Cannot read property "defaultView" of undefined</code> <a href="https://github.com/mholt/PapaParse/issues/114">is</a> <a href="https://github.com/mholt/PapaParse/issues/163">common</a>), the whole worker thread will crash and parsing will not succeed.
+					</p>
+
 
 					<h6 id="browsers">Which browsers is it compatible with?</h6>
 					<p>
@@ -92,11 +97,6 @@
 					<h6 id="async">Can Papa Parse be loaded asynchronously (after the page loads)?</h6>
 					<p>
 						Yes. But if you want to use Web Workers, you'll need to specify the relative path to Papa Parse. To do this, set <a href="/docs#readonly">Papa.SCRIPT_PATH</a> to the relative path of the Papa Parse file. In synchronous loading, this is automatically detected.
-					</p>
-
-					<h6 id="combine">Can I build Papa Parse into the same file with other JS dependencies?</h6>
-					<p>
-						Yes, but then don't use the Web Worker feature unless your other dependencies are battle-hardened for worker threads.
 					</p>
 
 
