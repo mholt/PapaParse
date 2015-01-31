@@ -1434,9 +1434,7 @@
 	}
 
 	// if requirejs is available, return Papa
-	if (typeof define === "function" && define.amd) {
-	    define('papaparse', [], function() {
-	    	return global.Papa;
-    	});
+	if (isFunction(define) && define.amd) {
+	    define( function() { return global.Papa; });
 	}
 })(this);
