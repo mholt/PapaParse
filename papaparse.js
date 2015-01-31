@@ -1333,4 +1333,9 @@
 	{
 		return typeof func === 'function';
 	}
+
+	// if requirejs is available, return Papa
+	if (isFunction(define) && define.amd) {
+	    define( function() { return global.Papa; });
+	}
 })(this);
