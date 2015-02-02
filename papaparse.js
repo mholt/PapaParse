@@ -20,7 +20,7 @@
 	global.Papa.BYTE_ORDER_MARK = "\ufeff";
 	global.Papa.BAD_DELIMITERS = ["\r", "\n", "\"", global.Papa.BYTE_ORDER_MARK];
 	global.Papa.WORKERS_SUPPORTED = !!global.Worker;
-	global.Papa.SCRIPT_PATH = null;	// Must be set manually if using workers and Papa Parse is loaded asynchronously
+	global.Papa.SCRIPT_PATH = null;	// Must be set by your code if you use workers and this lib is loaded asynchronously
 
 	// Configurable chunk sizes for local and remote files, respectively
 	global.Papa.LocalChunkSize = 1024 * 1024 * 10;	// 10 MB
@@ -33,6 +33,10 @@
 	global.Papa.NetworkStreamer = NetworkStreamer;
 	global.Papa.FileStreamer = FileStreamer;
 	global.Papa.StringStreamer = StringStreamer;
+
+	// Wireup with RequireJS
+	if (isFunction(global.define) && global.define.amd)
+	    global.define(function() { return global.Papa; });
 
 	if (global.jQuery)
 	{
@@ -1323,18 +1327,11 @@
 
 	function bindFunction(f, self)
 	{
-		return function() {
-			f.apply(self, arguments);
-		}
+		return function() { f.apply(self, arguments); };
 	}
 
 	function isFunction(func)
 	{
 		return typeof func === 'function';
-	}
-
-	// if requirejs is available, return Papa
-	if (isFunction(define) && define.amd) {
-	    define( function() { return global.Papa; });
 	}
 })(this);
