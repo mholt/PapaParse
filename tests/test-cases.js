@@ -563,10 +563,19 @@ var PARSE_TESTS = [
 		}
 	},
 	{
-		description: "Bad delimiter",
+		description: "Bad delimiter (\\n)",
 		input: 'a,b,c',
-		config: { delimiter: "DELIM" },
+		config: { delimiter: "\n" },
 		notes: "Should silently default to comma",
+		expected: {
+			data: [['a', 'b', 'c']],
+			errors: []
+		}
+	},
+	{
+		description: "Multi-character delimiter",
+		input: 'a, b, c',
+		config: { delimiter: ", " },
 		expected: {
 			data: [['a', 'b', 'c']],
 			errors: []

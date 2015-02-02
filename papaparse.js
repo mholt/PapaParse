@@ -925,7 +925,6 @@
 
 		// Delimiter must be valid
 		if (typeof delim !== 'string'
-			|| delim.length != 1
 			|| Papa.BAD_DELIMITERS.indexOf(delim) > -1)
 			delim = ",";
 
