@@ -424,7 +424,6 @@
 	function ChunkStreamer(config)
 	{
 		this._handle = null;
-		this._paused = false;
 		this._finished = false;
 		this._input = null;
 		this._baseIndex = 0;
@@ -440,7 +439,7 @@
 		};
 		replaceConfig.call(this, config);
 
-		this.parseChunk = function(chunk)
+		this.parseChunk = function(chunk, isFakeChunk)
 		{
 			// First chunk pre-processing
 			if (this.isFirstChunk && isFunction(this._config.beforeFirstChunk))
@@ -481,10 +480,10 @@
 					finished: finishedIncludingPreview
 				});
 			}
-			else if (isFunction(this._config.chunk))
+			else if (isFunction(this._config.chunk) && !isFakeChunk)
 			{
 				this._config.chunk(results, this._handle);
-				if (this._paused)
+				if (this._handle.paused())
 					return;
 				results = undefined;
 				this._completeResults = undefined;
@@ -916,7 +915,7 @@
 		this.resume = function()
 		{
 			_paused = false;
-			self.streamer.parseChunk(_input);
+			self.streamer.parseChunk(_input, true);
 		};
 
 		this.aborted = function ()
