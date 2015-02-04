@@ -355,7 +355,6 @@
 	function ChunkStreamer(config)
 	{
 		this._handle = null;
-		this._paused = false;
 		this._finished = false;
 		this._input = null;
 		this._baseIndex = 0;
@@ -365,7 +364,7 @@
 		this._nextChunk = null;
 		replaceConfig.call(this, config);
 
-		this.parseChunk = function(chunk)
+		this.parseChunk = function(chunk, isFakeChunk)
 		{
 			// Rejoin the line we likely just split in two by chunking the file
 			var aggregate = this._partialLine + chunk;
@@ -397,15 +396,15 @@
 					finished: finishedIncludingPreview
 				});
 			}
-			else if (isFunction(this._config.chunk))
+			else if (isFunction(this._config.chunk) && !isFakeChunk)
 			{
 				this._config.chunk(results, this._handle);
-				if (this._paused)
+				if (this._handle.paused())
 					return;
 				results = undefined;
 			}
 
-			if (finishedIncludingPreview && isFunction(this._config.complete) && (!results || !results.meta.aborted))
+			if (finishedIncludingPreview && isFunction(this._config.complete))
 				this._config.complete(results);
 			
 			if (!finishedIncludingPreview && (!results || !results.meta.paused))
@@ -723,14 +722,15 @@
 		this.resume = function()
 		{
 			_paused = false;
-			self.streamer.parseChunk(_input);
+			self.streamer.parseChunk(_input, true);
 		};
 
 		this.abort = function()
 		{
+			_paused = true;
 			_parser.abort();
 			if (isFunction(_config.complete))
-				_config.complete(_results);
+				_config.complete({ meta: { aborted: true } });
 			_input = "";
 		};
 

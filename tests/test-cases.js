@@ -1159,6 +1159,72 @@ var CUSTOM_TESTS = [
 		}
 	},
 	{
+		description: "Chunk functions can pause parsing",
+		expected: [
+			[['A', 'b', 'c']]
+		],
+		run: function(callback) {
+			var updates = [];
+			Papa.parse('A,b,c\nd,E,f\nG,h,i', {
+				chunkSize: 10,
+				chunk: function(response, handle) {
+					updates.push(response.data);
+					handle.pause();
+					callback(updates);
+				},
+				complete: function() {
+					callback('incorrect complete callback');
+				}
+			});
+		}
+	},
+	{
+		description: "Chunk functions can resume parsing",
+		expected: [
+			[['A', 'b', 'c']],
+			[['d', 'E', 'f'], ['G', 'h', 'i']]
+		],
+		run: function(callback) {
+			var updates = [];
+			var handle = null;
+			var first = true;
+			Papa.parse('A,b,c\nd,E,f\nG,h,i', {
+				chunkSize: 10,
+				chunk: function(response, h) {
+					updates.push(response.data);
+					if (!first) return;
+					handle = h;
+					handle.pause();
+					first = false;
+				},
+				complete: function() {
+					callback(updates);
+				}
+			});
+			setTimeout(function() {
+				handle.resume();
+			}, 500);
+		}
+	},
+	{
+		description: "Chunk functions can abort parsing",
+		expected: [
+			[['A', 'b', 'c'], ['d', 'E', 'f'], ['G', 'h', 'i']]
+		],
+		run: function(callback) {
+			var updates = [];
+			Papa.parse('A,b,c\nd,E,f\nG,h,i', {
+				chunk: function(response, handle) {
+					updates.push(response.data);
+					handle.abort();
+				},
+				complete: function(response) {
+					callback(updates);
+				}
+			});
+		}
+	},
+	{
 		description: "Step exposes indexes for files",
 		expected: [6, 12, 17],
 		disabled: !FILES_ENABLED,
