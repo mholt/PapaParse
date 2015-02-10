@@ -113,7 +113,7 @@
 						Fast mode makes <a href="http://jsperf.com/javascript-csv-parsers/3">Papa Parse screaming fast</a>, but you wouldn't want to use it if there are quoted fields in your input. Fast mode is fast because it makes one major assumption: no quoted fields. If you don't specify fastMode either way, fast mode will be turned on automatically if there are no quote characters in the input. With fast mode on, 1 GB files can be parsed in about 20 seconds.
 					</p>
 
-					<h6 id="fast-mode">Why do non-ASCII characters look weird?</h6>
+					<h6 id="encoding">Why do non-ASCII characters look weird?</h6>
 					<p>
 						It's probably an encoding issue. The FileReader API allows you to specify an encoding, which you can do using the <code>encoding</code> configuration property. This property only works with local files and does not apply to strings or remote files. Also see issues <a href="https://github.com/mholt/PapaParse/issues/64">#64</a> and <a href="https://github.com/mholt/PapaParse/issues/169">#169</a> if you're having trouble parsing CSV files generated from Excel.
 					</p>
