@@ -7,7 +7,7 @@
 {
 	"use strict";
 
-	var IS_WORKER = !global.document, LOADED_SYNC = false, AUTO_SCRIPT_PATH;
+	var IS_WORKER = (!global.document && !!global.postMessage), LOADED_SYNC = false, AUTO_SCRIPT_PATH;
 	var workers = {}, workerIdCounter = 0;
 
 	var Papa = {};
