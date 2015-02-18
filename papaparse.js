@@ -1334,4 +1334,4 @@
 	{
 		return typeof func === 'function';
 	}
-})(this);
+})(typeof window !== 'undefined' ? window : this);
