@@ -34,8 +34,13 @@
 	Papa.FileStreamer = FileStreamer;
 	Papa.StringStreamer = StringStreamer;
 
+	// export to Node...
+	if (typeof module !== 'undefined' && module.exports) {
+		module.exports = Papa;
+	}
+
 	// Wireup with RequireJS
-	if (isFunction(global.define) && global.define.amd)
+	else if (isFunction(global.define) && global.define.amd)
 	{
 		global.define(function() { return Papa; });
 	}
