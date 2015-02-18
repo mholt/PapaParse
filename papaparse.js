@@ -10,33 +10,41 @@
 	var IS_WORKER = !global.document, LOADED_SYNC = false, AUTO_SCRIPT_PATH;
 	var workers = {}, workerIdCounter = 0;
 
-	global.Papa = {};
+	var Papa = {};
 
-	global.Papa.parse = CsvToJson;
-	global.Papa.unparse = JsonToCsv;
+	Papa.parse = CsvToJson;
+	Papa.unparse = JsonToCsv;
 
-	global.Papa.RECORD_SEP = String.fromCharCode(30);
-	global.Papa.UNIT_SEP = String.fromCharCode(31);
-	global.Papa.BYTE_ORDER_MARK = "\ufeff";
-	global.Papa.BAD_DELIMITERS = ["\r", "\n", "\"", global.Papa.BYTE_ORDER_MARK];
-	global.Papa.WORKERS_SUPPORTED = !!global.Worker;
-	global.Papa.SCRIPT_PATH = null;	// Must be set by your code if you use workers and this lib is loaded asynchronously
+	Papa.RECORD_SEP = String.fromCharCode(30);
+	Papa.UNIT_SEP = String.fromCharCode(31);
+	Papa.BYTE_ORDER_MARK = "\ufeff";
+	Papa.BAD_DELIMITERS = ["\r", "\n", "\"", Papa.BYTE_ORDER_MARK];
+	Papa.WORKERS_SUPPORTED = !!global.Worker;
+	Papa.SCRIPT_PATH = null;	// Must be set by your code if you use workers and this lib is loaded asynchronously
 
 	// Configurable chunk sizes for local and remote files, respectively
-	global.Papa.LocalChunkSize = 1024 * 1024 * 10;	// 10 MB
-	global.Papa.RemoteChunkSize = 1024 * 1024 * 5;	// 5 MB
-	global.Papa.DefaultDelimiter = ",";				// Used if not specified and detection fails
+	Papa.LocalChunkSize = 1024 * 1024 * 10;	// 10 MB
+	Papa.RemoteChunkSize = 1024 * 1024 * 5;	// 5 MB
+	Papa.DefaultDelimiter = ",";				// Used if not specified and detection fails
 
 	// Exposed for testing and development only
-	global.Papa.Parser = Parser;
-	global.Papa.ParserHandle = ParserHandle;
-	global.Papa.NetworkStreamer = NetworkStreamer;
-	global.Papa.FileStreamer = FileStreamer;
-	global.Papa.StringStreamer = StringStreamer;
+	Papa.Parser = Parser;
+	Papa.ParserHandle = ParserHandle;
+	Papa.NetworkStreamer = NetworkStreamer;
+	Papa.FileStreamer = FileStreamer;
+	Papa.StringStreamer = StringStreamer;
 
 	// Wireup with RequireJS
 	if (isFunction(global.define) && global.define.amd)
-	    global.define(function() { return global.Papa; });
+	{
+		global.define(function() { return Papa; });
+	}
+
+	// ...or as browser global
+	else
+	{
+		global.Papa = Papa;
+	}
 
 	if (global.jQuery)
 	{
@@ -257,7 +265,7 @@
 
 			if (typeof _config.delimiter === 'string'
 				&& _config.delimiter.length == 1
-				&& global.Papa.BAD_DELIMITERS.indexOf(_config.delimiter) == -1)
+				&& Papa.BAD_DELIMITERS.indexOf(_config.delimiter) == -1)
 			{
 				_delimiter = _config.delimiter;
 			}
@@ -338,7 +346,7 @@
 
 			var needsQuotes = (typeof _quotes === 'boolean' && _quotes)
 							|| (_quotes instanceof Array && _quotes[col])
-							|| hasAny(str, global.Papa.BAD_DELIMITERS)
+							|| hasAny(str, Papa.BAD_DELIMITERS)
 							|| str.indexOf(_delimiter) > -1
 							|| str.charAt(0) == ' '
 							|| str.charAt(str.length - 1) == ' ';
