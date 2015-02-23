@@ -788,9 +788,9 @@
 					if (_config.dynamicTyping)
 					{
 						var value = _results.data[i][j];
-						if (value == "true")
+						if (value == "true" || value == "TRUE")
 							_results.data[i][j] = true;
-						else if (value == "false")
+						else if (value == "false" || value == "FALSE")
 							_results.data[i][j] = false;
 						else
 							_results.data[i][j] = tryParseFloat(value);

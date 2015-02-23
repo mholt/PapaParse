@@ -178,7 +178,7 @@ function compare(actualData, actualErrors, expected)
 	return {
 		data: data,
 		errors: errors
-	}
+	};
 
 
 	function compareData(actual, expected)
