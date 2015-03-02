@@ -1,3 +1,5 @@
+require('./node-tests.js');
+
 var connect = require('connect');
 var serveStatic = require('serve-static');
 var open = require('open');
