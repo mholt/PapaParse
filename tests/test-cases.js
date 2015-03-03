@@ -1227,10 +1227,9 @@ var CUSTOM_TESTS = [
 				step: function(response, handle) {
 					updates.push(response.data[0]);
 					handle.abort();
-				},
-				complete: function() {
 					callback(updates);
-				}
+				},
+				chunkSize: 6
 			});
 		}
 	},
