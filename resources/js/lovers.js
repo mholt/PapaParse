@@ -48,5 +48,11 @@ var peopleLovePapa = [
 		link: "https://www.mediawiki.org/wiki/VisualEditor",
 		name: "Wikipedia",
 		description: "uses Papa Parse in VisualEditor to help article editors effortlessly build data tables from text files."
+	},
+	{
+		link: "https://www.webucator.com/webdesign/javascript.cfm",
+		name: "Webucator",
+		description: "created a video showing how to use Papa Parse and FileDrop.js to create a drag-and-drop CSV-JSON converter.",
+		quote: "It's often easy to convert data to CSV. With Papa, it's easy to turn that CSV into JSON."
 	}
 ];
