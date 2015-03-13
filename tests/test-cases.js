@@ -1042,6 +1042,18 @@ var UNPARSE_TESTS = [
 
 var CUSTOM_TESTS = [
 	{
+		description: "Complete is called with all results if neither step nor chunk is defined",
+		expected: [['A', 'b', 'c'], ['d', 'E', 'f'], ['G', 'h', 'i']],
+		run: function(callback) {
+			Papa.parse(new File(['A,b,c\nd,E,f\nG,h,i'], 'sample.csv'), {
+				chunkSize: 3,
+				complete: function(response) {
+					callback(response.data);
+				}
+			});
+		}
+	},
+	{
 		description: "Step is called for each row",
 		expected: 2,
 		run: function(callback) {

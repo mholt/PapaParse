@@ -450,6 +450,8 @@
 			// Deep-copy the config so we can edit it
 			var configCopy = copy(config);
 			configCopy.chunkSize = parseInt(configCopy.chunkSize);	// VERY important so we don't concatenate strings!
+			if (!config.step && !config.chunk)
+				configCopy.chunkSize = null;
 			this._handle = new ParserHandle(configCopy);
 			this._handle.streamer = this;
 			this._config = configCopy;	// persist the copy to the caller
@@ -506,7 +508,7 @@
 
 			xhr.open("GET", this._input, !IS_WORKER);
 			
-			if (this._config.step || this._config.chunk)
+			if (this._config.chunkSize)
 			{
 				var end = this._start + this._config.chunkSize - 1;	// minus one because byte range is inclusive
 				xhr.setRequestHeader("Range", "bytes="+this._start+"-"+end);
@@ -537,7 +539,7 @@
 				return;
 			}
 
-			this._finished = (!this._config.step && !this._config.chunk) || this._start > getFileSize(xhr);
+			this._finished = !this._config.chunkSize || this._start > getFileSize(xhr);
 			this.parseChunk(xhr.responseText);
 		}
 
@@ -595,8 +597,13 @@
 
 		this._readChunk = function()
 		{
-			var end = Math.min(this._start + this._config.chunkSize, this._input.size);
-			var txt = reader.readAsText(slice.call(this._input, this._start, end), this._config.encoding);
+			var input = this._input;
+			if (this._config.chunkSize)
+			{
+				var end = Math.min(this._start + this._config.chunkSize, this._input.size);
+				input = slice.call(input, this._start, end);
+			}
+			var txt = reader.readAsText(input, this._config.encoding);
 			if (!usingAsyncReader)
 				this._chunkLoaded({ target: { result: txt } });	// mimic the async signature
 		}
@@ -605,7 +612,7 @@
 		{
 			// Very important to increment start each time before handling results
 			this._start += this._config.chunkSize;
-			this._finished = this._start >= this._input.size;
+			this._finished = !this._config.chunkSize || this._start >= this._input.size;
 			this.parseChunk(event.target.result);
 		}
 
