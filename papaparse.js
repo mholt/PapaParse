@@ -380,6 +380,11 @@
 		this._rowCount = 0;
 		this._start = 0;
 		this._nextChunk = null;
+		this._completeResults = {
+			data: [],
+			errors: [],
+			meta: {}
+		};
 		replaceConfig.call(this, config);
 
 		this.parseChunk = function(chunk)
@@ -420,11 +425,18 @@
 				if (this._paused)
 					return;
 				results = undefined;
+				this._completeResults = undefined;
+			}
+
+			if (!this._config.step && !this._config.chunk) {
+				this._completeResults.data = this._completeResults.data.concat(results.data);
+				this._completeResults.errors = this._completeResults.errors.concat(results.errors);
+				this._completeResults.meta = results.meta;
 			}
 
 			if (finishedIncludingPreview && isFunction(this._config.complete) && (!results || !results.meta.aborted))
-				this._config.complete(results);
-			
+				this._config.complete(this._completeResults);
+
 			if (!finishedIncludingPreview && (!results || !results.meta.paused))
 				this._nextChunk();
 
@@ -450,8 +462,6 @@
 			// Deep-copy the config so we can edit it
 			var configCopy = copy(config);
 			configCopy.chunkSize = parseInt(configCopy.chunkSize);	// VERY important so we don't concatenate strings!
-			if (!config.step && !config.chunk)
-				configCopy.chunkSize = null;
 			this._handle = new ParserHandle(configCopy);
 			this._handle.streamer = this;
 			this._config = configCopy;	// persist the copy to the caller
