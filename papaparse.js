@@ -752,6 +752,7 @@
 		{
 			_aborted = true;
 			_parser.abort();
+			_results.meta.aborted = true;
 			if (isFunction(_config.complete))
 				_config.complete(_results);
 			_input = "";

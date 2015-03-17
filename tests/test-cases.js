@@ -1234,6 +1234,22 @@ var CUSTOM_TESTS = [
 		}
 	},
 	{
+		description: "Complete is called after aborting",
+		expected: true,
+		run: function(callback) {
+			var updates = [];
+			Papa.parse('A,b,c\nd,E,f\nG,h,i', {
+				step: function(response, handle) {
+					handle.abort();
+				},
+				chunkSize: 6,
+				complete: function (response) {
+					callback(response.meta.aborted);
+				}
+			});
+		}
+	},
+	{
 		description: "Step functions can pause parsing",
 		expected: [['A', 'b', 'c']],
 		run: function(callback) {
