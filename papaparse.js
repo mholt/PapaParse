@@ -946,6 +946,7 @@
 		var step = config.step;
 		var preview = config.preview;
 		var fastMode = config.fastMode;
+        var startAtLine = config.startAtLine ? config.startAtLine - 1 : 0; //Due to 0-base
 
 		// Delimiter must be valid
 		if (typeof delim !== 'string'
@@ -993,7 +994,7 @@
 			if (fastMode || (fastMode !== false && input.indexOf('"') === -1))
 			{
 				var rows = input.split(newline);
-				for (var i = 0; i < rows.length; i++)
+				for (var i = 0 + startAtLine; i < rows.length; i++)
 				{
 					var row = rows[i];
 					cursor += row.length;
@@ -1022,7 +1023,13 @@
 				return returnable();
 			}
 
-			var nextDelim = input.indexOf(delim, cursor);
+            if(startAtLine) {
+                for(var i = 0; i < startAtLine; i++) {
+                    cursor = input.indexOf(newline, cursor) + 1;
+                }
+            }
+
+            var nextDelim = input.indexOf(delim, cursor);
 			var nextNewline = input.indexOf(newline, cursor);
 
 			// Parser loop
