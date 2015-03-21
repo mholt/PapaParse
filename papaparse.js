@@ -1024,8 +1024,28 @@
 			}
 
             if(startAtLine) {
+                var dQuoteDelim = '"' + delim;
+                var dQuoteNewline = '"' + newline;
+
                 for(var i = 0; i < startAtLine; i++) {
-                    cursor = input.indexOf(newline, cursor) + 1;
+                    var nextDQuotes = input.indexOf('"', cursor);
+                    var nextDQuoteDelim = input.indexOf(dQuoteDelim, cursor);
+                    var nextDQuoteNewline = input.indexOf(dQuoteNewline, cursor);
+                    nextNewline = input.indexOf(newline, cursor);
+
+                    if(nextDQuotes === -1 || nextDQuotes > nextNewline) {
+                        cursor = nextNewline + newline.length;
+                        continue;
+                    }
+
+                    if(nextDQuoteDelim !== -1 && nextDQuoteNewline > nextDQuoteDelim || nextDQuoteNewline === -1) {
+                        cursor = nextDQuoteDelim + dQuoteDelim.length;
+                        i--;
+                        continue;
+                    }
+
+                    //newline should be right after the quotes now resulting in a new record
+                    cursor = nextDQuoteNewline + dQuoteNewline.length;
                 }
             }
 
