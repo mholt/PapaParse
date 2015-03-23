@@ -390,7 +390,7 @@
 
 			var results = this._handle.parse(aggregate, this._baseIndex, !this._finished);
 			
-			if (this._handle.paused())
+			if (this._handle.paused() || this._handle.aborted())
 				return;
 			
 			var lastIndex = results.meta.cursor;
@@ -665,6 +665,7 @@
 		var _input;				// The input being parsed
 		var _parser;			// The core parser being used
 		var _paused = false;	// Whether we are paused or not
+		var _aborted = false;   // Whether the parser has aborted or not
 		var _delimiterError;	// Temporary state between delimiter detection and processing results
 		var _fields = [];		// Fields are from the header row of the input, if there is one
 		var _results = {		// The last results returned from the parser
@@ -750,9 +751,15 @@
 			self.streamer.parseChunk(_input);
 		};
 
+		this.aborted = function () {
+			return _aborted;
+		}
+
 		this.abort = function()
 		{
+			_aborted = true;
 			_parser.abort();
+			_results.meta.aborted = true;
 			if (isFunction(_config.complete))
 				_config.complete(_results);
 			_input = "";

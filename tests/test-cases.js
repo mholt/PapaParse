@@ -1239,9 +1239,24 @@ var CUSTOM_TESTS = [
 				step: function(response, handle) {
 					updates.push(response.data[0]);
 					handle.abort();
-				},
-				complete: function() {
 					callback(updates);
+				},
+				chunkSize: 6
+			});
+		}
+	},
+	{
+		description: "Complete is called after aborting",
+		expected: true,
+		run: function(callback) {
+			var updates = [];
+			Papa.parse('A,b,c\nd,E,f\nG,h,i', {
+				step: function(response, handle) {
+					handle.abort();
+				},
+				chunkSize: 6,
+				complete: function (response) {
+					callback(response.meta.aborted);
 				}
 			});
 		}
