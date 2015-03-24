@@ -25,6 +25,10 @@
 		"jquery-plugin"
 	],
 	"homepage": "http://papaparse.com",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/mholt/PapaParse.git"
+	},
 	"author": {
 		"name": "Matthew Holt",
 		"url": "https://twitter.com/mholt6"
