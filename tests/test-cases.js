@@ -1309,6 +1309,7 @@ var CUSTOM_TESTS = [
 			var updates = 0;
 			Papa.parse("/tests/long-sample.csv", {
 				worker: true,
+				download: true,
 				chunkSize: 500,
 				step: function(response, handle) {
 					updates++;
@@ -1319,5 +1320,26 @@ var CUSTOM_TESTS = [
 				}
 			});
 		}
+	},
+	{
+		description: "beforeFirstChunk can manipulate first chunk",
+		expected: 7,
+		run: function(callback) {
+			var updates = 0;
+			Papa.parse("/tests/long-sample.csv", {
+				download: true,
+				chunkSize: 500,
+				beforeFirstChunk: function(chunk) {
+					return chunk.replace(/.*?\n/, '');
+				},
+				step: function(response) {
+					updates++;
+				},
+				complete: function() {
+					callback(updates);
+				}
+			});
+		}
 	}
+
 ];
