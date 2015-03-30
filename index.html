@@ -252,7 +252,7 @@ console.log(results.meta.delimiter);
 
 							<p>Then give Papa a <a href="https://developer.mozilla.org/en-US/docs/Web/API/File">File</a>  instead of a string. Since file parsing is asynchronous, don't forget a callback.</p>
 
-							<pre><code class="language-javascript">var results = Papa.parse(fileInput.files[0], {
+							<pre><code class="language-javascript">Papa.parse(fileInput.files[0], {
 	complete: function(results) {
 		console.log(results);
 	}
