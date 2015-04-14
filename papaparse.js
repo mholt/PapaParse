@@ -248,7 +248,7 @@
 			if (_input.data instanceof Array)
 			{
 				if (!_input.fields)
-					_input.fields = _input.data[0] instanceof Array
+					_input.fields = ( _input.meta && _input.meta.fields ) || _input.data[0] instanceof Array
 									? _input.fields
 									: objectKeys(_input.data[0]);
 
