@@ -42,6 +42,8 @@
 	{
 		var config = copyAndValidateConfig(_config);
 		var ph = new ParserHandle(config);
+		if ((/(\.csv|\.txt)$/).test(_input))
+			_input = fs.readFileSync(_input).toString();
 		var results = ph.parse(_input);
 		if (isFunction(config.complete))
 			config.complete(results);
