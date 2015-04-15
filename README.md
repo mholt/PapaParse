@@ -20,6 +20,8 @@ rows = parsed.data;
 Parse File(s)
 -----
 
+Baby Parse will assume the input is a filename if it ends in .csv or .txt.
+
 ```js
 // Parse single file
 parsed = Baby.parseFiles(file[, config])
