@@ -16,6 +16,27 @@ parsed = Baby.parse(csv);
 rows = parsed.data;
 ```
 
+
+Parse File(s)
+-----
+
+```js
+// Parse single file
+parsed = Baby.parseFiles(file[, config])
+
+rows = parsed.data
+```
+
+```js
+// Parse multiple files
+// Files can be either an array of strings or objects { file: filename[, config: config] }
+// When using and array of objects and you include a config it will be used in place of the global config
+parsed = Baby.parseFiles(files[, globalConfig])
+
+rows = parsed[index].data
+```
+
+
 For a complete understanding of the power of this library, please refer to the [Papa Parse web site](http://papaparse.com).
 
 
