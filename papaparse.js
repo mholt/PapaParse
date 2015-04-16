@@ -36,6 +36,8 @@
 
 	// export to Node...
 	if (typeof module !== 'undefined' && module.exports) {
+		// Add file parsing support but only when running Node so we don't add functionality that won't work elsewhere
+		Papa.parseFiles = ParseFiles;
 		module.exports = Papa;
 	}
 
@@ -168,6 +170,42 @@
 		}
 	}
 
+	// Ability to parse file(s) when using with Node
+	function ParseFiles(_input, _config)
+	{
+		if (Array.isArray(_input)) {
+			var results = [];
+			_input.forEach(function(input) {
+				if(typeof input === 'object')
+					results.push(ParseFiles(input.file, input.config));
+				else
+					results.push(ParseFiles(input, _config));
+			});
+			return results;
+		} else {
+			var results = {
+				data: [],
+				errors: []
+			};
+			if ((/(\.csv|\.txt)$/).test(_input)) {
+				try {
+					var contents = fs.readFileSync(_input).toString();
+					return CsvToJson(contents, _config);
+				} catch (err) {
+					results.errors.push(err);
+					return results;
+				}
+			} else {
+				results.errors.push({
+					type: '',
+					code: '',
+					message: 'Unsupported file type.',
+					row: ''
+				});
+				return results;
+			}
+		}
+	}
 
 
 
@@ -212,9 +250,6 @@
 
 		return streamer.stream(_input);
 	}
-
-
-
 
 
 
