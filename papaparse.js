@@ -1,6 +1,6 @@
 /*!
 	Papa Parse
-	v4.1.0
+	v4.1.1
 	https://github.com/mholt/PapaParse
 */
 (function(global)
@@ -34,20 +34,19 @@
 	Papa.FileStreamer = FileStreamer;
 	Papa.StringStreamer = StringStreamer;
 
-	// export to Node...
-	if (typeof module !== 'undefined' && module.exports) {
+	if (typeof module !== 'undefined' && module.exports)
+	{
+		// Export to Node...
 		module.exports = Papa;
 	}
-
-	// Wireup with RequireJS
 	else if (isFunction(global.define) && global.define.amd)
 	{
+		// Wireup with RequireJS
 		global.define(function() { return Papa; });
 	}
-
-	// ...or as browser global
 	else
 	{
+		// ...or as browser global
 		global.Papa = Papa;
 	}
 
