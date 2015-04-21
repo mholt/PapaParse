@@ -379,6 +379,7 @@
 		this._rowCount = 0;
 		this._start = 0;
 		this._nextChunk = null;
+		this._chunkIndex = 0;
 		this._completeResults = {
 			data: [],
 			errors: [],
@@ -388,6 +389,14 @@
 
 		this.parseChunk = function(chunk)
 		{
+			if (this._chunkIndex == 0 && isFunction(this._config.beforeFirstChunk)) {
+				var result = this._config.beforeFirstChunk(chunk);
+				if (result !== undefined)
+					chunk = result;
+			}
+
+			this._chunkIndex++;
+
 			// Rejoin the line we likely just split in two by chunking the file
 			var aggregate = this._partialLine + chunk;
 			this._partialLine = "";
