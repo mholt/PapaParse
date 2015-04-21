@@ -345,7 +345,8 @@ var csv = Papa.unparse({
 	download: false,
 	skipEmptyLines: false,
 	chunk: undefined,
-	fastMode: undefined
+	fastMode: undefined,
+	beforeFirstChunk: undefined,
 }</code></pre>
 					</div>
 					<div class="clear"></div>
@@ -488,6 +489,14 @@ var csv = Papa.unparse({
 								</td>
 								<td>
 									Fast mode speeds up parsing significantly for large inputs. However, it only works when the input has no quoted fields. Fast mode will automatically be enabled if no <code>"</code> characters appear in the input. You can force fast mode either way by setting it to <code>true</code> or <code>false</code>.
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<code>beforeFirstChunk</code>
+								</td>
+								<td>
+									A function to execute before parsing the first chunk. This only applies if using a chunk callback. The function receives as an argument the chunk about to be parsed, and it may return a modified chunk to parse. This is useful for stripping header lines (as long as the header fits in a single chunk).
 								</td>
 							</tr>
 						</table>
