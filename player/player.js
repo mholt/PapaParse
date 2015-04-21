@@ -104,7 +104,8 @@ function buildConfig()
 		download: $('#download').prop('checked'),
 		fastMode: $('#fastmode').prop('checked'),
 		skipEmptyLines: $('#skipEmptyLines').prop('checked'),
-		chunk: $('#chunk').prop('checked') ? chunkFn : undefined
+		chunk: $('#chunk').prop('checked') ? chunkFn : undefined,
+		beforeFirstChunk: undefined,
 	};
 
 	function getLineEnding()

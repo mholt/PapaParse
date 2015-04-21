@@ -1322,7 +1322,7 @@ var CUSTOM_TESTS = [
 		}
 	},
 	{
-		description: "beforeFirstChunk can manipulate first chunk",
+		description: "beforeFirstChunk manipulates only first chunk",
 		expected: 7,
 		run: function(callback) {
 			var updates = 0;
@@ -1331,6 +1331,25 @@ var CUSTOM_TESTS = [
 				chunkSize: 500,
 				beforeFirstChunk: function(chunk) {
 					return chunk.replace(/.*?\n/, '');
+				},
+				step: function(response) {
+					updates++;
+				},
+				complete: function() {
+					callback(updates);
+				}
+			});
+		}
+	},
+	{
+		description: "First chunk not modified if beforeFirstChunk returns nothing",
+		expected: 8,
+		run: function(callback) {
+			var updates = 0;
+			Papa.parse("/tests/long-sample.csv", {
+				download: true,
+				chunkSize: 500,
+				beforeFirstChunk: function(chunk) {
 				},
 				step: function(response) {
 					updates++;
