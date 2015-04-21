@@ -1319,5 +1319,20 @@ var CUSTOM_TESTS = [
 				}
 			});
 		}
-	}
+	},
+	{
+		description: "Errors give correct row numbers with several chunks being processed",
+		expected: '[{"type":"FieldMismatch","code":"TooFewFields","message":"Too few fields: expected 12 fields but parsed 11","row":21},{"type":"FieldMismatch","code":"TooFewFields","message":"Too few fields: expected 12 fields but parsed 10","row":23}]',
+		run: function(callback) {
+			var updates = 0;
+			Papa.parse("/tests/long-sample-with-errors.csv", {
+				download: true,
+				chunkSize: 1024 * 1024 * .0005,
+                header: true,
+				complete: function(data) {
+					callback( JSON.stringify(data.errors) );
+				}
+			});
+		}
+    }
 ];
