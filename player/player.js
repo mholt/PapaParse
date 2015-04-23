@@ -104,7 +104,8 @@ function buildConfig()
 		download: $('#download').prop('checked'),
 		fastMode: $('#fastmode').prop('checked'),
 		skipEmptyLines: $('#skipEmptyLines').prop('checked'),
-		chunk: $('#chunk').prop('checked') ? chunkFn : undefined
+		chunk: $('#chunk').prop('checked') ? chunkFn : undefined,
+		beforeFirstChunk: undefined,
 	};
 
 	function getLineEnding()
@@ -147,15 +148,15 @@ function chunkFn(results, streamer, file)
 
 	parser = streamer;
 
+	if (printStepChecked)
+		console.log("Chunk data:", results.data.length, results);
+
 	if (pauseChecked)
 	{
 		console.log("Pausing; " + results.data.length + " rows in chunk; file:", file);
 		streamer.pause();
 		return;
 	}
-	
-	if (printStepChecked)
-		console.log("Chunk data:", results.data.length, results);
 }
 
 function errorFn(error, file)

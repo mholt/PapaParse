@@ -1,6 +1,6 @@
 /*!
 	Papa Parse
-	v4.1.0
+	v4.1.1
 	https://github.com/mholt/PapaParse
 */
 (function(global)
@@ -40,16 +40,14 @@
 		Papa.parseFiles = ParseFiles;
 		module.exports = Papa;
 	}
-
-	// Wireup with RequireJS
 	else if (isFunction(global.define) && global.define.amd)
 	{
+		// Wireup with RequireJS
 		global.define(function() { return Papa; });
 	}
-
-	// ...or as browser global
 	else
 	{
+		// ...or as browser global
 		global.Papa = Papa;
 	}
 
@@ -415,6 +413,7 @@
 		this._rowCount = 0;
 		this._start = 0;
 		this._nextChunk = null;
+		this.isFirstChunk = true;
 		this._completeResults = {
 			data: [],
 			errors: [],
@@ -424,6 +423,15 @@
 
 		this.parseChunk = function(chunk)
 		{
+			// First chunk pre-processing
+			if (this.isFirstChunk && isFunction(this._config.beforeFirstChunk))
+			{
+				var modifiedChunk = this._config.beforeFirstChunk(chunk);
+				if (modifiedChunk !== undefined)
+					chunk = modifiedChunk;
+			}
+			this.isFirstChunk = false;
+
 			// Rejoin the line we likely just split in two by chunking the file
 			var aggregate = this._partialLine + chunk;
 			this._partialLine = "";
