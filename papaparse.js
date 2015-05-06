@@ -972,6 +972,7 @@
 		var step = config.step;
 		var preview = config.preview;
 		var fastMode = config.fastMode;
+		var replaceSmartQuotes = config.replaceSmartQuotes || false;
 
 		// Delimiter must be valid
 		if (typeof delim !== 'string'
@@ -1000,6 +1001,10 @@
 			// For some reason, in Chrome, this speeds things up (!?)
 			if (typeof input !== 'string')
 				throw "Input must be a string";
+
+			if (config.replaceSmartQuotes) {
+				input = input.replace(/[\xD2\xD3]/g, '"');
+			}
 
 			// We don't need to compute some of these every time parse() is called,
 			// but having them in a more local scope seems to perform better

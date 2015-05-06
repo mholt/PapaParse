@@ -425,6 +425,15 @@ var CORE_PARSER_TESTS = [
 			data: [['a', 'b', 'c'], ['']],
 			errors: []
 		}
+	},
+	{
+		description: "Replace smart quotes when asked",
+		input: '\xD2a\xD3,\xD2b\xD3,\xD2c\xD3',
+		config: { replaceSmartQuotes: true },
+		expected: {
+			data: [['a', 'b', 'c']],
+			errors: []
+		}
 	}
 ];
 
