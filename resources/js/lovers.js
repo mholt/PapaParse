@@ -54,5 +54,11 @@ var peopleLovePapa = [
 		name: "Webucator",
 		description: "created a video showing how to use Papa Parse and FileDrop.js to create a drag-and-drop CSV-JSON converter.",
 		quote: "It's often easy to convert data to CSV. With Papa, it's easy to turn that CSV into JSON."
+	},
+	{
+		link: "https://www.appstax.com",
+		name: "Appstax",
+		description: "uses Papa Parse to import and export CSV data in their visual databrowser.",
+		quote: "Papa is a great for parsing CSV. And what a great tone of voice - love it!"
 	}
 ];
