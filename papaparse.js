@@ -7,7 +7,9 @@
 {
 	"use strict";
 
-	var IS_WORKER = (!global.document && !!global.postMessage), LOADED_SYNC = false, AUTO_SCRIPT_PATH;
+	var IS_WORKER = !global.document && !!global.postMessage,
+		IS_PAPA_WORKER = IS_WORKER && /(\?|&)papaworker(=|&|$)/.test(global.location.search),
+		LOADED_SYNC = false, AUTO_SCRIPT_PATH;
 	var workers = {}, workerIdCounter = 0;
 
 	var Papa = {};
@@ -19,7 +21,7 @@
 	Papa.UNIT_SEP = String.fromCharCode(31);
 	Papa.BYTE_ORDER_MARK = "\ufeff";
 	Papa.BAD_DELIMITERS = ["\r", "\n", "\"", Papa.BYTE_ORDER_MARK];
-	Papa.WORKERS_SUPPORTED = !!global.Worker;
+	Papa.WORKERS_SUPPORTED = !IS_WORKER && !!global.Worker;
 	Papa.SCRIPT_PATH = null;	// Must be set by your code if you use workers and this lib is loaded asynchronously
 
 	// Configurable chunk sizes for local and remote files, respectively
@@ -145,7 +147,7 @@
 	}
 
 
-	if (IS_WORKER)
+	if (IS_PAPA_WORKER)
 	{
 		global.onmessage = workerThreadReceivedMessage;
 	}
@@ -426,7 +428,7 @@
 
 			var finishedIncludingPreview = this._finished || (this._config.preview && this._rowCount >= this._config.preview);
 
-			if (IS_WORKER)
+			if (IS_PAPA_WORKER)
 			{
 				global.postMessage({
 					results: results,
@@ -462,7 +464,7 @@
 		{
 			if (isFunction(this._config.error))
 				this._config.error(error);
-			else if (IS_WORKER && this._config.error)
+			else if (IS_PAPA_WORKER && this._config.error)
 			{
 				global.postMessage({
 					workerId: Papa.WORKER_ID,
@@ -1280,7 +1282,10 @@
 				'Script path cannot be determined automatically when Papa Parse is loaded asynchronously. ' +
 				'You need to set Papa.SCRIPT_PATH manually.'
 			);
-		var w = new global.Worker(Papa.SCRIPT_PATH || AUTO_SCRIPT_PATH);
+		var workerUrl = Papa.SCRIPT_PATH || AUTO_SCRIPT_PATH;
+		// Append "papaworker" to the search string to tell papaparse that this is our worker.
+		workerUrl += (workerUrl.indexOf('?') !== -1 ? '&' : '?') + 'papaworker';
+		var w = new global.Worker(workerUrl);
 		w.onmessage = mainThreadReceivedMessage;
 		w.id = workerIdCounter++;
 		workers[w.id] = w;
