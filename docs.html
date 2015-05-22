@@ -414,7 +414,7 @@ var csv = Papa.unparse({
 									<code>worker</code>
 								</td>
 								<td>
-									Whether or not to use a <a href="/faq#workers">worker thread</a>. Using a worker will keep your page reactive, but may be slightly slower.
+									Whether or not to use a <a href="/faq#workers">worker thread</a>. Using a worker will keep your page reactive, but may be slightly slower. Web Workers also load the entire Javascript file, so be careful when <a href="/faq#combine">combining other libraries</a> in the same file as Papa Parse.
 								</td>
 							</tr>
 							<tr>
