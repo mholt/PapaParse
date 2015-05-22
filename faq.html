@@ -203,6 +203,11 @@
 						Just specify <code>worker: true</code> in your <a href="/docs#config">config</a>. You'll also need to make a <code>complete</code> callback (unless you're streaming) so that you can get the results, because using a worker makes the parse function asynchronous.
 					</p>
 
+					<h6>Can I use a worker if I combine/concatenate my Javascript files?</h6>
+					<p>
+						Probably not. It's safest to concatenate the rest of your dependencies and include Papa Parse in a seperate file. Any library that expects to have access to the <code>window</code> or DOM will crash when executed in a worker thread. Only put <a href="/faq#combine">other libraries in the same file</a> if they are ready to be used in worker threads.
+					</p>
+
 					<h6>When should I use a worker?</h6>
 					<p>
 						That's up to you. The most typical reason to use a web worker is if your web page becomes unresponsive during parsing. In other words, if it freezes and you can't click things or the scrolling becomes choppy. If that happens, some browsers (like Firefox) will warn the user that a script has become unresponsive or is taking a long time (even if it's working properly). If this happens to you or some of your users, consider using a web worker, at least for the large inputs.
