@@ -168,6 +168,15 @@ var CORE_PARSER_TESTS = [
 			errors: []
 		}
 	},
+    {
+        description: "Ignore opening quotes",
+        input: 'A,"B" C,D,E',
+        config: { openingQuotes: false },
+        expected: {
+            data: [['A','"B" C','D','E']],
+            errors: []
+        }
+    },
 	{
 		description: "Quoted field has no closing quote",
 		input: 'a,"b,c\nd,e,f',

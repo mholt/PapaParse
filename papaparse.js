@@ -974,6 +974,7 @@
 		var step = config.step;
 		var preview = config.preview;
 		var fastMode = config.fastMode;
+        var openingQuotes = config.openingQuotes;
 
 		// Delimiter must be valid
 		if (typeof delim !== 'string'
@@ -992,6 +993,16 @@
 		// Newline must be valid: \r, \n, or \r\n
 		if (newline != '\n' && newline != '\r' && newline != '\r\n')
 			newline = '\n';
+
+        // openingQuotes must be a boolean: [true/false]
+        if (typeof openingQuotes !== 'boolean') {
+            if(openingQuotes) {
+                throw "The configuration parameter \"openingQuotes\" must be a boolean when specified. Defaults to true when not specified. false = ignore opening quotes.";
+            }
+            else {
+                openingQuotes = true;
+            }
+        }
 
 		// We're gonna need these at the Parser scope
 		var cursor = 0;
@@ -1056,8 +1067,8 @@
 			// Parser loop
 			for (;;)
 			{
-				// Field has opening quote
-				if (input[cursor] == '"')
+				// process opening quotes at all and field has opening quote
+                if (openingQuotes && input[cursor] == '"')
 				{
 					// Start our search for the closing quote where the cursor is
 					var quoteSearch = cursor;
