@@ -206,6 +206,14 @@ var CORE_PARSER_TESTS = [
 			errors: []
 		}
 	},
+    	{
+		description: "Line ends with double quoted field",
+		input: 'a,b\n"c","d"\n""e"",""f""\n""g"1",""h"1"\n"1"i"","1"j""\n"1"k"1","1"l"1"',
+		expected: {
+		    	data: [['a', 'b'], ['c', 'd'], ['"e"', '"f"'], ['"g"1', '"h"1'], ['1"i"', '1"j"'], ['1"k"1', '1"l"1']],
+			errors: []
+		}
+    	},
 	{
 		description: "Multiple consecutive empty fields",
 		input: 'a,b,,,c,d\n,,e,,,f',
