@@ -403,12 +403,12 @@
 			this._partialLine = "";
 
 			var results = this._handle.parse(aggregate, this._baseIndex, !this._finished);
-			
+
 			if (this._handle.paused() || this._handle.aborted())
 				return;
-			
+
 			var lastIndex = results.meta.cursor;
-			
+
 			if (!this._finished)
 			{
 				this._partialLine = aggregate.substring(lastIndex - this._baseIndex);
@@ -520,7 +520,7 @@
 			}
 
 			xhr = new XMLHttpRequest();
-			
+
 			if (!IS_WORKER)
 			{
 				xhr.onload = bindFunction(this._chunkLoaded, this);
@@ -528,7 +528,7 @@
 			}
 
 			xhr.open("GET", this._input, !IS_WORKER);
-			
+
 			if (this._config.chunkSize)
 			{
 				var end = this._start + this._config.chunkSize - 1;	// minus one because byte range is inclusive
@@ -1057,7 +1057,7 @@
 			for (;;)
 			{
 				// Field has opening quote
-				if (input[cursor] == '"')
+				if (input.charAt(cursor) == '"')
 				{
 					// Start our search for the closing quote where the cursor is
 					var quoteSearch = cursor;
@@ -1093,13 +1093,13 @@
 						}
 
 						// If this quote is escaped, it's part of the data; skip it
-						if (input[quoteSearch+1] == '"')
+						if (input.charAt(quoteSearch+1) == '"')
 						{
 							quoteSearch++;
 							continue;
 						}
 
-						if (input[quoteSearch+1] == delim)
+						if (input.charAt(quoteSearch+1) == delim)
 						{
 							// Closing quote followed by delimiter
 							row.push(input.substring(cursor, quoteSearch).replace(/""/g, '"'));
@@ -1122,7 +1122,7 @@
 								if (aborted)
 									return returnable();
 							}
-							
+
 							if (preview && data.length >= preview)
 								return returnable(true);
 
