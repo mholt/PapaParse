@@ -425,6 +425,51 @@ var CORE_PARSER_TESTS = [
 			data: [['a', 'b', 'c'], ['']],
 			errors: []
 		}
+	},
+    {
+		description: "startAtLine feature with fastMode",
+		input: 'a,b,c\nd,e,f',
+		config: { fastMode: true, startAtLine: 2 },
+		expected: {
+			data: [['d', 'e', 'f']],
+			errors: []
+		}
+	},
+    {
+		description: "startAtLine feature on 3 line input",
+		input: 'a,b,c\nd,e,f\nh,i,j',
+		config: { startAtLine: 2 },
+		expected: {
+			data: [['d', 'e', 'f'], ['h', 'i', 'j']],
+			errors: []
+		}
+	},
+    {
+		description: "startAtLine feature on 3 line input with double quotes on second line",
+		input: 'a,b,c\n"d",e,"f"\nh,i,j',
+		config: { startAtLine: 2 },
+		expected: {
+			data: [['d', 'e', 'f'], ['h', 'i', 'j']],
+			errors: []
+		}
+	},
+    {
+		description: "startAtLine feature on 3 line input with newlines and escaped double quotes",
+		input: 'a,b,c\n"d",e,"f"\nh,i,j\n"""k""","Papa\nparse\n""me""",l\nm,n,o\np,q,r\nt,u,v',
+		config: { startAtLine: 5 },
+		expected: {
+			data: [['m', 'n', 'o'], ['p', 'q', 'r'], ['t', 'u', 'v']],
+			errors: []
+		}
+	},
+    {
+		description: "startAtLine feature on 3 line input with invalid quotes",
+		input: 'a,b,c\n"d",e,""f\n"\nh,i,j\n"""k""","Papa\nparse\n""me""",l\nm,n,o\np,q,r\nt,u,v',
+		config: { startAtLine: 5 },
+		expected: {
+			data: [['m', 'n', 'o'], ['p', 'q', 'r'], ['t', 'u', 'v']],
+			errors: []
+		}
 	}
 ];
 

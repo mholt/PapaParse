@@ -974,6 +974,7 @@
 		var step = config.step;
 		var preview = config.preview;
 		var fastMode = config.fastMode;
+        var startAtLine = config.startAtLine ? config.startAtLine - 1 : 0; //Due to 0-base
 
 		// Delimiter must be valid
 		if (typeof delim !== 'string'
@@ -1021,7 +1022,7 @@
 			if (fastMode || (fastMode !== false && input.indexOf('"') === -1))
 			{
 				var rows = input.split(newline);
-				for (var i = 0; i < rows.length; i++)
+				for (var i = 0 + startAtLine; i < rows.length; i++)
 				{
 					var row = rows[i];
 					cursor += row.length;
@@ -1050,7 +1051,33 @@
 				return returnable();
 			}
 
-			var nextDelim = input.indexOf(delim, cursor);
+            if(startAtLine) {
+                var dQuoteDelim = '"' + delim;
+                var dQuoteNewline = '"' + newline;
+
+                for(var i = 0; i < startAtLine; i++) {
+                    var nextDQuotes = input.indexOf('"', cursor);
+                    var nextDQuoteDelim = input.indexOf(dQuoteDelim, cursor);
+                    var nextDQuoteNewline = input.indexOf(dQuoteNewline, cursor);
+                    nextNewline = input.indexOf(newline, cursor);
+
+                    if(nextDQuotes === -1 || nextDQuotes > nextNewline) {
+                        cursor = nextNewline + newline.length;
+                        continue;
+                    }
+
+                    if(nextDQuoteDelim !== -1 && nextDQuoteNewline > nextDQuoteDelim || nextDQuoteNewline === -1) {
+                        cursor = nextDQuoteDelim + dQuoteDelim.length;
+                        i--;
+                        continue;
+                    }
+
+                    //newline should be right after the quotes now resulting in a new record
+                    cursor = nextDQuoteNewline + dQuoteNewline.length;
+                }
+            }
+
+            var nextDelim = input.indexOf(delim, cursor);
 			var nextNewline = input.indexOf(newline, cursor);
 
 			// Parser loop
