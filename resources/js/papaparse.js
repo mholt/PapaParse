@@ -1,6 +1,6 @@
 /*!
 	Papa Parse
-	v4.1.1
+	v4.1.2 - PRE-RELEASE
 	https://github.com/mholt/PapaParse
 */
 (function(global)
@@ -25,7 +25,7 @@
 	// Configurable chunk sizes for local and remote files, respectively
 	Papa.LocalChunkSize = 1024 * 1024 * 10;	// 10 MB
 	Papa.RemoteChunkSize = 1024 * 1024 * 5;	// 5 MB
-	Papa.DefaultDelimiter = ",";				// Used if not specified and detection fails
+	Papa.DefaultDelimiter = ",";			// Used if not specified and detection fails
 
 	// Exposed for testing and development only
 	Papa.Parser = Parser;
@@ -42,7 +42,7 @@
 	else if (isFunction(global.define) && global.define.amd)
 	{
 		// Wireup with RequireJS
-		global.define(function() { return Papa; });
+		define(function() { return Papa; });
 	}
 	else
 	{
@@ -379,6 +379,7 @@
 		this._rowCount = 0;
 		this._start = 0;
 		this._nextChunk = null;
+		this.isFirstChunk = true;
 		this._completeResults = {
 			data: [],
 			errors: [],
@@ -388,6 +389,15 @@
 
 		this.parseChunk = function(chunk)
 		{
+			// First chunk pre-processing
+			if (this.isFirstChunk && isFunction(this._config.beforeFirstChunk))
+			{
+				var modifiedChunk = this._config.beforeFirstChunk(chunk);
+				if (modifiedChunk !== undefined)
+					chunk = modifiedChunk;
+			}
+			this.isFirstChunk = false;
+
 			// Rejoin the line we likely just split in two by chunking the file
 			var aggregate = this._partialLine + chunk;
 			this._partialLine = "";
@@ -460,7 +470,9 @@
 		{
 			// Deep-copy the config so we can edit it
 			var configCopy = copy(config);
-			configCopy.chunkSize = parseInt(configCopy.chunkSize);	// VERY important so we don't concatenate strings!
+			configCopy.chunkSize = parseInt(configCopy.chunkSize);	// parseInt VERY important so we don't concatenate strings!
+			if (!config.step && !config.chunk)
+				configCopy.chunkSize = null;  // disable Range header if not streaming; bad values break IIS - see issue #196
 			this._handle = new ParserHandle(configCopy);
 			this._handle.streamer = this;
 			this._config = configCopy;	// persist the copy to the caller

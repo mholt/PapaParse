@@ -496,7 +496,7 @@ var csv = Papa.unparse({
 									<code>beforeFirstChunk</code>
 								</td>
 								<td>
-									A function to execute before parsing the first chunk. This only applies if using a chunk callback. The function receives as an argument the chunk about to be parsed, and it may return a modified chunk to parse. This is useful for stripping header lines (as long as the header fits in a single chunk).
+									A function to execute before parsing the first chunk. Can be used with chunk or step streaming modes. The function receives as an argument the chunk about to be parsed, and it may return a modified chunk to parse. This is useful for stripping header lines (as long as the header fits in a single chunk).
 								</td>
 							</tr>
 						</table>
