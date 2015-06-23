@@ -25,7 +25,7 @@
 	// Configurable chunk sizes for local and remote files, respectively
 	Papa.LocalChunkSize = 1024 * 1024 * 10;	// 10 MB
 	Papa.RemoteChunkSize = 1024 * 1024 * 5;	// 5 MB
-	Papa.DefaultDelimiter = ",";				// Used if not specified and detection fails
+	Papa.DefaultDelimiter = ",";			// Used if not specified and detection fails
 
 	// Exposed for testing and development only
 	Papa.Parser = Parser;
@@ -42,7 +42,7 @@
 	else if (isFunction(global.define) && global.define.amd)
 	{
 		// Wireup with RequireJS
-		global.define(function() { return Papa; });
+		define(function() { return Papa; });
 	}
 	else
 	{
