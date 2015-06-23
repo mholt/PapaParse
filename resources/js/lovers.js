@@ -56,9 +56,15 @@ var peopleLovePapa = [
 		quote: "It's often easy to convert data to CSV. With Papa, it's easy to turn that CSV into JSON."
 	},
 	{       
-	        link: "http://www.yolpo.com/social/gist.github?1dbd4556e748bdb830b3&autoplay=1&interimresults=0&failfast=1",
-	        name: "yolpo",
-		description: "created a simple regression test for the Papa Parse",
-                quote: "Papa's api is so intuitive, it took me no time to get it to work"
-        }
+		link: "http://www.yolpo.com/social/gist.github?1dbd4556e748bdb830b3&autoplay=1&interimresults=0&failfast=1",
+		name: "Yolpo",
+		description: "created a simple regression test for Papa Parse.",
+		quote: "Papa's API is so intuitive, it took me no time to get it to work."
+	},
+	{
+		link: "https://www.appstax.com",
+		name: "Appstax",
+		description: "uses Papa Parse to import and export CSV data in their visual databrowser.",
+		quote: "Papa is a great for parsing CSV. And what a great tone of voice - love it!"
+	}
 ];
