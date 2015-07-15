@@ -17,9 +17,14 @@
 	<div id="mocha"></div>
 
 	<script>
-		mocha.checkLeaks();
-		mocha.globals(['jQuery']);
-		mocha.run();
+		if (window.mochaPhantomJS) {
+			mochaPhantomJS.run();
+
+		} else {
+			mocha.checkLeaks();
+			mocha.globals(['jQuery']);
+			mocha.run();
+		}
 	</script>
 	</body>
 </html>
