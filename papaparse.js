@@ -223,9 +223,15 @@
 		var _fields = [];
 
 		// Default configuration
-		var _quotes = false;	// whether to surround every datum with quotes
-		var _delimiter = ",";	// delimiting character
-		var _newline = "\r\n";	// newline character(s)
+
+		/** whether to surround every datum with quotes */
+		var _quotes = false;
+
+		/** delimiting character */
+		var _delimiter = ",";
+
+		/** newline character(s) */
+		var _newline = "\r\n";
 
 		unpackConfig();
 
@@ -283,7 +289,7 @@
 		}
 
 
-		// Turns an object's keys into an array
+		/** Turns an object's keys into an array */
 		function objectKeys(obj)
 		{
 			if (typeof obj !== 'object')
@@ -294,7 +300,7 @@
 			return keys;
 		}
 
-		// The double for loop that iterates the data and writes out a CSV string including header row
+		/** The double for loop that iterates the data and writes out a CSV string including header row */
 		function serialize(fields, data)
 		{
 			var csv = "";
@@ -340,7 +346,7 @@
 			return csv;
 		}
 
-		// Encloses a value around quotes if needed (makes a value safe for CSV insertion)
+		/** Encloses a value around quotes if needed (makes a value safe for CSV insertion) */
 		function safe(str, col)
 		{
 			if (typeof str === "undefined" || str === null)
@@ -367,7 +373,7 @@
 		}
 	}
 
-	// ChunkStreamer is the base prototype for various streamer implementations.
+	/** ChunkStreamer is the base prototype for various streamer implementations. */
 	function ChunkStreamer(config)
 	{
 		this._handle = null;
@@ -721,9 +727,11 @@
 			};
 		}
 
-		// Parses input. Most users won't need, and shouldn't mess with, the baseIndex
-		// and ignoreLastRow parameters. They are used by streamers (wrapper functions)
-		// when an input comes in multiple chunks, like from a file.
+		/**
+		 * Parses input. Most users won't need, and shouldn't mess with, the baseIndex
+		 * and ignoreLastRow parameters. They are used by streamers (wrapper functions)
+		 * when an input comes in multiple chunks, like from a file.
+		 */
 		this.parse = function(input, baseIndex, ignoreLastRow)
 		{
 			if (!_config.newline)
@@ -963,7 +971,7 @@
 
 
 
-	// The core parser implements speedy and correct CSV parsing
+	/** The core parser implements speedy and correct CSV parsing */
 	function Parser(config)
 	{
 		// Unpack the config object
@@ -1185,8 +1193,10 @@
 				lastCursor = cursor;
 			}
 
-			// Appends the remaining input from cursor to the end into
-			// row, saves the row, calls step, and returns the results.
+			/**
+			 * Appends the remaining input from cursor to the end into
+			 * row, saves the row, calls step, and returns the results.
+			 */
 			function finish(value)
 			{
 				if (ignoreLastRow)
@@ -1201,10 +1211,12 @@
 				return returnable();
 			}
 
-			// Appends the current row to the results. It sets the cursor
-			// to newCursor and finds the nextNewline. The caller should
-			// take care to execute user's step function and check for
-			// preview and end parsing if necessary.
+			/**
+			 * Appends the current row to the results. It sets the cursor
+			 * to newCursor and finds the nextNewline. The caller should
+			 * take care to execute user's step function and check for
+			 * preview and end parsing if necessary.
+			 */
 			function saveRow(newCursor)
 			{
 				cursor = newCursor;
@@ -1213,7 +1225,7 @@
 				nextNewline = input.indexOf(newline, cursor);
 			}
 
-			// Returns an object with the results, errors, and meta.
+			/** Returns an object with the results, errors, and meta. */
 			function returnable(stopped)
 			{
 				return {
@@ -1229,7 +1241,7 @@
 				};
 			}
 
-			// Executes the user's step function and resets data & errors.
+			/** Executes the user's step function and resets data & errors. */
 			function doStep()
 			{
 				step(returnable());
@@ -1237,13 +1249,13 @@
 			}
 		};
 
-		// Sets the abort flag
+		/** Sets the abort flag */
 		this.abort = function()
 		{
 			aborted = true;
 		};
 
-		// Gets the cursor position
+		/** Gets the cursor position */
 		this.getCharIndex = function()
 		{
 			return cursor;
@@ -1275,7 +1287,7 @@
 		return w;
 	}
 
-	// Callback when main thread receives a message
+	/** Callback when main thread receives a message */
 	function mainThreadReceivedMessage(e)
 	{
 		var msg = e.data;
@@ -1334,7 +1346,7 @@
 		throw "Not implemented.";
 	}
 
-	// Callback when worker thread receives a message
+	/** Callback when worker thread receives a message */
 	function workerThreadReceivedMessage(e)
 	{
 		var msg = e.data;
@@ -1362,7 +1374,7 @@
 		}
 	}
 
-	// Makes a deep copy of an array or object (mostly)
+	/** Makes a deep copy of an array or object (mostly) */
 	function copy(obj)
 	{
 		if (typeof obj !== 'object')
