@@ -48,6 +48,8 @@
 		"serve-static": "^1.7.1"
 	},
 	"scripts": {
-		"test": "node tests/test.js"
+		"test-browser": "node tests/test.js",
+		"test-node": "node tests/node-tests.js",
+		"test": "npm run test-node && npm run test-browser"
 	}
 }
