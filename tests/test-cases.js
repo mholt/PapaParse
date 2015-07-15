@@ -1044,6 +1044,7 @@ var CUSTOM_TESTS = [
 	{
 		description: "Complete is called with all results if neither step nor chunk is defined",
 		expected: [['A', 'b', 'c'], ['d', 'E', 'f'], ['G', 'h', 'i']],
+		disabled: !FILES_ENABLED,
 		run: function(callback) {
 			Papa.parse(new File(['A,b,c\nd,E,f\nG,h,i'], 'sample.csv'), {
 				chunkSize: 3,
