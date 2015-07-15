@@ -37,16 +37,19 @@
 		assert.equal(parsedCsv.errors.length, 0)
 	}
 
-	var synchronouslyParsedCsvShouldBeCorrectlyParsed = function() {
-		assertLongSampleParsedCorrectly(Papa.parse(longSampleRawCsv));
-	}();
-
-	var asynchronouslyParsedCsvShouldBeCorrectlyParsed = function() {
-		Papa.parse(longSampleRawCsv, {
-			complete: function(parsedCsv) {
-				assertLongSampleParsedCorrectly(parsedCsv);
-			},
+	describe('PapaParse', function() {
+		it('synchronously parsed CSV should be correctly parsed', function() {
+			assertLongSampleParsedCorrectly(Papa.parse(longSampleRawCsv));
 		});
-	}();
+
+		it('asynchronously parsed CSV should be correctly parsed', function(done) {
+			Papa.parse(longSampleRawCsv, {
+				complete: function(parsedCsv) {
+					assertLongSampleParsedCorrectly(parsedCsv);
+					done();
+				},
+			});
+		});
+	});
 
 })();

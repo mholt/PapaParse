@@ -44,12 +44,13 @@
 		"connect": "^3.3.3",
 		"grunt": "^0.4.5",
 		"grunt-contrib-uglify": "^0.6.0",
+		"mocha": "^2.2.5",
 		"open": "0.0.5",
 		"serve-static": "^1.7.1"
 	},
 	"scripts": {
 		"test-browser": "node tests/test.js",
-		"test-node": "node tests/node-tests.js",
+		"test-node": "mocha tests/node-tests.js",
 		"test": "npm run test-node && npm run test-browser"
 	}
 }
