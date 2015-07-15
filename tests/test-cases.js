@@ -6,6 +6,12 @@ try {
 	FILES_ENABLED = true;
 } catch (e) {} // safari, ie
 
+var XHR_ENABLED = false;
+try {
+	new XMLHttpRequest();
+	XHR_ENABLED = true;
+} catch (e) {} // safari, ie
+
 // Tests for the core parser using new Papa.Parser().parse() (CSV to JSON)
 var CORE_PARSER_TESTS = [
 	{
@@ -843,6 +849,7 @@ var PARSE_ASYNC_TESTS = [
 		config: {
 			download: true
 		},
+		disabled: !XHR_ENABLED,
 		expected: {
 			data: [['A','B','C'],['X','Y','Z']],
 			errors: []
@@ -855,6 +862,7 @@ var PARSE_ASYNC_TESTS = [
 			worker: true,
 			download: true
 		},
+		disabled: !XHR_ENABLED,
 		expected: {
 			data: [['A','B','C'],['X','Y','Z']],
 			errors: []
@@ -1098,6 +1106,7 @@ var CUSTOM_TESTS = [
 	{
 		description: "Step exposes cursor for downloads",
 		expected: [129,	287, 452, 595, 727, 865, 1031, 1209],
+		disabled: !XHR_ENABLED,
 		run: function(callback) {
 			var updates = [];
 			Papa.parse("/tests/long-sample.csv", {
@@ -1114,6 +1123,7 @@ var CUSTOM_TESTS = [
 	{
 		description: "Step exposes cursor for chunked downloads",
 		expected: [129,	287, 452, 595, 727, 865, 1031, 1209],
+		disabled: !XHR_ENABLED,
 		run: function(callback) {
 			var updates = [];
 			Papa.parse("/tests/long-sample.csv", {
@@ -1131,6 +1141,7 @@ var CUSTOM_TESTS = [
 	{
 		description: "Step exposes cursor for workers",
 		expected: [452, 452, 452, 865, 865, 865, 1209, 1209],
+		disabled: !XHR_ENABLED,
 		run: function(callback) {
 			var updates = [];
 			Papa.parse("/tests/long-sample.csv", {
@@ -1149,6 +1160,7 @@ var CUSTOM_TESTS = [
 	{
 		description: "Chunk is called for each chunk",
 		expected: [3, 3, 2],
+		disabled: !XHR_ENABLED,
 		run: function(callback) {
 			var updates = [];
 			Papa.parse("/tests/long-sample.csv", {
@@ -1166,6 +1178,7 @@ var CUSTOM_TESTS = [
 	{
 		description: "Chunk is called with cursor position",
 		expected: [452, 865, 1209],
+		disabled: !XHR_ENABLED,
 		run: function(callback) {
 			var updates = [];
 			Papa.parse("/tests/long-sample.csv", {
@@ -1306,6 +1319,7 @@ var CUSTOM_TESTS = [
 	{
 		description: "Step functions can abort workers",
 		expected: 1,
+		disabled: !XHR_ENABLED,
 		run: function(callback) {
 			var updates = 0;
 			Papa.parse("/tests/long-sample.csv", {
@@ -1325,6 +1339,7 @@ var CUSTOM_TESTS = [
 	{
 		description: "beforeFirstChunk manipulates only first chunk",
 		expected: 7,
+		disabled: !XHR_ENABLED,
 		run: function(callback) {
 			var updates = 0;
 			Papa.parse("/tests/long-sample.csv", {
@@ -1345,6 +1360,7 @@ var CUSTOM_TESTS = [
 	{
 		description: "First chunk not modified if beforeFirstChunk returns nothing",
 		expected: 8,
+		disabled: !XHR_ENABLED,
 		run: function(callback) {
 			var updates = 0;
 			Papa.parse("/tests/long-sample.csv", {
