@@ -1,3 +1,8 @@
+if (typeof module !== 'undefined' && module.exports) {
+	var chai = require('chai');
+	var Papa = require('../papaparse.js');
+}
+
 var assert = chai.assert;
 
 var RECORD_SEP = String.fromCharCode(30);
