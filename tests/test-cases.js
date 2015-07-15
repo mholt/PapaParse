@@ -1,3 +1,5 @@
+var assert = chai.assert;
+
 var RECORD_SEP = String.fromCharCode(30);
 var UNIT_SEP = String.fromCharCode(31);
 var FILES_ENABLED = false;
@@ -434,6 +436,21 @@ var CORE_PARSER_TESTS = [
 	}
 ];
 
+describe('Core Parser Tests', function() {
+	function generateTest(test) {
+		(test.disabled ? it.skip : it)(test.description, function() {
+			var actual = new Papa.Parser(test.config).parse(test.input);
+			assert.deepEqual(JSON.stringify(actual.errors), JSON.stringify(test.expected.errors));
+			assert.deepEqual(actual.data, test.expected.data);
+		});
+	}
+
+	for (var i = 0; i < CORE_PARSER_TESTS.length; i++) {
+		generateTest(CORE_PARSER_TESTS[i]);
+	}
+});
+
+
 
 // Tests for Papa.parse() function -- high-level wrapped parser (CSV to JSON)
 var PARSE_TESTS = [
@@ -824,9 +841,19 @@ var PARSE_TESTS = [
 	}
 ];
 
+describe('Parse Tests', function() {
+	function generateTest(test) {
+		(test.disabled ? it.skip : it)(test.description, function() {
+			var actual = Papa.parse(test.input, test.config);
+			assert.deepEqual(JSON.stringify(actual.errors), JSON.stringify(test.expected.errors));
+			assert.deepEqual(actual.data, test.expected.data);
+		});
+	}
 
-
-
+	for (var i = 0; i < PARSE_TESTS.length; i++) {
+		generateTest(PARSE_TESTS[i]);
+	}
+});
 
 
 
@@ -893,10 +920,29 @@ var PARSE_ASYNC_TESTS = [
 	}
 ];
 
+describe('Parse Async Tests', function() {
+	function generateTest(test) {
+		(test.disabled ? it.skip : it)(test.description, function(done) {
+			var config = test.config;
 
+			config.complete = function(actual) {
+				assert.deepEqual(JSON.stringify(actual.errors), JSON.stringify(test.expected.errors));
+				assert.deepEqual(actual.data, test.expected.data);
+				done();
+			};
 
+			config.error = function(err) {
+				throw err;
+			};
 
+			Papa.parse(test.input, config);
+		});
+	}
 
+	for (var i = 0; i < PARSE_ASYNC_TESTS.length; i++) {
+		generateTest(PARSE_ASYNC_TESTS[i]);
+	}
+});
 
 
 
@@ -1045,6 +1091,29 @@ var UNPARSE_TESTS = [
 		expected: 'Col1,Col2,Col3\r\na,,c'
 	}
 ];
+
+describe('Unparse Tests', function() {
+	function generateTest(test) {
+		(test.disabled ? it.skip : it)(test.description, function() {
+			var actual;
+
+			try {
+				actual = Papa.unparse(test.input, test.config);
+			} catch (e) {
+				if (e instanceof Error) {
+					throw e;
+				}
+				actual = e;
+			}
+
+			assert.strictEqual(actual, test.expected);
+		});
+	}
+
+	for (var i = 0; i < UNPARSE_TESTS.length; i++) {
+		generateTest(UNPARSE_TESTS[i]);
+	}
+});
 
 
 
@@ -1379,3 +1448,18 @@ var CUSTOM_TESTS = [
 	}
 
 ];
+
+describe('Custom Tests', function() {
+	function generateTest(test) {
+		(test.disabled ? it.skip : it)(test.description, function(done) {
+			test.run(function (actual) {
+				assert.deepEqual(JSON.stringify(actual), JSON.stringify(test.expected));
+				done();
+			});
+		});
+	}
+
+	for (var i = 0; i < CUSTOM_TESTS.length; i++) {
+		generateTest(CUSTOM_TESTS[i]);
+	}
+});
