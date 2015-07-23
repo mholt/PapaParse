@@ -219,6 +219,14 @@ var CORE_PARSER_TESTS = [
 			errors: []
 		}
 	},
+  {
+    description: "Empty quoted field at EOF is empty",
+    input: 'a,b,""\na,b,""',
+    expected: {
+      data: [['a', 'b', ''], ['a', 'b', '']],
+      errors: []
+    }
+  },
 	{
 		description: "Multiple consecutive empty fields",
 		input: 'a,b,,,c,d\n,,e,,,f',

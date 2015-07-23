@@ -1201,7 +1201,7 @@
 			{
 				if (ignoreLastRow)
 					return returnable();
-				if (!value)
+				if (typeof value === 'undefined')
 					value = input.substr(cursor);
 				row.push(value);
 				cursor = inputLen;	// important in case parsing is paused
