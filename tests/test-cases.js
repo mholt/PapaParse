@@ -1458,6 +1458,37 @@ var CUSTOM_TESTS = [
 				}
 			});
 		}
+	},
+	{
+		description: "Should not assume we own the worker unless papaworker is in the search string",
+		disabled: typeof Worker === 'undefined',
+		expected: [false, true, true, true, true],
+		run: function(callback) {
+			var searchStrings = [
+				'',
+				'?papaworker',
+				'?x=1&papaworker',
+				'?x=1&papaworker&y=1',
+				'?x=1&papaworker=1'
+			];
+			var results = searchStrings.map(function () { return false; });
+			var workers = [];
+
+			// Give it .5s to do something
+			setTimeout(function () {
+				workers.forEach(function (w) { w.terminate(); });
+				callback(results);
+			}, 500);
+
+			searchStrings.forEach(function (searchString, idx) {
+				var w = new Worker('../papaparse.js' + searchString);
+				workers.push(w);
+				w.addEventListener('message', function () {
+					results[idx] = true;
+				});
+				w.postMessage({input: 'a,b,c\n1,2,3'});
+			});
+		}
 	}
 
 ];
