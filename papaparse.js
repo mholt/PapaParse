@@ -915,7 +915,8 @@
 					}
 				}
 
-				avgFieldCount /= preview.data.length;
+				if (preview.data.length > 0)
+					avgFieldCount /= preview.data.length;
 
 				if ((typeof bestDelta === 'undefined' || delta < bestDelta)
 					&& avgFieldCount > 1.99)
