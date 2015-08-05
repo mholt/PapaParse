@@ -1,13 +1,15 @@
 /*!
 	Papa Parse
-	v4.1.2 - PRE-RELEASE
+	v4.1.2
 	https://github.com/mholt/PapaParse
 */
 (function(global)
 {
 	"use strict";
 
-	var IS_WORKER = (!global.document && !!global.postMessage), LOADED_SYNC = false, AUTO_SCRIPT_PATH;
+	var IS_WORKER = !global.document && !!global.postMessage,
+		IS_PAPA_WORKER = IS_WORKER && /(\?|&)papaworker(=|&|$)/.test(global.location.search),
+		LOADED_SYNC = false, AUTO_SCRIPT_PATH;
 	var workers = {}, workerIdCounter = 0;
 
 	var Papa = {};
@@ -19,7 +21,7 @@
 	Papa.UNIT_SEP = String.fromCharCode(31);
 	Papa.BYTE_ORDER_MARK = "\ufeff";
 	Papa.BAD_DELIMITERS = ["\r", "\n", "\"", Papa.BYTE_ORDER_MARK];
-	Papa.WORKERS_SUPPORTED = !!global.Worker;
+	Papa.WORKERS_SUPPORTED = !IS_WORKER && !!global.Worker;
 	Papa.SCRIPT_PATH = null;	// Must be set by your code if you use workers and this lib is loaded asynchronously
 
 	// Configurable chunk sizes for local and remote files, respectively
@@ -145,7 +147,7 @@
 	}
 
 
-	if (IS_WORKER)
+	if (IS_PAPA_WORKER)
 	{
 		global.onmessage = workerThreadReceivedMessage;
 	}
@@ -223,9 +225,15 @@
 		var _fields = [];
 
 		// Default configuration
-		var _quotes = false;	// whether to surround every datum with quotes
-		var _delimiter = ",";	// delimiting character
-		var _newline = "\r\n";	// newline character(s)
+
+		/** whether to surround every datum with quotes */
+		var _quotes = false;
+
+		/** delimiting character */
+		var _delimiter = ",";
+
+		/** newline character(s) */
+		var _newline = "\r\n";
 
 		unpackConfig();
 
@@ -283,7 +291,7 @@
 		}
 
 
-		// Turns an object's keys into an array
+		/** Turns an object's keys into an array */
 		function objectKeys(obj)
 		{
 			if (typeof obj !== 'object')
@@ -294,7 +302,7 @@
 			return keys;
 		}
 
-		// The double for loop that iterates the data and writes out a CSV string including header row
+		/** The double for loop that iterates the data and writes out a CSV string including header row */
 		function serialize(fields, data)
 		{
 			var csv = "";
@@ -340,7 +348,7 @@
 			return csv;
 		}
 
-		// Encloses a value around quotes if needed (makes a value safe for CSV insertion)
+		/** Encloses a value around quotes if needed (makes a value safe for CSV insertion) */
 		function safe(str, col)
 		{
 			if (typeof str === "undefined" || str === null)
@@ -367,7 +375,7 @@
 		}
 	}
 
-	// ChunkStreamer is the base prototype for various streamer implementations.
+	/** ChunkStreamer is the base prototype for various streamer implementations. */
 	function ChunkStreamer(config)
 	{
 		this._handle = null;
@@ -420,7 +428,7 @@
 
 			var finishedIncludingPreview = this._finished || (this._config.preview && this._rowCount >= this._config.preview);
 
-			if (IS_WORKER)
+			if (IS_PAPA_WORKER)
 			{
 				global.postMessage({
 					results: results,
@@ -456,7 +464,7 @@
 		{
 			if (isFunction(this._config.error))
 				this._config.error(error);
-			else if (IS_WORKER && this._config.error)
+			else if (IS_PAPA_WORKER && this._config.error)
 			{
 				global.postMessage({
 					workerId: Papa.WORKER_ID,
@@ -721,9 +729,11 @@
 			};
 		}
 
-		// Parses input. Most users won't need, and shouldn't mess with, the baseIndex
-		// and ignoreLastRow parameters. They are used by streamers (wrapper functions)
-		// when an input comes in multiple chunks, like from a file.
+		/**
+		 * Parses input. Most users won't need, and shouldn't mess with, the baseIndex
+		 * and ignoreLastRow parameters. They are used by streamers (wrapper functions)
+		 * when an input comes in multiple chunks, like from a file.
+		 */
 		this.parse = function(input, baseIndex, ignoreLastRow)
 		{
 			if (!_config.newline)
@@ -905,7 +915,8 @@
 					}
 				}
 
-				avgFieldCount /= preview.data.length;
+				if (preview.data.length > 0)
+					avgFieldCount /= preview.data.length;
 
 				if ((typeof bestDelta === 'undefined' || delta < bestDelta)
 					&& avgFieldCount > 1.99)
@@ -963,7 +974,7 @@
 
 
 
-	// The core parser implements speedy and correct CSV parsing
+	/** The core parser implements speedy and correct CSV parsing */
 	function Parser(config)
 	{
 		// Unpack the config object
@@ -1185,13 +1196,15 @@
 				lastCursor = cursor;
 			}
 
-			// Appends the remaining input from cursor to the end into
-			// row, saves the row, calls step, and returns the results.
+			/**
+			 * Appends the remaining input from cursor to the end into
+			 * row, saves the row, calls step, and returns the results.
+			 */
 			function finish(value)
 			{
 				if (ignoreLastRow)
 					return returnable();
-				if (!value)
+				if (typeof value === 'undefined')
 					value = input.substr(cursor);
 				row.push(value);
 				cursor = inputLen;	// important in case parsing is paused
@@ -1201,10 +1214,12 @@
 				return returnable();
 			}
 
-			// Appends the current row to the results. It sets the cursor
-			// to newCursor and finds the nextNewline. The caller should
-			// take care to execute user's step function and check for
-			// preview and end parsing if necessary.
+			/**
+			 * Appends the current row to the results. It sets the cursor
+			 * to newCursor and finds the nextNewline. The caller should
+			 * take care to execute user's step function and check for
+			 * preview and end parsing if necessary.
+			 */
 			function saveRow(newCursor)
 			{
 				cursor = newCursor;
@@ -1213,7 +1228,7 @@
 				nextNewline = input.indexOf(newline, cursor);
 			}
 
-			// Returns an object with the results, errors, and meta.
+			/** Returns an object with the results, errors, and meta. */
 			function returnable(stopped)
 			{
 				return {
@@ -1229,7 +1244,7 @@
 				};
 			}
 
-			// Executes the user's step function and resets data & errors.
+			/** Executes the user's step function and resets data & errors. */
 			function doStep()
 			{
 				step(returnable());
@@ -1237,13 +1252,13 @@
 			}
 		};
 
-		// Sets the abort flag
+		/** Sets the abort flag */
 		this.abort = function()
 		{
 			aborted = true;
 		};
 
-		// Gets the cursor position
+		/** Gets the cursor position */
 		this.getCharIndex = function()
 		{
 			return cursor;
@@ -1268,14 +1283,17 @@
 				'Script path cannot be determined automatically when Papa Parse is loaded asynchronously. ' +
 				'You need to set Papa.SCRIPT_PATH manually.'
 			);
-		var w = new global.Worker(Papa.SCRIPT_PATH || AUTO_SCRIPT_PATH);
+		var workerUrl = Papa.SCRIPT_PATH || AUTO_SCRIPT_PATH;
+		// Append "papaworker" to the search string to tell papaparse that this is our worker.
+		workerUrl += (workerUrl.indexOf('?') !== -1 ? '&' : '?') + 'papaworker';
+		var w = new global.Worker(workerUrl);
 		w.onmessage = mainThreadReceivedMessage;
 		w.id = workerIdCounter++;
 		workers[w.id] = w;
 		return w;
 	}
 
-	// Callback when main thread receives a message
+	/** Callback when main thread receives a message */
 	function mainThreadReceivedMessage(e)
 	{
 		var msg = e.data;
@@ -1334,7 +1352,7 @@
 		throw "Not implemented.";
 	}
 
-	// Callback when worker thread receives a message
+	/** Callback when worker thread receives a message */
 	function workerThreadReceivedMessage(e)
 	{
 		var msg = e.data;
@@ -1362,7 +1380,7 @@
 		}
 	}
 
-	// Makes a deep copy of an array or object (mostly)
+	/** Makes a deep copy of an array or object (mostly) */
 	function copy(obj)
 	{
 		if (typeof obj !== 'object')
