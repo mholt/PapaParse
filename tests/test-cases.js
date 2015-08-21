@@ -1208,6 +1208,15 @@ var PARSE_TESTS = [
 			data: [{'a': 'c', 'b': 'd'}],
 			errors: []
 		}
+	},
+	{
+		description: "Mixture of newlines",
+		input: '"a\r\na","b"\n"c","d"\n\n',
+		config: { skipEmptyLines: true },
+		expected: {
+			data: [['a\r\na', 'b'], ['c', 'd']],
+			errors: []
+		}
 	}
 ];
 
