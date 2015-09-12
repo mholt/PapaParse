@@ -347,6 +347,7 @@ var csv = Papa.unparse({
 	chunk: undefined,
 	fastMode: undefined,
 	beforeFirstChunk: undefined,
+	withCredentials: undefined
 }</code></pre>
 					</div>
 					<div class="clear"></div>
@@ -497,6 +498,14 @@ var csv = Papa.unparse({
 								</td>
 								<td>
 									A function to execute before parsing the first chunk. Can be used with chunk or step streaming modes. The function receives as an argument the chunk about to be parsed, and it may return a modified chunk to parse. This is useful for stripping header lines (as long as the header fits in a single chunk).
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<code>withCredentials</code>
+								</td>
+								<td>
+									A boolean value passed directly into XMLHttpRequest's "withCredentials" property.
 								</td>
 							</tr>
 						</table>
