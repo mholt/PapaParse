@@ -1210,11 +1210,11 @@ var PARSE_TESTS = [
 		}
 	},
 	{
-		description: "Mixture of newlines",
-		input: '"a\r\na","b"\n"c","d"\n\n',
+		description: "Carriage return in header inside quotes, with line feed endings",
+		input: '"a\r\na","b"\n"c","d"\n"e","f"\n,"g","h"\n"i","j"\n',
 		config: { skipEmptyLines: true },
 		expected: {
-			data: [['a\r\na', 'b'], ['c', 'd']],
+			data: [['a\r\na', 'b'], ['c', 'd'], ['e', 'f'], ['g', 'h']['i', 'j']],
 			errors: []
 		}
 	}
