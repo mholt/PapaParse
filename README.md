@@ -5,6 +5,14 @@ Fast and reliable CSV parser based on [Papa Parse](http://papaparse.com). Papa P
 
 This package has all the functionality of Papa Parse except for web workers and parsing directly from files. You can pass a string to Baby Parse and use any of the other config options as described in the [Papa Parse documentation](http://papaparse.com/docs).
 
+Installation
+-----
+
+```js
+// simply install using npm
+npm install babyparse
+```
+
 Basic Usage
 -----
 
