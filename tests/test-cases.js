@@ -508,6 +508,14 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Mixed slash n and slash r should choose first as precident",
+		input: 'a,b,c\nd,e,f\rg,h,i\n',
+		expected: {
+			data: [['a', 'b', 'c'], ['d', 'e', 'f\rg', 'h', 'i'], ['']],
+			errors: []
+		}
+	},
+	{
 		description: "Header row with one row of data",
 		input: 'A,B,C\r\na,b,c',
 		config: { header: true },
