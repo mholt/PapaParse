@@ -790,9 +790,10 @@
 			self.streamer.parseChunk(_input);
 		};
 
-		this.aborted = function () {
+		this.aborted = function () 
+		{
 			return _aborted;
-		}
+		};
 
 		this.abort = function()
 		{
