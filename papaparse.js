@@ -950,7 +950,11 @@
 
 			var r = input.split('\r');
 
-			if (r.length === 1)
+			var n = input.split('\n');
+
+			var nAppearsFirst = (n.length > 1 && n[0].length < r[0].length);
+
+			if (r.length === 1 || nAppearsFirst)
 				return '\n';
 
 			var numWithN = 0;
