@@ -455,7 +455,7 @@
 			}
 
 			if (finishedIncludingPreview && isFunction(this._config.complete) && (!results || !results.meta.aborted))
-				this._config.complete(this._completeResults);
+				this._config.complete(this._completeResults, this._input);
 
 			if (!finishedIncludingPreview && (!results || !results.meta.paused))
 				this._nextChunk();
