@@ -3,7 +3,26 @@
 	v4.1.2
 	https://github.com/mholt/PapaParse
 */
-(function(global)
+(function(root, factory)
+{
+  if (typeof define === 'function' && define.amd)
+	{
+    // AMD. Register as an anonymous module.
+    define([], factory);
+  }
+	else if (typeof module === 'object' && module.exports)
+	{
+    // Node. Does not work with strict CommonJS, but
+    // only CommonJS-like environments that support module.exports,
+    // like Node.
+    module.exports = factory();
+  }
+	else
+	{
+    // Browser globals (root is window)
+    root.returnExports = factory();
+  }
+}(this, function()
 {
 	'use strict';
 
@@ -35,22 +54,6 @@
 	Papa.NetworkStreamer = NetworkStreamer;
 	Papa.FileStreamer = FileStreamer;
 	Papa.StringStreamer = StringStreamer;
-
-	if (typeof module !== 'undefined' && module.exports)
-	{
-		// Export to Node...
-		module.exports = Papa;
-	}
-	else if (isFunction(global.define) && global.define.amd)
-	{
-		// Wireup with RequireJS
-		define(function() { return Papa; });
-	}
-	else
-	{
-		// ...or as browser global
-		global.Papa = Papa;
-	}
 
 	if (global.jQuery)
 	{
@@ -790,7 +793,7 @@
 			self.streamer.parseChunk(_input);
 		};
 
-		this.aborted = function () 
+		this.aborted = function ()
 		{
 			return _aborted;
 		};
@@ -1414,4 +1417,6 @@
 	{
 		return typeof func === 'function';
 	}
-})(typeof window !== 'undefined' ? window : this);
+
+	return Papa;
+}));
