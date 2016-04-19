@@ -26,6 +26,7 @@
 {
 	'use strict';
 
+	var global = Function('return this')();
 	var IS_WORKER = !global.document && !!global.postMessage,
 		IS_PAPA_WORKER = IS_WORKER && /(\?|&)papaworker(=|&|$)/.test(global.location.search),
 		LOADED_SYNC = false, AUTO_SCRIPT_PATH;
