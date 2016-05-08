@@ -66,5 +66,11 @@ var peopleLovePapa = [
 		name: "Appstax",
 		description: "uses Papa Parse to import and export CSV data in their visual databrowser.",
 		quote: "Papa is a great for parsing CSV. And what a great tone of voice - love it!"
+	},
+	{
+		link: "https://github.com/Nanofus/novel.js",
+		name: "Novel.js",
+		description: "is a text adventure framework that uses Papa Parse to enable user-friendly translations.",
+		quote: "Papa saves countless hours of work and makes reading large CSV files so easy!"
 	}
 ];
