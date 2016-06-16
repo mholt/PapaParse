@@ -859,7 +859,17 @@ var PARSE_TESTS = [
 			data: [[" "], ['a', 'b', 'c']],
 			errors: []
 		}
-	}
+	},
+    {
+        description: "Single quote as quote character",
+        notes: "Must parse correctly when single quote is specified as a quote character",
+        input: "a,b,'c,d'",
+        config: { quoteChar: "'"},
+        expected: {
+            data: [['a', 'b', 'c,d']],
+            errors: []
+        }
+    }
 ];
 
 describe('Parse Tests', function() {
