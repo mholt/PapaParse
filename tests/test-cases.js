@@ -626,6 +626,15 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Callback delimiter",
+		input: 'a$ b$ c',
+		config: { delimiter: function(input) { return input[1] + ' '; } },
+		expected: {
+			data: [['a', 'b', 'c']],
+			errors: []
+		}
+	},
+	{
 		description: "Dynamic typing converts numeric literals",
 		input: '1,2.2,1e3\r\n-4,-4.5,-4e-5\r\n-,5a,5-2',
 		config: { dynamicTyping: true },

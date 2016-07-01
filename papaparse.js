@@ -764,6 +764,11 @@
 				}
 				_results.meta.delimiter = _config.delimiter;
 			}
+			else if(typeof _config.delimiter === 'function')
+			{
+				_config.delimiter = _config.delimiter(input);
+				_results.meta.delimiter = _config.delimiter;
+			}
 
 			var parserConfig = copy(_config);
 			if (_config.preview && _config.header)
