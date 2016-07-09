@@ -653,6 +653,38 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Dynamic typing applies to specific columns",
+		input: 'A,B,C\r\n1,2.2,1e3\r\n-4,-4.5,-4e-5',
+		config: { header: true, dynamicTyping: { A: true, C: true } },
+		expected: {
+			data: [{"A": 1, "B": "2.2", "C": 1000}, {"A": -4, "B": "-4.5", "C": -0.00004}],
+			errors: []
+		}
+	},
+	{
+		description: "Dynamic typing applies to specific columns by index",
+		input: '1,2.2,1e3\r\n-4,-4.5,-4e-5\r\n-,5a,5-2',
+		config: { dynamicTyping: { 1: true } },
+		expected: {
+			data: [["1", 2.2, "1e3"], ["-4", -4.5, "-4e-5"], ["-", "5a", "5-2"]],
+			errors: []
+		}
+	},
+	{
+		description: "Dynamic typing can be applied to `__parsed_extra`",
+		input: 'A,B,C\r\n1,2.2,1e3,5.5\r\n-4,-4.5,-4e-5',
+		config: { header: true, dynamicTyping: { A: true, C: true, __parsed_extra: true } },
+		expected: {
+			data: [{"A": 1, "B": "2.2", "C": 1000, "__parsed_extra": [ 5.5 ]}, {"A": -4, "B": "-4.5", "C": -0.00004}],
+			errors: [{
+				"type": "FieldMismatch",
+				"code": "TooManyFields",
+				"message": "Too many fields: expected 3 fields but parsed 4",
+				"row": 0
+			}]
+		}
+	},
+	{
 		description: "Blank line at beginning",
 		input: '\r\na,b,c\r\nd,e,f',
 		config: { newline: '\r\n' },
