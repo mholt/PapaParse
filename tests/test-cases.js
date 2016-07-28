@@ -892,16 +892,16 @@ var PARSE_TESTS = [
 			errors: []
 		}
 	},
-    {
-        description: "Single quote as quote character",
-        notes: "Must parse correctly when single quote is specified as a quote character",
-        input: "a,b,'c,d'",
-        config: { quoteChar: "'"},
-        expected: {
-            data: [['a', 'b', 'c,d']],
-            errors: []
-        }
-    }
+	{
+		description: "Single quote as quote character",
+		notes: "Must parse correctly when single quote is specified as a quote character",
+		input: "a,b,'c,d'",
+		config: { quoteChar: "'"},
+		expected: {
+			data: [['a', 'b', 'c,d']],
+			errors: []
+		}
+	}
 ];
 
 describe('Parse Tests', function() {
@@ -1152,6 +1152,12 @@ var UNPARSE_TESTS = [
 		description: "JSON null is treated as empty value",
 		input: [{ "Col1": "a", "Col2": null, "Col3": "c" }],
 		expected: 'Col1,Col2,Col3\r\na,,c'
+	},
+	{
+		description: "Custom quote character (single quote)",
+		input: [['a,d','b','c']],
+		config: { quoteChar: "'"},
+		expected: "'a,d',b,c"
 	}
 ];
 
