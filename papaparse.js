@@ -249,8 +249,22 @@
 		{
 			if (!_input.length || _input[0] instanceof Array)
 				return serialize(null, _input);
-			else if (typeof _input[0] === 'object')
-				return serialize(objectKeys(_input[0]), _input);
+			else if (typeof _input[0] === 'object'){
+				if (_config && _config.wide){
+					var tmpObj = [];
+					for(var i = 0; i < _input.length; i++){
+						for (var prop in _input[i]) {
+						  if (_input[i].hasOwnProperty(prop)) {
+						    if (tmpObj.indexOf(prop) < 0) {
+						      tmpObj.push(prop);
+						    }
+						  }
+						}
+					}
+					return serialize(tmpObj.sort(), _input);
+				} else
+					return serialize(objectKeys(_input[0]), _input);
+			}
 		}
 		else if (typeof _input === 'object')
 		{
@@ -296,6 +310,9 @@
 
 			if (typeof _config.newline === 'string')
 				_newline = _config.newline;
+
+			if (typeof _config.wide === 1)
+				_wide = _config.wide;
 		}
 
 
