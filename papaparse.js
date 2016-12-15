@@ -1013,6 +1013,7 @@
 		var preview = config.preview;
 		var fastMode = config.fastMode;
 		var quoteChar = config.quoteChar || '"';
+		var trim = config.trim;
 
 		// Delimiter must be valid
 		if (typeof delim !== 'string'
@@ -1035,6 +1036,15 @@
 		// We're gonna need these at the Parser scope
 		var cursor = 0;
 		var aborted = false;
+
+		var trimElements = function(elementArray) {
+			var i = 0;
+			for (i = 0; i < elementArray.length; ++i) {
+				if (typeof elementArray[i] === 'string') {
+					elementArray[i] = elementArray[i].trim();
+				}
+			}
+		}
 
 		this.parse = function(input, baseIndex, ignoreLastRow)
 		{
@@ -1073,13 +1083,26 @@
 					if (stepIsFunction)
 					{
 						data = [];
-						pushRow(row.split(delim));
+						var rowElements = row.split(delim);
+						if (trim) {
+							trimElements(rowElements);
+						}
+						pushRow(rowElements);
 						doStep();
-						if (aborted)
+						if (aborted) 
+						{
 							return returnable();
+						}
 					}
 					else
-						pushRow(row.split(delim));
+					{
+						var rowElements = row.split(delim);
+						if (trim) {
+							trimElements(rowElements);
+						}
+						pushRow(rowElements);
+					}
+
 					if (preview && i >= preview)
 					{
 						data = data.slice(0, preview);
