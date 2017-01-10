@@ -1152,6 +1152,12 @@ var UNPARSE_TESTS = [
 		description: "JSON null is treated as empty value",
 		input: [{ "Col1": "a", "Col2": null, "Col3": "c" }],
 		expected: 'Col1,Col2,Col3\r\na,,c'
+	},
+	{
+		description: "Don't print header if header:false option specified",
+		input: [{ "Col1": "a", "Col2": "b", "Col3": "c" }, { "Col1": "d", "Col2": "e", "Col3": "f" }],
+		config: { header: false },
+		expected: 'a,b,c\r\nd,e,f'
 	}
 ];
 

@@ -234,6 +234,9 @@
 		/** whether to surround every datum with quotes */
 		var _quotes = false;
 
+		/** whether to write headers */
+		var _writeHeader = true;
+
 		/** delimiting character */
 		var _delimiter = ',';
 
@@ -296,6 +299,9 @@
 
 			if (typeof _config.newline === 'string')
 				_newline = _config.newline;
+
+			if (typeof _config.header === 'boolean')
+				_writeHeader = _config.header;
 		}
 
 
@@ -324,7 +330,7 @@
 			var dataKeyedByField = !(data[0] instanceof Array);
 
 			// If there a header row, write it first
-			if (hasHeader)
+			if (hasHeader && _writeHeader)
 			{
 				for (var i = 0; i < fields.length; i++)
 				{
