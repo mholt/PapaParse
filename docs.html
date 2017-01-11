@@ -248,9 +248,10 @@
 {
 	quotes: false,
 	delimiter: ",",
+	header: true,
 	newline: "\r\n"
 }</code></pre>
-								Set <code>quotes</code> to <code>true</code> to always enclose each field in quotes, or an array of true/false values correlating to specific to columns to force-quote. The <code>delimiter</code> can be any valid delimiting character. The <code>newline</code> character(s) may also be customized.
+                                Set <code>quotes</code> to <code>true</code> to always enclose each field in quotes, or an array of true/false values correlating to specific to columns to force-quote. The <code>delimiter</code> can be any valid delimiting character. The <code>newline</code> character(s) may also be customized. Setting <code>header</code> to <code>false</code> will omit the header row.
 							</li>
 						</ul>
 					</div>
@@ -568,7 +569,7 @@ var csv = Papa.unparse({
 						</ul>
 					</div>
 					<div class="clear"></div>
-					
+
 
 					<div class="grid-100">
 						<h5 id="data">Data</h5>
