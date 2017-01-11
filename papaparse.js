@@ -234,6 +234,9 @@
 		/** whether to surround every datum with quotes */
 		var _quotes = false;
 
+		/** whether to write headers */
+		var _writeHeader = true;
+
 		/** delimiting character */
 		var _delimiter = ',';
 
@@ -304,6 +307,9 @@
 
 			if (typeof _config.quoteChar === 'string')
 				_quoteChar = _config.quoteChar;
+
+			if (typeof _config.header === 'boolean')
+				_writeHeader = _config.header;
 		}
 
 
@@ -332,7 +338,7 @@
 			var dataKeyedByField = !(data[0] instanceof Array);
 
 			// If there a header row, write it first
-			if (hasHeader)
+			if (hasHeader && _writeHeader)
 			{
 				for (var i = 0; i < fields.length; i++)
 				{
@@ -773,6 +779,11 @@
 				}
 				_results.meta.delimiter = _config.delimiter;
 			}
+			else if(typeof _config.delimiter === 'function')
+			{
+				_config.delimiter = _config.delimiter(input);
+				_results.meta.delimiter = _config.delimiter;
+			}
 
 			var parserConfig = copy(_config);
 			if (_config.preview && _config.header)
@@ -1136,7 +1147,7 @@
 						if (quoteSearch === inputLen-1)
 						{
 							// Closing quote at EOF
-							var value = input.substring(cursor, quoteSearch).replace(quoteCharRegex, '"');
+							var value = input.substring(cursor, quoteSearch).replace(quoteCharRegex, quoteChar);
 							return finish(value);
 						}
 
@@ -1150,7 +1161,7 @@
 						if (input[quoteSearch+1] === delim)
 						{
 							// Closing quote followed by delimiter
-							row.push(input.substring(cursor, quoteSearch).replace(quoteCharRegex, '"'));
+							row.push(input.substring(cursor, quoteSearch).replace(quoteCharRegex, quoteChar));
 							cursor = quoteSearch + 1 + delimLen;
 							nextDelim = input.indexOf(delim, cursor);
 							nextNewline = input.indexOf(newline, cursor);
@@ -1160,7 +1171,7 @@
 						if (input.substr(quoteSearch+1, newlineLen) === newline)
 						{
 							// Closing quote followed by newline
-							row.push(input.substring(cursor, quoteSearch).replace(quoteCharRegex, '"'));
+							row.push(input.substring(cursor, quoteSearch).replace(quoteCharRegex, quoteChar));
 							saveRow(quoteSearch + 1 + newlineLen);
 							nextDelim = input.indexOf(delim, cursor);	// because we may have skipped the nextDelim in the quoted field
 
