@@ -608,7 +608,7 @@
 		function getFileSize(xhr)
 		{
 			var contentRange = xhr.getResponseHeader('Content-Range');
-			return parseInt(contentRange.substr(contentRange.lastIndexOf('/') + 1));
+			return contentRange == null ? -1 : parseInt(contentRange.substr(contentRange.lastIndexOf('/') + 1));
 		}
 	}
 	NetworkStreamer.prototype = Object.create(ChunkStreamer.prototype);
