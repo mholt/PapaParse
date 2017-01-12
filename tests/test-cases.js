@@ -901,16 +901,16 @@ var PARSE_TESTS = [
 			errors: []
 		}
 	},
-    {
-        description: "Single quote as quote character",
-        notes: "Must parse correctly when single quote is specified as a quote character",
-        input: "a,b,'c,d'",
-        config: { quoteChar: "'"},
-        expected: {
-            data: [['a', 'b', 'c,d']],
-            errors: []
-        }
-    }
+	{
+		description: "Single quote as quote character",
+		notes: "Must parse correctly when single quote is specified as a quote character",
+		input: "a,b,'c,d'",
+		config: { quoteChar: "'"},
+		expected: {
+			data: [['a', 'b', 'c,d']],
+			errors: []
+		}
+	}
 ];
 
 describe('Parse Tests', function() {
@@ -1163,6 +1163,12 @@ var UNPARSE_TESTS = [
 		expected: 'Col1,Col2,Col3\r\na,,c'
 	},
 	{
+		description: "Custom quote character (single quote)",
+		input: [['a,d','b','c']],
+		config: { quoteChar: "'"},
+		expected: "'a,d',b,c"
+  },
+  {
 		description: "Don't print header if header:false option specified",
 		input: [{ "Col1": "a", "Col2": "b", "Col3": "c" }, { "Col1": "d", "Col2": "e", "Col3": "f" }],
 		config: { header: false },

@@ -243,7 +243,12 @@
 		/** newline character(s) */
 		var _newline = '\r\n';
 
+		/** quote character */
+		var _quoteChar = '"';
+
 		unpackConfig();
+
+		var quoteCharRegex = new RegExp(_quoteChar, 'g');
 
 		if (typeof _input === 'string')
 			_input = JSON.parse(_input);
@@ -299,6 +304,9 @@
 
 			if (typeof _config.newline === 'string')
 				_newline = _config.newline;
+
+			if (typeof _config.quoteChar === 'string')
+				_quoteChar = _config.quoteChar;
 
 			if (typeof _config.header === 'boolean')
 				_writeHeader = _config.header;
@@ -368,7 +376,7 @@
 			if (typeof str === 'undefined' || str === null)
 				return '';
 
-			str = str.toString().replace(/"/g, '""');
+			str = str.toString().replace(quoteCharRegex, _quoteChar+_quoteChar);
 
 			var needsQuotes = (typeof _quotes === 'boolean' && _quotes)
 							|| (_quotes instanceof Array && _quotes[col])
@@ -377,7 +385,7 @@
 							|| str.charAt(0) === ' '
 							|| str.charAt(str.length - 1) === ' ';
 
-			return needsQuotes ? '"' + str + '"' : str;
+			return needsQuotes ? _quoteChar + str + _quoteChar : str;
 		}
 
 		function hasAny(str, substrings)
