@@ -1,6 +1,6 @@
 {
 	"name": "papaparse",
-	"version": "4.1.2",
+	"version": "4.1.3",
 	"description": "Fast and powerful CSV parser for the browser that supports web workers and streaming large files. Converts CSV to JSON and JSON to CSV.",
 	"keywords": [
 		"csv",

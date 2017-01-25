@@ -1,6 +1,6 @@
 /*!
 	Papa Parse
-	v4.1.2
+	v4.1.3
 	https://github.com/mholt/PapaParse
 */
 (function(root, factory)
@@ -610,7 +610,7 @@
 			var contentRange = xhr.getResponseHeader('Content-Range');
 			if (contentRange === null) { // no content range, then finish!
         			return -1;
-            		} 
+            		}
 			return parseInt(contentRange.substr(contentRange.lastIndexOf('/') + 1));
 		}
 	}
