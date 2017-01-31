@@ -26,7 +26,19 @@
 {
 	'use strict';
 
-	var global = Function('return this')();
+	var global = (function () {
+		// alternative method, similar to `Function('return this')()`
+		// but without using `eval` (which is disabled when
+		// using Content Security Policy).
+
+		if (typeof self !== 'undefined') { return self; }
+		if (typeof window !== 'undefined') { return window; }
+		if (typeof global !== 'undefined') { return global; }
+
+		throw new Error('Cannot determine global object');
+	})();
+	
+	
 	var IS_WORKER = !global.document && !!global.postMessage,
 		IS_PAPA_WORKER = IS_WORKER && /(\?|&)papaworker(=|&|$)/.test(global.location.search),
 		LOADED_SYNC = false, AUTO_SCRIPT_PATH;
