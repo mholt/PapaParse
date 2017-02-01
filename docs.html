@@ -336,6 +336,7 @@ var csv = Papa.unparse({
 						<pre><code class="language-javascript">{
 	delimiter: "",	// auto-detect
 	newline: "",	// auto-detect
+	quoteChar: '"',
 	header: false,
 	dynamicTyping: false,
 	preview: 0,
@@ -379,6 +380,13 @@ var csv = Papa.unparse({
 								</td>
 								<td>
 									The newline sequence. Leave blank to auto-detect. Must be one of \r, \n, or \r\n.
+								</td>
+							</tr>
+								<td>
+									<code>quoteChar</code>
+								</td>
+								<td>
+									The character used to quote fields. The quoting of all fields is not mandatory. Any field which is not quoted will correctly read.
 								</td>
 							</tr>
 							<tr>
