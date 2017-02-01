@@ -35,10 +35,11 @@
 		if (typeof window !== 'undefined') { return window; }
 		if (typeof global !== 'undefined') { return global; }
 
-		throw new Error('Cannot determine global object');
+        // When running tests none of the above have been defined
+        return {};
 	})();
-	
-	
+
+
 	var IS_WORKER = !global.document && !!global.postMessage,
 		IS_PAPA_WORKER = IS_WORKER && /(\?|&)papaworker(=|&|$)/.test(global.location.search),
 		LOADED_SYNC = false, AUTO_SCRIPT_PATH;
