@@ -910,6 +910,16 @@ var PARSE_TESTS = [
 			data: [['a', 'b', 'c,d']],
 			errors: []
 		}
+	},
+	{
+		description: "Header row with preceding comment",
+		notes: "Must parse correctly headers if they are preceded by comments",
+		input: '#Comment\na,b\nc,d\n',
+        config: { header: true, comments: '#', skipEmptyLines: true, delimiter: ','},
+		expected: {
+            data: [{'a': 'c', 'b': 'd'}],
+			errors: []
+		}
 	}
 ];
 
