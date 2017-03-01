@@ -626,6 +626,15 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Callback delimiter",
+		input: 'a$ b$ c',
+		config: { delimiter: function(input) { return input[1] + ' '; } },
+		expected: {
+			data: [['a', 'b', 'c']],
+			errors: []
+		}
+	},
+	{
 		description: "Dynamic typing converts numeric literals",
 		input: '1,2.2,1e3\r\n-4,-4.5,-4e-5\r\n-,5a,5-2',
 		config: { dynamicTyping: true },
@@ -892,16 +901,26 @@ var PARSE_TESTS = [
 			errors: []
 		}
 	},
-    {
-        description: "Single quote as quote character",
-        notes: "Must parse correctly when single quote is specified as a quote character",
-        input: "a,b,'c,d'",
-        config: { quoteChar: "'"},
-        expected: {
-            data: [['a', 'b', 'c,d']],
-            errors: []
-        }
-    }
+	{
+		description: "Single quote as quote character",
+		notes: "Must parse correctly when single quote is specified as a quote character",
+		input: "a,b,'c,d'",
+		config: { quoteChar: "'"},
+		expected: {
+			data: [['a', 'b', 'c,d']],
+			errors: []
+		}
+	},
+	{
+		description: "Header row with preceding comment",
+		notes: "Must parse correctly headers if they are preceded by comments",
+		input: '#Comment\na,b\nc,d\n',
+        config: { header: true, comments: '#', skipEmptyLines: true, delimiter: ','},
+		expected: {
+            data: [{'a': 'c', 'b': 'd'}],
+			errors: []
+		}
+	}
 ];
 
 describe('Parse Tests', function() {
@@ -1152,6 +1171,18 @@ var UNPARSE_TESTS = [
 		description: "JSON null is treated as empty value",
 		input: [{ "Col1": "a", "Col2": null, "Col3": "c" }],
 		expected: 'Col1,Col2,Col3\r\na,,c'
+	},
+	{
+		description: "Custom quote character (single quote)",
+		input: [['a,d','b','c']],
+		config: { quoteChar: "'"},
+		expected: "'a,d',b,c"
+  },
+  {
+		description: "Don't print header if header:false option specified",
+		input: [{ "Col1": "a", "Col2": "b", "Col3": "c" }, { "Col1": "d", "Col2": "e", "Col3": "f" }],
+		config: { header: false },
+		expected: 'a,b,c\r\nd,e,f'
 	}
 ];
 

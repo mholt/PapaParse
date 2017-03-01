@@ -1,6 +1,6 @@
 /*!
 	Papa Parse
-	v4.1.2
+	v4.1.4
 	https://github.com/mholt/PapaParse
 */
 (function(root, factory)
@@ -26,7 +26,20 @@
 {
 	'use strict';
 
-	var global = Function('return this')();
+	var global = (function () {
+		// alternative method, similar to `Function('return this')()`
+		// but without using `eval` (which is disabled when
+		// using Content Security Policy).
+
+		if (typeof self !== 'undefined') { return self; }
+		if (typeof window !== 'undefined') { return window; }
+		if (typeof global !== 'undefined') { return global; }
+
+        // When running tests none of the above have been defined
+        return {};
+	})();
+
+
 	var IS_WORKER = !global.document && !!global.postMessage,
 		IS_PAPA_WORKER = IS_WORKER && /(\?|&)papaworker(=|&|$)/.test(global.location.search),
 		LOADED_SYNC = false, AUTO_SCRIPT_PATH;
@@ -234,13 +247,21 @@
 		/** whether to surround every datum with quotes */
 		var _quotes = false;
 
+		/** whether to write headers */
+		var _writeHeader = true;
+
 		/** delimiting character */
 		var _delimiter = ',';
 
 		/** newline character(s) */
 		var _newline = '\r\n';
 
+		/** quote character */
+		var _quoteChar = '"';
+
 		unpackConfig();
+
+		var quoteCharRegex = new RegExp(_quoteChar, 'g');
 
 		if (typeof _input === 'string')
 			_input = JSON.parse(_input);
@@ -296,6 +317,12 @@
 
 			if (typeof _config.newline === 'string')
 				_newline = _config.newline;
+
+			if (typeof _config.quoteChar === 'string')
+				_quoteChar = _config.quoteChar;
+
+			if (typeof _config.header === 'boolean')
+				_writeHeader = _config.header;
 		}
 
 
@@ -324,7 +351,7 @@
 			var dataKeyedByField = !(data[0] instanceof Array);
 
 			// If there a header row, write it first
-			if (hasHeader)
+			if (hasHeader && _writeHeader)
 			{
 				for (var i = 0; i < fields.length; i++)
 				{
@@ -362,7 +389,7 @@
 			if (typeof str === 'undefined' || str === null)
 				return '';
 
-			str = str.toString().replace(/"/g, '""');
+			str = str.toString().replace(quoteCharRegex, _quoteChar+_quoteChar);
 
 			var needsQuotes = (typeof _quotes === 'boolean' && _quotes)
 							|| (_quotes instanceof Array && _quotes[col])
@@ -371,7 +398,7 @@
 							|| str.charAt(0) === ' '
 							|| str.charAt(str.length - 1) === ' ';
 
-			return needsQuotes ? '"' + str + '"' : str;
+			return needsQuotes ? _quoteChar + str + _quoteChar : str;
 		}
 
 		function hasAny(str, substrings)
@@ -594,6 +621,9 @@
 		function getFileSize(xhr)
 		{
 			var contentRange = xhr.getResponseHeader('Content-Range');
+			if (contentRange === null) { // no content range, then finish!
+        			return -1;
+            		}
 			return parseInt(contentRange.substr(contentRange.lastIndexOf('/') + 1));
 		}
 	}
@@ -763,6 +793,11 @@
 					_delimiterError = true;	// add error after parsing (otherwise it would be overwritten)
 					_config.delimiter = Papa.DefaultDelimiter;
 				}
+				_results.meta.delimiter = _config.delimiter;
+			}
+			else if(typeof _config.delimiter === 'function')
+			{
+				_config.delimiter = _config.delimiter(input);
 				_results.meta.delimiter = _config.delimiter;
 			}
 
