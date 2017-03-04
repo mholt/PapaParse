@@ -68,6 +68,7 @@
 	Papa.NetworkStreamer = NetworkStreamer;
 	Papa.FileStreamer = FileStreamer;
 	Papa.StringStreamer = StringStreamer;
+	Papa.ReadableStreamStreamer = ReadableStreamStreamer;
 
 	if (global.jQuery)
 	{
@@ -225,6 +226,10 @@
 				streamer = new NetworkStreamer(_config);
 			else
 				streamer = new StringStreamer(_config);
+		}
+		else if (_input.readable === true && typeof _input.read === 'function' && typeof _input.on === 'function')
+		{
+			streamer = new ReadableStreamStreamer(_config);
 		}
 		else if ((global.File && _input instanceof File) || _input instanceof Object)	// ...Safari. (see issue #106)
 			streamer = new FileStreamer(_config);
@@ -724,6 +729,76 @@
 	StringStreamer.prototype = Object.create(StringStreamer.prototype);
 	StringStreamer.prototype.constructor = StringStreamer;
 
+
+	function ReadableStreamStreamer(config)
+	{
+		config = config || {};
+
+		ChunkStreamer.call(this, config);
+
+		var queue = [];
+		var parseOnData = true;
+
+		this.stream = function(stream)
+		{
+			this._input = stream;
+
+			this._input.on('data', this._streamData);
+			this._input.on('end', this._streamEnd);
+			this._input.on('error', this._streamError);
+		}
+
+		this._nextChunk = function()
+		{
+			if (queue.length)
+			{
+				this.parseChunk(queue.shift());
+			}
+			else
+			{
+				parseOnData = true;
+			}
+		}
+
+		this._streamData = bindFunction(function(chunk)
+		{
+			try
+			{
+				queue.push(typeof chunk === 'string' ? chunk : chunk.toString(this._config.encoding));
+
+				if (parseOnData)
+				{
+					parseOnData = false;
+					this.parseChunk(queue.shift());
+				}
+			}
+			catch (error)
+			{
+				this._streamError(error);
+			}
+		}, this);
+
+		this._streamError = bindFunction(function(error)
+		{
+			this._input.removeListener('data', this._streamData);
+			this._input.removeListener('end', this._streamEnd);
+			this._input.removeListener('error', this._streamError);
+
+			this._sendError(error.message);
+		}, this);
+
+		this._streamEnd = bindFunction(function()
+		{
+			this._input.removeListener('data', this._streamData);
+			this._input.removeListener('end', this._streamEnd);
+			this._input.removeListener('error', this._streamError);
+
+			this._finished = true;
+			this._streamData('');
+		}, this);
+	}
+	ReadableStreamStreamer.prototype = Object.create(ChunkStreamer.prototype);
+	ReadableStreamStreamer.prototype.constructor = ReadableStreamStreamer;
 
 
 	// Use one ParserHandle per entire CSV file or string
