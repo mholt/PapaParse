@@ -780,21 +780,22 @@
 
 		this._streamError = bindFunction(function(error)
 		{
-			this._input.removeListener('data', this._streamData);
-			this._input.removeListener('end', this._streamEnd);
-			this._input.removeListener('error', this._streamError);
-
+			this._streamCleanUp();
 			this._sendError(error.message);
 		}, this);
 
 		this._streamEnd = bindFunction(function()
 		{
+			this._streamCleanUp();
+			this._finished = true;
+			this._streamData('');
+		}, this);
+
+		this._streamCleanUp = bindFunction(function()
+		{
 			this._input.removeListener('data', this._streamData);
 			this._input.removeListener('end', this._streamEnd);
 			this._input.removeListener('error', this._streamError);
-
-			this._finished = true;
-			this._streamData('');
 		}, this);
 	}
 	ReadableStreamStreamer.prototype = Object.create(ChunkStreamer.prototype);
