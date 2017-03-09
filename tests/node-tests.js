@@ -50,6 +50,15 @@
 				},
 			});
 		});
+
+		it('asynchronously parsed streaming CSV should be correctly parsed', function(done) {
+			Papa.parse(fs.createReadStream(__dirname + '/long-sample.csv', 'utf8'), {
+				complete: function(parsedCsv) {
+					assertLongSampleParsedCorrectly(parsedCsv);
+					done();
+				},
+			});
+		});
 	});
 
 })();
