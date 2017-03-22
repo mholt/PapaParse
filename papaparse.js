@@ -582,6 +582,19 @@
 
 			xhr.open('GET', this._input, !IS_WORKER);
 
+			if (this._config.downloadRequestHeaders) 
+			{
+				var headers = this._config.downloadRequestHeaders;
+
+				for (var headerName in headers) 
+				{
+					if (Object.prototype.hasOwnProperty.call(headers, headerName))
+					{
+						xhr.setRequestHeader(headerName, headers[headerName]);
+					}
+				}
+			}
+
 			if (this._config.chunkSize)
 			{
 				var end = this._start + this._config.chunkSize - 1;	// minus one because byte range is inclusive
