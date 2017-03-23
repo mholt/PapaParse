@@ -581,7 +581,7 @@
 			}
 
 			xhr.open('GET', this._input, !IS_WORKER);
-
+			// Headers can only be set when once the request state is OPENED
 			if (this._config.downloadRequestHeaders)
 			{
 				var headers = this._config.downloadRequestHeaders;
