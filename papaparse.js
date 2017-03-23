@@ -574,6 +574,16 @@
 				xhr.withCredentials = this._config.withCredentials;
 			}
 
+			if (this._config.downloadRequestHeaders)
+			{
+				var headers = this._config.downloadRequestHeaders;
+
+				for (var headerName in headers)
+				{
+					xhr.setRequestHeader(headerName, headers[headerName]);
+				}
+			}
+
 			if (!IS_WORKER)
 			{
 				xhr.onload = bindFunction(this._chunkLoaded, this);
@@ -581,19 +591,6 @@
 			}
 
 			xhr.open('GET', this._input, !IS_WORKER);
-
-			if (this._config.downloadRequestHeaders) 
-			{
-				var headers = this._config.downloadRequestHeaders;
-
-				for (var headerName in headers) 
-				{
-					if (Object.prototype.hasOwnProperty.call(headers, headerName))
-					{
-						xhr.setRequestHeader(headerName, headers[headerName]);
-					}
-				}
-			}
 
 			if (this._config.chunkSize)
 			{
