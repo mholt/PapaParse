@@ -574,6 +574,14 @@
 				xhr.withCredentials = this._config.withCredentials;
 			}
 
+			if (!IS_WORKER)
+			{
+				xhr.onload = bindFunction(this._chunkLoaded, this);
+				xhr.onerror = bindFunction(this._chunkError, this);
+			}
+
+			xhr.open('GET', this._input, !IS_WORKER);
+
 			if (this._config.downloadRequestHeaders)
 			{
 				var headers = this._config.downloadRequestHeaders;
@@ -583,14 +591,6 @@
 					xhr.setRequestHeader(headerName, headers[headerName]);
 				}
 			}
-
-			if (!IS_WORKER)
-			{
-				xhr.onload = bindFunction(this._chunkLoaded, this);
-				xhr.onerror = bindFunction(this._chunkError, this);
-			}
-
-			xhr.open('GET', this._input, !IS_WORKER);
 
 			if (this._config.chunkSize)
 			{
