@@ -161,7 +161,7 @@
 				queue.splice(0, 1);
 				parseNextFile();
 			}
-		}
+		};
 	}
 
 
@@ -193,7 +193,7 @@
 	function CsvToJson(_input, _config)
 	{
 		_config = _config || {};
-		_config.dynamicTyping = _config.dynamicTyping || false;
+		_config.dynamicTyping = new DynamicTypingConfig(_config.dynamicTyping);
 
 		if (_config.worker && Papa.WORKERS_SUPPORTED)
 		{
@@ -414,6 +414,50 @@
 			return false;
 		}
 	}
+
+	function DynamicTypingConfig(config)
+	{
+		this._columnConfig = {};
+		this._isAllDynamic = false;
+		this._isBlackListOnly = true;
+
+		if (config === true)
+		{
+			this._isAllDynamic = true;
+			return;
+		}
+		else if (!config)
+		{
+			return;
+		}
+
+		if (config.__only instanceof Array)
+		{
+			this._isBlackListOnly = false;
+			config.__only.forEach(function(field)
+			{
+				this._columnConfig[field] = true;
+			}.bind(this));
+		}
+		else
+		{
+			this._isBlackListOnly = !!config.__except;
+			this._columnConfig = config;
+		}
+
+		if (config.__except instanceof Array)
+		{
+			config.__except.forEach(function(field)
+			{
+				this._columnConfig[field] = false;
+			}.bind(this));
+		}
+	}
+	DynamicTypingConfig.prototype.constructor = DynamicTypingConfig;
+	DynamicTypingConfig.prototype.isIncluded = function(field)
+	{
+		return this._isAllDynamic || this._columnConfig[field] === true || (this._isBlackListOnly && this._columnConfig[field] !== false)
+	};
 
 	/** ChunkStreamer is the base prototype for various streamer implementations. */
 	function ChunkStreamer(config)
@@ -969,7 +1013,7 @@
 
 		function parseDynamic(field, value)
 		{
-			if ((_config.dynamicTyping[field] || _config.dynamicTyping) === true)
+			if (_config.dynamicTyping.isIncluded(field))
 			{
 				if (value === 'true' || value === 'TRUE')
 					return true;
