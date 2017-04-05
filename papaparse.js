@@ -161,7 +161,7 @@
 				queue.splice(0, 1);
 				parseNextFile();
 			}
-		};
+		}
 	}
 
 
