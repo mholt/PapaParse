@@ -426,6 +426,10 @@
 			this._isAllDynamic = true;
 			return;
 		}
+		else if (typeof config === 'function')
+		{
+			this._isIncluded = config;
+		}
 		else if (!config)
 		{
 			return;
@@ -456,6 +460,10 @@
 	DynamicTypingConfig.prototype.constructor = DynamicTypingConfig;
 	DynamicTypingConfig.prototype.isIncluded = function(field)
 	{
+		if (typeof this._isIncluded === 'function')
+		{
+			return this._isIncluded(field);
+		}
 		return this._isAllDynamic || this._columnConfig[field] === true || (this._isBlackListOnly && this._columnConfig[field] !== false)
 	};
 

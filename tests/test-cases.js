@@ -721,6 +721,15 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Dynamic typing by indices can be determined by function",
+		input: '001,002,003',
+		config: { dynamicTyping: function(field) { return (field % 2) === 0; } },
+		expected: {
+			data: [[1, "002", 3]],
+			errors: []
+		}
+	},
+	{
 		description: "Dynamic typing can be applied to `__only` headers",
 		input: 'A,B,C\r\n001,002,003',
 		config: { header: true, dynamicTyping: { __only: ['B'] } },
@@ -744,6 +753,15 @@ var PARSE_TESTS = [
 		config: { header: true, dynamicTyping: { __only: ['B', 'C'], __except: ['B'] } },
 		expected: {
 			data: [{"A": "001", "B": "002", "C": 3}],
+			errors: []
+		}
+	},
+	{
+		description: "Dynamic typing by headers can be determined by function",
+		input: 'A_as_int,B,C_as_int\r\n001,002,003',
+		config: { header: true, dynamicTyping: function(field) { return /_as_int$/.test(field); } },
+		expected: {
+			data: [{"A_as_int": 1, "B": "002", "C_as_int": 3}],
 			errors: []
 		}
 	},
