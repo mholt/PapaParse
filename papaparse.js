@@ -424,7 +424,7 @@
 	{
 		if (typeof this._config === 'function')
 		{
-			return this._config(field);
+			return this._config(field) === true;
 		}
 		if (typeof this._config === 'object')
 		{
