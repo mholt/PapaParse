@@ -193,7 +193,7 @@
 	function CsvToJson(_input, _config)
 	{
 		_config = _config || {};
-		_config.dynamicTyping = _config.dynamicTyping || false;
+		_config.dynamicTyping = new DynamicTypingConfig(_config.dynamicTyping);
 
 		if (_config.worker && Papa.WORKERS_SUPPORTED)
 		{
@@ -414,6 +414,24 @@
 			return false;
 		}
 	}
+
+	function DynamicTypingConfig(config)
+	{
+		this._config = config;
+	}
+	DynamicTypingConfig.prototype.constructor = DynamicTypingConfig;
+	DynamicTypingConfig.prototype.isIncluded = function(field)
+	{
+		if (typeof this._config === 'function')
+		{
+			return this._config(field) === true;
+		}
+		if (typeof this._config === 'object')
+		{
+			return this._config[field] === true;
+		}
+		return !!this._config;
+	};
 
 	/** ChunkStreamer is the base prototype for various streamer implementations. */
 	function ChunkStreamer(config)
@@ -969,7 +987,7 @@
 
 		function parseDynamic(field, value)
 		{
-			if ((_config.dynamicTyping[field] || _config.dynamicTyping) === true)
+			if (_config.dynamicTyping.isIncluded(field))
 			{
 				if (value === 'true' || value === 'TRUE')
 					return true;
