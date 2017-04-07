@@ -417,54 +417,20 @@
 
 	function DynamicTypingConfig(config)
 	{
-		this._columnConfig = {};
-		this._isAllDynamic = false;
-		this._isBlackListOnly = true;
-
-		if (config === true)
-		{
-			this._isAllDynamic = true;
-			return;
-		}
-		else if (typeof config === 'function')
-		{
-			this._isIncluded = config;
-		}
-		else if (!config)
-		{
-			return;
-		}
-
-		if (config.__only instanceof Array)
-		{
-			this._isBlackListOnly = false;
-			config.__only.forEach(function(field)
-			{
-				this._columnConfig[field] = true;
-			}.bind(this));
-		}
-		else
-		{
-			this._isBlackListOnly = !!config.__except;
-			this._columnConfig = config;
-		}
-
-		if (config.__except instanceof Array)
-		{
-			config.__except.forEach(function(field)
-			{
-				this._columnConfig[field] = false;
-			}.bind(this));
-		}
+		this._config = config;
 	}
 	DynamicTypingConfig.prototype.constructor = DynamicTypingConfig;
 	DynamicTypingConfig.prototype.isIncluded = function(field)
 	{
-		if (typeof this._isIncluded === 'function')
+		if (typeof this._config === 'function')
 		{
-			return this._isIncluded(field);
+			return this._config(field);
 		}
-		return this._isAllDynamic || this._columnConfig[field] === true || (this._isBlackListOnly && this._columnConfig[field] !== false)
+		if (typeof this._config === 'object')
+		{
+			return this._config[field] === true;
+		}
+		return !!this._config;
 	};
 
 	/** ChunkStreamer is the base prototype for various streamer implementations. */

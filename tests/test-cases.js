@@ -694,65 +694,11 @@ var PARSE_TESTS = [
 		}
 	},
 	{
-		description: "Dynamic typing can be applied to `__only` indices",
-		input: '001,002,003',
-		config: { dynamicTyping: { __only: [1] } },
-		expected: {
-			data: [["001", 2, "003"]],
-			errors: []
-		}
-	},
-	{
-		description: "Dynamic typing can be applied to all indices and not `__except` indices",
-		input: '001,002,003',
-		config: { dynamicTyping: { __except: [1] } },
-		expected: {
-			data: [[1, "002", 3]],
-			errors: []
-		}
-	},
-	{
-		description: "Dynamic typing can be applied to `__only` indices and not `__except` indices",
-		input: '001,002,003',
-		config: { dynamicTyping: { __only: [1, 2], __except: [1] } },
-		expected: {
-			data: [["001", "002", 3]],
-			errors: []
-		}
-	},
-	{
 		description: "Dynamic typing by indices can be determined by function",
 		input: '001,002,003',
 		config: { dynamicTyping: function(field) { return (field % 2) === 0; } },
 		expected: {
 			data: [[1, "002", 3]],
-			errors: []
-		}
-	},
-	{
-		description: "Dynamic typing can be applied to `__only` headers",
-		input: 'A,B,C\r\n001,002,003',
-		config: { header: true, dynamicTyping: { __only: ['B'] } },
-		expected: {
-			data: [{"A": "001", "B": 2, "C": "003"}],
-			errors: []
-		}
-	},
-	{
-		description: "Dynamic typing can be applied to all headers and not `__except` headers",
-		input: 'A,B,C\r\n001,002,003',
-		config: { header: true, dynamicTyping: { __except: ['B'] } },
-		expected: {
-			data: [{"A": 1, "B": "002", "C": 3}],
-			errors: []
-		}
-	},
-	{
-		description: "Dynamic typing can be applied to `__only` headers and not `__except` headers",
-		input: 'A,B,C\r\n001,002,003',
-		config: { header: true, dynamicTyping: { __only: ['B', 'C'], __except: ['B'] } },
-		expected: {
-			data: [{"A": "001", "B": "002", "C": 3}],
 			errors: []
 		}
 	},
