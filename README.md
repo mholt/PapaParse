@@ -37,7 +37,7 @@ Papa Parse can parse a [Readable Stream](https://nodejs.org/api/stream.html#stre
 Additionally, [Rich Harris](https://github.com/Rich-Harris) forked this project to make **[Baby Parse](https://github.com/Rich-Harris/BabyParse)** which runs in Node.js environments.
 
 ```bash
-$ npm install babyparse
+$ npm install babyparse --save
 ```
 
 [Baby Parse on npm registry](https://www.npmjs.org/package/babyparse)
