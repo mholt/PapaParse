@@ -10,7 +10,7 @@ Installation
 
 ```js
 // simply install using npm
-npm install babyparse
+npm install babyparse --save
 ```
 
 Basic Usage
