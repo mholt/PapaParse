@@ -146,7 +146,7 @@
 
 					<h6>What is a stream and when should I stream files?</h6>
 					<p>
-						A stream is a unique data structure which, given infinite time, gives you infinite space. 
+						A stream is a unique data structure which, given infinite time, gives you infinite space.
 						So if you're short on memory (as browsers often are), use a stream.
 					</p>
 
@@ -193,9 +193,14 @@
 					<br><br>
 					<h4 id="workers">Multi-Threading (Workers)</h4>
 
+					<h6>Can I use workers for unparsing?</h6>
+					<p>
+						No, unparsing CSV files with workers is not currently available. Workers can only be used for parsing CSV files.
+					</p>
+
 					<h6>What is a web worker? Why use one?</h6>
 					<p>
-						<a href="https://developer.mozilla.org/en-US/docs/Web/API/Worker">HTML5 Web Workers</a> facilitate basic multi-threading in the browser. This means that a web page can spawn a new thread in the operating system that runs Javascript code. This is highly beneficial for long-running scripts that would otherwise lock up the web page. 
+						<a href="https://developer.mozilla.org/en-US/docs/Web/API/Worker">HTML5 Web Workers</a> facilitate basic multi-threading in the browser. This means that a web page can spawn a new thread in the operating system that runs Javascript code. This is highly beneficial for long-running scripts that would otherwise lock up the web page.
 					</p>
 
 					<h6>How do I use a worker?</h6>
