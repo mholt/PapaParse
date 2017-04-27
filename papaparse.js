@@ -202,7 +202,7 @@
         _config.dynamicTyping = dynamicTyping;
         _config.shouldApplyDynamicTyping = function(field) {
             // Cache function values to avoid calling it for each row
-            if (_config.dynamicTypingFunction && !_config.dynamicTyping[field]) {
+            if (_config.dynamicTypingFunction && _config.dynamicTyping[field] === undefined) {
                 _config.dynamicTyping[field] = _config.dynamicTypingFunction(field);
             }
             return (_config.dynamicTyping[field] || _config.dynamicTyping) === true
