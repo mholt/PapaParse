@@ -194,7 +194,6 @@
 	{
 		_config = _config || {};
         var dynamicTyping = _config.dynamicTyping || false;
-        debugger;
         if (typeof dynamicTyping == 'function') {
             _config.dynamicTypingFunction = dynamicTyping;
             // Will be filled on first row call
