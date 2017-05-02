@@ -194,7 +194,7 @@
 	{
 		_config = _config || {};
         var dynamicTyping = _config.dynamicTyping || false;
-        if (typeof dynamicTyping == 'function') {
+        if (isFunction(dynamicTyping)) {
             _config.dynamicTypingFunction = dynamicTyping;
             // Will be filled on first row call
             dynamicTyping = {};
@@ -240,7 +240,7 @@
 			else
 				streamer = new StringStreamer(_config);
 		}
-		else if (_input.readable === true && typeof _input.read === 'function' && typeof _input.on === 'function')
+		else if (_input.readable === true && isFunction(_input.read) && isFunction(_input.on))
 		{
 			streamer = new ReadableStreamStreamer(_config);
 		}
@@ -894,7 +894,7 @@
 				}
 				_results.meta.delimiter = _config.delimiter;
 			}
-			else if(typeof _config.delimiter === 'function')
+			else if(isFunction(_config.delimiter))
 			{
 				_config.delimiter = _config.delimiter(input);
 				_results.meta.delimiter = _config.delimiter;
@@ -1182,7 +1182,7 @@
 				delimLen = delim.length,
 				newlineLen = newline.length,
 				commentsLen = comments.length;
-			var stepIsFunction = typeof step === 'function';
+			var stepIsFunction = isFunction(step);
 
 			// Establish starting state
 			cursor = 0;
