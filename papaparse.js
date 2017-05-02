@@ -200,13 +200,6 @@
             dynamicTyping = {};
         }
         _config.dynamicTyping = dynamicTyping;
-        _config.shouldApplyDynamicTyping = function(field) {
-            // Cache function values to avoid calling it for each row
-            if (_config.dynamicTypingFunction && _config.dynamicTyping[field] === undefined) {
-                _config.dynamicTyping[field] = _config.dynamicTypingFunction(field);
-            }
-            return (_config.dynamicTyping[field] || _config.dynamicTyping) === true
-        }
 
 		if (_config.worker && Papa.WORKERS_SUPPORTED)
 		{
@@ -980,9 +973,17 @@
 			_results.data.splice(0, 1);
 		}
 
+        function shouldApplyDynamicTyping(field) {
+            // Cache function values to avoid calling it for each row
+            if (_config.dynamicTypingFunction && _config.dynamicTyping[field] === undefined) {
+                _config.dynamicTyping[field] = _config.dynamicTypingFunction(field);
+            }
+            return (_config.dynamicTyping[field] || _config.dynamicTyping) === true
+        }
+
 		function parseDynamic(field, value)
 		{
-			if (_config.shouldApplyDynamicTyping(field))
+			if (shouldApplyDynamicTyping(field))
 			{
 				if (value === 'true' || value === 'TRUE')
 					return true;
