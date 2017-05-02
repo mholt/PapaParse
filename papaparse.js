@@ -969,7 +969,7 @@
 				return;
 			for (var i = 0; needsHeaderRow() && i < _results.data.length; i++)
 				for (var j = 0; j < _results.data[i].length; j++)
-					_fields.push(_results.data[i][j]);
+					_fields.push(_results.data[i][j].trim());
 			_results.data.splice(0, 1);
 		}
 
