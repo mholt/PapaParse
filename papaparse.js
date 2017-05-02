@@ -1,6 +1,6 @@
 /*!
 	Papa Parse
-	v4.3.1
+	v4.3.2
 	https://github.com/mholt/PapaParse
 */
 (function(root, factory)
