@@ -1,6 +1,6 @@
 /*!
 	Papa Parse
-	v4.2.0
+	v4.3.2
 	https://github.com/mholt/PapaParse
 */
 (function(root, factory)
@@ -193,7 +193,13 @@
 	function CsvToJson(_input, _config)
 	{
 		_config = _config || {};
-		_config.dynamicTyping = _config.dynamicTyping || false;
+        var dynamicTyping = _config.dynamicTyping || false;
+        if (isFunction(dynamicTyping)) {
+            _config.dynamicTypingFunction = dynamicTyping;
+            // Will be filled on first row call
+            dynamicTyping = {};
+        }
+        _config.dynamicTyping = dynamicTyping;
 
 		if (_config.worker && Papa.WORKERS_SUPPORTED)
 		{
@@ -227,7 +233,7 @@
 			else
 				streamer = new StringStreamer(_config);
 		}
-		else if (_input.readable === true && typeof _input.read === 'function' && typeof _input.on === 'function')
+		else if (_input.readable === true && isFunction(_input.read) && isFunction(_input.on))
 		{
 			streamer = new ReadableStreamStreamer(_config);
 		}
@@ -581,6 +587,16 @@
 			}
 
 			xhr.open('GET', this._input, !IS_WORKER);
+			// Headers can only be set when once the request state is OPENED
+			if (this._config.downloadRequestHeaders)
+			{
+				var headers = this._config.downloadRequestHeaders;
+
+				for (var headerName in headers)
+				{
+					xhr.setRequestHeader(headerName, headers[headerName]);
+				}
+			}
 
 			if (this._config.chunkSize)
 			{
@@ -871,7 +887,7 @@
 				}
 				_results.meta.delimiter = _config.delimiter;
 			}
-			else if(typeof _config.delimiter === 'function')
+			else if(isFunction(_config.delimiter))
 			{
 				_config.delimiter = _config.delimiter(input);
 				_results.meta.delimiter = _config.delimiter;
@@ -957,9 +973,17 @@
 			_results.data.splice(0, 1);
 		}
 
+        function shouldApplyDynamicTyping(field) {
+            // Cache function values to avoid calling it for each row
+            if (_config.dynamicTypingFunction && _config.dynamicTyping[field] === undefined) {
+                _config.dynamicTyping[field] = _config.dynamicTypingFunction(field);
+            }
+            return (_config.dynamicTyping[field] || _config.dynamicTyping) === true
+        }
+
 		function parseDynamic(field, value)
 		{
-			if ((_config.dynamicTyping[field] || _config.dynamicTyping) === true)
+			if (shouldApplyDynamicTyping(field))
 			{
 				if (value === 'true' || value === 'TRUE')
 					return true;
@@ -1159,7 +1183,7 @@
 				delimLen = delim.length,
 				newlineLen = newline.length,
 				commentsLen = comments.length;
-			var stepIsFunction = typeof step === 'function';
+			var stepIsFunction = isFunction(step);
 
 			// Establish starting state
 			cursor = 0;
