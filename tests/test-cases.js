@@ -47,10 +47,10 @@ var CORE_PARSER_TESTS = [
 	},
 	{
 		description: "Whitespace at edges of unquoted field",
-		input: 'a,  b ,c',
+		input: 'a,	b ,c',
 		notes: "Extra whitespace should graciously be preserved",
 		expected: {
-			data: [['a', '  b ', 'c']],
+			data: [['a', '	b ', 'c']],
 			errors: []
 		}
 	},
@@ -220,12 +220,12 @@ var CORE_PARSER_TESTS = [
 		}
 	},
   {
-    description: "Empty quoted field at EOF is empty",
-    input: 'a,b,""\na,b,""',
-    expected: {
-      data: [['a', 'b', ''], ['a', 'b', '']],
-      errors: []
-    }
+	description: "Empty quoted field at EOF is empty",
+	input: 'a,b,""\na,b,""',
+	expected: {
+	  data: [['a', 'b', ''], ['a', 'b', '']],
+	  errors: []
+	}
   },
 	{
 		description: "Multiple consecutive empty fields",
@@ -933,9 +933,9 @@ var PARSE_TESTS = [
 		description: "Header row with preceding comment",
 		notes: "Must parse correctly headers if they are preceded by comments",
 		input: '#Comment\na,b\nc,d\n',
-        config: { header: true, comments: '#', skipEmptyLines: true, delimiter: ','},
+		config: { header: true, comments: '#', skipEmptyLines: true, delimiter: ','},
 		expected: {
-            data: [{'a': 'c', 'b': 'd'}],
+			data: [{'a': 'c', 'b': 'd'}],
 			errors: []
 		}
 	}

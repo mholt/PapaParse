@@ -35,8 +35,8 @@
 		if (typeof window !== 'undefined') { return window; }
 		if (typeof global !== 'undefined') { return global; }
 
-        // When running tests none of the above have been defined
-        return {};
+		// When running tests none of the above have been defined
+		return {};
 	})();
 
 
@@ -193,13 +193,13 @@
 	function CsvToJson(_input, _config)
 	{
 		_config = _config || {};
-        var dynamicTyping = _config.dynamicTyping || false;
-        if (isFunction(dynamicTyping)) {
-            _config.dynamicTypingFunction = dynamicTyping;
-            // Will be filled on first row call
-            dynamicTyping = {};
-        }
-        _config.dynamicTyping = dynamicTyping;
+		var dynamicTyping = _config.dynamicTyping || false;
+		if (isFunction(dynamicTyping)) {
+			_config.dynamicTypingFunction = dynamicTyping;
+			// Will be filled on first row call
+			dynamicTyping = {};
+		}
+		_config.dynamicTyping = dynamicTyping;
 
 		if (_config.worker && Papa.WORKERS_SUPPORTED)
 		{
@@ -643,8 +643,8 @@
 		{
 			var contentRange = xhr.getResponseHeader('Content-Range');
 			if (contentRange === null) { // no content range, then finish!
-        			return -1;
-            		}
+					return -1;
+					}
 			return parseInt(contentRange.substr(contentRange.lastIndexOf('/') + 1));
 		}
 	}
@@ -829,7 +829,7 @@
 		var _input;				// The input being parsed
 		var _parser;			// The core parser being used
 		var _paused = false;	// Whether we are paused or not
-		var _aborted = false;   // Whether the parser has aborted or not
+		var _aborted = false;	// Whether the parser has aborted or not
 		var _delimiterError;	// Temporary state between delimiter detection and processing results
 		var _fields = [];		// Fields are from the header row of the input, if there is one
 		var _results = {		// The last results returned from the parser
@@ -973,13 +973,13 @@
 			_results.data.splice(0, 1);
 		}
 
-        function shouldApplyDynamicTyping(field) {
-            // Cache function values to avoid calling it for each row
-            if (_config.dynamicTypingFunction && _config.dynamicTyping[field] === undefined) {
-                _config.dynamicTyping[field] = _config.dynamicTypingFunction(field);
-            }
-            return (_config.dynamicTyping[field] || _config.dynamicTyping) === true
-        }
+		function shouldApplyDynamicTyping(field) {
+			// Cache function values to avoid calling it for each row
+			if (_config.dynamicTypingFunction && _config.dynamicTyping[field] === undefined) {
+				_config.dynamicTyping[field] = _config.dynamicTypingFunction(field);
+			}
+			return (_config.dynamicTyping[field] || _config.dynamicTyping) === true
+		}
 
 		function parseDynamic(field, value)
 		{

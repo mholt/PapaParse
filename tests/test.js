@@ -6,14 +6,14 @@ var child_process = require('child_process');
 
 var server = connect().use(serveStatic(path.join(__dirname, '/..'))).listen(8071, function() {
   if (process.argv.indexOf('--phantomjs') !== -1) {
-    child_process.spawn('node_modules/.bin/mocha-phantomjs', ['http://localhost:8071/tests/tests.html'], {
-      stdio: 'inherit'
-    }).on('exit', function () {
-      server.close();
-    });
+	child_process.spawn('node_modules/.bin/mocha-phantomjs', ['http://localhost:8071/tests/tests.html'], {
+	  stdio: 'inherit'
+	}).on('exit', function () {
+	  server.close();
+	});
 
   } else {
-    open('http://localhost:8071/tests/tests.html');
-    console.log('Serving tests...');
+	open('http://localhost:8071/tests/tests.html');
+	console.log('Serving tests...');
   }
 });
