@@ -400,6 +400,14 @@
 		{
 			if (typeof str === 'undefined' || str === null)
 				return '';
+				
+			
+			// if the String passed in that we are checking in the unparse
+			// is a object (which means it is a img file from the json)
+			// so get the url from it, so users can access the file.
+			if(typeof str ==="object") {
+				return str.url;
+			}
 
 			str = str.toString().replace(quoteCharRegex, _quoteChar+_quoteChar);
 
