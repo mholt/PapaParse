@@ -11,7 +11,7 @@
 		// AMD. Register as an anonymous module.
 		define([], factory);
 	}
-	else if (typeof module === 'object' && module.exports)
+	else if (typeof module === 'object' && typeof exports !== 'undefined')
 	{
 		// Node. Does not work with strict CommonJS, but
 		// only CommonJS-like environments that support module.exports,
