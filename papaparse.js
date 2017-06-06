@@ -2,6 +2,7 @@
 	Papa Parse
 	v4.3.2
 	https://github.com/mholt/PapaParse
+	License: MIT
 */
 (function(root, factory)
 {
