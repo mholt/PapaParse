@@ -635,6 +635,24 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Custom array of potential delimiters",
+		input: "a\t,b\t,c\t",
+		config: { delimiter: ['|', ';', ','] },
+		expected: {
+			data: [["a\t", "b\t", "c\t"]],
+			errors: []
+		}
+	},
+	{
+		description: "Custom delimiter array, correctly guesses most prevalent one",
+		input: 'a;%b,%c,%d;',
+		config: { delimiter: ['%', ',', ';'] },
+		expected: {
+			data: [['a;', 'b,', 'c,', 'd;']],
+			errors: []
+		}
+	},
+	{
 		description: "Dynamic typing converts numeric literals",
 		input: '1,2.2,1e3\r\n-4,-4.5,-4e-5\r\n-,5a,5-2',
 		config: { dynamicTyping: true },

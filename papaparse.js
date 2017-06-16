@@ -876,9 +876,9 @@
 				_config.newline = guessLineEndings(input);
 
 			_delimiterError = false;
-			if (!_config.delimiter)
+			if (!_config.delimiter || isArray(_config.delimiter))
 			{
-				var delimGuess = guessDelimiter(input, _config.newline);
+				var delimGuess = guessDelimiter(input, _config.newline, _config.delimiter);
 				if (delimGuess.successful)
 					_config.delimiter = delimGuess.bestDelimiter;
 				else
@@ -1040,10 +1040,14 @@
 			return _results;
 		}
 
-		function guessDelimiter(input, newline)
+		function guessDelimiter(input, newline, customDelimChoices)
 		{
-			var delimChoices = [',', '\t', '|', ';', Papa.RECORD_SEP, Papa.UNIT_SEP];
-			var bestDelim, bestDelta, fieldCountPrevRow;
+			var bestDelim, bestDelta, delimChoices, fieldCountPrevRow;
+
+			if (!customDelimChoices)
+				delimChoices = [',', '\t', '|', ';', Papa.RECORD_SEP, Papa.UNIT_SEP];
+			else
+				delimChoices = customDelimChoices;
 
 			for (var i = 0; i < delimChoices.length; i++)
 			{
@@ -1564,6 +1568,11 @@
 	function isFunction(func)
 	{
 		return typeof func === 'function';
+	}
+
+	function isArray(arr)
+	{
+		return Object.prototype.toString.call(arr) === '[object Array]';
 	}
 
 	return Papa;
