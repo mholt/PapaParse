@@ -920,6 +920,16 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Skip empty lines while detecting delimiter",
+		notes: "Parsing correctly newline-terminated short data with delimiter:auto and skipEmptyLines:true",
+		input: 'a,b\n1,2\n3,4\n',
+		config: { header: true, skipEmptyLines: true },
+		expected: {
+			data: [{'a': '1', 'b': '2'}, {'a': '3', 'b': '4'}],
+			errors: []
+		}
+	},
+	{
 		description: "Single quote as quote character",
 		notes: "Must parse correctly when single quote is specified as a quote character",
 		input: "a,b,'c,d'",
