@@ -196,6 +196,21 @@ var CORE_PARSER_TESTS = [
 		}
 	},
 	{
+		description: "Quoted field has invalid trailing quote after delimiter with a valid closer",
+		input: '"a,"b,c"\nd,e,f',
+		notes: "The input is malformed, opening quotes identified, trailing quote is malformed. Trailing quote should be escaped or followed by valid new line or delimiter to be valid",
+		expected: {
+			data: [['a,"b,c'], ['d', 'e', 'f']],
+			errors: [{
+				"type": "Quotes",
+				"code": "InvalidQuotes",
+				"message": "Trailing quote on quoted field is malformed",
+				"row": 0,
+				"index":1
+			}]
+		}
+	},
+	{
 		description: "Quoted field has invalid trailing quote after delimiter",
 		input: 'a,"b,"c\nd,e,f',
 		notes: "The input is malformed, opening quotes identified, trailing quote is malformed. Trailing quote should be escaped or followed by valid new line or delimiter to be valid",
