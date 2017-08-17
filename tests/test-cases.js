@@ -196,6 +196,123 @@ var CORE_PARSER_TESTS = [
 		}
 	},
 	{
+		description: "Quoted field has invalid trailing quote after delimiter with a valid closer",
+		input: '"a,"b,c"\nd,e,f',
+		notes: "The input is malformed, opening quotes identified, trailing quote is malformed. Trailing quote should be escaped or followed by valid new line or delimiter to be valid",
+		expected: {
+			data: [['a,"b,c'], ['d', 'e', 'f']],
+			errors: [{
+				"type": "Quotes",
+				"code": "InvalidQuotes",
+				"message": "Trailing quote on quoted field is malformed",
+				"row": 0,
+				"index":1
+			}]
+		}
+	},
+	{
+		description: "Quoted field has invalid trailing quote after delimiter",
+		input: 'a,"b,"c\nd,e,f',
+		notes: "The input is malformed, opening quotes identified, trailing quote is malformed. Trailing quote should be escaped or followed by valid new line or delimiter to be valid",
+		expected: {
+			data: [['a', 'b,"c\nd,e,f']],
+			errors: [{
+				"type": "Quotes",
+				"code": "InvalidQuotes",
+				"message": "Trailing quote on quoted field is malformed",
+				"row": 0,
+				"index": 3
+			},
+			{
+				"type": "Quotes",
+				"code": "MissingQuotes",
+				"message": "Quoted field unterminated",
+				"row": 0,
+				"index": 3
+			}]
+		}
+	},
+	{
+		description: "Quoted field has invalid trailing quote before delimiter",
+		input: 'a,"b"c,d\ne,f,g',
+		notes: "The input is malformed, opening quotes identified, trailing quote is malformed. Trailing quote should be escaped or followed by valid new line or delimiter to be valid",
+		expected: {
+			data: [['a', 'b"c,d\ne,f,g']],
+			errors: [{
+				"type": "Quotes",
+				"code": "InvalidQuotes",
+				"message": "Trailing quote on quoted field is malformed",
+				"row": 0,
+				"index": 3
+			},
+			{
+				"type": "Quotes",
+				"code": "MissingQuotes",
+				"message": "Quoted field unterminated",
+				"row": 0,
+				"index": 3
+			}]
+		}
+	},
+	{
+		description: "Quoted field has invalid trailing quote after new line",
+		input: 'a,"b,c\nd"e,f,g',
+		notes: "The input is malformed, opening quotes identified, trailing quote is malformed. Trailing quote should be escaped or followed by valid new line or delimiter to be valid",
+		expected: {
+			data: [['a', 'b,c\nd"e,f,g']],
+			errors: [{
+				"type": "Quotes",
+				"code": "InvalidQuotes",
+				"message": "Trailing quote on quoted field is malformed",
+				"row": 0,
+				"index": 3
+			},
+			{
+				"type": "Quotes",
+				"code": "MissingQuotes",
+				"message": "Quoted field unterminated",
+				"row": 0,
+				"index": 3
+			}]
+		}
+	},
+	{
+		description: "Quoted field has valid trailing quote via delimiter",
+		input: 'a,"b",c\nd,e,f',
+		notes: "Trailing quote is valid due to trailing delimiter",
+		expected: {
+			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
+			errors: []
+		}
+	},
+	{
+		description: "Quoted field has valid trailing quote via \\n",
+		input: 'a,b,"c"\nd,e,f',
+		notes: "Trailing quote is valid due to trailing new line delimiter",
+		expected: {
+			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
+			errors: []
+		}
+	},
+	{
+		description: "Quoted field has valid trailing quote via EOF",
+		input: 'a,b,c\nd,e,"f"',
+		notes: "Trailing quote is valid due to EOF",
+		expected: {
+			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
+			errors: []
+		}
+	},
+	{
+		description: "Quoted field contains delimiters and \\n with valid trailing quote",
+		input: 'a,"b,c\nd,e,f"',
+		notes: "Trailing quote is valid due to trailing delimiter",
+		expected: {
+			data: [['a', 'b,c\nd,e,f']],
+			errors: []
+		}
+	},
+	{
 		description: "Line starts with quoted field",
 		input: 'a,b,c\n"d",e,f',
 		expected: {
