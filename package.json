@@ -45,7 +45,7 @@
 		"connect": "^3.3.3",
 		"grunt": "^0.4.5",
 		"grunt-contrib-uglify": "^0.6.0",
-		"mocha": "^2.2.5",
+		"mocha": "^3.5.0",
 		"mocha-phantomjs": "^3.5.4",
 		"open": "0.0.5",
 		"phantomjs": "1.9.1 - 1.9.7-15",
