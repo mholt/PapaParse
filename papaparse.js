@@ -824,6 +824,7 @@
 	{
 		// One goal is to minimize the use of regular expressions...
 		var FLOAT = /^\s*-?(\d*\.?\d+|\d+\.?\d*)(e[-+]?\d+)?\s*$/i;
+		var LEADINGZERO = /^0[0-9].*$/;
 
 		var self = this;
 		var _stepCounter = 0;	// Number of times step was called (number of rows parsed)
@@ -1123,7 +1124,8 @@
 		function tryParseFloat(val)
 		{
 			var isNumber = FLOAT.test(val);
-			return isNumber ? parseFloat(val) : val;
+			var leadingZeroAsString = _config.leadingZeroAsString&&LEADINGZERO.test(val);
+			return isNumber&&!leadingZeroAsString ? parseFloat(val) : val;
 		}
 
 		function addError(type, code, msg, row)
