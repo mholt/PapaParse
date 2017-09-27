@@ -712,7 +712,7 @@
 
 		this._chunkError = function()
 		{
-			this._sendError(reader.error);
+			this._sendError(reader.error.message);
 		}
 
 	}
