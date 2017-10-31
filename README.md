@@ -40,9 +40,49 @@ Get Started
 
 Use [papaparse.min.js](https://github.com/mholt/PapaParse/blob/master/papaparse.min.js) for production.
 
-For usage instructions, see the [homepage](http://papaparse.com) and, for more detail, the [documentation](http://papaparse.com/docs).
+For detailed usage instructions, see the [homepage](http://papaparse.com) and, for more detail, the [documentation](http://papaparse.com/docs).
 
+### Installing for EmberCLI
 
+Installing with npm: `npm install papaparse --save`
+
+Installing with yarn: `yarn add papaparse`
+
+#### Use in a Single File
+
+Import Papa Parse where you need it at the top of your files:
+
+```
+import Papa from 'npm:papaparse';
+```
+
+Follow docs as normal. 
+
+#### Use Globally
+
+To import into your project call in `ember-cli-build.js`:
+```
+module.exports = function(defaults) {
+  ...
+  
+  // PapaParse
+  app.import('node_modules/papaparse/papaparse.min.js');
+  
+  return app.toTree();
+};
+```
+
+Update your `.eslintrc.js` to avoid linting errors:
+
+```
+module.exports = {
+  globals: {
+    "Papa": true
+  }
+};
+```
+
+Follow docs as normal to use anywhere in your ember app. 
 
 Tests
 -----
