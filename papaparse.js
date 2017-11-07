@@ -271,7 +271,7 @@
 		/** quote character */
 
 		/** Use default value only if its not set */
-		if ( config.quoteChar == undefined ) {
+		if ( config.quoteChar === undefined ) {
 			var quoteChar = '"';
 		} else {
 			var quoteChar = config.quoteChar;
