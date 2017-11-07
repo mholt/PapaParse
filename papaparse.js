@@ -269,12 +269,7 @@
 		var _newline = '\r\n';
 
 		/** quote character */
-		/** Use default value only if its not set */
-		if ( config.quoteChar === undefined ) {
-			var _quoteChar = '"';
-		} else {
-			var _quoteChar = config.quoteChar;
-		}
+		var _quoteChar = '"';
 
 		unpackConfig();
 
@@ -1157,7 +1152,12 @@
 		var step = config.step;
 		var preview = config.preview;
 		var fastMode = config.fastMode;
-		var quoteChar = config.quoteChar || '"';
+		/** Allows for no quoteChar by setting quoteChar to undefined in config */
+		if (config.quoteChar === undefined){
+			var quoteChar = '"';
+		} else {
+			var quoteChar = config.quoteChar;
+		}
 
 		// Delimiter must be valid
 		if (typeof delim !== 'string'
