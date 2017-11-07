@@ -57,5 +57,4 @@
 		"test-node": "mocha tests/node-tests.js tests/test-cases.js",
 		"test": "npm run test-node && npm run test-phantomjs"
 	}
-	}
 }
