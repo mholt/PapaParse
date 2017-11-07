@@ -269,7 +269,6 @@
 		var _newline = '\r\n';
 
 		/** quote character */
-
 		/** Use default value only if its not set */
 		if ( config.quoteChar === undefined ) {
 			var _quoteChar = '"';
