@@ -272,9 +272,9 @@
 
 		/** Use default value only if its not set */
 		if ( config.quoteChar === undefined ) {
-			var quoteChar = '"';
+			var _quoteChar = '"';
 		} else {
-			var quoteChar = config.quoteChar;
+			var _quoteChar = config.quoteChar;
 		}
 
 		unpackConfig();
