@@ -269,7 +269,25 @@
 		var _newline = '\r\n';
 
 		/** quote character */
-		var _quoteChar = '"';
+// lunatixcoer: Changed logic so you can ignore quote characters altogether.
+//              Takes into consideration data sets where you may have special characters inside of data adjacent to delimiters.
+//  			A positive assertion is necessary and the preoper way to trap is checking for undefined.
+// 				If quoteChar is missing from the config or its set to undefined ( quoteChar: undefined, ) in your papaparse config,
+//				we can check for undefined and default it to """, 
+//              otherwise we should take what literally it is set to or if set to "" ignore quotes altogether.
+//
+// Lunatixcoder: removed...
+//
+//      var quoteChar = config.quoteChar || '"';
+//
+//      and replaced with 	
+
+		if ( config.quoteChar == undefined ) {
+			var quoteChar = '"'; // sets default value to " so it should not effect existing code used by other programs
+		} else {
+			var quoteChar = config.quoteChar; // that way if you set quoteChar in your config to a positive assertion of quoteChar: "", it will ignore quotes between delimiters
+		}
+
 
 		unpackConfig();
 
