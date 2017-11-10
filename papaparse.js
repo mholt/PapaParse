@@ -42,7 +42,7 @@
 
 
 	var IS_WORKER = !global.document && !!global.postMessage,
-		IS_PAPA_WORKER = IS_WORKER && /(\?|&)papaworker(=|&|$)/.test(global.location.search),
+		IS_PAPA_WORKER = IS_WORKER && (/(\?|&)papaworker(=|&|$)/.test(global.location.search) || isBlobURL(global.location)),
 		LOADED_SYNC = false, AUTO_SCRIPT_PATH;
 	var workers = {}, workerIdCounter = 0;
 
@@ -57,6 +57,7 @@
 	Papa.BAD_DELIMITERS = ['\r', '\n', '"', Papa.BYTE_ORDER_MARK];
 	Papa.WORKERS_SUPPORTED = !IS_WORKER && !!global.Worker;
 	Papa.SCRIPT_PATH = null;	// Must be set by your code if you use workers and this lib is loaded asynchronously
+	Papa.SCRIPT_PATH_AS_BLOB_URL = false;	// Should be used when you want to use blob urls as 'SCRIPT_PATH' location.
 
 	// Configurable chunk sizes for local and remote files, respectively
 	Papa.LocalChunkSize = 1024 * 1024 * 10;	// 10 MB
@@ -1468,13 +1469,44 @@
 				'You need to set Papa.SCRIPT_PATH manually.'
 			);
 		var workerUrl = Papa.SCRIPT_PATH || AUTO_SCRIPT_PATH;
-		// Append 'papaworker' to the search string to tell papaparse that this is our worker.
-		workerUrl += (workerUrl.indexOf('?') !== -1 ? '&' : '?') + 'papaworker';
+
+		if(Papa.SCRIPT_PATH_AS_BLOB_URL){
+			workerUrl = createDummyBlobUrlFromUrl(workerUrl);
+		}
+		else{			
+			// Append 'papaworker' to the search string to tell papaparse that this is our worker.
+			workerUrl += (workerUrl.indexOf('?') !== -1 ? '&' : '?') + 'papaworker';
+		}
+
 		var w = new global.Worker(workerUrl);
 		w.onmessage = mainThreadReceivedMessage;
 		w.id = workerIdCounter++;
 		workers[w.id] = w;
 		return w;
+	}
+
+	function createDummyBlobUrlFromUrl(script_path) {
+		var xhr = new XMLHttpRequest();
+		xhr.open('GET', script_path, false);
+		xhr.responseType = 'application/javascript';
+		xhr.send();
+
+		if (xhr.status === 200) {
+			return URL.createObjectURL(
+				new Blob(
+					[ xhr.responseText ],
+					{ type: 'application/javascript' }
+				)
+			);
+		}
+		else{
+			throw new Error("Could not get script from path");
+		}
+	}
+
+	function isBlobURL(value) {
+		var REGEXP_BLOB_URL = /^blob:.+\/[\w-]{36,}(#.+)?$/;
+		return REGEXP_BLOB_URL.test(value);
 	}
 
 	/** Callback when main thread receives a message */
