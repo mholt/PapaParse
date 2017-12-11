@@ -53,10 +53,12 @@ For usage instructions, see the [homepage](http://papaparse.com) and, for more d
 Tests
 -----
 
-Papa Parse is under test. Download this repository, run `npm install`, then `npm test` to run the tests in your browser.
+Papa Parse is under test. Download this repository, run `npm install`, then `npm test` to run the tests.
 
 
 Contributing
 ------------
 
 To discuss a new feature or ask a question, open an issue. To fix a bug, submit a pull request to be credited with the [contributors](https://github.com/mholt/PapaParse/graphs/contributors)! Remember, a pull request, *with test*, is best. You may also discuss on Twitter with [#PapaParse](https://twitter.com/search?q=%23PapaParse&src=typd&f=realtime) or directly to me, [@mholt6](https://twitter.com/mholt6).
+
+If you contribute a patch, ensure the tests suite is running correctly. We run continuous integration on each pull request and will not accept a patch that breaks the tests.
