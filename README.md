@@ -18,6 +18,16 @@ Papa Parse is the [fastest](http://jsperf.com/javascript-csv-parsers/4) in-brows
 
 Papa Parse has **no dependencies** - not even jQuery.
 
+Install
+-------
+
+papaparse is available on [npm](https://www.npmjs.com/package/papaparse). It
+can be installed with the following command:
+
+    npm install papaparse
+
+If you don't want to use npm, [papaparse.min.js](https://github.com/mholt/PapaParse/blob/master/papaparse.min.js) can be downloaded to your project source.
+
 
 Homepage & Demo
 ----------------
@@ -38,17 +48,12 @@ Papa Parse can parse a [Readable Stream](https://nodejs.org/api/stream.html#stre
 Get Started
 -----------
 
-Use [papaparse.min.js](https://github.com/mholt/PapaParse/blob/master/papaparse.min.js) for production.
-
 For usage instructions, see the [homepage](http://papaparse.com) and, for more detail, the [documentation](http://papaparse.com/docs).
-
-
 
 Tests
 -----
 
 Papa Parse is under test. Download this repository, run `npm install`, then `npm test` to run the tests in your browser.
-
 
 
 Contributing
