@@ -949,7 +949,7 @@
 			if (_config.skipEmptyLines)
 			{
 				for (var i = 0; i < _results.data.length; i++)
-					if (_results.data[i].length === 1 && _results.data[i][0] === '')
+					if (Object.values(_results.data[i]).join('').length === 0)
 						_results.data.splice(i--, 1);
 			}
 
