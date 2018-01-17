@@ -1047,6 +1047,26 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Skip lines with only empty values",
+		notes: "",
+		input: 'a,b\nc,d\n,\n,\n',
+		config: { header: true, skipEmptyLines: true},
+		expected: {
+			data: [{'a': 'c', 'b': 'd'}],
+			errors: []
+		}
+	},
+	{
+		description: "Skip lines with only empty values",
+		notes: "",
+		input: 'a,b\nc,d\n,\n,\n',
+		config: { skipEmptyLines: true},
+		expected: {
+			data: [['a', 'b'], ['c', 'd']],
+			errors: []
+		}
+	},
+	{
 		description: "Single quote as quote character",
 		notes: "Must parse correctly when single quote is specified as a quote character",
 		input: "a,b,'c,d'",
