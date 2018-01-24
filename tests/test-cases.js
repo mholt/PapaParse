@@ -1003,6 +1003,15 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Skip all empty lines",
+		input: 'a,b,c\n\n\n\nd,e,f',
+		config: { skipEmptyLines: true },
+		expected: {
+			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
+			errors: []
+		}
+	},
+	{
 		description: "Skip empty lines, with newline at end of input",
 		input: 'a,b,c\r\n\r\nd,e,f\r\n',
 		config: { skipEmptyLines: true },
