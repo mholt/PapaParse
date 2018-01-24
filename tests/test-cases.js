@@ -1056,6 +1056,36 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Null lines remain unaffected by 'skip empty lines' config",
+		notes: "",
+		input: 'a,b\nc,d\n\n,\n',
+		config: { skipEmptyLines: true },
+		expected: {
+			data: [['a', 'b'], ['c', 'd'], ["", ""]],
+			errors: []
+		}
+	},
+	{
+		description: "Skip null lines with only empty values",
+		notes: "",
+		input: 'a,b\nc,d\n,\n,\n',
+		config: { skipNullLines: true },
+		expected: {
+			data: [['a', 'b'], ['c', 'd']],
+			errors: []
+		}
+	},
+	{
+		description: "Skip null lines and empty lines work well with each other",
+		notes: "",
+		input: 'a,b\n,\n\nc,d',
+		config: { skipNullLines: true, skipEmptyLines: true },
+		expected: {
+			data: [['a', 'b'], ['c', 'd']],
+			errors: []
+		}
+	},
+	{
 		description: "Single quote as quote character",
 		notes: "Must parse correctly when single quote is specified as a quote character",
 		input: "a,b,'c,d'",

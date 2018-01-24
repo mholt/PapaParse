@@ -946,10 +946,13 @@
 				_delimiterError = false;
 			}
 
-			if (_config.skipEmptyLines)
+			if (_config.skipEmptyLines || _config.skipNullLines)
 			{
 				for (var i = 0; i < _results.data.length; i++)
-					if (isEmptyLine(_results.data[i]))
+					if (
+						(_config.skipEmptyLines && isEmptyLine(_results.data[i])) ||
+						(_config.skipNullLines && isNullLine(_results.data[i]))
+					)
 						_results.data.splice(i--, 1);
 			}
 
@@ -1059,11 +1062,14 @@
 
 				for (var j = 0; j < preview.data.length; j++)
 				{
-					if (_config.skipEmptyLines && isEmptyLine(preview.data[j]))
-					{
+					if (
+						(_config.skipEmptyLines && isEmptyLine(preview.data[j])) ||
+						(_config.skipNullLines && isNullLine(preview.data[j]))
+					) {
 						emptyLinesCount++;
 						continue;
 					}
+
 					var fieldCount = preview.data[j].length;
 					avgFieldCount += fieldCount;
 
@@ -1124,6 +1130,17 @@
 		function isEmptyLine(line)
 		{
 			return line.length === 1 && line[0].length === 0;
+		}
+
+		function isNullLine(line)
+		{
+			for (var prop in line)
+			{
+				if (line.hasOwnProperty(prop) && line[prop].length > 0)
+					return false;
+			}
+
+			return true;
 		}
 
 		function tryParseFloat(val)
