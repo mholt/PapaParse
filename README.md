@@ -55,6 +55,8 @@ Tests
 
 Papa Parse is under test. Download this repository, run `npm install`, then `npm test` to run the tests.
 
+The continuous integration server runs these tests using Node 0.12. You should ensure your tests pass locally using that version of Node.
+
 
 Contributing
 ------------
