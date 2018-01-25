@@ -1076,6 +1076,16 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "skipEmptyFieldsLines leaves empty lines alone",
+		notes: "",
+		input: 'a,b\n\nc,d',
+		config: { skipEmptyFieldsLines: true },
+		expected: {
+			data: [['a', 'b'], [], ['c', 'd']],
+			errors: []
+		}
+	},
+	{
 		description: "Skipping empty fields lines and empty lines work well with each other",
 		notes: "",
 		input: 'a,b\n,\n\nc,d',
