@@ -878,7 +878,7 @@
 			_delimiterError = false;
 			if (!_config.delimiter)
 			{
-				var delimGuess = guessDelimiter(input, _config.newline, _config.skipEmptyLines);
+				var delimGuess = guessDelimiter(input, _config.newline, _config.skipEmptyLines, _config.skipEmptyFieldsLines);
 				if (delimGuess.successful)
 					_config.delimiter = delimGuess.bestDelimiter;
 				else
@@ -946,13 +946,10 @@
 				_delimiterError = false;
 			}
 
-			if (_config.skipEmptyLines || _config.skipNullLines)
+			if (_config.skipEmptyLines || _config.skipEmptyFieldsLines)
 			{
 				for (var i = 0; i < _results.data.length; i++)
-					if (
-						(_config.skipEmptyLines && isEmptyLine(_results.data[i])) ||
-						(_config.skipNullLines && isNullLine(_results.data[i]))
-					)
+					if (isEmptyLine(_results.data[i], _config.skipEmptyLines, _config.skipEmptyFieldsLines))
 						_results.data.splice(i--, 1);
 			}
 
@@ -1043,7 +1040,7 @@
 			return _results;
 		}
 
-		function guessDelimiter(input, newline, skipEmptyLines)
+		function guessDelimiter(input, newline, skipEmptyLines, skipEmptyFieldsLines)
 		{
 			var delimChoices = [',', '\t', '|', ';', Papa.RECORD_SEP, Papa.UNIT_SEP];
 			var bestDelim, bestDelta, fieldCountPrevRow;
@@ -1062,10 +1059,8 @@
 
 				for (var j = 0; j < preview.data.length; j++)
 				{
-					if (
-						(_config.skipEmptyLines && isEmptyLine(preview.data[j])) ||
-						(_config.skipNullLines && isNullLine(preview.data[j]))
-					) {
+					if (isEmptyLine(preview.data[j], skipEmptyLines, skipEmptyFieldsLines))
+					{
 						emptyLinesCount++;
 						continue;
 					}
@@ -1127,20 +1122,23 @@
 			return numWithN >= r.length / 2 ? '\r\n' : '\r';
 		}
 
-		function isEmptyLine(line)
+		function isEmptyLine(line, skipEmptyLines, skipEmptyFieldsLines)
 		{
-			return line.length === 1 && line[0].length === 0;
-		}
+			if (skipEmptyLines && line.length === 1 && line[0].length === 0)
+				return true
 
-		function isNullLine(line)
-		{
-			for (var prop in line)
+			if (skipEmptyFieldsLines)
 			{
-				if (line.hasOwnProperty(prop) && line[prop].length > 0)
-					return false;
+				for (var prop in line)
+				{
+					if (line.hasOwnProperty(prop) && line[prop].length > 0)
+						return false;
+				}
+
+				return true;
 			}
 
-			return true;
+			return false;
 		}
 
 		function tryParseFloat(val)

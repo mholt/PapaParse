@@ -1056,7 +1056,7 @@ var PARSE_TESTS = [
 		}
 	},
 	{
-		description: "Null lines remain unaffected by 'skip empty lines' config",
+		description: "Empty fields lines remain unaffected by 'skip empty lines' config",
 		notes: "",
 		input: 'a,b\nc,d\n\n,\n',
 		config: { skipEmptyLines: true },
@@ -1066,20 +1066,20 @@ var PARSE_TESTS = [
 		}
 	},
 	{
-		description: "Skip null lines with only empty values",
+		description: "Skip lines with only empty fields",
 		notes: "",
 		input: 'a,b\nc,d\n,\n,\n',
-		config: { skipNullLines: true },
+		config: { skipEmptyFieldsLines: true },
 		expected: {
 			data: [['a', 'b'], ['c', 'd']],
 			errors: []
 		}
 	},
 	{
-		description: "Skip null lines and empty lines work well with each other",
+		description: "Skipping empty fields lines and empty lines work well with each other",
 		notes: "",
 		input: 'a,b\n,\n\nc,d',
-		config: { skipNullLines: true, skipEmptyLines: true },
+		config: { skipEmptyFieldsLines: true, skipEmptyLines: true },
 		expected: {
 			data: [['a', 'b'], ['c', 'd']],
 			errors: []
