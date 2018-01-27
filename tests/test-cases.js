@@ -584,55 +584,55 @@ describe('Core Parser Tests', function() {
 
 // Tests for Papa.parse() function -- high-level wrapped parser (CSV to JSON)
 var PARSE_TESTS = [
-	{
+  {
 		description: "Two rows, just \\r",
 		input: 'A,b,c\rd,E,f',
 		expected: {
 			data: [['A', 'b', 'c'], ['d', 'E', 'f']],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "Two rows, \\r\\n",
 		input: 'A,b,c\r\nd,E,f',
 		expected: {
 			data: [['A', 'b', 'c'], ['d', 'E', 'f']],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "Quoted field with \\r\\n",
 		input: 'A,"B\r\nB",C',
 		expected: {
 			data: [['A', 'B\r\nB', 'C']],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "Quoted field with \\r",
 		input: 'A,"B\rB",C',
 		expected: {
 			data: [['A', 'B\rB', 'C']],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "Quoted field with \\n",
 		input: 'A,"B\nB",C',
 		expected: {
 			data: [['A', 'B\nB', 'C']],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "Mixed slash n and slash r should choose first as precident",
 		input: 'a,b,c\nd,e,f\rg,h,i\n',
 		expected: {
 			data: [['a', 'b', 'c'], ['d', 'e', 'f\rg', 'h', 'i'], ['']],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "Header row with one row of data",
 		input: 'A,B,C\r\na,b,c',
 		config: { header: true },
@@ -640,8 +640,8 @@ var PARSE_TESTS = [
 			data: [{"A": "a", "B": "b", "C": "c"}],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "Header row only",
 		input: 'A,B,C',
 		config: { header: true },
@@ -649,8 +649,8 @@ var PARSE_TESTS = [
 			data: [],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "Row with too few fields",
 		input: 'A,B,C\r\na,b',
 		config: { header: true },
@@ -663,8 +663,8 @@ var PARSE_TESTS = [
 				"row": 0
 			}]
 		}
-	},
-	{
+  },
+  {
 		description: "Row with too many fields",
 		input: 'A,B,C\r\na,b,c,d,e\r\nf,g,h',
 		config: { header: true },
@@ -677,8 +677,8 @@ var PARSE_TESTS = [
 				"row": 0
 			}]
 		}
-	},
-	{
+  },
+  {
 		description: "Row with enough fields but blank field at end",
 		input: 'A,B,C\r\na,b,',
 		config: { header: true },
@@ -686,8 +686,8 @@ var PARSE_TESTS = [
 			data: [{"A": "a", "B": "b", "C": ""}],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "Tab delimiter",
 		input: 'a\tb\tc\r\nd\te\tf',
 		config: { delimiter: "\t" },
@@ -695,8 +695,8 @@ var PARSE_TESTS = [
 			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "Pipe delimiter",
 		input: 'a|b|c\r\nd|e|f',
 		config: { delimiter: "|" },
@@ -704,8 +704,8 @@ var PARSE_TESTS = [
 			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "ASCII 30 delimiter",
 		input: 'a'+RECORD_SEP+'b'+RECORD_SEP+'c\r\nd'+RECORD_SEP+'e'+RECORD_SEP+'f',
 		config: { delimiter: RECORD_SEP },
@@ -713,8 +713,8 @@ var PARSE_TESTS = [
 			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "ASCII 31 delimiter",
 		input: 'a'+UNIT_SEP+'b'+UNIT_SEP+'c\r\nd'+UNIT_SEP+'e'+UNIT_SEP+'f',
 		config: { delimiter: UNIT_SEP },
@@ -722,8 +722,8 @@ var PARSE_TESTS = [
 			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "Bad delimiter (\\n)",
 		input: 'a,b,c',
 		config: { delimiter: "\n" },
@@ -732,8 +732,8 @@ var PARSE_TESTS = [
 			data: [['a', 'b', 'c']],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "Multi-character delimiter",
 		input: 'a, b, c',
 		config: { delimiter: ", " },
@@ -741,8 +741,8 @@ var PARSE_TESTS = [
 			data: [['a', 'b', 'c']],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "Callback delimiter",
 		input: 'a$ b$ c',
 		config: { delimiter: function(input) { return input[1] + ' '; } },
@@ -750,8 +750,8 @@ var PARSE_TESTS = [
 			data: [['a', 'b', 'c']],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "Dynamic typing converts numeric literals",
 		input: '1,2.2,1e3\r\n-4,-4.5,-4e-5\r\n-,5a,5-2',
 		config: { dynamicTyping: true },
@@ -759,8 +759,8 @@ var PARSE_TESTS = [
 			data: [[1, 2.2, 1000], [-4, -4.5, -0.00004], ["-", "5a", "5-2"]],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "Dynamic typing converts boolean literals",
 		input: 'true,false,T,F,TRUE,FALSE,True,False',
 		config: { dynamicTyping: true },
@@ -768,8 +768,8 @@ var PARSE_TESTS = [
 			data: [[true, false, "T", "F", true, false, "True", "False"]],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "Dynamic typing doesn't convert other types",
 		input: 'A,B,C\r\nundefined,null,[\r\nvar,float,if',
 		config: { dynamicTyping: true },
@@ -777,8 +777,8 @@ var PARSE_TESTS = [
 			data: [["A", "B", "C"], ["undefined", "null", "["], ["var", "float", "if"]],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "Dynamic typing applies to specific columns",
 		input: 'A,B,C\r\n1,2.2,1e3\r\n-4,-4.5,-4e-5',
 		config: { header: true, dynamicTyping: { A: true, C: true } },
@@ -786,8 +786,8 @@ var PARSE_TESTS = [
 			data: [{"A": 1, "B": "2.2", "C": 1000}, {"A": -4, "B": "-4.5", "C": -0.00004}],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "Dynamic typing applies to specific columns by index",
 		input: '1,2.2,1e3\r\n-4,-4.5,-4e-5\r\n-,5a,5-2',
 		config: { dynamicTyping: { 1: true } },
@@ -795,8 +795,8 @@ var PARSE_TESTS = [
 			data: [["1", 2.2, "1e3"], ["-4", -4.5, "-4e-5"], ["-", "5a", "5-2"]],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "Dynamic typing can be applied to `__parsed_extra`",
 		input: 'A,B,C\r\n1,2.2,1e3,5.5\r\n-4,-4.5,-4e-5',
 		config: { header: true, dynamicTyping: { A: true, C: true, __parsed_extra: true } },
@@ -809,8 +809,8 @@ var PARSE_TESTS = [
 				"row": 0
 			}]
 		}
-	},
-	{
+  },
+  {
 		description: "Dynamic typing by indices can be determined by function",
 		input: '001,002,003',
 		config: { dynamicTyping: function(field) { return (field % 2) === 0; } },
@@ -818,8 +818,8 @@ var PARSE_TESTS = [
 			data: [[1, "002", 3]],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "Dynamic typing by headers can be determined by function",
 		input: 'A_as_int,B,C_as_int\r\n001,002,003',
 		config: { header: true, dynamicTyping: function(field) { return /_as_int$/.test(field); } },
@@ -827,8 +827,8 @@ var PARSE_TESTS = [
 			data: [{"A_as_int": 1, "B": "002", "C_as_int": 3}],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "Blank line at beginning",
 		input: '\r\na,b,c\r\nd,e,f',
 		config: { newline: '\r\n' },
@@ -836,8 +836,8 @@ var PARSE_TESTS = [
 			data: [[''], ['a', 'b', 'c'], ['d', 'e', 'f']],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "Blank line in middle",
 		input: 'a,b,c\r\n\r\nd,e,f',
 		config: { newline: '\r\n' },
@@ -845,48 +845,48 @@ var PARSE_TESTS = [
 			data: [['a', 'b', 'c'], [''], ['d', 'e', 'f']],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "Blank lines at end",
 		input: 'a,b,c\nd,e,f\n\n',
 		expected: {
 			data: [['a', 'b', 'c'], ['d', 'e', 'f'], [''], ['']],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "Blank line in middle with whitespace",
 		input: 'a,b,c\r\n \r\nd,e,f',
 		expected: {
 			data: [['a', 'b', 'c'], [" "], ['d', 'e', 'f']],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "First field of a line is empty",
 		input: 'a,b,c\r\n,e,f',
 		expected: {
 			data: [['a', 'b', 'c'], ['', 'e', 'f']],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "Last field of a line is empty",
 		input: 'a,b,\r\nd,e,f',
 		expected: {
 			data: [['a', 'b', ''], ['d', 'e', 'f']],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "Other fields are empty",
 		input: 'a,,c\r\n,,',
 		expected: {
 			data: [['a', '', 'c'], ['', '', '']],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "Empty input string",
 		input: '',
 		expected: {
@@ -897,16 +897,16 @@ var PARSE_TESTS = [
 				"message": "Unable to auto-detect delimiting character; defaulted to ','"
 			}]
 		}
-	},
-	{
+  },
+  {
 		description: "Input is just the delimiter (2 empty fields)",
 		input: ',',
 		expected: {
 			data: [['', '']],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "Input is just a string (a single field)",
 		input: 'Abc def',
 		expected: {
@@ -919,8 +919,8 @@ var PARSE_TESTS = [
 				}
 			]
 		}
-	},
-	{
+  },
+  {
 		description: "Preview 0 rows should default to parsing all",
 		input: 'a,b,c\r\nd,e,f\r\ng,h,i',
 		config: { preview: 0 },
@@ -928,8 +928,8 @@ var PARSE_TESTS = [
 			data: [['a', 'b', 'c'], ['d', 'e', 'f'], ['g', 'h', 'i']],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "Preview 1 row",
 		input: 'a,b,c\r\nd,e,f\r\ng,h,i',
 		config: { preview: 1 },
@@ -937,8 +937,8 @@ var PARSE_TESTS = [
 			data: [['a', 'b', 'c']],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "Preview 2 rows",
 		input: 'a,b,c\r\nd,e,f\r\ng,h,i',
 		config: { preview: 2 },
@@ -946,8 +946,8 @@ var PARSE_TESTS = [
 			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "Preview all (3) rows",
 		input: 'a,b,c\r\nd,e,f\r\ng,h,i',
 		config: { preview: 3 },
@@ -955,8 +955,8 @@ var PARSE_TESTS = [
 			data: [['a', 'b', 'c'], ['d', 'e', 'f'], ['g', 'h', 'i']],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "Preview more rows than input has",
 		input: 'a,b,c\r\nd,e,f\r\ng,h,i',
 		config: { preview: 4 },
@@ -964,8 +964,8 @@ var PARSE_TESTS = [
 			data: [['a', 'b', 'c'], ['d', 'e', 'f'], ['g', 'h', 'i']],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "Preview should count rows, not lines",
 		input: 'a,b,c\r\nd,e,"f\r\nf",g,h,i',
 		config: { preview: 2 },
@@ -973,8 +973,8 @@ var PARSE_TESTS = [
 			data: [['a', 'b', 'c'], ['d', 'e', 'f\r\nf', 'g', 'h', 'i']],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "Preview with header row",
 		notes: "Preview is defined to be number of rows of input not including header row",
 		input: 'a,b,c\r\nd,e,f\r\ng,h,i\r\nj,k,l',
@@ -983,8 +983,8 @@ var PARSE_TESTS = [
 			data: [{"a": "d", "b": "e", "c": "f"}, {"a": "g", "b": "h", "c": "i"}],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "Empty lines",
 		input: '\na,b,c\n\nd,e,f\n\n',
 		config: { delimiter: ',' },
@@ -992,8 +992,8 @@ var PARSE_TESTS = [
 			data: [[''], ['a', 'b', 'c'], [''], ['d', 'e', 'f'], [''], ['']],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "Skip empty lines",
 		input: 'a,b,c\n\nd,e,f',
 		config: { skipEmptyLines: true },
@@ -1001,8 +1001,8 @@ var PARSE_TESTS = [
 			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "Skip empty lines, with newline at end of input",
 		input: 'a,b,c\r\n\r\nd,e,f\r\n',
 		config: { skipEmptyLines: true },
@@ -1010,8 +1010,8 @@ var PARSE_TESTS = [
 			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "Skip empty lines, with empty input",
 		input: '',
 		config: { skipEmptyLines: true },
@@ -1025,8 +1025,8 @@ var PARSE_TESTS = [
 				}
 			]
 		}
-	},
-	{
+  },
+  {
 		description: "Skip empty lines, with first line only whitespace",
 		notes: "A line must be absolutely empty to be considered empty",
 		input: ' \na,b,c',
@@ -1035,8 +1035,8 @@ var PARSE_TESTS = [
 			data: [[" "], ['a', 'b', 'c']],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "Skip empty lines while detecting delimiter",
 		notes: "Parsing correctly newline-terminated short data with delimiter:auto and skipEmptyLines:true",
 		input: 'a,b\n1,2\n3,4\n',
@@ -1045,8 +1045,8 @@ var PARSE_TESTS = [
 			data: [{'a': '1', 'b': '2'}, {'a': '3', 'b': '4'}],
 			errors: []
 		}
-	},
-	{
+  },
+  {
 		description: "Single quote as quote character",
 		notes: "Must parse correctly when single quote is specified as a quote character",
 		input: "a,b,'c,d'",
@@ -1055,17 +1055,28 @@ var PARSE_TESTS = [
 			data: [['a', 'b', 'c,d']],
 			errors: []
 		}
-	},
-	{
-		description: "Header row with preceding comment",
-		notes: "Must parse correctly headers if they are preceded by comments",
-		input: '#Comment\na,b\nc,d\n',
-		config: { header: true, comments: '#', skipEmptyLines: true, delimiter: ','},
-		expected: {
-			data: [{'a': 'c', 'b': 'd'}],
-			errors: []
-		}
-	}
+  },
+  {
+    description: "Header row with preceding comment",
+    notes: "Must parse correctly headers if they are preceded by comments",
+    input: '#Comment\na,b\nc,d\n',
+    config: { header: true, comments: '#', skipEmptyLines: true, delimiter: ','},
+    expected: {
+      data: [{'a': 'c', 'b': 'd'}],
+      errors: []
+    }
+  },
+  {
+    description: "Carriage return in header inside quotes, with line feed endings",
+    input: '"a\r\na","b"\n"c","d"\n"e","f"\n"g","h"\n"i","j"',
+    config: {
+    	newline: '\n', delimiter: ','
+		},
+    expected: {
+      data: [['a\r\na', 'b'], ['c', 'd'], ['e', 'f'], ['g', 'h'], ['i', 'j']],
+      errors: []
+    }
+  }
 ];
 
 describe('Parse Tests', function() {
