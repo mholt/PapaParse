@@ -625,6 +625,30 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Quoted fields with spaces between closing quote and next delimiter",
+		input: 'A,"B" ,C,D\r\nE,F,"G"  ,H',
+		expected: {
+			data: [['A', 'B', 'C','D'],['E', 'F', 'G','H']],
+			errors: []
+		}
+	},
+	{
+		description: "Quoted fields with spaces between closing quote and next new line",
+		input: 'A,B,C,"D" \r\nE,F,G,"H"  \r\nQ,W,E,R',
+		expected: {
+			data: [['A', 'B', 'C','D'],['E', 'F', 'G','H'],['Q', 'W', 'E','R']],
+			errors: []
+		}
+	},
+	{
+		description: "Quoted fields with spaces after closing quote",
+		input: 'A,"B" ,C,"D" \r\nE,F,"G"  ,"H"  \r\nQ,W,"E" ,R',
+		expected: {
+			data: [['A', 'B', 'C','D'],['E', 'F', 'G','H'],['Q', 'W', 'E','R']],
+			errors: []
+		}
+	},
+	{
 		description: "Mixed slash n and slash r should choose first as precident",
 		input: 'a,b,c\nd,e,f\rg,h,i\n',
 		expected: {
