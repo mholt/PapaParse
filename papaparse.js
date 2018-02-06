@@ -1285,10 +1285,10 @@
 							continue;
 						}
 
-						var spacesBetweenQuoteAndDelimiter = extraSpacesLengthAfterQuote(nextDelim);
+						var spacesBetweenQuoteAndDelimiter = extraSpaces(nextDelim);
 
 						// Closing quote followed by delimiter or 'unnecessary steps + delimiter'
-						if (input[quoteSearch+1] === delim  || spacesBetweenQuoteAndDelimiter > 0)
+						if (input[quoteSearch+1+spacesBetweenQuoteAndDelimiter] === delim)
 						{
 							row.push(input.substring(cursor, quoteSearch).replace(quoteCharRegex, quoteChar));
 							cursor = quoteSearch + 1 + spacesBetweenQuoteAndDelimiter + delimLen;
@@ -1297,10 +1297,10 @@
 							break;
 						}
 
-						var spacesBetweenQuoteAndNewLine = extraSpacesLengthAfterQuote(nextNewline);
+						var spacesBetweenQuoteAndNewLine = extraSpaces(nextNewline);
 
 						// Closing quote followed by newline or 'unnecessary spaces + newLine'
-						if (input.substr(quoteSearch+1, newlineLen) === newline || spacesBetweenQuoteAndNewLine > 0)
+						if (input.substr(quoteSearch+1+spacesBetweenQuoteAndNewLine, newlineLen) === newline)
 						{
 							row.push(input.substring(cursor, quoteSearch).replace(quoteCharRegex, quoteChar));
 							saveRow(quoteSearch + 1 + spacesBetweenQuoteAndNewLine + newlineLen);
@@ -1390,15 +1390,15 @@
 			}
 
 			/**
-             * checks if there are extra spaces after closing quote and newLine without any text
+             * checks if there are extra spaces after closing quote and given index without any text
              * if Yes, returns the number of spaces
             */
-            function extraSpacesLengthAfterQuote(index) {
+            function extraSpaces(index) {
                 var spaceLength = 0;
 				if (index !== -1) {
-                    var textBetweenQuoteAndNextNewLine = input.substring(quoteSearch + 1, index);
-					if (textBetweenQuoteAndNextNewLine && textBetweenQuoteAndNextNewLine.trim() == '') {
-                        spaceLength = textBetweenQuoteAndNextNewLine.length;
+                    var textBetweenClosingQuoteAndIndex = input.substring(quoteSearch + 1, index);
+					if (textBetweenClosingQuoteAndIndex && textBetweenClosingQuoteAndIndex.trim() == '') {
+                        spaceLength = textBetweenClosingQuoteAndIndex.length;
                     }
                 }
                 return spaceLength;
