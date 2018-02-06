@@ -1285,21 +1285,25 @@
 							continue;
 						}
 
-						// Closing quote followed by delimiter
-						if (input[quoteSearch+1] === delim)
+						var spacesBetweenQuoteAndDelimiter = extraSpacesLengthAfterQuote(nextDelim);
+
+						// Closing quote followed by delimiter or 'unnecessary steps + delimiter'
+						if (input[quoteSearch+1] === delim  || spacesBetweenQuoteAndDelimiter > 0)
 						{
 							row.push(input.substring(cursor, quoteSearch).replace(quoteCharRegex, quoteChar));
-							cursor = quoteSearch + 1 + delimLen;
+							cursor = quoteSearch + 1 + spacesBetweenQuoteAndDelimiter + delimLen;
 							nextDelim = input.indexOf(delim, cursor);
 							nextNewline = input.indexOf(newline, cursor);
 							break;
 						}
 
-						// Closing quote followed by newline
-						if (input.substr(quoteSearch+1, newlineLen) === newline)
+						var spacesBetweenQuoteAndNewLine = extraSpacesLengthAfterQuote(nextNewline);
+
+						// Closing quote followed by newline or 'unnecessary spaces + newLine'
+						if (input.substr(quoteSearch+1, newlineLen) === newline || spacesBetweenQuoteAndNewLine > 0)
 						{
 							row.push(input.substring(cursor, quoteSearch).replace(quoteCharRegex, quoteChar));
-							saveRow(quoteSearch + 1 + newlineLen);
+							saveRow(quoteSearch + 1 + spacesBetweenQuoteAndNewLine + newlineLen);
 							nextDelim = input.indexOf(delim, cursor);	// because we may have skipped the nextDelim in the quoted field
 
 							if (stepIsFunction)
@@ -1384,6 +1388,21 @@
 				data.push(row);
 				lastCursor = cursor;
 			}
+
+			/**
+             * checks if there are extra spaces after closing quote and newLine without any text
+             * if Yes, returns the number of spaces
+            */
+            function extraSpacesLengthAfterQuote(index) {
+                var spaceLength = 0;
+				if (index !== -1) {
+                    var textBetweenQuoteAndNextNewLine = input.substring(quoteSearch + 1, index);
+					if (textBetweenQuoteAndNextNewLine && textBetweenQuoteAndNextNewLine.trim() == '') {
+                        spaceLength = textBetweenQuoteAndNextNewLine.length;
+                    }
+                }
+                return spaceLength;
+            }
 
 			/**
 			 * Appends the remaining input from cursor to the end into
