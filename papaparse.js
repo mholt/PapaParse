@@ -1240,7 +1240,7 @@
 
 			var nextDelim = input.indexOf(delim, cursor);
 			var nextNewline = input.indexOf(newline, cursor);
-			var quoteCharRegex = new RegExp(escapeChar.replace('\\', '\\\\')+quoteChar, 'g');
+			var quoteCharRegex = new RegExp(escapeChar.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&')+quoteChar, 'g');
 
 			// Parser loop
 			for (;;)
