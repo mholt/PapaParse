@@ -1081,6 +1081,26 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Custom escape character in the middle",
+		notes: "Must parse correctly if the backslash sign (\\) is configured as a custom escape character",
+		input: 'a,b,"c\\"d\\"f"',
+		config: { escapeChar:'\\'},
+		expected: {
+			data: [['a', 'b', 'c"d"f']],
+			errors: []
+		}
+	},
+	{
+		description: "Custom escape character at the end",
+		notes: "Must parse correctly if the backslash sign (\\) is configured as a custom escape character and the escaped quote character appears at the end of the column",
+		input: 'a,b,"c\\"d\\""',
+		config: { escapeChar:'\\'},
+		expected: {
+			data: [['a', 'b', 'c"d"']],
+			errors: []
+		}
+	},
+	{
 		description: "Header row with preceding comment",
 		notes: "Must parse correctly headers if they are preceded by comments",
 		input: '#Comment\na,b\nc,d\n',
