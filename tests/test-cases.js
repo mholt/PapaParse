@@ -1101,6 +1101,16 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Custom escape character not used for escaping",
+		notes: "Must parse correctly if the backslash sign (\\) is configured as a custom escape character and appears as regular character in the text",
+		input: 'a,b,"c\\d"',
+		config: { escapeChar:'\\'},
+		expected: {
+			data: [['a', 'b', 'c\\d']],
+			errors: []
+		}
+	},
+	{
 		description: "Header row with preceding comment",
 		notes: "Must parse correctly headers if they are preceded by comments",
 		input: '#Comment\na,b\nc,d\n',
