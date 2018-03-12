@@ -1123,7 +1123,7 @@
 		function tryParseFloat(val)
 		{
 			var isNumber = FLOAT.test(val);
-			return isNumber ? parseFloat(val) : val;
+			return isNumber ? parseFloat(val) : (val === '' ? null : val);
 		}
 
 		function addError(type, code, msg, row)
