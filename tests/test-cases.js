@@ -853,6 +853,15 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Dynamic typing converts empty values into NULL",
+		input: '1,2.2,1e3\r\n,NULL,\r\n-,5a,null',
+		config: { dynamicTyping: true },
+		expected: {
+			data: [[1, 2.2, 1000], [null, "NULL", null], ["-", "5a", "null"]],
+			errors: []
+		}
+	},
+	{
 		description: "Blank line at beginning",
 		input: '\r\na,b,c\r\nd,e,f',
 		config: { newline: '\r\n' },
