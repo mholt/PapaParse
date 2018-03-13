@@ -1158,6 +1158,10 @@
 		} else {
 			var quoteChar = config.quoteChar;
 		}
+		var escapeChar = quoteChar;
+		if (config.escapeChar !== undefined){
+			escapeChar = config.escapeChar;
+		}
 
 		// Delimiter must be valid
 		if (typeof delim !== 'string'
@@ -1236,7 +1240,7 @@
 
 			var nextDelim = input.indexOf(delim, cursor);
 			var nextNewline = input.indexOf(newline, cursor);
-			var quoteCharRegex = new RegExp(quoteChar+quoteChar, 'g');
+			var quoteCharRegex = new RegExp(escapeChar.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&')+quoteChar, 'g');
 
 			// Parser loop
 			for (;;)
@@ -1279,9 +1283,16 @@
 						}
 
 						// If this quote is escaped, it's part of the data; skip it
-						if (input[quoteSearch+1] === quoteChar)
+						// If the quote character is the escape character, then check if the next character is the escape character
+						if (quoteChar === escapeChar &&  input[quoteSearch+1] === escapeChar)
 						{
 							quoteSearch++;
+							continue;
+						}
+
+						// If the quote character is not the escape character, then check if the previous character was the escape character
+						if (quoteChar !== escapeChar && quoteSearch !== 0 && input[quoteSearch-1] === escapeChar)
+						{
 							continue;
 						}
 
