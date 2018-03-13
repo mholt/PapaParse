@@ -878,7 +878,7 @@
 			_delimiterError = false;
 			if (!_config.delimiter)
 			{
-				var delimGuess = guessDelimiter(input, _config.newline, _config.skipEmptyLines);
+				var delimGuess = guessDelimiter(input, _config.newline, _config.skipEmptyLines, _config.skipEmptyFieldsLines);
 				if (delimGuess.successful)
 					_config.delimiter = delimGuess.bestDelimiter;
 				else
@@ -946,10 +946,10 @@
 				_delimiterError = false;
 			}
 
-			if (_config.skipEmptyLines)
+			if (_config.skipEmptyLines || _config.skipEmptyFieldsLines)
 			{
 				for (var i = 0; i < _results.data.length; i++)
-					if (_results.data[i].length === 1 && _results.data[i][0] === '')
+					if (isEmptyLine(_results.data[i], _config.skipEmptyLines, _config.skipEmptyFieldsLines))
 						_results.data.splice(i--, 1);
 			}
 
@@ -1040,7 +1040,7 @@
 			return _results;
 		}
 
-		function guessDelimiter(input, newline, skipEmptyLines)
+		function guessDelimiter(input, newline, skipEmptyLines, skipEmptyFieldsLines)
 		{
 			var delimChoices = [',', '\t', '|', ';', Papa.RECORD_SEP, Papa.UNIT_SEP];
 			var bestDelim, bestDelta, fieldCountPrevRow;
@@ -1059,10 +1059,12 @@
 
 				for (var j = 0; j < preview.data.length; j++)
 				{
-					if (skipEmptyLines && preview.data[j].length === 1 && preview.data[j][0].length === 0) {
-						emptyLinesCount++
-						continue
+					if (isEmptyLine(preview.data[j], skipEmptyLines, skipEmptyFieldsLines))
+					{
+						emptyLinesCount++;
+						continue;
 					}
+
 					var fieldCount = preview.data[j].length;
 					avgFieldCount += fieldCount;
 
@@ -1118,6 +1120,25 @@
 			}
 
 			return numWithN >= r.length / 2 ? '\r\n' : '\r';
+		}
+
+		function isEmptyLine(line, skipEmptyLines, skipEmptyFieldsLines)
+		{
+			if (skipEmptyLines && line.length === 1 && line[0].length === 0)
+				return true
+
+			if (skipEmptyFieldsLines)
+			{
+				for (var prop in line)
+				{
+					if (line.hasOwnProperty(prop) && line[prop].length > 0)
+						return false;
+				}
+
+				return true;
+			}
+
+			return false;
 		}
 
 		function tryParseFloat(val)
