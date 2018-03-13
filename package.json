@@ -33,12 +33,7 @@
 		"name": "Matthew Holt",
 		"url": "https://twitter.com/mholt6"
 	},
-	"licenses": [
-		{
-			"type": "MIT",
-			"url": "http://opensource.org/licenses/MIT"
-		}
-	],
+	"license": "MIT",
 	"main": "papaparse.js",
 	"devDependencies": {
 		"chai": "^3.0.0",
