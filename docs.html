@@ -248,11 +248,12 @@
 {
 	quotes: false,
 	quoteChar: '"',
+	escapeChar: '"',
 	delimiter: ",",
 	header: true,
 	newline: "\r\n"
 }</code></pre>
-                                Set <code>quotes</code> to <code>true</code> to always enclose each field in quotes, or an array of true/false values correlating to specific to columns to force-quote. The caracter used to quote can be customized using <code>quoteChar</code>. The <code>delimiter</code> can be any valid delimiting character. The <code>newline</code> character(s) may also be customized. Setting <code>header</code> to <code>false</code> will omit the header row.
+                                Set <code>quotes</code> to <code>true</code> to always enclose each field in quotes, or an array of true/false values correlating to specific to columns to force-quote. The character used to quote can be customized using <code>quoteChar</code>. The character used to escape the <code>quoteChar</code> within a field can be customized using <code>escapeChar</code>. The <code>delimiter</code> can be any valid delimiting character. The <code>newline</code> character(s) may also be customized. Setting <code>header</code> to <code>false</code> will omit the header row.
 							</li>
 						</ul>
 					</div>
@@ -337,6 +338,7 @@ var csv = Papa.unparse({
 	delimiter: "",	// auto-detect
 	newline: "",	// auto-detect
 	quoteChar: '"',
+	escapeChar: '"',
 	header: false,
 	dynamicTyping: false,
 	preview: 0,
@@ -382,11 +384,20 @@ var csv = Papa.unparse({
 									The newline sequence. Leave blank to auto-detect. Must be one of \r, \n, or \r\n.
 								</td>
 							</tr>
+							<tr>
 								<td>
 									<code>quoteChar</code>
 								</td>
 								<td>
 									The character used to quote fields. The quoting of all fields is not mandatory. Any field which is not quoted will correctly read.
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<code>escapeChar</code>
+								</td>
+								<td>
+									The character used to escape the quote character within a field. If not set, this option will default to the value of <code>quoteChar</code>, meaning that the default escaping of quote character within a quoted field is using the quote character two times. (e.g. <code>"column with ""quotes"" in text"</code>)
 								</td>
 							</tr>
 							<tr>
