@@ -990,8 +990,12 @@
 					return true;
 				else if (value === 'false' || value === 'FALSE')
 					return false;
-				else
-					return tryParseFloat(value);
+				else if(FLOAT.test(value)) {
+					return parseFloat(value);
+				}
+				else {
+					return (value === '' ? null : value);
+				}
 			}
 			return value;
 		}
@@ -1118,12 +1122,6 @@
 			}
 
 			return numWithN >= r.length / 2 ? '\r\n' : '\r';
-		}
-
-		function tryParseFloat(val)
-		{
-			var isNumber = FLOAT.test(val);
-			return isNumber ? parseFloat(val) : (val === '' ? null : val);
 		}
 
 		function addError(type, code, msg, row)
