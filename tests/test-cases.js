@@ -1579,7 +1579,7 @@ var CUSTOM_TESTS = [
 					callback(updates);
 				},
 				complete: function() {
-					callback('incorrect complete callback');
+					callback(new Error('incorrect complete callback'));
 				}
 			});
 		}
@@ -1615,14 +1615,17 @@ var CUSTOM_TESTS = [
 	{
 		description: "Chunk functions can abort parsing",
 		expected: [
-			[['A', 'b', 'c'], ['d', 'E', 'f'], ['G', 'h', 'i']]
+			[['A', 'b', 'c']]
 		],
 		run: function(callback) {
 			var updates = [];
 			Papa.parse('A,b,c\nd,E,f\nG,h,i', {
+				chunkSize: 1,
 				chunk: function(response, handle) {
-					updates.push(response.data);
-					handle.abort();
+					if (response.data.length) {
+						updates.push(response.data);
+						handle.abort();
+					}
 				},
 				complete: function(response) {
 					callback(updates);
