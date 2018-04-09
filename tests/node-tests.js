@@ -57,5 +57,40 @@ describe('PapaParse', function() {
 				done();
 			},
 		});
+
+		it('should support pausing and resuming on same tick when streaming', function(done) {
+			var rows = [];
+			Papa.parse(fs.createReadStream(__dirname + '/long-sample.csv', 'utf8'), {
+				chunk: function(results, parser) {
+					rows = rows.concat(results.data);
+					parser.pause();
+					parser.resume();
+				},
+				error: function(err) {
+					done(new Error(err));
+				},
+				complete: function() {
+					assert.deepEqual(rows[0], [
+						'Grant',
+						'Dyer',
+						'Donec.elementum@orciluctuset.example',
+						'2013-11-23T02:30:31-08:00',
+						'2014-05-31T01:06:56-07:00',
+						'Magna Ut Associates',
+						'ljenkins'
+					]);
+					assert.deepEqual(rows[7], [
+						'Talon',
+						'Salinas',
+						'posuere.vulputate.lacus@Donecsollicitudin.example',
+						'2015-01-31T09:19:02-08:00',
+						'2014-12-17T04:59:18-08:00',
+						'Aliquam Iaculis Incorporate',
+						'Phasellus@Quisquetincidunt.example'
+					]);
+					done();
+				}
+			});
+		});
 	});
 });

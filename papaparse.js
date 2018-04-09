@@ -425,6 +425,7 @@
 	{
 		this._handle = null;
 		this._finished = false;
+		this._completed = false;
 		this._input = null;
 		this._baseIndex = 0;
 		this._partialLine = '';
@@ -483,7 +484,7 @@
 			else if (isFunction(this._config.chunk) && !isFakeChunk)
 			{
 				this._config.chunk(results, this._handle);
-				if (this._handle.paused())
+				if (this._handle.paused() || this._handle.aborted())
 					return;
 				results = undefined;
 				this._completeResults = undefined;
@@ -495,8 +496,10 @@
 				this._completeResults.meta = results.meta;
 			}
 
-			if (finishedIncludingPreview && isFunction(this._config.complete) && (!results || !results.meta.aborted))
+			if (!this._completed && finishedIncludingPreview && isFunction(this._config.complete) && (!results || !results.meta.aborted)) {
 				this._config.complete(this._completeResults, this._input);
+				this._completed = true;
+			}
 
 			if (!finishedIncludingPreview && (!results || !results.meta.paused))
 				this._nextChunk();
