@@ -6,6 +6,7 @@
 */
 (function(root, factory)
 {
+	/* globals define */
 	if (typeof define === 'function' && define.amd)
 	{
 		// AMD. Register as an anonymous module.
@@ -251,9 +252,6 @@
 
 	function JsonToCsv(_input, _config)
 	{
-		var _output = '';
-		var _fields = [];
-
 		// Default configuration
 
 		/** whether to surround every datum with quotes */
@@ -297,8 +295,8 @@
 
 				if (!_input.fields)
 					_input.fields =  _input.data[0] instanceof Array
-									? _input.fields
-									: objectKeys(_input.data[0]);
+						? _input.fields
+						: objectKeys(_input.data[0]);
 
 				if (!(_input.data[0] instanceof Array) && typeof _input.data[0] !== 'object')
 					_input.data = [_input.data];	// handles input like [1,2,3] or ['asdf']
@@ -644,8 +642,8 @@
 		{
 			var contentRange = xhr.getResponseHeader('Content-Range');
 			if (contentRange === null) { // no content range, then finish!
-					return -1;
-					}
+				return -1;
+			}
 			return parseInt(contentRange.substr(contentRange.lastIndexOf('/') + 1));
 		}
 	}
@@ -725,11 +723,9 @@
 		config = config || {};
 		ChunkStreamer.call(this, config);
 
-		var string;
 		var remaining;
 		this.stream = function(s)
 		{
-			string = s;
 			remaining = s;
 			return this._nextChunk();
 		}
@@ -1150,11 +1146,12 @@
 		var step = config.step;
 		var preview = config.preview;
 		var fastMode = config.fastMode;
+		var quoteChar;
 		/** Allows for no quoteChar by setting quoteChar to undefined in config */
 		if (config.quoteChar === undefined){
-			var quoteChar = '"';
+			quoteChar = '"';
 		} else {
-			var quoteChar = config.quoteChar;
+			quoteChar = config.quoteChar;
 		}
 		var escapeChar = quoteChar;
 		if (config.escapeChar !== undefined){
@@ -1209,7 +1206,7 @@
 				var rows = input.split(newline);
 				for (var i = 0; i < rows.length; i++)
 				{
-					var row = rows[i];
+					row = rows[i];
 					cursor += row.length;
 					if (i !== rows.length - 1)
 						cursor += newline.length;
@@ -1238,7 +1235,7 @@
 
 			var nextDelim = input.indexOf(delim, cursor);
 			var nextNewline = input.indexOf(newline, cursor);
-			var quoteCharRegex = new RegExp(escapeChar.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&')+quoteChar, 'g');
+			var quoteCharRegex = new RegExp(escapeChar.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&')+quoteChar, 'g');
 
 			// Parser loop
 			for (;;)
@@ -1255,7 +1252,7 @@
 					for (;;)
 					{
 						// Find closing quote
-						var quoteSearch = input.indexOf(quoteChar, quoteSearch+1);
+						quoteSearch = input.indexOf(quoteChar, quoteSearch+1);
 
 						//No other quotes are found - no other delimiters
 						if (quoteSearch === -1)
@@ -1401,17 +1398,17 @@
 			/**
              * checks if there are extra spaces after closing quote and given index without any text
              * if Yes, returns the number of spaces
-            */
-            function extraSpaces(index) {
-                var spaceLength = 0;
+             */
+			function extraSpaces(index) {
+				var spaceLength = 0;
 				if (index !== -1) {
-                    var textBetweenClosingQuoteAndIndex = input.substring(quoteSearch + 1, index);
+					var textBetweenClosingQuoteAndIndex = input.substring(quoteSearch + 1, index);
 					if (textBetweenClosingQuoteAndIndex && textBetweenClosingQuoteAndIndex.trim() == '') {
-                        spaceLength = textBetweenClosingQuoteAndIndex.length;
-                    }
-                }
-                return spaceLength;
-            }
+						spaceLength = textBetweenClosingQuoteAndIndex.length;
+					}
+				}
+				return spaceLength;
+			}
 
 			/**
 			 * Appends the remaining input from cursor to the end into
