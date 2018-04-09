@@ -59,6 +59,45 @@
 				},
 			});
 		});
+
+		it('handles errors in beforeFirstChunk', function(done) {
+			var expectedError = new Error('test');
+			Papa.parse(fs.createReadStream(__dirname + '/long-sample.csv', 'utf8'), {
+				beforeFirstChunk: function() {
+					throw expectedError;
+				},
+				error: function(err) {
+					assert.deepEqual(err, expectedError);
+					done();
+				}
+			});
+		});
+
+		it('handles errors in chunk', function(done) {
+			var expectedError = new Error('test');
+			Papa.parse(fs.createReadStream(__dirname + '/long-sample.csv', 'utf8'), {
+				chunk: function() {
+					throw expectedError;
+				},
+				error: function(err) {
+					assert.deepEqual(err, expectedError);
+					done();
+				}
+			});
+		});
+
+		it('handles errors in step', function(done) {
+			var expectedError = new Error('test');
+			Papa.parse(fs.createReadStream(__dirname + '/long-sample.csv', 'utf8'), {
+				step: function() {
+					throw expectedError;
+				},
+				error: function(err) {
+					assert.deepEqual(err, expectedError);
+					done();
+				}
+			});
+		});
 	});
 
 })();
