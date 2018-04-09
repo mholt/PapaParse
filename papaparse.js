@@ -637,7 +637,7 @@
 		this._chunkError = function(errorMessage)
 		{
 			var errorText = xhr.statusText || errorMessage;
-			this._sendError(errorText);
+			this._sendError(new Error(errorText));
 		}
 
 		function getFileSize(xhr)
@@ -712,7 +712,7 @@
 
 		this._chunkError = function()
 		{
-			this._sendError(reader.error.message);
+			this._sendError(reader.error);
 		}
 
 	}
@@ -796,7 +796,7 @@
 		this._streamError = bindFunction(function(error)
 		{
 			this._streamCleanUp();
-			this._sendError(error.message);
+			this._sendError(error);
 		}, this);
 
 		this._streamEnd = bindFunction(function()
