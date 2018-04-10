@@ -1,6 +1,8 @@
+var chai;
+var Papa;
 if (typeof module !== 'undefined' && module.exports) {
-	var chai = require('chai');
-	var Papa = require('../papaparse.js');
+	chai = require('chai');
+	Papa = require('../papaparse.js');
 }
 
 var assert = chai.assert;
@@ -206,7 +208,7 @@ var CORE_PARSER_TESTS = [
 				"code": "InvalidQuotes",
 				"message": "Trailing quote on quoted field is malformed",
 				"row": 0,
-				"index":1
+				"index": 1
 			}]
 		}
 	},
@@ -731,7 +733,7 @@ var PARSE_TESTS = [
 	},
 	{
 		description: "ASCII 30 delimiter",
-		input: 'a'+RECORD_SEP+'b'+RECORD_SEP+'c\r\nd'+RECORD_SEP+'e'+RECORD_SEP+'f',
+		input: 'a' + RECORD_SEP + 'b' + RECORD_SEP + 'c\r\nd' + RECORD_SEP + 'e' + RECORD_SEP + 'f',
 		config: { delimiter: RECORD_SEP },
 		expected: {
 			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
@@ -740,7 +742,7 @@ var PARSE_TESTS = [
 	},
 	{
 		description: "ASCII 31 delimiter",
-		input: 'a'+UNIT_SEP+'b'+UNIT_SEP+'c\r\nd'+UNIT_SEP+'e'+UNIT_SEP+'f',
+		input: 'a' + UNIT_SEP + 'b' + UNIT_SEP + 'c\r\nd' + UNIT_SEP + 'e' + UNIT_SEP + 'f',
 		config: { delimiter: UNIT_SEP },
 		expected: {
 			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
@@ -1083,7 +1085,7 @@ var PARSE_TESTS = [
 		description: "Single quote as quote character",
 		notes: "Must parse correctly when single quote is specified as a quote character",
 		input: "a,b,'c,d'",
-		config: { quoteChar: "'"},
+		config: { quoteChar: "'" },
 		expected: {
 			data: [['a', 'b', 'c,d']],
 			errors: []
@@ -1093,7 +1095,7 @@ var PARSE_TESTS = [
 		description: "Custom escape character in the middle",
 		notes: "Must parse correctly if the backslash sign (\\) is configured as a custom escape character",
 		input: 'a,b,"c\\"d\\"f"',
-		config: { escapeChar:'\\'},
+		config: { escapeChar: '\\' },
 		expected: {
 			data: [['a', 'b', 'c"d"f']],
 			errors: []
@@ -1103,7 +1105,7 @@ var PARSE_TESTS = [
 		description: "Custom escape character at the end",
 		notes: "Must parse correctly if the backslash sign (\\) is configured as a custom escape character and the escaped quote character appears at the end of the column",
 		input: 'a,b,"c\\"d\\""',
-		config: { escapeChar:'\\'},
+		config: { escapeChar: '\\' },
 		expected: {
 			data: [['a', 'b', 'c"d"']],
 			errors: []
@@ -1113,7 +1115,7 @@ var PARSE_TESTS = [
 		description: "Custom escape character not used for escaping",
 		notes: "Must parse correctly if the backslash sign (\\) is configured as a custom escape character and appears as regular character in the text",
 		input: 'a,b,"c\\d"',
-		config: { escapeChar:'\\'},
+		config: { escapeChar: '\\' },
 		expected: {
 			data: [['a', 'b', 'c\\d']],
 			errors: []
@@ -1123,7 +1125,7 @@ var PARSE_TESTS = [
 		description: "Header row with preceding comment",
 		notes: "Must parse correctly headers if they are preceded by comments",
 		input: '#Comment\na,b\nc,d\n',
-		config: { header: true, comments: '#', skipEmptyLines: true, delimiter: ','},
+		config: { header: true, comments: '#', skipEmptyLines: true, delimiter: ',' },
 		expected: {
 			data: [{'a': 'c', 'b': 'd'}],
 			errors: []
@@ -1314,7 +1316,7 @@ var UNPARSE_TESTS = [
 		description: "Custom delimiter (ASCII 30)",
 		input: [['a', 'b', 'c'], ['d', 'e', 'f']],
 		config: { delimiter: RECORD_SEP },
-		expected: 'a'+RECORD_SEP+'b'+RECORD_SEP+'c\r\nd'+RECORD_SEP+'e'+RECORD_SEP+'f'
+		expected: 'a' + RECORD_SEP + 'b' + RECORD_SEP + 'c\r\nd' + RECORD_SEP + 'e' + RECORD_SEP + 'f'
 	},
 	{
 		description: "Bad delimiter (\\n)",
@@ -1708,7 +1710,7 @@ var CUSTOM_TESTS = [
 					handle.abort();
 				},
 				chunkSize: 6,
-				complete: function (response) {
+				complete: function(response) {
 					callback(response.meta.aborted);
 				}
 			});
@@ -1828,19 +1830,19 @@ var CUSTOM_TESTS = [
 				'?x=1&papaworker&y=1',
 				'?x=1&papaworker=1'
 			];
-			var results = searchStrings.map(function () { return false; });
+			var results = searchStrings.map(function() { return false; });
 			var workers = [];
 
 			// Give it .5s to do something
-			setTimeout(function () {
-				workers.forEach(function (w) { w.terminate(); });
+			setTimeout(function() {
+				workers.forEach(function(w) { w.terminate(); });
 				callback(results);
 			}, 500);
 
-			searchStrings.forEach(function (searchString, idx) {
+			searchStrings.forEach(function(searchString, idx) {
 				var w = new Worker('../papaparse.js' + searchString);
 				workers.push(w);
-				w.addEventListener('message', function () {
+				w.addEventListener('message', function() {
 					results[idx] = true;
 				});
 				w.postMessage({input: 'a,b,c\n1,2,3'});
@@ -1853,7 +1855,7 @@ var CUSTOM_TESTS = [
 describe('Custom Tests', function() {
 	function generateTest(test) {
 		(test.disabled ? it.skip : it)(test.description, function(done) {
-			test.run(function (actual) {
+			test.run(function(actual) {
 				assert.deepEqual(JSON.stringify(actual), JSON.stringify(test.expected));
 				done();
 			});
