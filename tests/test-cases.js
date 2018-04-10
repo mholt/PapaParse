@@ -9,13 +9,13 @@ var RECORD_SEP = String.fromCharCode(30);
 var UNIT_SEP = String.fromCharCode(31);
 var FILES_ENABLED = false;
 try {
-	new File([""], "");
+	new File([""], ""); // eslint-disable-line no-new
 	FILES_ENABLED = true;
 } catch (e) {} // safari, ie
 
 var XHR_ENABLED = false;
 try {
-	new XMLHttpRequest();
+	new XMLHttpRequest(); // eslint-disable-line no-new
 	XHR_ENABLED = true;
 } catch (e) {} // safari, ie
 
@@ -336,14 +336,14 @@ var CORE_PARSER_TESTS = [
 			errors: []
 		}
 	},
-  {
-	description: "Empty quoted field at EOF is empty",
-	input: 'a,b,""\na,b,""',
-	expected: {
-	  data: [['a', 'b', ''], ['a', 'b', '']],
-	  errors: []
-	}
-  },
+	{
+		description: "Empty quoted field at EOF is empty",
+		input: 'a,b,""\na,b,""',
+		expected: {
+			data: [['a', 'b', ''], ['a', 'b', '']],
+			errors: []
+		}
+	},
 	{
 		description: "Multiple consecutive empty fields",
 		input: 'a,b,,,c,d\n,,e,,,f',
@@ -825,7 +825,7 @@ var PARSE_TESTS = [
 		input: 'A,B,C\r\n1,2.2,1e3,5.5\r\n-4,-4.5,-4e-5',
 		config: { header: true, dynamicTyping: { A: true, C: true, __parsed_extra: true } },
 		expected: {
-			data: [{"A": 1, "B": "2.2", "C": 1000, "__parsed_extra": [ 5.5 ]}, {"A": -4, "B": "-4.5", "C": -0.00004}],
+			data: [{"A": 1, "B": "2.2", "C": 1000, "__parsed_extra": [5.5]}, {"A": -4, "B": "-4.5", "C": -0.00004}],
 			errors: [{
 				"type": "FieldMismatch",
 				"code": "TooManyFields",
@@ -1385,11 +1385,11 @@ var UNPARSE_TESTS = [
 		input: [['a,d','b','c']],
 		config: { quoteChar: "'"},
 		expected: "'a,d',b,c"
-  },
-  {
+	},
+	{
 		description: "Don't print header if header:false option specified",
-		input: [{ "Col1": "a", "Col2": "b", "Col3": "c" }, { "Col1": "d", "Col2": "e", "Col3": "f" }],
-		config: { header: false },
+		input: [{"Col1": "a", "Col2": "b", "Col3": "c"}, {"Col1": "d", "Col2": "e", "Col3": "f"}],
+		config: {header: false},
 		expected: 'a,b,c\r\nd,e,f'
 	}
 ];
@@ -1634,7 +1634,6 @@ var CUSTOM_TESTS = [
 		description: "Complete is called after aborting",
 		expected: true,
 		run: function(callback) {
-			var updates = [];
 			Papa.parse('A,b,c\nd,E,f\nG,h,i', {
 				step: function(response, handle) {
 					handle.abort();
