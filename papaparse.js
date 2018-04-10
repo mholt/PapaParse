@@ -1,4 +1,4 @@
-/*!
+/*@license
 	Papa Parse
 	v4.3.7
 	https://github.com/mholt/PapaParse
