@@ -42,9 +42,9 @@
 		"grunt": "^1.0.2",
 		"grunt-contrib-uglify": "^3.3.0",
 		"mocha": "^3.5.0",
-		"mocha-phantomjs": "^3.5.4",
+		"mocha-phantomjs": "^4.1.0",
 		"open": "0.0.5",
-		"phantomjs": "1.9.1 - 1.9.7-15",
+		"phantomjs-prebuilt": "^2.1.16",
 		"serve-static": "^1.7.1"
 	},
 	"scripts": {
