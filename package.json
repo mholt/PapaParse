@@ -37,15 +37,14 @@
 	"main": "papaparse.js",
 	"devDependencies": {
 		"chai": "^4.1.2",
-		"connect": "^3.3.3",
 		"eslint": "^4.19.1",
+		"express": "^4.16.3",
 		"grunt": "^1.0.2",
 		"grunt-contrib-uglify": "^3.3.0",
 		"mocha": "^3.5.0",
 		"mocha-phantomjs": "^4.1.0",
 		"open": "0.0.5",
-		"phantomjs-prebuilt": "^2.1.16",
-		"serve-static": "^1.7.1"
+		"phantomjs-prebuilt": "^2.1.16"
 	},
 	"scripts": {
 		"lint": "eslint --no-ignore papaparse.js Gruntfile.js .eslintrc.js 'tests/**/*.js'",
