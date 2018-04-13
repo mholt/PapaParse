@@ -7,7 +7,7 @@ var assert = require('assert');
 var longSampleRawCsv = fs.readFileSync(__dirname + '/long-sample.csv', 'utf8');
 
 function assertLongSampleParsedCorrectly(parsedCsv) {
-	assert.equal(8, parsedCsv.data.length)
+	assert.equal(8, parsedCsv.data.length);
 	assert.deepEqual(parsedCsv.data[0], [
 		'Grant',
 		'Dyer',
@@ -16,7 +16,7 @@ function assertLongSampleParsedCorrectly(parsedCsv) {
 		'2014-05-31T01:06:56-07:00',
 		'Magna Ut Associates',
 		'ljenkins'
-	])
+	]);
 	assert.deepEqual(parsedCsv.data[7], [
 		'Talon',
 		'Salinas',
@@ -27,13 +27,13 @@ function assertLongSampleParsedCorrectly(parsedCsv) {
 		'Phasellus@Quisquetincidunt.example'
 	]);
 	assert.deepEqual(parsedCsv.meta, {
-		"delimiter":",",
-		"linebreak":"\n",
-		"aborted":false,
-		"truncated":false,
-		"cursor":1209
+		"delimiter": ",",
+		"linebreak": "\n",
+		"aborted": false,
+		"truncated": false,
+		"cursor": 1209
 	});
-	assert.equal(parsedCsv.errors.length, 0)
+	assert.equal(parsedCsv.errors.length, 0);
 }
 
 describe('PapaParse', function() {

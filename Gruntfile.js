@@ -18,4 +18,4 @@ module.exports = function(grunt) {
 
 	grunt.registerTask('build', ['uglify']);
 	grunt.registerTask('default', ['uglify']);
-}
+};

@@ -28,7 +28,7 @@
 {
 	'use strict';
 
-	var global = (function () {
+	var global = (function() {
 		// alternative method, similar to `Function('return this')()`
 		// but without using `eval` (which is disabled when
 		// using Content Security Policy).
@@ -163,7 +163,7 @@
 				queue.splice(0, 1);
 				parseNextFile();
 			}
-		}
+		};
 	}
 
 
@@ -183,7 +183,7 @@
 		}
 		else
 		{
-			document.addEventListener('DOMContentLoaded', function () {
+			document.addEventListener('DOMContentLoaded', function() {
 				LOADED_SYNC = true;
 			}, true);
 		}
@@ -399,7 +399,7 @@
 			if (typeof str === 'undefined' || str === null)
 				return '';
 
-			str = str.toString().replace(quoteCharRegex, _quoteChar+_quoteChar);
+			str = str.toString().replace(quoteCharRegex, _quoteChar + _quoteChar);
 
 			var needsQuotes = (typeof _quotes === 'boolean' && _quotes)
 							|| (_quotes instanceof Array && _quotes[col])
@@ -602,7 +602,7 @@
 			if (this._config.chunkSize)
 			{
 				var end = this._start + this._config.chunkSize - 1;	// minus one because byte range is inclusive
-				xhr.setRequestHeader('Range', 'bytes='+this._start+'-'+end);
+				xhr.setRequestHeader('Range', 'bytes=' + this._start + '-' + end);
 				xhr.setRequestHeader('If-None-Match', 'webkit-no-cache'); // https://bugs.webkit.org/show_bug.cgi?id=82672
 			}
 
@@ -617,11 +617,11 @@
 				this._chunkError();
 			else
 				this._start += this._config.chunkSize;
-		}
+		};
 
 		this._chunkLoaded = function()
 		{
-			if (xhr.readyState != 4)
+			if (xhr.readyState !== 4)
 				return;
 
 			if (xhr.status < 200 || xhr.status >= 400)
@@ -632,13 +632,13 @@
 
 			this._finished = !this._config.chunkSize || this._start > getFileSize(xhr);
 			this.parseChunk(xhr.responseText);
-		}
+		};
 
 		this._chunkError = function(errorMessage)
 		{
 			var errorText = xhr.statusText || errorMessage;
 			this._sendError(new Error(errorText));
-		}
+		};
 
 		function getFileSize(xhr)
 		{
@@ -687,7 +687,7 @@
 		{
 			if (!this._finished && (!this._config.preview || this._rowCount < this._config.preview))
 				this._readChunk();
-		}
+		};
 
 		this._readChunk = function()
 		{
@@ -700,7 +700,7 @@
 			var txt = reader.readAsText(input, this._config.encoding);
 			if (!usingAsyncReader)
 				this._chunkLoaded({ target: { result: txt } });	// mimic the async signature
-		}
+		};
 
 		this._chunkLoaded = function(event)
 		{
@@ -708,12 +708,12 @@
 			this._start += this._config.chunkSize;
 			this._finished = !this._config.chunkSize || this._start >= this._input.size;
 			this.parseChunk(event.target.result);
-		}
+		};
 
 		this._chunkError = function()
 		{
 			this._sendError(reader.error);
-		}
+		};
 
 	}
 	FileStreamer.prototype = Object.create(ChunkStreamer.prototype);
@@ -730,7 +730,7 @@
 		{
 			remaining = s;
 			return this._nextChunk();
-		}
+		};
 		this._nextChunk = function()
 		{
 			if (this._finished) return;
@@ -739,7 +739,7 @@
 			remaining = size ? remaining.substr(size) : '';
 			this._finished = !remaining;
 			return this.parseChunk(chunk);
-		}
+		};
 	}
 	StringStreamer.prototype = Object.create(StringStreamer.prototype);
 	StringStreamer.prototype.constructor = StringStreamer;
@@ -761,7 +761,7 @@
 			this._input.on('data', this._streamData);
 			this._input.on('end', this._streamEnd);
 			this._input.on('error', this._streamError);
-		}
+		};
 
 		this._nextChunk = function()
 		{
@@ -773,7 +773,7 @@
 			{
 				parseOnData = true;
 			}
-		}
+		};
 
 		this._streamData = bindFunction(function(chunk)
 		{
@@ -921,7 +921,7 @@
 			self.streamer.parseChunk(_input, true);
 		};
 
-		this.aborted = function ()
+		this.aborted = function()
 		{
 			return _aborted;
 		};
@@ -940,7 +940,7 @@
 		{
 			if (_results && _delimiterError)
 			{
-				addError('Delimiter', 'UndetectableDelimiter', 'Unable to auto-detect delimiting character; defaulted to \''+Papa.DefaultDelimiter+'\'');
+				addError('Delimiter', 'UndetectableDelimiter', 'Unable to auto-detect delimiting character; defaulted to \'' + Papa.DefaultDelimiter + '\'');
 				_delimiterError = false;
 			}
 
@@ -977,7 +977,7 @@
 			if (_config.dynamicTypingFunction && _config.dynamicTyping[field] === undefined) {
 				_config.dynamicTyping[field] = _config.dynamicTypingFunction(field);
 			}
-			return (_config.dynamicTyping[field] || _config.dynamicTyping) === true
+			return (_config.dynamicTyping[field] || _config.dynamicTyping) === true;
 		}
 
 		function parseDynamic(field, value)
@@ -1007,7 +1007,8 @@
 			{
 				var row = _config.header ? {} : [];
 
-				for (var j = 0; j < _results.data[i].length; j++)
+				var j;
+				for (j = 0; j < _results.data[i].length; j++)
 				{
 					var field = j;
 					var value = _results.data[i][j];
@@ -1062,8 +1063,8 @@
 				for (var j = 0; j < preview.data.length; j++)
 				{
 					if (skipEmptyLines && preview.data[j].length === 1 && preview.data[j][0].length === 0) {
-						emptyLinesCount++
-						continue
+						emptyLinesCount++;
+						continue;
 					}
 					var fieldCount = preview.data[j].length;
 					avgFieldCount += fieldCount;
@@ -1096,12 +1097,12 @@
 			return {
 				successful: !!bestDelim,
 				bestDelimiter: bestDelim
-			}
+			};
 		}
 
 		function guessLineEndings(input)
 		{
-			input = input.substr(0, 1024*1024);	// max length 1 MB
+			input = input.substr(0, 1024 * 1024);	// max length 1 MB
 
 			var r = input.split('\r');
 
@@ -1150,13 +1151,13 @@
 		var fastMode = config.fastMode;
 		var quoteChar;
 		/** Allows for no quoteChar by setting quoteChar to undefined in config */
-		if (config.quoteChar === undefined){
+		if (config.quoteChar === undefined) {
 			quoteChar = '"';
 		} else {
 			quoteChar = config.quoteChar;
 		}
 		var escapeChar = quoteChar;
-		if (config.escapeChar !== undefined){
+		if (config.escapeChar !== undefined) {
 			escapeChar = config.escapeChar;
 		}
 
@@ -1175,7 +1176,7 @@
 			comments = false;
 
 		// Newline must be valid: \r, \n, or \r\n
-		if (newline != '\n' && newline != '\r' && newline != '\r\n')
+		if (newline !== '\n' && newline !== '\r' && newline !== '\r\n')
 			newline = '\n';
 
 		// We're gonna need these at the Parser scope
@@ -1237,7 +1238,8 @@
 
 			var nextDelim = input.indexOf(delim, cursor);
 			var nextNewline = input.indexOf(newline, cursor);
-			var quoteCharRegex = new RegExp(escapeChar.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&')+quoteChar, 'g');
+			var quoteCharRegex = new RegExp(escapeChar.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&') + quoteChar, 'g');
+			var quoteSearch;
 
 			// Parser loop
 			for (;;)
@@ -1246,7 +1248,7 @@
 				if (input[cursor] === quoteChar)
 				{
 					// Start our search for the closing quote where the cursor is
-					var quoteSearch = cursor;
+					quoteSearch = cursor;
 
 					// Skip the opening quote
 					cursor++;
@@ -1254,7 +1256,7 @@
 					for (;;)
 					{
 						// Find closing quote
-						quoteSearch = input.indexOf(quoteChar, quoteSearch+1);
+						quoteSearch = input.indexOf(quoteChar, quoteSearch + 1);
 
 						//No other quotes are found - no other delimiters
 						if (quoteSearch === -1)
@@ -1273,7 +1275,7 @@
 						}
 
 						// Closing quote at EOF
-						if (quoteSearch === inputLen-1)
+						if (quoteSearch === inputLen - 1)
 						{
 							var value = input.substring(cursor, quoteSearch).replace(quoteCharRegex, quoteChar);
 							return finish(value);
@@ -1281,14 +1283,14 @@
 
 						// If this quote is escaped, it's part of the data; skip it
 						// If the quote character is the escape character, then check if the next character is the escape character
-						if (quoteChar === escapeChar &&  input[quoteSearch+1] === escapeChar)
+						if (quoteChar === escapeChar &&  input[quoteSearch + 1] === escapeChar)
 						{
 							quoteSearch++;
 							continue;
 						}
 
 						// If the quote character is not the escape character, then check if the previous character was the escape character
-						if (quoteChar !== escapeChar && quoteSearch !== 0 && input[quoteSearch-1] === escapeChar)
+						if (quoteChar !== escapeChar && quoteSearch !== 0 && input[quoteSearch - 1] === escapeChar)
 						{
 							continue;
 						}
@@ -1296,7 +1298,7 @@
 						var spacesBetweenQuoteAndDelimiter = extraSpaces(nextDelim);
 
 						// Closing quote followed by delimiter or 'unnecessary steps + delimiter'
-						if (input[quoteSearch+1+spacesBetweenQuoteAndDelimiter] === delim)
+						if (input[quoteSearch + 1 + spacesBetweenQuoteAndDelimiter] === delim)
 						{
 							row.push(input.substring(cursor, quoteSearch).replace(quoteCharRegex, quoteChar));
 							cursor = quoteSearch + 1 + spacesBetweenQuoteAndDelimiter + delimLen;
@@ -1308,7 +1310,7 @@
 						var spacesBetweenQuoteAndNewLine = extraSpaces(nextNewline);
 
 						// Closing quote followed by newline or 'unnecessary spaces + newLine'
-						if (input.substr(quoteSearch+1+spacesBetweenQuoteAndNewLine, newlineLen) === newline)
+						if (input.substr(quoteSearch + 1 + spacesBetweenQuoteAndNewLine, newlineLen) === newline)
 						{
 							row.push(input.substring(cursor, quoteSearch).replace(quoteCharRegex, quoteChar));
 							saveRow(quoteSearch + 1 + spacesBetweenQuoteAndNewLine + newlineLen);
@@ -1405,7 +1407,7 @@
 				var spaceLength = 0;
 				if (index !== -1) {
 					var textBetweenClosingQuoteAndIndex = input.substring(quoteSearch + 1, index);
-					if (textBetweenClosingQuoteAndIndex && textBetweenClosingQuoteAndIndex.trim() == '') {
+					if (textBetweenClosingQuoteAndIndex && textBetweenClosingQuoteAndIndex.trim() === '') {
 						spaceLength = textBetweenClosingQuoteAndIndex.length;
 					}
 				}
@@ -1464,7 +1466,8 @@
 			function doStep()
 			{
 				step(returnable());
-				data = [], errors = [];
+				data = [];
+				errors = [];
 			}
 		};
 
