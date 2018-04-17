@@ -968,11 +968,15 @@
 				return;
 			for (var i = 0; needsHeaderRow() && i < _results.data.length; i++)
 				for (var j = 0; j < _results.data[i].length; j++)
+				{
 					var header = _results.data[i][j];
+
 					if (_config.trimHeaders) {
 						header = header.trim();
 					}
-					_fields.push(_results.data[i][j]);
+
+					_fields.push(header);
+				}
 			_results.data.splice(0, 1);
 		}
 
