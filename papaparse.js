@@ -755,6 +755,18 @@
 		var parseOnData = true;
 		var streamHasEnded = false;
 
+		this.pause = function()
+		{
+			ChunkStreamer.prototype.pause.apply(this, arguments);
+			this._input.pause();
+		};
+
+		this.resume = function()
+		{
+			ChunkStreamer.prototype.resume.apply(this, arguments);
+			this._input.resume();
+		};
+
 		this.stream = function(stream)
 		{
 			this._input = stream;
