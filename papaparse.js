@@ -753,6 +753,19 @@
 
 		var queue = [];
 		var parseOnData = true;
+		var streamHasEnded = false;
+
+		this.pause = function()
+		{
+			ChunkStreamer.prototype.pause.apply(this, arguments);
+			this._input.pause();
+		};
+
+		this.resume = function()
+		{
+			ChunkStreamer.prototype.resume.apply(this, arguments);
+			this._input.resume();
+		};
 
 		this.stream = function(stream)
 		{
@@ -763,8 +776,16 @@
 			this._input.on('error', this._streamError);
 		};
 
+		this._checkIsFinished = function()
+		{
+			if (streamHasEnded && queue.length === 1) {
+				this._finished = true;
+			}
+		};
+
 		this._nextChunk = function()
 		{
+			this._checkIsFinished();
 			if (queue.length)
 			{
 				this.parseChunk(queue.shift());
@@ -784,6 +805,7 @@
 				if (parseOnData)
 				{
 					parseOnData = false;
+					this._checkIsFinished();
 					this.parseChunk(queue.shift());
 				}
 			}
@@ -802,7 +824,7 @@
 		this._streamEnd = bindFunction(function()
 		{
 			this._streamCleanUp();
-			this._finished = true;
+			streamHasEnded = true;
 			this._streamData('');
 		}, this);
 
