@@ -340,6 +340,7 @@ var csv = Papa.unparse({
 	quoteChar: '"',
 	escapeChar: '"',
 	header: false,
+	trimHeader: false,
 	dynamicTyping: false,
 	preview: 0,
 	encoding: "",
@@ -406,6 +407,14 @@ var csv = Papa.unparse({
 								</td>
 								<td>
 									If true, the first row of parsed data will be interpreted as field names. An array of field names will be returned in <a href="#meta">meta</a>, and each row of data will be an object of values keyed by field name instead of a simple array. Rows with a different number of fields from the header row will produce an error. Warning: Duplicate field names will overwrite values in previous fields having the same name.
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<code>trimHeader</code>
+								</td>
+								<td>
+									If true leading/trailing spaces will be trimed from headers.
 								</td>
 							</tr>
 							<tr>
