@@ -714,11 +714,11 @@ var PARSE_TESTS = [
 		}
 	},
 	{
-		description: "Header row with whitespace trimmed",
-		input: '  A , B  ,  C  \r\na,b,c',
+		description: "Header rows are trimmed when trimHeaders is set",
+		input: '  A , B  ,  C  \r\na,b ,c',
 		config: { header: true, trimHeaders: true },
 		expected: {
-			data: [{"A": "a", "B": "b", "C": "c"}],
+			data: [{"A": "a", "B": "b ", "C": "c"}],
 			errors: []
 		}
 	},
