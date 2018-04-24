@@ -2,12 +2,11 @@
 	<head>
 		<title>Papa Parse Tests</title>
 		<meta charset="utf-8">
+		<script src="../node_modules/mocha/mocha.js"></script>
 		<link rel="stylesheet" href="../node_modules/mocha/mocha.css" />
-		<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
 		<script src="../papaparse.js"></script>
 
 		<script src="http://chaijs.com/chai.js"></script>
-		<script src="../node_modules/mocha/mocha.js"></script>
 
 		<script>mocha.setup('bdd')</script>
 		<script src="test-cases.js"></script>
@@ -21,7 +20,6 @@
 
 		} else {
 			mocha.checkLeaks();
-			mocha.globals(['jQuery']);
 			mocha.run();
 		}
 	</script>
