@@ -17,14 +17,14 @@
 		// Node. Does not work with strict CommonJS, but
 		// only CommonJS-like environments that support module.exports,
 		// like Node.
-		module.exports = factory();
+		module.exports = factory(require('stream'));
 	}
 	else
 	{
 		// Browser globals (root is window)
 		root.Papa = factory();
 	}
-}(this, function()
+}(this, function(streamModule)
 {
 	'use strict';
 
@@ -71,6 +71,7 @@
 	Papa.FileStreamer = FileStreamer;
 	Papa.StringStreamer = StringStreamer;
 	Papa.ReadableStreamStreamer = ReadableStreamStreamer;
+	Papa.createDuplexStream = createDuplexStream;
 
 	if (global.jQuery)
 	{
@@ -228,7 +229,13 @@
 		}
 
 		var streamer = null;
-		if (typeof _input === 'string')
+		if (_input === null && typeof streamModule !== 'undefined')
+		{
+			// create a node Duplex stream for use
+			// with .pipe
+			return createDuplexStream(_config);
+		}
+		else if (typeof _input === 'string')
 		{
 			if (_config.download)
 				streamer = new NetworkStreamer(_config);
@@ -838,6 +845,46 @@
 	ReadableStreamStreamer.prototype = Object.create(ChunkStreamer.prototype);
 	ReadableStreamStreamer.prototype.constructor = ReadableStreamStreamer;
 
+	function createDuplexStream(_config) {
+		var config = copy(_config);
+		config.step = function(results) {
+			results.data.forEach(function(item) {
+				duplexStream.push(item);
+			});
+		};
+		config.complete = function() {
+			duplexStream.push(null);
+		};
+
+		var chunkStreamer = new ChunkStreamer(config);
+
+		chunkStreamer._nextChunk = function() {
+			// empty function since this
+			// logic is handled by the Duplex class
+		};
+
+		// streamModule from node must exist
+		// for this to run
+		var duplexStream = new streamModule.Duplex({
+			readableObjectMode: true,
+			decodeStrings: false,
+			read: function(size) {
+				// since pausing controls the input into the parser
+				// we do not need to re-trigger the parser to continue
+			},
+			write: function(chunk, encoding, callback) {
+				chunkStreamer.parseChunk(typeof chunk === 'string' ? chunk : chunk.toString(config.encoding));
+				callback();
+			},
+			'final': function(callback) {
+				chunkStreamer._finished = true;
+				chunkStreamer.parseChunk('');
+				callback();
+			}
+		});
+
+		return duplexStream;
+	}
 
 	// Use one ParserHandle per entire CSV file or string
 	function ParserHandle(_config)

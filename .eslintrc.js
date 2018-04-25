@@ -42,7 +42,7 @@ module.exports = {
 		"consistent-this": "off",
 		"curly": "off",
 		"default-case": "error",
-		"dot-location": "error",
+		"dot-location": "off",
 		"dot-notation": "error",
 		"eol-last": "error",
 		"eqeqeq": "error",
