@@ -922,9 +922,6 @@
 
 		this._onWrite = function(chunk, encoding, callback)
 		{
-			if (chunk === null) {
-				console.log('final');
-			}
 			this._addToParseQueue(chunk, callback);
 		};
 
