@@ -850,11 +850,11 @@
 
 	function DuplexStreamStreamer(_config) {
 		var Duplex = require('stream').Duplex;
+		var config = copy(_config);
 		var parseOnWrite = true;
 		var writeStreamHasFinished = false;
 		var parseCallbackQueue = [];
 		var stream = null;
-		var config = copy(_config);
 
 		this._onCsvData = function(results)
 		{
@@ -873,7 +873,7 @@
 		{
 			stream.push(null);
 		};
-
+		
 		config.step = bindFunction(this._onCsvData, this);
 		config.complete = bindFunction(this._onCsvComplete, this);
 		ChunkStreamer.call(this, config);
