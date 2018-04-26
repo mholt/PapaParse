@@ -58,6 +58,7 @@
 	Papa.BAD_DELIMITERS = ['\r', '\n', '"', Papa.BYTE_ORDER_MARK];
 	Papa.WORKERS_SUPPORTED = !IS_WORKER && !!global.Worker;
 	Papa.SCRIPT_PATH = null;	// Must be set by your code if you use workers and this lib is loaded asynchronously
+	Papa.NODE_STREAM_INPUT = {};
 
 	// Configurable chunk sizes for local and remote files, respectively
 	Papa.LocalChunkSize = 1024 * 1024 * 10;	// 10 MB
@@ -229,7 +230,7 @@
 		}
 
 		var streamer = null;
-		if (_input === null && typeof streamModule !== 'undefined')
+		if (_input === Papa.NODE_STREAM_INPUT)
 		{
 			// create a node Duplex stream for use
 			// with .pipe
@@ -865,7 +866,8 @@
 
 		// streamModule from node must exist
 		// for this to run
-		var duplexStream = new streamModule.Duplex({
+		var stream = require('stream');
+		var duplexStream = new stream.Duplex({
 			readableObjectMode: true,
 			decodeStrings: false,
 			read: function(size) {

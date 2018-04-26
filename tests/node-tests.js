@@ -62,7 +62,7 @@ describe('PapaParse', function() {
 	it('piped streaming CSV should be correctly parsed', function(done) {
 		var data = [];
 		fs.createReadStream(__dirname + '/long-sample.csv', 'utf8')
-			.pipe(Papa.parse(null))
+			.pipe(Papa.parse(Papa.NODE_STREAM_INPUT))
 			.on('data', function(item) {
 				data.push(item);
 			})
