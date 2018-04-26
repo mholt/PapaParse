@@ -850,7 +850,6 @@
 
 	function DuplexStreamStreamer(_config) {
 		var Duplex = require('stream').Duplex;
-		// var self = this;
 		var config = copy(_config);
 		var parseOnWrite = true;
 		var writeStreamHasFinished = false;
@@ -872,6 +871,8 @@
 
 		this._onCsvComplete = function()
 		{
+			// node will finish the read stream when
+			// null is pushed
 			stream.push(null);
 		};
 
