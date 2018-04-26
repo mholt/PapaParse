@@ -17,14 +17,14 @@
 		// Node. Does not work with strict CommonJS, but
 		// only CommonJS-like environments that support module.exports,
 		// like Node.
-		module.exports = factory(require('stream'));
+		module.exports = factory();
 	}
 	else
 	{
 		// Browser globals (root is window)
 		root.Papa = factory();
 	}
-}(this, function(streamModule)
+}(this, function()
 {
 	'use strict';
 
@@ -864,10 +864,10 @@
 			// logic is handled by the Duplex class
 		};
 
-		// streamModule from node must exist
+		// stream module from node must exist
 		// for this to run
-		var stream = require('stream');
-		var duplexStream = new stream.Duplex({
+		var Duplex = require('stream').Duplex;
+		var duplexStream = new Duplex({
 			readableObjectMode: true,
 			decodeStrings: false,
 			read: function(size) {
