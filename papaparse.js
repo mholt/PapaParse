@@ -850,6 +850,7 @@
 
 	function DuplexStreamStreamer(_config) {
 		var Duplex = require('stream').Duplex;
+		// var self = this;
 		var config = copy(_config);
 		var parseOnWrite = true;
 		var writeStreamHasFinished = false;
@@ -920,30 +921,31 @@
 
 		this._onWrite = function(chunk, encoding, callback)
 		{
+			if (chunk === null) {
+				console.log('final');
+			}
 			this._addToParseQueue(chunk, callback);
 		};
 
-		this._onWriteComplete = function(callback)
+		this._onWriteComplete = function()
 		{
 			writeStreamHasFinished = true;
 			// have to write empty string
 			// so parser knows its done
 			this._addToParseQueue('');
-			callback();
 		};
 
 		this.getStream = function()
 		{
 			return stream;
 		};
-
 		stream = new Duplex({
 			readableObjectMode: true,
 			decodeStrings: false,
 			read: bindFunction(this._onRead, this),
-			write: bindFunction(this._onWrite, this),
-			'final': bindFunction(this._onWriteComplete, this)
+			write: bindFunction(this._onWrite, this)
 		});
+		stream.once('finish', bindFunction(this._onWriteComplete, this));
 	}
 	DuplexStreamStreamer.prototype = Object.create(ChunkStreamer.prototype);
 	DuplexStreamStreamer.prototype.constructor = DuplexStreamStreamer;
