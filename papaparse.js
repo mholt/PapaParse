@@ -890,7 +890,8 @@
 			}
 		};
 
-		this._addToParseQueue = function(chunk, callback) {
+		this._addToParseQueue = function(chunk, callback)
+		{
 			// add to queue so that we can indicate
 			// completion via callback
 			// node will automatically pause the incoming stream
