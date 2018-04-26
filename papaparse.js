@@ -873,7 +873,7 @@
 		{
 			stream.push(null);
 		};
-		
+
 		config.step = bindFunction(this._onCsvData, this);
 		config.complete = bindFunction(this._onCsvComplete, this);
 		ChunkStreamer.call(this, config);
