@@ -68,9 +68,11 @@ $(function()
 	{
 		var input = $('#input').val();
 		var delim = $('#delimiter').val();
+		var header = $('#header').prop('checked');
 
 		var results = Papa.unparse(input, {
-			delimiter: delim
+			delimiter: delim,
+			header: header,
 		});
 
 		console.log("Unparse complete!");
