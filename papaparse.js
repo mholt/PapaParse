@@ -1632,7 +1632,7 @@
 	/** Makes a deep copy of an array or object (mostly) */
 	function copy(obj)
 	{
-		if (typeof obj !== 'object')
+		if (typeof obj !== 'object' || obj === null)
 			return obj;
 		var cpy = obj instanceof Array ? [] : {};
 		for (var key in obj)
