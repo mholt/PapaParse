@@ -1465,7 +1465,7 @@ var CUSTOM_TESTS = [
 		run: function(callback) {
 			Papa.parse('A,b,c', {
 				step: function(response) {
-					callback(response.data[0]);
+					callback(response.data);
 				}
 			});
 		}
@@ -1702,7 +1702,7 @@ var CUSTOM_TESTS = [
 			var updates = [];
 			Papa.parse('A,b,c\nd,E,f\nG,h,i', {
 				step: function(response, handle) {
-					updates.push(response.data[0]);
+					updates.push(response.data);
 					handle.abort();
 					callback(updates);
 				},
@@ -1732,7 +1732,7 @@ var CUSTOM_TESTS = [
 			var updates = [];
 			Papa.parse('A,b,c\nd,E,f\nG,h,i', {
 				step: function(response, handle) {
-					updates.push(response.data[0]);
+					updates.push(response.data);
 					handle.pause();
 					callback(updates);
 				},
@@ -1751,7 +1751,7 @@ var CUSTOM_TESTS = [
 			var first = true;
 			Papa.parse('A,b,c\nd,E,f\nG,h,i', {
 				step: function(response, h) {
-					updates.push(response.data[0]);
+					updates.push(response.data);
 					if (!first) return;
 					handle = h;
 					handle.pause();
