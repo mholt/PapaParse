@@ -898,7 +898,7 @@
 			_delimiterError = false;
 			if (!_config.delimiter)
 			{
-				var delimGuess = guessDelimiter(input, _config.newline, _config.skipEmptyLines);
+				var delimGuess = guessDelimiter(input, _config.newline, _config.skipEmptyLines, _config.comments);
 				if (delimGuess.successful)
 					_config.delimiter = delimGuess.bestDelimiter;
 				else
@@ -1073,7 +1073,7 @@
 			return _results;
 		}
 
-		function guessDelimiter(input, newline, skipEmptyLines)
+		function guessDelimiter(input, newline, skipEmptyLines, comments)
 		{
 			var delimChoices = [',', '\t', '|', ';', Papa.RECORD_SEP, Papa.UNIT_SEP];
 			var bestDelim, bestDelta, fieldCountPrevRow;
@@ -1085,6 +1085,7 @@
 				fieldCountPrevRow = undefined;
 
 				var preview = new Parser({
+					comments: comments,
 					delimiter: delim,
 					newline: newline,
 					preview: 10

@@ -1091,6 +1091,26 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Lines with comments are not used when guessing the delimiter in an escaped file",
+		notes: "Guessing the delimiter should work even if there are many lines of comments at the start of the file",
+		input: '#1\n#2\n#3\n#4\n#5\n#6\n#7\n#8\n#9\n#10\none,"t,w,o",three\nfour,five,six',
+		config: { comments: '#' },
+		expected: {
+			data: [['one','t,w,o','three'],['four','five','six']],
+			errors: []
+		}
+	},
+	{
+		description: "Lines with comments are not used when guessing the delimiter in a non-escaped file",
+		notes: "Guessing the delimiter should work even if there are many lines of comments at the start of the file",
+		input: '#1\n#2\n#3\n#4\n#5\n#6\n#7\n#8\n#9\n#10\n#11\none,two,three\nfour,five,six',
+		config: { comments: '#' },
+		expected: {
+			data: [['one','two','three'],['four','five','six']],
+			errors: []
+		}
+	},
+	{
 		description: "Single quote as quote character",
 		notes: "Must parse correctly when single quote is specified as a quote character",
 		input: "a,b,'c,d'",
