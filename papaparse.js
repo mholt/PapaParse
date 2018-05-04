@@ -203,6 +203,8 @@
 		}
 		_config.dynamicTyping = dynamicTyping;
 
+		_config.transform = isFunction(_config.transform) ? _config.transform : false;
+
 		if (_config.worker && Papa.WORKERS_SUPPORTED)
 		{
 			var w = newWorker();
@@ -976,7 +978,7 @@
 			if (needsHeaderRow())
 				fillHeaderFields();
 
-			return applyHeaderAndDynamicTyping();
+			return applyHeaderAndDynamicTypingAndTransformation();
 		}
 
 		function needsHeaderRow()
@@ -1028,9 +1030,21 @@
 			return value;
 		}
 
-		function applyHeaderAndDynamicTyping()
+		function parseTransform(field, value) {
+			if (_config.transform) {
+				if (_config.transform.length === 1) {
+					return _config.transform(value);
+				} else {
+					return _config.transform(field,value);
+				}
+			} else {
+				return value;
+			}
+		}
+
+		function applyHeaderAndDynamicTypingAndTransformation()
 		{
-			if (!_results || (!_config.header && !_config.dynamicTyping))
+			if (!_results || (!_config.header && !_config.dynamicTyping && !_config.transform))
 				return _results;
 
 			for (var i = 0; i < _results.data.length; i++)
@@ -1046,6 +1060,7 @@
 					if (_config.header)
 						field = j >= _fields.length ? '__parsed_extra' : _fields[j];
 
+					value = parseTransform(field, value);
 					value = parseDynamic(field, value);
 
 					if (field === '__parsed_extra')
