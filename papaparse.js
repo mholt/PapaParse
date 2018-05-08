@@ -408,6 +408,9 @@
 			if (typeof str === 'undefined' || str === null)
 				return '';
 
+			if (str.constructor === Date)
+				return JSON.stringify(str).slice(1, 25);
+
 			str = str.toString().replace(quoteCharRegex, _quoteChar + _quoteChar);
 
 			var needsQuotes = (typeof _quotes === 'boolean' && _quotes)
@@ -954,6 +957,7 @@
 	{
 		// One goal is to minimize the use of regular expressions...
 		var FLOAT = /^\s*-?(\d*\.?\d+|\d+\.?\d*)(e[-+]?\d+)?\s*$/i;
+		var ISO_DATE = /(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))/;
 
 		var self = this;
 		var _stepCounter = 0;	// Number of times step was called (number of rows parsed)
@@ -1128,12 +1132,12 @@
 					return true;
 				else if (value === 'false' || value === 'FALSE')
 					return false;
-				else if(FLOAT.test(value)) {
+				else if (FLOAT.test(value))
 					return parseFloat(value);
-				}
-				else {
+				else if (ISO_DATE.test(value))
+					return new Date(value);
+				else
 					return (value === '' ? null : value);
-				}
 			}
 			return value;
 		}
