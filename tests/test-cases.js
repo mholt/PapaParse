@@ -886,6 +886,15 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Dynamic typing converts ISO date strings to Dates",
+		input: 'ISO date,long date\r\n2018-05-04T21:08:03.269Z,Fri May 04 2018 14:08:03 GMT-0700 (PDT)\r\n2018-05-08T15:20:22.642Z,Tue May 08 2018 08:20:22 GMT-0700 (PDT)',
+		config: { dynamicTyping: true },
+		expected: {
+			data: [["ISO date", "long date"], [new Date("2018-05-04T21:08:03.269Z"), "Fri May 04 2018 14:08:03 GMT-0700 (PDT)"], [new Date("2018-05-08T15:20:22.642Z"), "Tue May 08 2018 08:20:22 GMT-0700 (PDT)"]],
+			errors: []
+		}
+	},
+	{
 		description: "Blank line at beginning",
 		input: '\r\na,b,c\r\nd,e,f',
 		config: { newline: '\r\n' },
@@ -1435,6 +1444,11 @@ var UNPARSE_TESTS = [
 		input: [{"Col1": "a", "Col2": "b", "Col3": "c"}, {"Col1": "d", "Col2": "e", "Col3": "f"}],
 		config: {header: false},
 		expected: 'a,b,c\r\nd,e,f'
+	},
+	{
+		description: "Date handling",
+		input: [{date: new Date("2018-05-04T21:08:03.269Z"), "not a date": 16}, {date: new Date("Tue May 08 2018 08:20:22 GMT-0700 (PDT)"), "not a date": 32}],
+		expected: 'date,not a date\r\n2018-05-04T21:08:03.269Z,16\r\n2018-05-08T15:20:22.000Z,32'
 	}
 ];
 
