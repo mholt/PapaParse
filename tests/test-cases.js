@@ -873,62 +873,15 @@ var PARSE_TESTS = [
 		}
 	},
 	{
-		description: "Custom transform function converts all true and false strings to booleans regardless of case",
-		input: '"true","false","T","F"\r\n"TRUE","FALSE","True","False"',
+		description: "Custom transform function is applied to values",
+		input: 'A,B,C\r\nd,e,f',
 		config: {
 			transform: function(value) {
-				if(typeof value === "string" && value.toLowerCase() === "true") return true;
-				if(typeof value === "string" && value.toLowerCase() === "false") return false;
-				return value;
+				return value.toLowerCase();
 			}
 		},
 		expected: {
-			data: [[true,false,"T","F"], [true, false, true, false]],
-			errors: []
-		}
-	},
-	{
-		description: "Custom transform function converts leading zero strings to number and empty strings to NULL",
-		input: '001,002,003\r\n,null,undefined',
-		config: {
-			transform: function(value) {
-				if ((/^\s*-?(\d*\.?\d+|\d+\.?\d*)(e[-+]?\d+)?\s*$/i).test(value)) {
-					return Number.parseFloat(value);
-				} else if (value === "") {
-					return null;
-				}
-				return value;
-			}
-		},
-		expected: {
-			data: [[1,2,3], [null,"null","undefined"]],
-			errors: []
-		}
-	},
-	{
-		description: "Custom transform function uses cache to determine whether to act on column",
-		input: 'A,B,C\r\n1,2,3\r\n4,5,6',
-		config: {
-			transform: function(field,value) {
-				if (!this.transformCache) {
-					this.transformCache = {};
-				} else if (this.transformCache[field] === true) {
-					return value + ".0";
-				} else if (this.transformCache[field] === false) {
-					return value;
-				}
-
-				if (field > 0) {
-					this.transformCache[field] = true;
-					return value + ".0";
-				} else {
-					this.transformCache[field] = false;
-					return value;
-				}
-			}
-		},
-		expected: {
-			data: [["A","B.0","C.0"], ["1","2.0","3.0"], ["4","5.0","6.0"]],
+			data: [["a","b","c"], ["d","e","f"]],
 			errors: []
 		}
 	},

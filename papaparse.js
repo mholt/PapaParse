@@ -1032,11 +1032,7 @@
 
 		function parseTransform(field, value) {
 			if (_config.transform) {
-				if (_config.transform.length === 1) {
-					return _config.transform(value);
-				} else {
-					return _config.transform(field,value);
-				}
+				return _config.transform(value,field);
 			} else {
 				return value;
 			}
