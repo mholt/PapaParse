@@ -59,6 +59,43 @@ describe('PapaParse', function() {
 		});
 	});
 
+	it('reports the correct row number on FieldMismatch errors', function(done) {
+		Papa.parse(fs.createReadStream(__dirname + '/verylong-sample.csv'), {
+			header: true,
+			fastMode: true,
+			complete: function(parsedCsv) {
+				assert.deepEqual(parsedCsv.errors, [
+					{
+						"type": "FieldMismatch",
+						"code": "TooFewFields",
+						"message": "Too few fields: expected 3 fields but parsed 2",
+						"row": 498
+					},
+					{
+						"type": "FieldMismatch",
+						"code": "TooFewFields",
+						"message": "Too few fields: expected 3 fields but parsed 2",
+						"row": 998
+					},
+					{
+						"type": "FieldMismatch",
+						"code": "TooFewFields",
+						"message": "Too few fields: expected 3 fields but parsed 2",
+						"row": 1498
+					},
+					{
+						"type": "FieldMismatch",
+						"code": "TooFewFields",
+						"message": "Too few fields: expected 3 fields but parsed 2",
+						"row": 1998
+					}
+				]);
+				assert.strictEqual(2000, parsedCsv.data.length);
+				done();
+			},
+		});
+	});
+
 	it('piped streaming CSV should be correctly parsed', function(done) {
 		var data = [];
 		var readStream = fs.createReadStream(__dirname + '/long-sample.csv', 'utf8');
