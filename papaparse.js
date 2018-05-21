@@ -957,7 +957,7 @@
 
 		var self = this;
 		var _stepCounter = 0;	// Number of times step was called (number of rows parsed)
-		var _rowsCounter = 0;	// Total number of rows that have been parsed so far
+		var _rowCounter = 0;	// Number of rows that have been parsed so far
 		var _input;				// The input being parsed
 		var _parser;			// The core parser being used
 		var _paused = false;	// Whether we are paused or not
@@ -1173,16 +1173,16 @@
 				if (_config.header)
 				{
 					if (j > _fields.length)
-						addError('FieldMismatch', 'TooManyFields', 'Too many fields: expected ' + _fields.length + ' fields but parsed ' + j, _rowsCounter + i);
+						addError('FieldMismatch', 'TooManyFields', 'Too many fields: expected ' + _fields.length + ' fields but parsed ' + j, _rowCounter + i);
 					else if (j < _fields.length)
-						addError('FieldMismatch', 'TooFewFields', 'Too few fields: expected ' + _fields.length + ' fields but parsed ' + j, _rowsCounter + i);
+						addError('FieldMismatch', 'TooFewFields', 'Too few fields: expected ' + _fields.length + ' fields but parsed ' + j, _rowCounter + i);
 				}
 			}
 
 			if (_config.header && _results.meta)
 				_results.meta.fields = _fields;
 
-			_rowsCounter += _results.data.length;
+			_rowCounter += _results.data.length;
 			return _results;
 		}
 
