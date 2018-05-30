@@ -27,6 +27,12 @@
 
 var peopleLovePapa = [
 	{
+		link: "https://www.circlehd.com",
+		name: "CircleHD Enterprise Video Platform",
+		description: "Makes provisioning users easy as cake in CircleHD",
+		quote: "Papa made it easy for our React devs to be able to import and parse the user data files in CSV format, all in browser."
+	},
+	{
 		link: "https://smartystreets.com",
 		name: "SmartyStreets",
 		description: "verifies addresses, many of which are submitted in CSV files. Papa Parse can process files with over a million addresses in the browser.",
