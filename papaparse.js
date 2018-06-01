@@ -408,7 +408,7 @@
 			if (typeof str === 'undefined' || str === null)
 				return '';
 
-			if (str.constructor === Date)
+			if (str instanceof Date)
 				return JSON.stringify(str).slice(1, 25);
 
 			str = str.toString().replace(quoteCharRegex, _quoteChar + _quoteChar);
