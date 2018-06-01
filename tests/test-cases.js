@@ -331,6 +331,46 @@ var CORE_PARSER_TESTS = [
 		}
 	},
 	{
+		description: "Line ends with quoted field, first field of next line is empty, \\n",
+		input: 'a,b,c\n,e,f\n,"h","i"\n,"k","l"',
+		config: {
+			newline: '\n',
+		},
+		expected: {
+			data: [['a', 'b', 'c'], ['', 'e', 'f'], ['', 'h', 'i'], ['', 'k', 'l']],
+			errors: []
+		}
+        },
+	{
+		description: "Line ends with quoted field, first field of next line is empty, \\r\\n",
+		input: 'a,b,c\r\n,e,f\r\n,"h","i"\r\n,"k","l"',
+		config: {
+			newline: '\r\n',
+		},
+		expected: {
+			data: [['a', 'b', 'c'], ['', 'e', 'f'], ['', 'h', 'i'], ['', 'k', 'l']],
+			errors: []
+		}
+	},
+	{
+		description: "Line ends with quoted field (longer), \\r\\n",
+		input: 'Task_TaskID,Task_Description,Task_BudgetHours,Task_Reference,Project_ProjectCode,Project_Description,Customer_CustomerCode,Customer_Name\r\n,"",,"","","","ABCDE","ABCDE Consulting"\r\n,"",,"","","","FGHIJ","FGHIJ Limited (Pty)"\r\n,"",,"","","","KLUMN","KLUMN"\r\n,"",,"","","","OPQRS","OPQRS Ltd"\r\n,"",,"","","","TUVWX","TUVWX Pty Ltd"',
+		config: {
+			newline: '\r\n',
+		},
+		expected: {
+			data: [
+				['Task_TaskID','Task_Description','Task_BudgetHours','Task_Reference','Project_ProjectCode','Project_Description','Customer_CustomerCode','Customer_Name'],
+				['','','','','','','ABCDE','ABCDE Consulting'],
+				['','','','','','','FGHIJ','FGHIJ Limited (Pty)'],
+				['','','','','','','KLUMN','KLUMN'],
+				['','','','','','','OPQRS','OPQRS Ltd'],
+				['','','','','','','TUVWX','TUVWX Pty Ltd'],
+			],
+			errors: []
+		}
+	},
+	{
 		description: "Quoted field at end of row (but not at EOF) has quotes",
 		input: 'a,b,"c""c"""\nd,e,f',
 		expected: {
@@ -647,6 +687,22 @@ var PARSE_TESTS = [
 		input: 'A,"B" ,C,"D" \r\nE,F,"G"  ,"H"  \r\nQ,W,"E" ,R',
 		expected: {
 			data: [['A', 'B', 'C','D'],['E', 'F', 'G','H'],['Q', 'W', 'E','R']],
+			errors: []
+		}
+	},
+	{
+		description: "Line ends with quoted field, first field of next line is empty \\r\\n",
+		input: 'a,b,"c"\r\nd,e,"f"\r\n,"h","i"\r\n,"k","l"',
+		config: {
+			header: true,
+			newline: '\r\n',
+		},
+		expected: {
+			data: [
+				{a: 'd', b: 'e', c: 'f'},
+				{a: '', b: 'h', c: 'i'},
+				{a: '', b: 'k', c: 'l'}
+			],
 			errors: []
 		}
 	},
