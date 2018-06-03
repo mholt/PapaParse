@@ -354,7 +354,8 @@ var csv = Papa.unparse({
 	chunk: undefined,
 	fastMode: undefined,
 	beforeFirstChunk: undefined,
-	withCredentials: undefined
+	withCredentials: undefined,
+	transform: undefined
 }</code></pre>
 					</div>
 					<div class="clear"></div>
@@ -537,6 +538,14 @@ var csv = Papa.unparse({
 								</td>
 								<td>
 									A boolean value passed directly into XMLHttpRequest's "withCredentials" property.
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<code>transform</code>
+								</td>
+								<td>
+									A function to apply on each value. The function receives the value as its first argument and the column number as its second argument. The return value of the function will replace the value it received. The transform function is applied before dynamicTyping.
 								</td>
 							</tr>
 						</table>
