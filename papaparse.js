@@ -1030,14 +1030,6 @@
 			return value;
 		}
 
-		function parseTransform(field, value) {
-			if (_config.transform) {
-				return _config.transform(value,field);
-			} else {
-				return value;
-			}
-		}
-
 		function applyHeaderAndDynamicTypingAndTransformation()
 		{
 			if (!_results || (!_config.header && !_config.dynamicTyping && !_config.transform))
@@ -1056,7 +1048,9 @@
 					if (_config.header)
 						field = j >= _fields.length ? '__parsed_extra' : _fields[j];
 
-					value = parseTransform(field, value);
+					if (_config.transform)
+						value = _config.transform(value,field);
+
 					value = parseDynamic(field, value);
 
 					if (field === '__parsed_extra')
