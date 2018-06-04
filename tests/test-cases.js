@@ -873,6 +873,19 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Custom transform function is applied to values",
+		input: 'A,B,C\r\nd,e,f',
+		config: {
+			transform: function(value) {
+				return value.toLowerCase();
+			}
+		},
+		expected: {
+			data: [["a","b","c"], ["d","e","f"]],
+			errors: []
+		}
+	},
+	{
 		description: "Blank line at beginning",
 		input: '\r\na,b,c\r\nd,e,f',
 		config: { newline: '\r\n' },

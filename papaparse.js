@@ -205,6 +205,8 @@
 		}
 		_config.dynamicTyping = dynamicTyping;
 
+		_config.transform = isFunction(_config.transform) ? _config.transform : false;
+
 		if (_config.worker && Papa.WORKERS_SUPPORTED)
 		{
 			var w = newWorker();
@@ -1087,7 +1089,7 @@
 			if (needsHeaderRow())
 				fillHeaderFields();
 
-			return applyHeaderAndDynamicTyping();
+			return applyHeaderAndDynamicTypingAndTransformation();
 		}
 
 		function needsHeaderRow()
@@ -1139,9 +1141,9 @@
 			return value;
 		}
 
-		function applyHeaderAndDynamicTyping()
+		function applyHeaderAndDynamicTypingAndTransformation()
 		{
-			if (!_results || (!_config.header && !_config.dynamicTyping))
+			if (!_results || (!_config.header && !_config.dynamicTyping && !_config.transform))
 				return _results;
 
 			for (var i = 0; i < _results.data.length; i++)
@@ -1156,6 +1158,9 @@
 
 					if (_config.header)
 						field = j >= _fields.length ? '__parsed_extra' : _fields[j];
+
+					if (_config.transform)
+						value = _config.transform(value,field);
 
 					value = parseDynamic(field, value);
 
