@@ -872,6 +872,17 @@ var PARSE_TESTS = [
 			errors: []
 		}
 	},
+  {
+		description: "Custom transform function is applied to values",
+		input: 'A,B,C\r\nd,e,f',
+		config: {
+			transform: function(value) {
+				return value.toLowerCase();
+			}
+		},
+		expected: {
+			data: [["a","b","c"], ["d","e","f"]],
+    },    
 	{
 		description: "Dynamic typing converts ISO date strings to Dates",
 		input: 'ISO date,long date\r\n2018-05-04T21:08:03.269Z,Fri May 04 2018 14:08:03 GMT-0700 (PDT)\r\n2018-05-08T15:20:22.642Z,Tue May 08 2018 08:20:22 GMT-0700 (PDT)',
