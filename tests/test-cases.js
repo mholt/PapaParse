@@ -1446,7 +1446,7 @@ var UNPARSE_TESTS = [
 		expected: 'a,b,c\r\nd,e,f'
 	},
 	{
-		description: "Date handling",
+		description: "Date objects are exported in its ISO representation",
 		input: [{date: new Date("2018-05-04T21:08:03.269Z"), "not a date": 16}, {date: new Date("Tue May 08 2018 08:20:22 GMT-0700 (PDT)"), "not a date": 32}],
 		expected: 'date,not a date\r\n2018-05-04T21:08:03.269Z,16\r\n2018-05-08T15:20:22.000Z,32'
 	}
