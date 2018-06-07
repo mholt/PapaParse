@@ -1448,9 +1448,11 @@
 							continue;
 						}
 
-						var spacesBetweenQuoteAndDelimiter = extraSpaces(nextDelim);
+						// Check up to nextDelim or nextNewline, whichever is closest
+						var checkUpTo = nextNewline === -1 ? nextDelim : Math.min(nextDelim, nextNewline);
+						var spacesBetweenQuoteAndDelimiter = extraSpaces(checkUpTo);
 
-						// Closing quote followed by delimiter or 'unnecessary steps + delimiter'
+						// Closing quote followed by delimiter or 'unnecessary spaces + delimiter'
 						if (input[quoteSearch + 1 + spacesBetweenQuoteAndDelimiter] === delim)
 						{
 							row.push(input.substring(cursor, quoteSearch).replace(quoteCharRegex, quoteChar));
