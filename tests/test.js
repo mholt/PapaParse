@@ -10,7 +10,7 @@ var server = connect().use(serveStatic(path.join(__dirname, '/..'))).listen(8071
 			stdio: 'inherit'
 		}).on('exit', function(code) {
 			server.close();
-			process.exit(code)
+			process.exit(code);  // eslint-disable-line no-process-exit
 		});
 
 	} else {
