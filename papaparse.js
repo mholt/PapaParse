@@ -271,7 +271,7 @@
 		/** whether to write headers */
 		var _writeHeader = true;
 
-		/** delimiting character */
+		/** delimiting character(s) */
 		var _delimiter = ',';
 
 		/** newline character(s) */
