@@ -1397,6 +1397,12 @@ var UNPARSE_TESTS = [
 		expected: 'a' + RECORD_SEP + 'b' + RECORD_SEP + 'c\r\nd' + RECORD_SEP + 'e' + RECORD_SEP + 'f'
 	},
 	{
+		description: "Custom delimiter (Multi-character)",
+		input: [['A', 'b', 'c'], ['d', 'e', 'f']],
+		config: { delimiter: ', ' },
+		expected: 'A, b, c\r\nd, e, f'
+	},
+	{
 		description: "Bad delimiter (\\n)",
 		notes: "Should default to comma",
 		input: [['a', 'b', 'c'], ['d', 'e', 'f']],

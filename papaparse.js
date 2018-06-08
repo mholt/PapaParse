@@ -326,9 +326,10 @@
 				return;
 
 			if (typeof _config.delimiter === 'string'
-				&& _config.delimiter.length === 1
-				&& Papa.BAD_DELIMITERS.indexOf(_config.delimiter) === -1)
+                && !Papa.BAD_DELIMITERS.filter(function(value) { return _config.delimiter.includes(value); }).length)
 			{
+				// We have a string as config and it does not contains any
+				// of the invalid delimiters.
 				_delimiter = _config.delimiter;
 			}
 
