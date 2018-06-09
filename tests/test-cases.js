@@ -167,10 +167,10 @@ var CORE_PARSER_TESTS = [
 	},
 	{
 		description: "Quoted field with whitespace around quotes",
-		input: 'A,  "B"  ,"C"  ,  "D",E "F',
+		input: 'A,  "B"  ,"C"  ,  "D",E "F," ""G"" ",H',
 		notes: "The quotes must be immediately adjacent to the delimiter to indicate a quoted field, but there are leading or trailing spaces they are ignored",
 		expected: {
-			data: [['A', 'B', 'C', 'D', 'E "F']],
+			data: [['A', 'B', 'C', 'D', 'E "F',' "G" ', 'H']],
 			errors: []
 		}
 	},
