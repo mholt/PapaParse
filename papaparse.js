@@ -1393,10 +1393,19 @@
 			var nextNewline = input.indexOf(newline, cursor);
 			var quoteCharRegex = new RegExp(escapeChar.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&') + quoteChar, 'g');
 			var quoteSearch;
+			var trailingSpacesRegex = new RegExp('^[ ]+(".*)');
+			var trailingSpacesSearch;
 
 			// Parser loop
 			for (;;)
 			{
+				trailingSpacesSearch = input.substring(cursor).match(trailingSpacesRegex);
+				if (trailingSpacesSearch) {
+					// We have a quoted value with trailing space(s), so we
+					// ignore the spaces.
+					cursor += 1;
+					continue;
+				}
 				// Field has opening quote
 				if (input[cursor] === quoteChar)
 				{
