@@ -271,7 +271,7 @@
 		/** whether to write headers */
 		var _writeHeader = true;
 
-		/** delimiting character */
+		/** delimiting character(s) */
 		var _delimiter = ',';
 
 		/** newline character(s) */
@@ -326,8 +326,7 @@
 				return;
 
 			if (typeof _config.delimiter === 'string'
-				&& _config.delimiter.length === 1
-				&& Papa.BAD_DELIMITERS.indexOf(_config.delimiter) === -1)
+                && !Papa.BAD_DELIMITERS.filter(function(value) { return _config.delimiter.indexOf(value) !== -1; }).length)
 			{
 				_delimiter = _config.delimiter;
 			}
