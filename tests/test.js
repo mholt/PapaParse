@@ -8,8 +8,9 @@ var server = connect().use(serveStatic(path.join(__dirname, '/..'))).listen(8071
 	if (process.argv.indexOf('--phantomjs') !== -1) {
 		childProcess.spawn('node_modules/.bin/mocha-phantomjs', ['http://localhost:8071/tests/tests.html'], {
 			stdio: 'inherit'
-		}).on('exit', function() {
+		}).on('exit', function(code) {
 			server.close();
+			process.exit(code);  // eslint-disable-line no-process-exit
 		});
 
 	} else {
