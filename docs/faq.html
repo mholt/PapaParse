@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>FAQ - Papa Parse</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, maximum-scale=1.0">
+		<meta name="theme-color" content="#ffffff">
+		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css">
+		<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Arvo|Source+Sans+Pro:400,400italic,700|Lato:300,400">
+		<link rel="stylesheet" href="/resources/css/unsemantic.css">
+		<link rel="stylesheet" href="/resources/css/tomorrow.highlight.css">
+		<link rel="stylesheet" href="/resources/css/common.css">
+		<script src="/resources/js/jquery.min.js"></script>
+		<script src="/resources/js/highlight.min.js"></script>
+		<script src="/resources/js/common.js"></script>
+		<script>hljs.initHighlightingOnLoad();</script>
+	</head>
+	<body>
+
+
+		<main>
+			<header>
+				<div class="grid-container">
+					<div class="grid-40 mobile-grid-50">
+						<div class="links">
+							<a href="/demo">
+								<i class="fa fa-magic fa-lg"></i> Demo
+							</a>
+							<a href="/docs">
+								<i class="fa fa-book fa-lg"></i> Docs
+							</a>
+							<a href="/faq">
+								<i class="fa fa-question fa-lg"></i> FAQ
+							</a>
+						</div>
+					</div>
+					<div class="grid-20 hide-on-mobile text-center">
+						<a href="/" class="text-logo">Papa Parse 4</a>
+					</div>
+					<div class="grid-40 mobile-grid-50 text-right">
+						<div class="links">
+							<a href="https://github.com/mholt/PapaParse">
+								<i class="fa fa-github fa-lg"></i> GitHub
+							</a>
+							<a href="http://stackoverflow.com/questions/tagged/papaparse">
+								<i class="fa fa-stack-overflow fa-lg"></i> Help
+							</a>
+							<!-- <a href="https://matt.life/pay" class="donate">
+								<i class="fa fa-heart fa-lg"></i> Donate
+							</a> -->
+						</div>
+					</div>
+				</div>
+			</header>
+
+			<h1>FAQ</h1>
+
+
+			<div class="grid-container">
+				<div class="prefix-15 grid-70 suffix-15">
+
+					<h4 id="general">General</h4>
+
+
+					<h6 id="why">Why use Papa Parse?</h6>
+					<p>
+						There's a thousand CSV libraries for Javascript. Papa is different. It's written with correctness and performance in mind. Papa is the first (and so far only) multi-threaded CSV parser that runs on web pages. It can parse files gigabytes in size without crashing the browser. It correctly handles malformed or edge-case CSV text. It can parse files on the local file system or download them over the Internet. Papa is boss.
+					</p>
+					<p>
+						Privacy advocates also use Papa Parse to avoid having to transmit sensitive files over the Internet. Now all the processing can be done locally on the client's computer. This is especially significant considering some organizations' policies.
+					</p>
+					<p>
+						As of version 4, Papa Parse is the <a href="http://jsperf.com/javascript-csv-parsers/4">fastest CSV parser</a> for the browser, whereas it used to be the slowest.
+					</p>
+
+					<h6 id="nodejs">Can I use Papa Parse server-side with Node.js?</h6>
+					<p>Yes, Paparse supports Node. See <a href="https://github.com/mholt/PapaParse/blob/master/README.md#papa-parse-for-node" target="_blank">our README</a>for further details.
+					</p>
+
+					<h6 id="dependencies">Does Papa Parse have any dependencies?</h6>
+					<p>
+						No. Papa Parse has no dependencies. If jQuery is present, however, it plugs in to make it easier to select files from the DOM.
+					</p>
+
+					<h6 id="combine">Can I put other libraries in the same file as Papa Parse?</h6>
+					<p>
+						Yes, but then don't use the Web Worker feature unless your other dependencies are battle-hardened for worker threads. A worker thread loads an entire file, not just a function, so all those dependencies would be executed in an environment without a DOM and other <code>window</code> features. If any of those dependencies crash (<code>Cannot read property "defaultView" of undefined</code> <a href="https://github.com/mholt/PapaParse/issues/114">is</a> <a href="https://github.com/mholt/PapaParse/issues/163">common</a>), the whole worker thread will crash and parsing will not succeed.
+					</p>
+
+
+					<h6 id="browsers">Which browsers is it compatible with?</h6>
+					<p>
+						All modern, competent browsers should support all of the features. However, as usual, use IE at your own risk. It looks like IE 10+ and Safari 6+ should support all the features. Firefox and Chrome should work with all features back to versions 3 and 4. Opera 11 and up should be fine. If you really need to use Papa in old IE or Opera, then keep the fancy features off and you may be in luck.
+					</p>
+
+
+					<h6 id="async">Can Papa Parse be loaded asynchronously (after the page loads)?</h6>
+					<p>
+						Yes. But if you want to use Web Workers, you'll need to specify the relative path to Papa Parse. To do this, set <a href="/docs#readonly">Papa.SCRIPT_PATH</a> to the relative path of the Papa Parse file. In synchronous loading, this is automatically detected.
+					</p>
+
+
+					<h6 id="open-source">Is it open source? (Can I contribute something?)</h6>
+					<p>
+						Yes, please! I don't want to do this all by myself. Head over to the <a href="https://github.com/mholt/PapaParse">GitHub project page</a> and hack away. If you're making a significant change, open an issue first so we can talk about it.
+					</p>
+
+
+
+					<h6 id="fast-mode">What's the deal with fast mode?</h6>
+					<p>
+						Fast mode makes <a href="http://jsperf.com/javascript-csv-parsers/3">Papa Parse screaming fast</a>, but you wouldn't want to use it if there are quoted fields in your input. Fast mode is fast because it makes one major assumption: no quoted fields. If you don't specify fastMode either way, fast mode will be turned on automatically if there are no quote characters in the input. With fast mode on, 1 GB files can be parsed in about 20 seconds.
+					</p>
+
+					<h6 id="encoding">Why do non-ASCII characters look weird?</h6>
+					<p>
+						It's probably an encoding issue. The FileReader API allows you to specify an encoding, which you can do using the <code>encoding</code> configuration property. This property only works with local files and does not apply to strings or remote files. Also see issues <a href="https://github.com/mholt/PapaParse/issues/64">#64</a> and <a href="https://github.com/mholt/PapaParse/issues/169">#169</a> if you're having trouble parsing CSV files generated from Excel.
+					</p>
+
+
+
+
+
+
+
+
+
+					<br><br>
+					<h4 id="streaming">Streaming</h4>
+
+					<h6>Can Papa load and parse huge files?</h6>
+					<p>
+						Yes. Parsing huge text files is facilitated by <i>streaming</i>, where the file is loaded a little bit at a time, parsed, and the results are sent to your <a href="/docs#config">step</a> callback function, row-by-row. You can also get results chunk-by-chunk (which is usually faster) by using the <code>chunk</code> callback function in the same way.
+					</p>
+
+					<h6>How do I stream my input?</h6>
+					<p>
+						Just specify a <a href="/docs#config">step</a> callback function. Results will <i>not</i> be available after parsing is finished, however. You have to inspect the results one row at a time.
+					</p>
+
+					<h6>What if I want more than 1 row at a time?</h6>
+					<p>
+						Use the <code>chunk</code> callback instead. It works just like step, but you get an entire chunk of the file at a time, rather than a single row. Don't try to use step and chunk together (the behavior is undefined).
+					</p>
+
+					<h6>What is a stream and when should I stream files?</h6>
+					<p>
+						A stream is a unique data structure which, given infinite time, gives you infinite space.
+						So if you're short on memory (as browsers often are), use a stream.
+					</p>
+
+					<h6>Wait, does that mean streaming takes more time?</h6>
+					<p>
+						Yes and no. Typically, when we gain speed, we pay with space. The opposite is true, too. Streaming uses significantly less memory with large inputs, but since the reading happens in chunks and results are processed at each row instead of at the very end, yes, it can be slower.
+					</p>
+					<p>
+						But consider the alternative: upload the file to a remote server, open and process it there, then compress the output and have the client download the results. How long does it take you to upload a 500 MB or 1 GB file? Then consider that the server still has to open the file and read its contents, which is what the client would have done minutes ago. The server might parse it faster with natively-compiled binaries, but only if its resources are dedicated to the task and isn't already parsing files for many other users.
+					</p>
+					<p>
+						So unless your clients have <a href="http://google.com/fiber">a fiber line</a> and you have a scalable cloud application, local parsing by streaming is nearly guaranteed to be faster.
+					</p>
+
+					<h6>How do I get all the results together after streaming?</h6>
+					<p>
+						You don't. Unless you assemble it manually. And really, don't do that... it defeats the purpose of using a stream. Just take the parts you need as they come through.
+					</p>
+
+					<h6>Does Papa use a true stream?</h6>
+					<p>
+						Papa uses HTML5's FileReader API which uses a stream. FileReader doesn't technically allow us to hook into the underlying stream, but it does let us load the file in pieces. But fortunately you don't have to worry about that; it's all taken care of for you. Just take the results one row at a time.
+					</p>
+
+					<h6>Can I stream files over a network or the Internet?</h6>
+					<p>
+						Yes, Papa Parse supports this. It will download a file in pieces using HTTP's standard Range header, then pass the parsed results to your step function just like a local file. However, these requests may not work cross-origin (different domain/hostname), depending on the server's configuration.
+					</p>
+
+					<p>
+						Streaming remote files also requires the Content-Range header in the server's response. Most production-ready servers support this header, but Python's SimpleHTTPServer does not. If you need a quick and easy server, <a href="https://caddyserver.com">Caddy</a> will do the trick: <code>$ caddy</code>
+					</p>
+
+					<h6>Can I pause and resume parsing?</h6>
+					<p>
+						Yes, as long as you are streaming and not using a worker. Your <a href="/docs#step">step callback</a> (same with the <code>chunk</code> callback) is passed a parser which has pause, resume, and abort functions. This is exceptionally useful when performing asynchronous actions during parsing, for example, AJAX requests. You can always abort parsing in your callback, even when using workers, but pause and resume is only available without a worker.
+					</p>
+
+
+
+
+
+
+					<br><br>
+					<h4 id="workers">Multi-Threading (Workers)</h4>
+
+					<h6>Can I use workers for unparsing?</h6>
+					<p>
+						No, unparsing CSV files with workers is not currently available. Workers can only be used for parsing CSV files.
+					</p>
+
+					<h6>What is a web worker? Why use one?</h6>
+					<p>
+						<a href="https://developer.mozilla.org/en-US/docs/Web/API/Worker">HTML5 Web Workers</a> facilitate basic multi-threading in the browser. This means that a web page can spawn a new thread in the operating system that runs Javascript code. This is highly beneficial for long-running scripts that would otherwise lock up the web page.
+					</p>
+
+					<h6>How do I use a worker?</h6>
+					<p>
+						Just specify <code>worker: true</code> in your <a href="/docs#config">config</a>. You'll also need to make a <code>complete</code> callback (unless you're streaming) so that you can get the results, because using a worker makes the parse function asynchronous.
+					</p>
+
+					<h6>Can I use a worker if I combine/concatenate my Javascript files?</h6>
+					<p>
+						Probably not. It's safest to concatenate the rest of your dependencies and include Papa Parse in a seperate file. Any library that expects to have access to the <code>window</code> or DOM will crash when executed in a worker thread. Only put <a href="/faq#combine">other libraries in the same file</a> if they are ready to be used in worker threads.
+					</p>
+
+					<h6>When should I use a worker?</h6>
+					<p>
+						That's up to you. The most typical reason to use a web worker is if your web page becomes unresponsive during parsing. In other words, if it freezes and you can't click things or the scrolling becomes choppy. If that happens, some browsers (like Firefox) will warn the user that a script has become unresponsive or is taking a long time (even if it's working properly). If this happens to you or some of your users, consider using a web worker, at least for the large inputs.
+					</p>
+					<p>
+						However, read the next answer for more info. Using workers has performance implications (both good and bad).
+					</p>
+
+					<h6>What are the performance implications of using a worker thread?</h6>
+					<p>
+						Using a worker will be a little slower. In Javascript, threads don't share memory. That's really annoying because sharing memory is the primary reason for multi-threading. As such, all parse results in a worker thread need to be <i>copied</i> to the main thread. And if you're parsing a string in a worker thread, that string also needs to be copied into the worker in the first place. (Files will be opened or downloaded by the worker itself, so the input doesn't need to be copied from the main thread in those cases.)
+					</p>
+					<p>
+						The process of sending data between the page and the worker thread can stall the main page for just a moment. Each thread must also wait for the data to finish sending before un-blocking.
+					</p>
+					<p>
+						Basically: if you don't have much time, don't use a worker. If you can afford a little extra time, use a worker. It will keep your page from appearing unresponsive and give users an overall better experience.
+					</p>
+
+
+					<h6>Can I stream and use a worker at the same time?</h6>
+					<p>
+						Yup. If the input is too large to fit in memory (or large enough to crash the browser), streaming is <i>always</i> the answer, even in a worker thread. Workers keep the page reactive. Streaming makes it able to fit in memory. Use both if you need to.
+					</p>
+
+					<h6>Can I pause/resume workers?</h6>
+					<p>
+						No. This would drastically slow down parsing, as it would require the worker to wait after every chunk for a "continue" signal from the main thread. But you <i>can</i> abort workers by calling <code>.abort()</code> on the parser that gets passed to your callback function.
+					</p>
+				</div>
+			</div>
+		</main>
+
+		<footer>
+			<!--<div class="footer-top">
+				<h3>Make Your Papa Proud</h3>
+				<h4><a href="https://github.com/mholt/PapaParse">Star</a> and <a href="https://github.com/mholt/PapaParse/blob/gh-pages/resources/js/lovers.js">shout</a> if you love #PapaParse</h4>
+			</div>-->
+			<div class="footer-main">
+				<div class="grid-container">
+					<div class="grid-40 text-center">
+						<div class="logo">P</div>
+						<br><br>
+						Papa Parse by <a href="https://twitter.com/mholt6">Matt Holt</a>
+						<br>
+						&copy; 2013-2018
+					</div>
+					<div class="grid-15 mobile-grid-50 links">
+						<h5>Learn</h5>
+						<a href="/demo">Demo</a>
+						<a href="/docs">Documentation</a>
+						<a href="/faq">FAQ</a>
+					</div>
+					<div class="grid-15 mobile-grid-50 links">
+						<h5>Project</h5>
+						<a href="https://gratipay.com/mholt">Donate</a>
+						<a href="https://github.com/mholt/PapaParse">GitHub</a>
+						<a href="https://twitter.com/search?q=%23PapaParse">Share</a>
+					</div>
+					<div class="clear hide-on-desktop"></div>
+					<div class="grid-15 mobile-grid-50 links">
+						<h5>Download</h5>
+						<a href="https://github.com/mholt/PapaParse/archive/master.zip">Latest (master)</a>
+						<hr>
+						<a href="https://github.com/mholt/PapaParse/blob/master/papaparse.min.js">Lil' Papa</a>
+						<a href="https://github.com/mholt/PapaParse/blob/master/papaparse.js">Fat Papa</a>
+					</div>
+					<div class="grid-15 mobile-grid-50 links">
+						<h5>Community</h5>
+						<a href="https://twitter.com/search?q=%23PapaParse">Twitter</a>
+						<a href="http://stackoverflow.com/questions/tagged/papaparse">Stack Overflow</a>
+					</div>
+				</div>
+			</div>
+		</footer>
+
+
+	</body>
+</html>

@@ -1,0 +1,159 @@
+.tabs,
+.tab {
+	border-color: #B4E3FF;
+	border-style: solid;
+}
+
+.tabs {
+	border-bottom-width: 1px;
+	padding: 0 5%;
+	margin-bottom: 30px;
+	text-align: center;
+}
+
+.tab {
+	display: inline-block;
+	padding: 8px 20px;
+	border-bottom-width: 1px;
+	border-radius: 5px 5px 0 0;
+	z-index: 2;
+	cursor: pointer;
+	font-size: 14px;
+	color: #777;
+	background: #FFF;
+	margin-bottom: -1px;
+}
+
+.tab.active {
+	border-width: 1px;
+	border-bottom-color: #FFF;
+	color: #000;
+}
+
+.tab:not(.active):hover {
+	color: #007FB6;
+}
+
+label {
+	display: block;
+	font-size: 14px;
+	line-height: 2em;
+}
+
+input[type=checkbox] {
+	margin-right: 4px;
+}
+
+textarea,
+input[type=text],
+input[type=number],
+input[type=password],
+input[type=email] {
+	font: 12px/1.25em Menlo, Monaco, 'Courier New', monospace;
+	padding: 4px;
+	tab-size: 4;
+}
+
+input[type=text],
+input[type=number],
+input[type=password],
+input[type=email] {
+	margin: 0 6px;
+}
+
+textarea {
+	box-sizing: border-box;
+	width: 100%;
+	height: 320px;
+	padding: 10px;
+	resize: vertical;
+}
+
+dfn {
+	font-size: 12px;
+	color: #999;
+	display: block;
+	line-height: 1.2em;
+	margin-bottom: 15px;
+}
+
+input[type=checkbox] + dfn {
+	padding-left: 22px;
+}
+
+input[type=file],
+#url {
+	margin: 20px auto;
+	display: block;
+}
+
+input[type=file] {
+	padding: 10px;
+	font-size: 12px;
+	background: #F0F0F0;
+}
+
+#insert-tab {
+	font-size: 12px;
+}
+
+.input-area {
+	margin-bottom: 20px;
+	font-size: 16px;
+	line-height: 1em;
+}
+
+ul {
+	margin-top: 20px;
+}
+
+li {
+	line-height: 1.5em;
+}
+
+#input-local,
+#input-remote,
+#input-unparse {
+	display: none;
+}
+
+#submit {
+	width: 100%;
+	max-width: 150px;
+}
+
+#url {
+	width: 100%;
+	font-size: 14px;
+	max-width: 500px;
+}
+
+.see-results {
+	color: #CC0000;
+	margin-bottom: 20px;
+	font-size: 12px;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	line-height: 1.5em;
+}
+
+
+@media (max-width: 767px) {
+	/* mobile */
+	textarea {
+		height: 250px;
+	}
+
+	.tab {
+		border: 0;
+		background: #F0F0F0;
+		border-radius: 0;
+		margin: 10px;
+		display: block;
+	}
+
+	.tab.active {
+		background: #3B9CE2;
+		color: #FFF;
+	}
+}

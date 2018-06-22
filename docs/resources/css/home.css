@@ -1,0 +1,266 @@
+#top {
+	padding: 6% 0 8%;
+	color: #1D80AB;
+	background: #FFF;
+	position: relative;
+	z-index: 0;
+
+	/*
+		For better performance, trigger 3D graphics acceleration.
+		This reduces lag/jitter considerably, esp. in Chrome.
+	*/
+	-webkit-transform: translateZ(0);
+	-webkit-backface-visibility: hidden;
+
+	transform-origin: 100% 100%;
+}
+
+#top code {
+	background: none;
+}
+
+h1 {
+	text-align: left;
+	font-family: Arvo;
+	font-size: 100px;
+	line-height: 1em;
+	margin-top: 8%;
+	margin-bottom: 40px;
+	letter-spacing: -5px;
+}
+
+h2 {
+	font-size: 24px;
+	text-align: left;
+	margin-bottom: 50px;
+}
+
+
+/* Switch around h4 and h5 for homepage... */
+h4 {
+	font-size: 12px;
+	letter-spacing: 2px;
+	margin-bottom: 10px;
+	text-transform: uppercase;
+	color: #A1B2C2;
+	line-height: 1em;
+}
+
+h5 {
+	font-size: 28px;
+	margin-bottom: 50px;
+	line-height: 1.25em;
+	text-transform: none;
+	color: inherit;
+	letter-spacing: 0;
+	margin-top: 0;
+}
+
+#title-main {
+	float: left;
+}
+
+#title-code {
+	float: right;
+}
+
+
+main {
+	padding-top: 0;
+}
+
+.fa-heart {
+	color: #F00;
+}
+
+header {
+	border-top-width: 1px;
+}
+
+header,
+.insignia {
+	position: relative;
+}
+
+header,
+.sticky-wrapper {
+	margin-bottom: -150px;
+}
+
+header .fa-heart {
+	color: inherit;
+}
+
+.insignia {
+	display: block;
+	width: 250px;
+	height: 250px;
+	box-sizing: border-box;
+	border-radius: 50%;
+	margin: 0 auto;
+	text-align: center;
+	color: #1D80AB;
+	z-index: 2;
+	margin-bottom: 30px;
+	border-width: 1px;
+}
+
+#version-intro {
+	position: absolute;
+	font-size: 12px;
+	top: 18%;
+	width: 100%;
+	font-family: 'Source Sans Pro', sans-serif;
+	text-transform: uppercase;
+	letter-spacing: 2px;
+}
+
+#version {
+	text-shadow: 0 3px 2px rgba(169, 169, 169, 0.5);
+	font: 100px/250px Arvo, sans-serif;
+}
+
+
+.firefox-hack {
+	position: absolute;
+	width: 100%;
+}
+
+.lover {
+	margin-bottom: 0;
+}
+
+.grid-container.narrow-grid {
+	max-width: 850px;
+}
+
+.mini-papa {
+	text-align: right;
+}
+
+#ticker {
+	width: 90%;
+	max-width: 800px;
+	margin: 0 auto;
+	height: 80px;
+	position: relative;
+}
+
+.ticker-item {
+	font-size: 24px;
+	color: #565656;
+	text-align: center;
+	font-family: Lato;
+	font-weight: 300;
+	line-height: 1.25em;
+	width: 100%;
+	position: absolute;
+	top: 0;
+	-webkit-transition: transform .25s;
+	transition: transform .25s;
+	-webkit-transform: scale(0);
+	transform: scale(0);
+}
+
+.ticker-item.current {
+	-webkit-transform: scale(1);
+	transform: scale(1);
+}
+
+.add-lover-link {
+	text-decoration: none;
+}
+
+footer {
+	margin-top: 0;
+}
+
+
+@media (max-width: 1150px) {
+	#title-main h1 {
+		font-size: 85px;
+	}
+
+	#title-main h2 {
+		font-size: 20px;
+		margin-bottom: 30px;
+	}
+
+	#title-code code {
+		font-size: 12px;
+	}
+
+	button,
+	.button {
+		padding: 8px 20px;
+		font-size: 14px;
+	}
+
+	header,
+	.sticky-wrapper {
+		margin-bottom: -120px;
+	}
+
+	.insignia {
+		width: 175px;
+		height: 175px;
+	}
+
+	#version {
+		font-size: 70px;
+		line-height: 175px;
+	}
+}
+
+@media (max-width: 950px) {
+	#title-code {
+		display: none;
+	}
+
+	#top {
+		padding-top: 0;
+	}
+
+	#title-main,
+	#title-main h1,
+	#title-main h2 {
+		width: 100%;
+		text-align: center;
+	}
+
+	#title-main {
+		padding-bottom: 50px;
+	}
+}
+
+@media (max-width: 767px) {
+	/* mobile */
+
+	#top h2 {
+		margin-bottom: 20px;
+	}
+
+	#title-main {
+		padding-bottom: 10px;
+	}
+	
+	.stuck {
+		position: static;
+	}
+
+	.insignia {
+		display: none;
+	}
+
+	#ticker {
+		height: 120px;
+	}
+
+	.lover {
+		margin-bottom: 25px;
+	}
+
+	.mini-papa {
+		text-align: left;
+	}
+}

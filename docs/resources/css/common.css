@@ -1,0 +1,514 @@
+/* Eric Meyer's Reset CSS v2.0 */
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,details,embed,figure,figcaption,footer,header,hgroup,menu,nav,output,ruby,section,summary,time,mark,audio,video{border:0;font-size:100%;font:inherit;vertical-align:baseline;margin:0;padding:0}article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{display:block}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:none}table{border-collapse:collapse;border-spacing:0}
+
+body,
+main {
+	background: #FFF;
+}
+
+body {
+	font: 18px/1.5em 'Source Sans Pro', 'Helvetica Neue', sans-serif;
+	color: #333;
+	height: 100%;
+}
+
+main {
+	padding-top: 100px;
+}
+
+a {
+	color: #1D58B1;
+}
+
+a:hover {
+	color: #2AACFC;
+}
+
+b {
+	font-weight: bold;
+}
+
+i {
+	font-style: italic;
+}
+
+p,
+li {
+	line-height: 1.75em;
+}
+
+p {
+	margin-bottom: 25px;
+}
+
+small {
+	font-size: 12px;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+	text-align: center;
+}
+
+h1 {
+	font-family: Lato;
+	font-weight: 300;
+	font-size: 40px;
+	margin-bottom: 50px;
+}
+
+h2 {
+	font-size: 60px;
+	line-height: 1.25em;
+}
+
+h3 {
+	font-size: 48px;
+	margin-bottom: 30px;
+	line-height: 1.5em;
+}
+
+h4 {
+	font-size: 28px;
+	margin-bottom: 50px;
+	line-height: 1.25em;
+}
+
+h5,
+footer h4 {
+	font-size: 12px;
+	letter-spacing: 2px;
+	text-transform: uppercase;
+	color: #A1B2C2;	/* darker alternative: #698EB0 */
+	line-height: 1em;
+	margin: 50px auto;
+}
+
+h6 {
+	font-weight: bold;
+	text-align: left;
+	margin: 40px auto 5px;
+}
+
+
+/*
+	Neat hack! http://css-tricks.com/hash-tag-links-padding/
+	So when you navigate in-page, the sticky header doesn't cover it up
+*/
+h2[id]:before,
+h3[id]:before,
+h4[id]:before,
+h5[id]:before,
+h6[id]:before { 
+	display: block;
+	content: " ";
+	margin-top: -75px;
+	height: 75px;
+	visibility: hidden;
+}
+
+ul,
+ol {
+	margin: 0 0 0 2em;
+}
+
+ul {
+	list-style-type: disc;
+}
+
+ol {
+	list-style-type: decimal;
+}
+
+header,
+main,
+footer {
+	position: relative;
+	z-index: 1;
+}
+
+header,
+.insignia {
+	background: #FFF;
+	border-color: #CCC;
+	border-style: solid;
+	box-shadow: 0 -4px 20px -3px rgba(0, 0, 0, 0.2);
+}
+
+header {
+	position: fixed;
+	top: 0;
+	width: 100%;
+	border-bottom-width: 1px;
+}
+
+section {
+	padding: 100px 0;
+	border-bottom: 1px solid #E3E3E3;
+}
+
+main h2 {
+	color: #253C50; /* #365DA3 */ /* #3D3D3D */ /* #9B0000 */
+	font-weight: 300;
+	line-height: 1.25em;
+	margin: 0px 0 50px;
+}
+
+main pre {
+	padding: 10px;
+	background: #F5F5F5;
+}
+
+.text-logo,
+header .links a {
+	display: inline-block;
+	color: #777;
+}
+
+.text-logo {
+	font-family: Arvo, sans-serif;
+	letter-spacing: -1px;
+	color: #1D80AB;
+	font-size: 24px;
+	text-decoration: none;
+	padding: 15px 10px;
+}
+
+.text-logo:hover {
+	color: #66B0E2;
+}
+
+header .links a {
+	font-size: 14px;
+	padding: 15px 25px;
+	text-decoration: none;
+}
+
+header .links a:hover {
+	color: #000;
+}
+
+header .links a:first-child {
+	padding-left: 10px;
+}
+
+header .links a .fa {
+	margin-right: 5px;
+}
+
+.donate {
+	background: #D9FFD1;
+}
+
+.donate:hover {
+	background: #A1FF87 !important;
+}
+
+code {
+	font: 75%/1em 'Liberation Mono', 'Consolas', 'Monaco', 'Menlo', 'Courier New', monospace;
+	color: #000;
+	padding: 5px;
+	background: #F5F5F5;
+}
+
+h2 code {
+	font-size: 42px;
+	background: none;
+}
+
+pre > code {
+	display: block;
+	line-height: 1.5em;
+	font-size: 14px;
+	tab-size: 4;
+}
+
+.button,
+button,
+input[type=button],
+button[type=submit] {
+	display: inline-block;
+	padding: 10px 25px;
+	color: #FFF;
+	border: 0;
+	text-decoration: none;
+	background: #366992;
+	margin: 5px;
+	transition: background .2s;
+	border-radius: 50px;
+	cursor: pointer;
+	outline: none;
+	line-height: 1.5em;
+	font-size: 18px;
+}
+
+.button[disabled],
+button[disabled],
+input[disabled] {
+	background: #BBB !important;
+	cursor: default !important;
+}
+
+.button:hover,
+button:hover,
+input[type=button]:hover,
+button[type=submit]:hover {
+	text-decoration: none;
+	background: #4B91C9;
+	color: #FFF;
+}
+
+.button.red,
+button.red {
+	background: #A01919;
+}
+
+.button.red:hover,
+button.red:hover {
+	background: #DD2222;
+}
+
+.button.green,
+button.green {
+	background: #419236;
+}
+
+.button.green:hover,
+button.green:hover {
+	background: #4DB43F;
+}
+
+.button.gray,
+button.gray {
+	background: #666;
+}
+
+.button.gray:hover,
+button.gray:hover {
+	background: #999;
+}
+
+hr {
+	border: 0;
+	border-top: 1px solid #D0D0D0;
+}
+
+table {
+	border-collapse: collapse;
+	width: 100%;
+}
+
+th,
+td {
+	padding: 20px;
+	font-size: 16px;
+	border-bottom: 1px solid #E0E0E0;
+}
+
+th {
+	font-weight: bold;
+	text-align: left;
+}
+
+table pre code {
+	font-size: 12px;
+}
+
+table pre,
+li pre {
+	margin: 10px 0;
+}
+
+.text-center {
+	text-align: center;
+}
+
+.text-right {
+	text-align: right;
+}
+
+footer {
+	z-index: 0;
+	background: #263A49;
+	box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+	border-bottom: 0;
+	padding: 0;
+	font-weight: 300;
+	font-size: 15px;
+	color: #EFEFEF;
+	line-height: 1.5em;
+	margin-top: 75px;
+}
+
+footer a {
+	color: #EFEFEF;
+	text-decoration: underline;
+}
+/*
+footer .footer-top {
+	padding: 20px;
+	background: #2C4252;
+}
+*/
+footer .footer-main {
+	font-family: Lato;
+	padding: 65px 0;
+}
+
+footer .links a {
+	color: #A1B2C2;
+	text-decoration: none;
+	transition: color .2s;
+	display: block;
+	font-size: 14px;
+	font-weight: 300;
+	line-height: 2em;
+}
+
+footer .links a:hover {
+	color: #ACD7FF;
+	text-decoration: none;
+}
+
+footer h3 {
+	color: #FFF;
+	font-size: 22px;
+	margin: 0;
+}
+
+footer h4 {
+	margin: 0;
+}
+
+footer h4 a {
+	color: #A1B2C2;
+	text-decoration: underline;
+}
+
+footer h5 {
+	color: #FFF;
+	text-transform: uppercase;
+	font-size: 16px;
+	margin: 0 0 10px 0;
+	font-weight: normal;
+	text-align: left;
+}
+
+footer hr {
+	border: 0;
+	border-top: 1px solid #3E5566;
+	width: 60%;
+	min-width: 50px;
+	margin: 10px 0;
+}
+
+.logo {
+	display: inline-block;
+	color: #263A49;
+	font-family: Arvo;
+	font-size: 90px;
+	line-height: 1em;
+	background: #EFEFEF;
+	border-radius: 100px;
+	padding: 10px 30px;
+}
+
+
+
+
+.stuck {
+	position: fixed;
+	top: 0;
+	width: 100%;
+	border-top-width: 0;
+	border-bottom-width: 1px;
+}
+
+
+
+
+
+
+@media (max-width: 1100px) {
+	.text-logo {
+		font-size: 18px;
+	}
+
+	p,
+	li {
+		line-height: 1.5em;
+	}
+}
+
+@media (max-width: 970px) {
+	header .links a {
+		padding: 15px;
+	}
+
+	header > .grid-container,
+	header .mobile-grid-50 {
+		padding: 0;
+	}
+}
+
+@media (max-width: 840px) {
+	header .links a {
+		font-size: 12px;
+	}
+}
+
+@media (max-width: 767px) {
+	/* mobile */
+
+	p,
+	li {
+		line-height: 1.5em;
+	}
+
+	header,
+	.sticky-wrapper {
+		position: static;
+		margin-bottom: 50px !important;
+	}
+
+	header > .grid-container,
+	header .mobile-grid-50 {
+		padding: 0;
+	}
+
+	section {
+		padding: 50px 0;
+	}
+
+	header .links a {
+		font-size: 16px;
+		display: block;
+		text-align: left;
+		padding: 15px 10% !important;
+	}
+
+	main {
+		padding-top: 0;
+	}
+
+	main h2 {
+		font-size: 40px;
+	}
+
+	main h2 code {
+		font-size: 30px;
+	}
+
+	td,
+	th {
+		font-size: 14px;
+		padding: 10px;
+	}
+
+	footer h5 {
+		margin-top: 40px;
+	}
+}
