@@ -280,7 +280,7 @@
 		/** quote character */
 		var _quoteChar = '"';
 
-		/** quote character */
+		/** whether only strings should be quoted */
 		var _onlyQuoteStrings = false;
 
 		unpackConfig();
@@ -412,20 +412,20 @@
 		}
 
 		/** Encloses a value around quotes if needed (makes a value safe for CSV insertion) */
-		function safe(str, col)
+		function safe(value, col)
 		{
-			if (typeof str === 'undefined' || str === null)
+			if (typeof value === 'undefined' || value === null)
 				return '';
 
-			if (str.constructor === Date)
-				return JSON.stringify(str).slice(1, 25);
+			if (value.constructor === Date)
+				return JSON.stringify(value).slice(1, 25);
 
-			// We must check, whether the data type is string already here,
+			// We must check, whether the data type of value is string already here,
 			// since all data types are converted into strings in the next line
-			var onlyQuoteStrings = _onlyQuoteStrings && typeof str === 'string';
+			var onlyQuoteStrings = _onlyQuoteStrings && typeof value === 'string';
 
 			// Converts every data type to string
-			str = str.toString().replace(quoteCharRegex, _quoteChar + _quoteChar);
+			var str = value.toString().replace(quoteCharRegex, _quoteChar + _quoteChar);
 
 			var needsQuotes = onlyQuoteStrings
 							|| (typeof _quotes === 'boolean' && _quotes)
