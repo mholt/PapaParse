@@ -280,6 +280,9 @@
 		/** quote character */
 		var _quoteChar = '"';
 
+		/** quote character */
+		var _onlyQuoteStrings = false;
+
 		unpackConfig();
 
 		var quoteCharRegex = new RegExp(_quoteChar, 'g');
@@ -343,6 +346,11 @@
 
 			if (typeof _config.header === 'boolean')
 				_writeHeader = _config.header;
+
+			if (typeof _config.onlyQuoteStrings === 'boolean') {
+				_onlyQuoteStrings = _config.onlyQuoteStrings;
+				_quotes = false; // Override quotes, since only quote strings is selected
+			}
 		}
 
 
@@ -412,9 +420,15 @@
 			if (str.constructor === Date)
 				return JSON.stringify(str).slice(1, 25);
 
+			// We must check, whether the data type is string already here,
+			// since all data types are converted into strings in the next line
+			var onlyQuoteStrings = _onlyQuoteStrings && typeof str === 'string';
+
+			// Converts every data type to string
 			str = str.toString().replace(quoteCharRegex, _quoteChar + _quoteChar);
 
-			var needsQuotes = (typeof _quotes === 'boolean' && _quotes)
+			var needsQuotes = onlyQuoteStrings
+							|| (typeof _quotes === 'boolean' && _quotes)
 							|| (_quotes instanceof Array && _quotes[col])
 							|| hasAny(str, Papa.BAD_DELIMITERS)
 							|| str.indexOf(_delimiter) > -1
