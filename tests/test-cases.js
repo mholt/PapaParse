@@ -734,6 +734,15 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Header rows are lowercase when lowercaseHeader is set",
+		input: 'A,b\r\na,b',
+		config: { header: true, lowercaseHeaders: true },
+		expected: {
+			data: [{"a": "a", "b": "b"}],
+			errors: []
+		}
+	},
+	{
 		description: "Line ends with quoted field, first field of next line is empty using headers",
 		input: 'a,b,"c"\r\nd,e,"f"\r\n,"h","i"\r\n,"k","l"',
 		config: {
