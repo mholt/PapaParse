@@ -1217,6 +1217,15 @@ var PARSE_TESTS = [
 			data: [['a\r\na', 'b'], ['c', 'd'], ['e', 'f'], ['g', 'h'], ['i', 'j']],
 			errors: []
 		}
+	},
+	{
+		description: "Line feed in header inside quotes, with carriage return + line feed endings",
+		input: '"a\na","b"\r\n"c","d"\r\n"e","f"\r\n"g","h"\r\n"i","j"\r\n',
+		config: {},
+		expected: {
+			data: [['a\na', 'b'], ['c', 'd'], ['e', 'f'], ['g', 'h'], ['i', 'j']],
+			errors: []
+		}
 	}
 ];
 
