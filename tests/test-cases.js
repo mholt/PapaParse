@@ -1214,7 +1214,7 @@ var PARSE_TESTS = [
 		input: '"a\r\na","b"\n"c","d"\n"e","f"\n"g","h"\n"i","j"\n',
 		config: {},
 		expected: {
-			data: [['a\r\na', 'b'], ['c', 'd'], ['e', 'f'], ['g', 'h']['i', 'j']],
+			data: [['a\r\na', 'b'], ['c', 'd'], ['e', 'f'], ['g', 'h'], ['i', 'j']],
 			errors: []
 		}
 	}
