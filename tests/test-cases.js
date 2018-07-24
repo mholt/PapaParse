@@ -1233,6 +1233,7 @@ describe('Parse Tests', function() {
 	function generateTest(test) {
 		(test.disabled ? it.skip : it)(test.description, function() {
 			var actual = Papa.parse(test.input, test.config);
+			test.expected.meta && assert.deepEqual(actual.meta, test.expected.meta);
 			assert.deepEqual(JSON.stringify(actual.errors), JSON.stringify(test.expected.errors));
 			assert.deepEqual(actual.data, test.expected.data);
 		});
