@@ -1257,7 +1257,7 @@
 		{
 			input = input.substr(0, 1024 * 1024);	// max length 1 MB
 			// Replace all the text inside quotes
-			var re = new RegExp(quoteChar + '(.*?)' + quoteChar, 'gm');
+			var re = new RegExp(quoteChar + '([^]*?)' + quoteChar, 'gm');
 			input = input.replace(re, '');
 
 			var r = input.split('\r');

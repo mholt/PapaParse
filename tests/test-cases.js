@@ -1211,7 +1211,7 @@ var PARSE_TESTS = [
 	},
 	{
 		description: "Carriage return in header inside quotes, with line feed endings",
-		input: '"a\r\na","b"\n"c","d"\n"e","f"\n"g","h"\n"i","j"\n',
+		input: '"a\r\na","b"\n"c","d"\n"e","f"\n"g","h"\n"i","j"',
 		config: {},
 		expected: {
 			data: [['a\r\na', 'b'], ['c', 'd'], ['e', 'f'], ['g', 'h'], ['i', 'j']],
@@ -1220,7 +1220,7 @@ var PARSE_TESTS = [
 	},
 	{
 		description: "Line feed in header inside quotes, with carriage return + line feed endings",
-		input: '"a\na","b"\r\n"c","d"\r\n"e","f"\r\n"g","h"\r\n"i","j"\r\n',
+		input: '"a\na","b"\r\n"c","d"\r\n"e","f"\r\n"g","h"\r\n"i","j"',
 		config: {},
 		expected: {
 			data: [['a\na', 'b'], ['c', 'd'], ['e', 'f'], ['g', 'h'], ['i', 'j']],
