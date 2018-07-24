@@ -1292,6 +1292,22 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Using \\r\\n endings with \\n in header field with skip empty lines uses \\r\\n linebreak",
+		input: '"a\na",b\r\nc,d\r\ne,f\r\ng,h\r\ni,j\r\n',
+		config: {skipEmptyLines: true},
+		expected: {
+			data: [['a\na', 'b'], ['c', 'd'], ['e', 'f'], ['g', 'h'], ['i', 'j']],
+			errors: [],
+			meta: {
+				linebreak: '\r\n',
+				delimiter: ',',
+				cursor: 29,
+				aborted: false,
+				truncated: false
+			}
+		}
+	},
+	{
 		description: "Using \\n endings with \\r\\n in header field uses \\n linebreak",
 		input: '"a\r\na",b\nc,d\ne,f\ng,h\ni,j',
 		config: {},
