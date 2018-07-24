@@ -1226,6 +1226,86 @@ var PARSE_TESTS = [
 			data: [['a\na', 'b'], ['c', 'd'], ['e', 'f'], ['g', 'h'], ['i', 'j']],
 			errors: []
 		}
+	},
+	{
+		description: "Using \\r\\n endings uses \\r\\n linebreak",
+		input: 'a,b\r\nc,d\r\ne,f\r\ng,h\r\ni,j',
+		config: {},
+		expected: {
+			data: [['a', 'b'], ['c', 'd'], ['e', 'f'], ['g', 'h'], ['i', 'j']],
+			errors: [],
+			meta: {
+				linebreak: '\r\n',
+				delimiter: ',',
+				cursor: 23,
+				aborted: false,
+				truncated: false
+			}
+		}
+	},
+	{
+		description: "Using \\n endings uses \\n linebreak",
+		input: 'a,b\nc,d\ne,f\ng,h\ni,j',
+		config: {},
+		expected: {
+			data: [['a', 'b'], ['c', 'd'], ['e', 'f'], ['g', 'h'], ['i', 'j']],
+			errors: [],
+			meta: {
+				linebreak: '\n',
+				delimiter: ',',
+				cursor: 19,
+				aborted: false,
+				truncated: false
+			}
+		}
+	},
+	{
+		description: "Using \\r\\n endings with \\r\\n in header field uses \\r\\n linebreak",
+		input: '"a\r\na",b\r\nc,d\r\ne,f\r\ng,h\r\ni,j',
+		config: {},
+		expected: {
+			data: [['a\r\na', 'b'], ['c', 'd'], ['e', 'f'], ['g', 'h'], ['i', 'j']],
+			errors: [],
+			meta: {
+				linebreak: '\r\n',
+				delimiter: ',',
+				cursor: 28,
+				aborted: false,
+				truncated: false
+			}
+		}
+	},
+	{
+		description: "Using \\r\\n endings with \\n in header field uses \\r\\n linebreak",
+		input: '"a\na",b\r\nc,d\r\ne,f\r\ng,h\r\ni,j',
+		config: {},
+		expected: {
+			data: [['a\na', 'b'], ['c', 'd'], ['e', 'f'], ['g', 'h'], ['i', 'j']],
+			errors: [],
+			meta: {
+				linebreak: '\r\n',
+				delimiter: ',',
+				cursor: 27,
+				aborted: false,
+				truncated: false
+			}
+		}
+	},
+	{
+		description: "Using \\n endings with \\r\\n in header field uses \\n linebreak",
+		input: '"a\r\na",b\nc,d\ne,f\ng,h\ni,j',
+		config: {},
+		expected: {
+			data: [['a\r\na', 'b'], ['c', 'd'], ['e', 'f'], ['g', 'h'], ['i', 'j']],
+			errors: [],
+			meta: {
+				linebreak: '\n',
+				delimiter: ',',
+				cursor: 24,
+				aborted: false,
+				truncated: false
+			}
+		}
 	}
 ];
 
