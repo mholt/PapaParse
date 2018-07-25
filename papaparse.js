@@ -1113,6 +1113,10 @@
 						header = header.trim();
 					}
 
+					if (_config.stripHeaders) {
+						header = header.replace(/\s/g,'');
+					}
+
 					_fields.push(header);
 				}
 			_results.data.splice(0, 1);

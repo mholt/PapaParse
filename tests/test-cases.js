@@ -734,6 +734,15 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Header rows are striped out of white spaces when stripHeaders is set ",
+		input: '  A , B  ,  C  \r\na,b,c',
+		config: { header: true, stripHeaders: true },
+		expected: {
+			data: [{"A": "a", "B": "b", "C": "c"}],
+			errors: []
+		}
+	},
+	{
 		description: "Line ends with quoted field, first field of next line is empty using headers",
 		input: 'a,b,"c"\r\nd,e,"f"\r\n,"h","i"\r\n,"k","l"',
 		config: {
