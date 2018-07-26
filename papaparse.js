@@ -1113,7 +1113,7 @@
 						header = header.trim();
 					}
 
-					if (_config.headerTransform) {
+					if (typeof _config.headerTransform === 'function') {
 						header = _config.headerTransform(header);
 					}
 
