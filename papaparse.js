@@ -1015,7 +1015,7 @@
 			_delimiterError = false;
 			if (!_config.delimiter)
 			{
-				var delimGuess = guessDelimiter(input, _config.newline, _config.skipEmptyLines, _config.comments);
+				var delimGuess = guessDelimiter(input, _config.newline, (_config.skipEmptyLines || _config.skipNoContentLines), _config.comments);
 				if (delimGuess.successful)
 					_config.delimiter = delimGuess.bestDelimiter;
 				else
@@ -1075,6 +1075,15 @@
 			_input = '';
 		};
 
+		function testEmptyLine(s, d) {
+			var q = _config.quoteChar || '"';
+			var r = _config.skipNoContentLines ? new RegExp('^[' + d + q + '\\s]*$') : new RegExp('^$');
+			for (var i = 0; i < s.length; i++)
+				if (r.test(s[i]))
+					return true;
+			return false;
+		}
+
 		function processResults()
 		{
 			if (_results && _delimiterError)
@@ -1083,10 +1092,10 @@
 				_delimiterError = false;
 			}
 
-			if (_config.skipEmptyLines)
+			if (_config.skipEmptyLines || _config.skipNoContentLines)
 			{
 				for (var i = 0; i < _results.data.length; i++)
-					if (_results.data[i].length === 1 && _results.data[i][0] === '')
+					if (testEmptyLine(_results.data[i], _config.delimiter))
 						_results.data.splice(i--, 1);
 			}
 
@@ -1215,7 +1224,8 @@
 
 				for (var j = 0; j < preview.data.length; j++)
 				{
-					if (skipEmptyLines && preview.data[j].length === 1 && preview.data[j][0].length === 0) {
+					if (skipEmptyLines && testEmptyLine(preview.data[j], delim))
+					{
 						emptyLinesCount++;
 						continue;
 					}

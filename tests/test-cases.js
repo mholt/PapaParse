@@ -1340,10 +1340,20 @@ var PARSE_TESTS = [
 		}
 	},
 	{
-		description: "Parsing with skipNoContentLines",
+		description: "Parsing with skipNoContentLines and skipEmptyLines",
 		notes: "Must parse correctly without lines with no content",
 		input: 'a,b\n\n,\nc,d\n , \n""," "\n " " , " "\n,,,,\n",,,",","\n',
 		config: { skipEmptyLines: true, skipNoContentLines: true },
+		expected: {
+			data: [['a', 'b'], ['c', 'd']],
+			errors: []
+		}
+	},
+	{
+		description: "Parsing with just skipNoContentLines",
+		notes: "Must parse correctly without lines with no content",
+		input: 'a,b\n\n,\nc,d\n , \n""," "\n " " , " "\n,,,,\n",,,",","\n',
+		config: { skipNoContentLines: true },
 		expected: {
 			data: [['a', 'b'], ['c', 'd']],
 			errors: []
