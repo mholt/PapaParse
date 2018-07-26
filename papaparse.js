@@ -1113,8 +1113,12 @@
 						header = header.trim();
 					}
 
-					if (typeof _config.headerTransform === 'function') {
-						header = _config.headerTransform(header);
+					if (_config.headerTransform) {
+						if (typeof _config.headerTransform === 'function') {
+							header = _config.headerTransform(header);
+						} else {
+							throw 'headerTransform must be a function';
+						}	
 					}
 
 					_fields.push(header);
