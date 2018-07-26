@@ -1338,6 +1338,16 @@ var PARSE_TESTS = [
 				truncated: false
 			}
 		}
+	},
+	{
+		description: "Parsing with skipNoContentLines",
+		notes: "Must parse correctly without lines with no content",
+		input: 'a,b\n\n,\nc,d\n , \n""," "\n " " , " "\n,,,,\n",,,",","\n',
+		config: { skipEmptyLines: true, skipNoContentLines: true },
+		expected: {
+			data: [['a', 'b'], ['c', 'd']],
+			errors: []
+		}
 	}
 ];
 
