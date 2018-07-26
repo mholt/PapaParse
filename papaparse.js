@@ -1077,7 +1077,9 @@
 
 		function testEmptyLine(s, d) {
 			var q = _config.quoteChar || '"';
-			var r = _config.skipNoContentLines ? new RegExp('^[' + d + q + '\\s]*$') : new RegExp('^$');
+			var r = _config.skipNoContentLines ? new RegExp('^[' + escapeRegExp(d) + escapeRegExp(q) + '\\s]*$') : new RegExp('^$');
+			// var q = _config.quoteChar || '"';
+			// var r = _config.skipNoContentLines ? new RegExp('^[' + d + q + '\\s]*$') : new RegExp('^$');
 			for (var i = 0; i < s.length; i++)
 				if (r.test(s[i]))
 					return true;
@@ -1300,8 +1302,8 @@
 		}
 	}
 
-	/** https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions */
-	function escapeRegExp(string) {
+	function escapeRegExp(string)
+	{
 		return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 	}
 
