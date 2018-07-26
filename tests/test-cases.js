@@ -734,11 +734,11 @@ var PARSE_TESTS = [
 		}
 	},
 	{
-		description: "Header rows are striped out of white spaces when stripHeaders is set ",
-		input: '  A , B  ,  C  \r\na,b,c',
-		config: { header: true, stripHeaders: true },
+		description: "Transform header",
+		input: '  A , B  ,  C  \r\na,b ,c',
+		config: { header: true, headerTransform: function(input) { return input.trim(); }},
 		expected: {
-			data: [{"A": "a", "B": "b", "C": "c"}],
+			data: [{"A": "a", "B": "b ", "C": "c"}],
 			errors: []
 		}
 	},

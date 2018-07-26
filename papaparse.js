@@ -1113,8 +1113,8 @@
 						header = header.trim();
 					}
 
-					if (_config.stripHeaders) {
-						header = header.replace(/\s/g,'');
+					if (_config.headerTransform) {
+						header = _config.headerTransform(header);
 					}
 
 					_fields.push(header);
