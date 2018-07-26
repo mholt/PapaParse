@@ -1322,6 +1322,22 @@ var PARSE_TESTS = [
 				truncated: false
 			}
 		}
+	},
+	{
+		description: "Using reserved regex characters as quote characters",
+		input: '.a\na.,b\r\nc,d\r\ne,f\r\ng,h\r\ni,j',
+		config: { quoteChar: '.' },
+		expected: {
+			data: [['a\na', 'b'], ['c', 'd'], ['e', 'f'], ['g', 'h'], ['i', 'j']],
+			errors: [],
+			meta: {
+				linebreak: '\r\n',
+				delimiter: ',',
+				cursor: 27,
+				aborted: false,
+				truncated: false
+			}
+		}
 	}
 ];
 
