@@ -355,7 +355,8 @@ var csv = Papa.unparse({
 	fastMode: undefined,
 	beforeFirstChunk: undefined,
 	withCredentials: undefined,
-	transform: undefined
+	transform: undefined,
+	headerTransform: undefined
 }</code></pre>
 					</div>
 					<div class="clear"></div>
@@ -546,6 +547,14 @@ var csv = Papa.unparse({
 								</td>
 								<td>
 									A function to apply on each value. The function receives the value as its first argument and the column number as its second argument. The return value of the function will replace the value it received. The transform function is applied before dynamicTyping.
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<code>headerTransform</code>
+								</td>
+								<td>
+									A function to apply on each header value. The function receives the value as its argument. The return value of the function will replace the value it received. The function is applied after trimHeaders.
 								</td>
 							</tr>
 						</table>
