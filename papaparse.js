@@ -1118,7 +1118,7 @@
 							header = _config.headerTransform(header);
 						} else {
 							throw 'headerTransform must be a function';
-						}	
+						}
 					}
 
 					_fields.push(header);
