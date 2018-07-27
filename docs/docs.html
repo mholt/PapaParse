@@ -351,7 +351,6 @@ var csv = Papa.unparse({
 	error: undefined,
 	download: false,
 	skipEmptyLines: false,
-	skipNoContentLines: false,
 	chunk: undefined,
 	fastMode: undefined,
 	beforeFirstChunk: undefined,
@@ -506,15 +505,7 @@ var csv = Papa.unparse({
 									<code>skipEmptyLines</code>
 								</td>
 								<td>
-									If true, lines that are completely empty will be skipped. An empty line is defined to be one which evaluates to empty string.
-								</td>
-							</tr>
-							<tr>
-								<td>
-									<code>skipNoContentLines</code>
-								</td>
-								<td>
-									If true, lines that don't have any content will be skipped. Lacking content is defined as having only delimiters, quotes, and whitespace. <code>skipNoContentLines</code> can be set alongside <code>skipEmptyLines</code> or instead of <code>skipEmptyLines</code> and retain the same functionality.
+									If true, lines that are completely empty (those which evaluate to an empty string) will be skipped. If set to <code>'strict'</code>, lines that don't have any content (those which have only delimiters, quotes, and whitespace) will also be skipped.
 								</td>
 							</tr>
 							<tr>
