@@ -1350,7 +1350,7 @@ var PARSE_TESTS = [
 		}
 	},
 	{
-		description: "Parsing with skipNoContentLines and regex special char as quoteChar",
+		description: "Parsing with skipEmptyLines set to 'greedy' and regex special char as quoteChar",
 		notes: "Must skip lines correctly with reserved regex char as quoteChar",
 		input: 'a,b\n\n,\nc,d\n , \n]],] ]\n ] ] , ] ]\n,,,,\n],,,],],]\n',
 		config: { skipEmptyLines: 'greedy', quoteChar: ']' },
@@ -1360,7 +1360,7 @@ var PARSE_TESTS = [
 		}
 	},
 	{
-		description: "Parsing with skipNoContentLines and regex special char as delimiter",
+		description: "Parsing with skipEmptyLines set to 'greedy' and regex special char as delimiter",
 		notes: "Must skip lines correctly with reserved regex char as delimiter",
 		input: 'a]b\n\n]\nc]d\n ] \n""]" "\n " " ] " "\n]]]]\n"]]]"]"]"\n',
 		config: { skipEmptyLines: 'greedy', delimiter: ']' },
