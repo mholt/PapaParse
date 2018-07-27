@@ -1008,8 +1008,9 @@
 		 */
 		this.parse = function(input, baseIndex, ignoreLastRow)
 		{
+			var quoteChar = _config.quoteChar || '"';
 			if (!_config.newline)
-				_config.newline = guessLineEndings(input);
+				_config.newline = guessLineEndings(input, quoteChar);
 
 			_delimiterError = false;
 			if (!_config.delimiter)
@@ -1252,9 +1253,12 @@
 			};
 		}
 
-		function guessLineEndings(input)
+		function guessLineEndings(input, quoteChar)
 		{
 			input = input.substr(0, 1024 * 1024);	// max length 1 MB
+			// Replace all the text inside quotes
+			var re = new RegExp(escapeRegExp(quoteChar) + '([^]*?)' + escapeRegExp(quoteChar), 'gm');
+			input = input.replace(re, '');
 
 			var r = input.split('\r');
 
@@ -1286,9 +1290,10 @@
 		}
 	}
 
-
-
-
+	/** https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions */
+	function escapeRegExp(string) {
+		return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+	}
 
 	/** The core parser implements speedy and correct CSV parsing */
 	function Parser(config)
