@@ -1077,7 +1077,7 @@
 
 		function testEmptyLine(s, d) {
 			var q = _config.quoteChar || '"';
-			var r = _config.skipEmptyLines === 'strict' ? new RegExp('^[' + escapeRegExp(d) + escapeRegExp(q) + '\\s]*$') : new RegExp('^$');
+			var r = _config.skipEmptyLines === 'greedy' ? new RegExp('^[' + escapeRegExp(d) + escapeRegExp(q) + '\\s]*$') : new RegExp('^$');
 			for (var i = 0; i < s.length; i++)
 				if (r.test(s[i]))
 					return true;
