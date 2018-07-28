@@ -1075,13 +1075,8 @@
 			_input = '';
 		};
 
-		function testEmptyLine(s, d) {
-			var q = _config.quoteChar || '"';
-			var r = _config.skipEmptyLines === 'greedy' ? new RegExp('^[' + escapeRegExp(d) + escapeRegExp(q) + '\\s]*$') : new RegExp('^$');
-			for (var i = 0; i < s.length; i++)
-				if (r.test(s[i]))
-					return true;
-			return false;
+		function testEmptyLine(s) {
+			return _config.skipEmptyLines === 'greedy' ? s.join('').trim() === '' : s.length === 1 && s[0].length === 0;
 		}
 
 		function processResults()
