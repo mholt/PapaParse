@@ -1090,7 +1090,7 @@
 			if (_config.skipEmptyLines)
 			{
 				for (var i = 0; i < _results.data.length; i++)
-					if (testEmptyLine(_results.data[i], _config.delimiter))
+					if (testEmptyLine(_results.data[i]))
 						_results.data.splice(i--, 1);
 			}
 
@@ -1219,7 +1219,7 @@
 
 				for (var j = 0; j < preview.data.length; j++)
 				{
-					if (skipEmptyLines && testEmptyLine(preview.data[j], delim))
+					if (skipEmptyLines && testEmptyLine(preview.data[j]))
 					{
 						emptyLinesCount++;
 						continue;
