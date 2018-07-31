@@ -1338,6 +1338,26 @@ var PARSE_TESTS = [
 				truncated: false
 			}
 		}
+	},
+	{
+		description: "Parsing with skipEmptyLines set to 'greedy'",
+		notes: "Must parse correctly without lines with no content",
+		input: 'a,b\n\n,\nc,d\n , \n""," "\n	,	\n,,,,\n',
+		config: { skipEmptyLines: 'greedy' },
+		expected: {
+			data: [['a', 'b'], ['c', 'd']],
+			errors: []
+		}
+	},
+	{
+		description: "Parsing with skipEmptyLines set to 'greedy' with quotes and delimiters as content",
+		notes: "Must include lines with escaped delimiters and quotes",
+		input: 'a,b\n\n,\nc,d\n" , ",","\n""" """,""""""\n\n\n',
+		config: { skipEmptyLines: 'greedy' },
+		expected: {
+			data: [['a', 'b'], ['c', 'd'], [' , ', ','], ['" "', '""']],
+			errors: []
+		}
 	}
 ];
 

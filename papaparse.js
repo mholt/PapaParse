@@ -1075,6 +1075,10 @@
 			_input = '';
 		};
 
+		function testEmptyLine(s) {
+			return _config.skipEmptyLines === 'greedy' ? s.join('').trim() === '' : s.length === 1 && s[0].length === 0;
+		}
+
 		function processResults()
 		{
 			if (_results && _delimiterError)
@@ -1086,7 +1090,7 @@
 			if (_config.skipEmptyLines)
 			{
 				for (var i = 0; i < _results.data.length; i++)
-					if (_results.data[i].length === 1 && _results.data[i][0] === '')
+					if (testEmptyLine(_results.data[i]))
 						_results.data.splice(i--, 1);
 			}
 
@@ -1215,7 +1219,8 @@
 
 				for (var j = 0; j < preview.data.length; j++)
 				{
-					if (skipEmptyLines && preview.data[j].length === 1 && preview.data[j][0].length === 0) {
+					if (skipEmptyLines && testEmptyLine(preview.data[j]))
+					{
 						emptyLinesCount++;
 						continue;
 					}
@@ -1291,7 +1296,8 @@
 	}
 
 	/** https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions */
-	function escapeRegExp(string) {
+	function escapeRegExp(string)
+	{
 		return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 	}
 
