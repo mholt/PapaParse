@@ -4,6 +4,7 @@
 	https://github.com/mholt/PapaParse
 	License: MIT
 */
+var XMLHttpRequest = XMLHttpRequest || require('xmlhttprequest').XMLHttpRequest;
 (function(root, factory)
 {
 	/* globals define */

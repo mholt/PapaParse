@@ -53,5 +53,8 @@
 		"test-phantomjs": "node tests/test.js --phantomjs",
 		"test-node": "mocha tests/node-tests.js tests/test-cases.js",
 		"test": "npm run lint && npm run test-node && npm run test-phantomjs"
+	},
+	"dependencies": {
+	  "xmlhttprequest": "^1.8.0"
 	}
 }
