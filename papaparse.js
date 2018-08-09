@@ -280,6 +280,9 @@
 		/** quote character */
 		var _quoteChar = '"';
 
+		/** whether only strings should be quoted */
+		var _onlyQuoteStrings = false;
+
 		unpackConfig();
 
 		var quoteCharRegex = new RegExp(_quoteChar, 'g');
@@ -343,6 +346,11 @@
 
 			if (typeof _config.header === 'boolean')
 				_writeHeader = _config.header;
+
+			if (typeof _config.onlyQuoteStrings === 'boolean') {
+				_onlyQuoteStrings = _config.onlyQuoteStrings;
+				_quotes = false; // Override quotes, since only quote strings is selected
+			}
 		}
 
 
@@ -404,17 +412,23 @@
 		}
 
 		/** Encloses a value around quotes if needed (makes a value safe for CSV insertion) */
-		function safe(str, col)
+		function safe(value, col)
 		{
-			if (typeof str === 'undefined' || str === null)
+			if (typeof value === 'undefined' || value === null)
 				return '';
 
-			if (str.constructor === Date)
-				return JSON.stringify(str).slice(1, 25);
+			if (value.constructor === Date)
+				return JSON.stringify(value).slice(1, 25);
 
-			str = str.toString().replace(quoteCharRegex, _quoteChar + _quoteChar);
+			// We must check, whether the data type of value is string already here,
+			// since all data types are converted into strings in the next line
+			var onlyQuoteStrings = _onlyQuoteStrings && typeof value === 'string';
 
-			var needsQuotes = (typeof _quotes === 'boolean' && _quotes)
+			// Converts every data type to string
+			var str = value.toString().replace(quoteCharRegex, _quoteChar + _quoteChar);
+
+			var needsQuotes = onlyQuoteStrings
+							|| (typeof _quotes === 'boolean' && _quotes)
 							|| (_quotes instanceof Array && _quotes[col])
 							|| hasAny(str, Papa.BAD_DELIMITERS)
 							|| str.indexOf(_delimiter) > -1

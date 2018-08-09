@@ -247,13 +247,37 @@
 								<pre><code class="language-javascript">// defaults shown
 {
 	quotes: false,
+	onlyQuoteStrings: false,
 	quoteChar: '"',
 	escapeChar: '"',
 	delimiter: ",",
-	header: true,
-	newline: "\r\n"
+	newline: "\r\n",
+	header: true
 }</code></pre>
-                                Set <code>quotes</code> to <code>true</code> to always enclose each field in quotes, or an array of true/false values correlating to specific to columns to force-quote. The character used to quote can be customized using <code>quoteChar</code>. The character used to escape the <code>quoteChar</code> within a field can be customized using <code>escapeChar</code>. The <code>delimiter</code> can be any valid delimiting character. The <code>newline</code> character(s) may also be customized. Setting <code>header</code> to <code>false</code> will omit the header row.
+								<ul>
+									<li>
+										<code>quotes</code>: Set this property to <code>true</code> to always enclose each field in quotes, or an array of true/false values correlating to specific to columns to force-quote (e.g., <code>[true, false, true]</code>).
+									</li>
+									<li>
+										<code>onlyQuoteStrings</code>: Setting this property to <code>true</code> will just quote strings in the resulting CSV. All other data types like numbers or booleans will not be quoted. Note, that this property overrides the <code>quotes</code> property.
+									</li>
+									<li>
+										<code>quoteChar</code>: The character used to quote.
+									</li>
+									<li>
+										<code>escapeChar</code>: The character used to escape the <code>quoteChar</code> within a field.
+									</li>
+									<li>
+										<code>delimiter</code>: This property can be any valid delimiting character.
+									</li>
+									<li>
+										<code>newline</code>: This property can be any valid newline character(s).
+									</li>
+									<li>
+										<code>header</code>: Setting this property to <code>false</code> will omit the header row.
+									</li>
+								</ul>
+
 							</li>
 						</ul>
 					</div>
