@@ -1636,6 +1636,24 @@ var UNPARSE_TESTS = [
 		description: "Date objects are exported in its ISO representation",
 		input: [{date: new Date("2018-05-04T21:08:03.269Z"), "not a date": 16}, {date: new Date("Tue May 08 2018 08:20:22 GMT-0700 (PDT)"), "not a date": 32}],
 		expected: 'date,not a date\r\n2018-05-04T21:08:03.269Z,16\r\n2018-05-08T15:20:22.000Z,32'
+	},
+	{
+		description: "Returns empty rows when empty rows are passed and skipEmptyLines is false",
+		input: [[null, ' '], [], ['1', '2']],
+		config: {skipEmptyLines: false},
+		expected: '," "\r\n\r\n1,2'
+	},
+	{
+		description: "Returns without empty rows when skipEmptyLines is true",
+		input: [[null, ' '], [], ['1', '2']],
+		config: {skipEmptyLines: true},
+		expected: '," "\r\n1,2'
+	},
+	{
+		description: "Returns without rows with no content when skipEmptyLines is 'greedy'",
+		input: [[null, ' '], [], ['1', '2']],
+		config: {skipEmptyLines: 'greedy'},
+		expected: '1,2'
 	}
 ];
 
