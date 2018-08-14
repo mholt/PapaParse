@@ -293,9 +293,9 @@
 		if (_input instanceof Array)
 		{
 			if (!_input.length || _input[0] instanceof Array)
-				return serialize(null, _input, _skipEmptyLines === 'greedy');
+				return serialize(null, _input, _skipEmptyLines);
 			else if (typeof _input[0] === 'object')
-				return serialize(objectKeys(_input[0]), _input, _skipEmptyLines === 'greedy');
+				return serialize(objectKeys(_input[0]), _input, _skipEmptyLines);
 		}
 		else if (typeof _input === 'object')
 		{
@@ -316,7 +316,7 @@
 					_input.data = [_input.data];	// handles input like [1,2,3] or ['asdf']
 			}
 
-			return serialize(_input.fields || [], _input.data || [], _skipEmptyLines === 'greedy');
+			return serialize(_input.fields || [], _input.data || [], _skipEmptyLines);
 		}
 
 		// Default (any valid paths should return before this)
@@ -365,7 +365,7 @@
 		}
 
 		/** The double for loop that iterates the data and writes out a CSV string including header row */
-		function serialize(fields, data, greedySkip)
+		function serialize(fields, data, skipEmptyLines)
 		{
 			var csv = '';
 
@@ -394,8 +394,9 @@
 			for (var row = 0; row < data.length; row++)
 			{
 				var maxCol = hasHeader ? fields.length : data[row].length;
+				var r = hasHeader ? fields : data[row];
 
-				if (!greedySkip || data[row].join('').trim() !== '')
+				if (skipEmptyLines !== 'greedy' || r.join('').trim() !== '')
 				{
 					for (var col = 0; col < maxCol; col++)
 					{
@@ -404,7 +405,7 @@
 						var colIdx = hasHeader && dataKeyedByField ? fields[col] : col;
 						csv += safe(data[row][colIdx], col);
 					}
-					if (row < data.length - 1)
+					if (row < data.length - 1 && (!skipEmptyLines || maxCol > 0))
 						csv += _newline;
 				}
 			}

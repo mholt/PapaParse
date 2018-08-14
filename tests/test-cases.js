@@ -1638,15 +1638,15 @@ var UNPARSE_TESTS = [
 		expected: 'date,not a date\r\n2018-05-04T21:08:03.269Z,16\r\n2018-05-08T15:20:22.000Z,32'
 	},
 	{
-		description: "Returns empty rows when no content is passed and skipEmptyLines is false",
+		description: "Returns empty rows when empty rows are passed and skipEmptyLines is false",
 		input: [[null, ' '], [], ['1', '2']],
 		config: {skipEmptyLines: false},
 		expected: '," "\r\n\r\n1,2'
 	},
 	{
-		description: "Returns without empty rows and skipEmptyLines is true",
+		description: "Returns without empty rows when skipEmptyLines is true",
 		input: [[null, ' '], [], ['1', '2']],
-		config: {skipEmptyLines: false},
+		config: {skipEmptyLines: true},
 		expected: '," "\r\n1,2'
 	},
 	{
