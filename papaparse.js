@@ -1024,7 +1024,7 @@
 			_delimiterError = false;
 			if (!_config.delimiter)
 			{
-				var delimGuess = guessDelimiter(input, _config.newline, _config.skipEmptyLines, _config.comments, _config.additionalDelimitersToGuess);
+				var delimGuess = guessDelimiter(input, _config.newline, _config.skipEmptyLines, _config.comments);
 				if (delimGuess.successful)
 					_config.delimiter = delimGuess.bestDelimiter;
 				else
@@ -1208,10 +1208,9 @@
 			return _results;
 		}
 
-		function guessDelimiter(input, newline, skipEmptyLines, comments, additionalDelimitersToGuess)
+		function guessDelimiter(input, newline, skipEmptyLines, comments)
 		{
-			additionalDelimitersToGuess = additionalDelimitersToGuess || [];
-			var delimChoices = [',', '\t', '|', ';', Papa.RECORD_SEP, Papa.UNIT_SEP].concat(additionalDelimitersToGuess);
+			var delimChoices = [',', '\t', '|', ';', Papa.RECORD_SEP, Papa.UNIT_SEP];
 			var bestDelim, bestDelta, fieldCountPrevRow;
 
 			for (var i = 0; i < delimChoices.length; i++)

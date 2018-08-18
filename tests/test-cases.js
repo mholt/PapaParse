@@ -2110,6 +2110,7 @@ var CUSTOM_TESTS = [
 			});
 		}
 	}
+
 ];
 
 describe('Custom Tests', function() {
@@ -2124,44 +2125,5 @@ describe('Custom Tests', function() {
 
 	for (var i = 0; i < CUSTOM_TESTS.length; i++) {
 		generateTest(CUSTOM_TESTS[i]);
-	}
-});
-
-
-var DELIMITERS_TO_GUESS_TESTS = [
-	{
-		description: "Should correctly guess custom delimiter when passed additional delimiters to guess.",
-		expected: "~",
-		run: function(callback) {
-			var results = Papa.parse('"A"~"B"~"C"~"D"', {
-				additionalDelimitersToGuess: ['~', '@', '%']
-			});
-			callback(results.meta.delimiter);
-		}
-	},
-	{
-		description: "Should still correctly guess default delimiters when additional delimiters to guess are given.",
-		expected: ",",
-		run: function(callback) {
-			var results = Papa.parse('"A","B","C","D"', {
-				additionalDelimitersToGuess: ['~', '@', '%']
-			});
-			callback(results.meta.delimiter);
-		}
-	}
-];
-
-describe('Additional Delimiters to Guess Tests', function() {
-	function generateTest(test) {
-		(test.disabled ? it.skip : it)(test.description, function(done) {
-			test.run(function(actual) {
-				assert.deepEqual(JSON.stringify(actual), JSON.stringify(test.expected));
-				done();
-			});
-		});
-	}
-
-	for (var i = 0; i < DELIMITERS_TO_GUESS_TESTS.length; i++) {
-		generateTest(DELIMITERS_TO_GUESS_TESTS[i]);
 	}
 });
