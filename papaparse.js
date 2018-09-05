@@ -283,6 +283,9 @@
 		/** whether to skip empty lines */
 		var _skipEmptyLines = false;
 
+		/** Accept a function to apply on each value */
+		var _transform;
+
 		unpackConfig();
 
 		var quoteCharRegex = new RegExp(_quoteChar, 'g');
@@ -350,6 +353,10 @@
 
 			if (typeof _config.header === 'boolean')
 				_writeHeader = _config.header;
+
+			if (typeof _config.transform === 'function') {
+				_transform = _config.transform;
+			}
 		}
 
 
@@ -430,7 +437,12 @@
 							|| str.charAt(0) === ' '
 							|| str.charAt(str.length - 1) === ' ';
 
-			return needsQuotes ? _quoteChar + str + _quoteChar : str;
+			var value = needsQuotes ? _quoteChar + str + _quoteChar : str;
+			if (_transform) {
+				value = _transform(value, col);
+			}
+
+			return value;
 		}
 
 		function hasAny(str, substrings)
