@@ -290,9 +290,9 @@
 		if (typeof _input === 'string')
 			_input = JSON.parse(_input);
 
-		if (_input instanceof Array)
+		if (isArray(_input))
 		{
-			if (!_input.length || _input[0] instanceof Array)
+			if (!_input.length || isArray(_input[0]))
 				return serialize(null, _input, _skipEmptyLines);
 			else if (typeof _input[0] === 'object')
 				return serialize(objectKeys(_input[0]), _input, _skipEmptyLines);
@@ -302,17 +302,17 @@
 			if (typeof _input.data === 'string')
 				_input.data = JSON.parse(_input.data);
 
-			if (_input.data instanceof Array)
+			if (isArray(_input.data))
 			{
 				if (!_input.fields)
 					_input.fields =  _input.meta && _input.meta.fields;
 
 				if (!_input.fields)
-					_input.fields =  _input.data[0] instanceof Array
+					_input.fields =  isArray(_input.data[0])
 						? _input.fields
 						: objectKeys(_input.data[0]);
 
-				if (!(_input.data[0] instanceof Array) && typeof _input.data[0] !== 'object')
+				if (!(isArray(_input.data[0])) && typeof _input.data[0] !== 'object')
 					_input.data = [_input.data];	// handles input like [1,2,3] or ['asdf']
 			}
 
@@ -335,7 +335,7 @@
 			}
 
 			if (typeof _config.quotes === 'boolean'
-				|| _config.quotes instanceof Array)
+				|| isArray(_config.quotes))
 				_quotes = _config.quotes;
 
 			if (typeof _config.skipEmptyLines === 'boolean'
@@ -374,8 +374,8 @@
 			if (typeof data === 'string')
 				data = JSON.parse(data);
 
-			var hasHeader = fields instanceof Array && fields.length > 0;
-			var dataKeyedByField = !(data[0] instanceof Array);
+			var hasHeader = isArray(fields) && fields.length > 0;
+			var dataKeyedByField = !(isArray(data[0]));
 
 			// If there a header row, write it first
 			if (hasHeader && _writeHeader)
@@ -424,7 +424,7 @@
 			str = str.toString().replace(quoteCharRegex, _quoteChar + _quoteChar);
 
 			var needsQuotes = (typeof _quotes === 'boolean' && _quotes)
-							|| (_quotes instanceof Array && _quotes[col])
+							|| (isArray(_quotes) && _quotes[col])
 							|| hasAny(str, Papa.BAD_DELIMITERS)
 							|| str.indexOf(_delimiter) > -1
 							|| str.charAt(0) === ' '
@@ -1778,7 +1778,7 @@
 	{
 		if (typeof obj !== 'object' || obj === null)
 			return obj;
-		var cpy = obj instanceof Array ? [] : {};
+		var cpy = isArray(obj) ? [] : {};
 		for (var key in obj)
 			cpy[key] = copy(obj[key]);
 		return cpy;
@@ -1792,6 +1792,11 @@
 	function isFunction(func)
 	{
 		return typeof func === 'function';
+	}
+
+	function isArray(obj)
+	{
+		return Object.prototype.toString.call(obj) === '[object Array]';
 	}
 
 	return Papa;
