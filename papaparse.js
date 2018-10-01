@@ -398,7 +398,9 @@
 				var emptyLine = false;
 				var nullLine = hasHeader ? Object.keys(data[row]).length === 0 : data[row].length === 0;
 				if (skipEmptyLines && !hasHeader)
+				{
 					emptyLine = skipEmptyLines === 'greedy' ? data[row].join('').trim() === '' : data[row].length === 1 && data[row][0].length === 0;
+				}
 				if (skipEmptyLines === 'greedy' && hasHeader) {
 					var line = [];
 					for (var c = 0; c < maxCol; c++) {
@@ -416,8 +418,10 @@
 						var colIdx = hasHeader && dataKeyedByField ? fields[col] : col;
 						csv += safe(data[row][colIdx], col);
 					}
-					if (row < data.length - 1 && (!skipEmptyLines || maxCol > 0) && (!skipEmptyLines || !nullLine))
+					if (row < data.length - 1 && (!skipEmptyLines || (maxCol > 0 && !nullLine)))
+					{
 						csv += _newline;
+					}
 				}
 			}
 			return csv;
