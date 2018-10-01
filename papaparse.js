@@ -1,9 +1,19 @@
 /*@license
-	Papa Parse
-	v4.6.0
-	https://github.com/mholt/PapaParse
-	License: MIT
+Papa Parse
+v4.6.0
+https://github.com/mholt/PapaParse
+License: MIT
 */
+
+// Polyfills
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/isArray#Polyfill
+if (!Array.isArray)
+{
+	Array.isArray = function(arg) {
+		return Object.prototype.toString.call(arg) === '[object Array]';
+	};
+}
+
 (function(root, factory)
 {
 	/* globals define */
@@ -40,15 +50,6 @@
 		// When running tests none of the above have been defined
 		return {};
 	})();
-
-	// Polyfills
-	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/isArray#Polyfill
-	if (!Array.isArray)
-	{
-		Array.isArray = function(arg) {
-			return Object.prototype.toString.call(arg) === '[object Array]';
-		};
-	}
 
 	var IS_WORKER = !global.document && !!global.postMessage,
 		IS_PAPA_WORKER = IS_WORKER && /(\?|&)papaworker(=|&|$)/.test(global.location.search),
