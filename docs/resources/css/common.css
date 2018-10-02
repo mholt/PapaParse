@@ -77,14 +77,13 @@ h4 {
 	line-height: 1.25em;
 }
 
-h5,
-footer h4 {
-	font-size: 12px;
-	letter-spacing: 2px;
-	text-transform: uppercase;
-	color: #A1B2C2;	/* darker alternative: #698EB0 */
-	line-height: 1em;
-	margin: 50px auto;
+h5, footer h4 {
+    font-size: 20px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #242627;
+    line-height: 1em;
+    margin: 50px auto;
 }
 
 h6 {
