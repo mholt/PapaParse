@@ -81,7 +81,9 @@ if (!Array.isArray)
 	Papa.FileStreamer = FileStreamer;
 	Papa.StringStreamer = StringStreamer;
 	Papa.ReadableStreamStreamer = ReadableStreamStreamer;
-	Papa.DuplexStreamStreamer = DuplexStreamStreamer;
+	if (typeof PAPA_BROWSER_CONTEXT === 'undefined') {
+		Papa.DuplexStreamStreamer = DuplexStreamStreamer;
+	}
 
 	if (global.jQuery)
 	{
@@ -241,7 +243,7 @@ if (!Array.isArray)
 		}
 
 		var streamer = null;
-		if (_input === Papa.NODE_STREAM_INPUT)
+		if (_input === Papa.NODE_STREAM_INPUT && typeof PAPA_BROWSER_CONTEXT === 'undefined')
 		{
 			// create a node Duplex stream for use
 			// with .pipe
@@ -982,8 +984,10 @@ if (!Array.isArray)
 		});
 		stream.once('finish', bindFunction(this._onWriteComplete, this));
 	}
-	DuplexStreamStreamer.prototype = Object.create(ChunkStreamer.prototype);
-	DuplexStreamStreamer.prototype.constructor = DuplexStreamStreamer;
+	if (typeof PAPA_BROWSER_CONTEXT === 'undefined') {
+		DuplexStreamStreamer.prototype = Object.create(ChunkStreamer.prototype);
+		DuplexStreamStreamer.prototype.constructor = DuplexStreamStreamer;
+	}
 
 
 	// Use one ParserHandle per entire CSV file or string
