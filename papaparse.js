@@ -871,101 +871,104 @@ if (!Array.isArray)
 
 
 	function DuplexStreamStreamer(_config) {
-		var Duplex = require('stream').Duplex;
-		var config = copy(_config);
-		var parseOnWrite = true;
-		var writeStreamHasFinished = false;
-		var parseCallbackQueue = [];
-		var stream = null;
+		if (typeof PAPA_BROWSER_CONTEXT === 'undefined') {
+			var Duplex = require('stream').Duplex;
 
-		this._onCsvData = function(results)
-		{
-			var data = results.data;
-			for (var i = 0; i < data.length; i++) {
-				if (!stream.push(data[i]) && !this._handle.paused()) {
-					// the writeable consumer buffer has filled up
-					// so we need to pause until more items
-					// can be processed
-					this._handle.pause();
+			var config = copy(_config);
+			var parseOnWrite = true;
+			var writeStreamHasFinished = false;
+			var parseCallbackQueue = [];
+			var stream = null;
+
+			this._onCsvData = function(results)
+			{
+				var data = results.data;
+				for (var i = 0; i < data.length; i++) {
+					if (!stream.push(data[i]) && !this._handle.paused()) {
+						// the writeable consumer buffer has filled up
+						// so we need to pause until more items
+						// can be processed
+						this._handle.pause();
+					}
 				}
-			}
-		};
+			};
 
-		this._onCsvComplete = function()
-		{
-			// node will finish the read stream when
-			// null is pushed
-			stream.push(null);
-		};
+			this._onCsvComplete = function()
+			{
+				// node will finish the read stream when
+				// null is pushed
+				stream.push(null);
+			};
 
-		config.step = bindFunction(this._onCsvData, this);
-		config.complete = bindFunction(this._onCsvComplete, this);
-		ChunkStreamer.call(this, config);
+			config.step = bindFunction(this._onCsvData, this);
+			config.complete = bindFunction(this._onCsvComplete, this);
+			ChunkStreamer.call(this, config);
 
-		this._nextChunk = function()
-		{
-			if (writeStreamHasFinished && parseCallbackQueue.length === 1) {
-				this._finished = true;
-			}
-			if (parseCallbackQueue.length) {
-				parseCallbackQueue.shift()();
-			} else {
-				parseOnWrite = true;
-			}
-		};
-
-		this._addToParseQueue = function(chunk, callback)
-		{
-			// add to queue so that we can indicate
-			// completion via callback
-			// node will automatically pause the incoming stream
-			// when too many items have been added without their
-			// callback being invoked
-			parseCallbackQueue.push(bindFunction(function() {
-				this.parseChunk(typeof chunk === 'string' ? chunk : chunk.toString(config.encoding));
-				if (isFunction(callback)) {
-					return callback();
+			this._nextChunk = function()
+			{
+				if (writeStreamHasFinished && parseCallbackQueue.length === 1) {
+					this._finished = true;
 				}
-			}, this));
-			if (parseOnWrite) {
-				parseOnWrite = false;
-				this._nextChunk();
-			}
-		};
+				if (parseCallbackQueue.length) {
+					parseCallbackQueue.shift()();
+				} else {
+					parseOnWrite = true;
+				}
+			};
 
-		this._onRead = function()
-		{
-			if (this._handle.paused()) {
-				// the writeable consumer can handle more data
-				// so resume the chunk parsing
-				this._handle.resume();
-			}
-		};
+			this._addToParseQueue = function(chunk, callback)
+			{
+				// add to queue so that we can indicate
+				// completion via callback
+				// node will automatically pause the incoming stream
+				// when too many items have been added without their
+				// callback being invoked
+				parseCallbackQueue.push(bindFunction(function() {
+					this.parseChunk(typeof chunk === 'string' ? chunk : chunk.toString(config.encoding));
+					if (isFunction(callback)) {
+						return callback();
+					}
+				}, this));
+				if (parseOnWrite) {
+					parseOnWrite = false;
+					this._nextChunk();
+				}
+			};
 
-		this._onWrite = function(chunk, encoding, callback)
-		{
-			this._addToParseQueue(chunk, callback);
-		};
+			this._onRead = function()
+			{
+				if (this._handle.paused()) {
+					// the writeable consumer can handle more data
+					// so resume the chunk parsing
+					this._handle.resume();
+				}
+			};
 
-		this._onWriteComplete = function()
-		{
-			writeStreamHasFinished = true;
-			// have to write empty string
-			// so parser knows its done
-			this._addToParseQueue('');
-		};
+			this._onWrite = function(chunk, encoding, callback)
+			{
+				this._addToParseQueue(chunk, callback);
+			};
 
-		this.getStream = function()
-		{
-			return stream;
-		};
-		stream = new Duplex({
-			readableObjectMode: true,
-			decodeStrings: false,
-			read: bindFunction(this._onRead, this),
-			write: bindFunction(this._onWrite, this)
-		});
-		stream.once('finish', bindFunction(this._onWriteComplete, this));
+			this._onWriteComplete = function()
+			{
+				writeStreamHasFinished = true;
+				// have to write empty string
+				// so parser knows its done
+				this._addToParseQueue('');
+			};
+
+			this.getStream = function()
+			{
+				return stream;
+			};
+			stream = new Duplex({
+				readableObjectMode: true,
+				decodeStrings: false,
+				read: bindFunction(this._onRead, this),
+				write: bindFunction(this._onWrite, this)
+			});
+			stream.once('finish', bindFunction(this._onWriteComplete, this));
+		}
 	}
 	DuplexStreamStreamer.prototype = Object.create(ChunkStreamer.prototype);
 	DuplexStreamStreamer.prototype.constructor = DuplexStreamStreamer;
