@@ -403,19 +403,34 @@ if (!Array.isArray)
 			for (var row = 0; row < data.length; row++)
 			{
 				var maxCol = hasHeader ? fields.length : data[row].length;
-				var r = hasHeader ? fields : data[row];
 
-				if (skipEmptyLines !== 'greedy' || r.join('').trim() !== '')
+				var emptyLine = false;
+				var nullLine = hasHeader ? Object.keys(data[row]).length === 0 : data[row].length === 0;
+				if (skipEmptyLines && !hasHeader)
+				{
+					emptyLine = skipEmptyLines === 'greedy' ? data[row].join('').trim() === '' : data[row].length === 1 && data[row][0].length === 0;
+				}
+				if (skipEmptyLines === 'greedy' && hasHeader) {
+					var line = [];
+					for (var c = 0; c < maxCol; c++) {
+						var cx = dataKeyedByField ? fields[c] : c;
+						line.push(data[row][cx]);
+					}
+					emptyLine = line.join('').trim() === '';
+				}
+				if (!emptyLine)
 				{
 					for (var col = 0; col < maxCol; col++)
 					{
-						if (col > 0)
+						if (col > 0 && !nullLine)
 							csv += _delimiter;
 						var colIdx = hasHeader && dataKeyedByField ? fields[col] : col;
 						csv += safe(data[row][colIdx], col);
 					}
-					if (row < data.length - 1 && (!skipEmptyLines || maxCol > 0))
+					if (row < data.length - 1 && (!skipEmptyLines || (maxCol > 0 && !nullLine)))
+					{
 						csv += _newline;
+					}
 				}
 			}
 			return csv;

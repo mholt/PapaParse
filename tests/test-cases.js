@@ -1654,6 +1654,24 @@ var UNPARSE_TESTS = [
 		input: [[null, ' '], [], ['1', '2']],
 		config: {skipEmptyLines: 'greedy'},
 		expected: '1,2'
+	},
+	{
+		description: "Returns empty rows when empty rows are passed and skipEmptyLines is false with headers",
+		input: [{a: null, b: ' '}, {}, {a: '1', b: '2'}],
+		config: {skipEmptyLines: false, header: true},
+		expected: 'a,b\r\n," "\r\n\r\n1,2'
+	},
+	{
+		description: "Returns without empty rows when skipEmptyLines is true with headers",
+		input: [{a: null, b: ' '}, {}, {a: '1', b: '2'}],
+		config: {skipEmptyLines: true, header: true},
+		expected: 'a,b\r\n," "\r\n1,2'
+	},
+	{
+		description: "Returns without rows with no content when skipEmptyLines is 'greedy' with headers",
+		input: [{a: null, b: ' '}, {}, {a: '1', b: '2'}],
+		config: {skipEmptyLines: 'greedy', header: true},
+		expected: 'a,b\r\n1,2'
 	}
 ];
 
