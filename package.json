@@ -42,8 +42,8 @@
 		"eslint": "^4.19.1",
 		"grunt": "^1.0.2",
 		"grunt-contrib-uglify": "^3.3.0",
-		"mocha": "^3.5.0",
-		"mocha-phantomjs": "^4.1.0",
+		"mocha": "^5.2.0",
+		"mocha-headless-chrome": "^2.0.1",
 		"open": "0.0.5",
 		"phantomjs-prebuilt": "^2.1.16",
 		"serve-static": "^1.7.1"
@@ -51,8 +51,8 @@
 	"scripts": {
 		"lint": "eslint --no-ignore papaparse.js Gruntfile.js .eslintrc.js 'tests/**/*.js'",
 		"test-browser": "node tests/test.js",
-		"test-phantomjs": "node tests/test.js --phantomjs",
+		"test-mocha-headless-chrome": "node tests/test.js --mocha-headless-chrome",
 		"test-node": "mocha tests/node-tests.js tests/test-cases.js",
-		"test": "npm run lint && npm run test-node && npm run test-phantomjs"
+		"test": "npm run lint && npm run test-node && npm run test-mocha-headless-chrome"
 	}
 }
