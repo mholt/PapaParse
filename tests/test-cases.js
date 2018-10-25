@@ -734,7 +734,7 @@ var PARSE_TESTS = [
 		}
 	},
 	{
-		description: "Header rows transformed",
+		description: "Header rows are transformed when transformHeader function is provided",
 		input: 'A,B,C\r\na,b,c',
 		config: { header: true, transformHeader: function(header) { return header.toLowerCase(); } },
 		expected: {
