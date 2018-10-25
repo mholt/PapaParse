@@ -1147,10 +1147,6 @@ if (!Array.isArray)
 				{
 					var header = _results.data[i][j];
 
-					if (_config.trimHeaders) {
-						header = header.trim();
-					}
-
 					if (isFunction(_config.transformHeader)) {
 						header = _config.transformHeader(header);
 					}
