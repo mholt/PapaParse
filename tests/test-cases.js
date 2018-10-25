@@ -725,15 +725,6 @@ var PARSE_TESTS = [
 		}
 	},
 	{
-		description: "Header rows are trimmed when trimHeaders is set",
-		input: '  A , B  ,  C  \r\na,b ,c',
-		config: { header: true, trimHeaders: true },
-		expected: {
-			data: [{"A": "a", "B": "b ", "C": "c"}],
-			errors: []
-		}
-	},
-	{
 		description: "Header rows are transformed when transformHeader function is provided",
 		input: 'A,B,C\r\na,b,c',
 		config: { header: true, transformHeader: function(header) { return header.toLowerCase(); } },

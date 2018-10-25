@@ -340,7 +340,6 @@ var csv = Papa.unparse({
 	quoteChar: '"',
 	escapeChar: '"',
 	header: false,
-	trimHeaders: false,
 	transformHeader: undefined,
 	dynamicTyping: false,
 	preview: 0,
@@ -413,18 +412,10 @@ var csv = Papa.unparse({
 							</tr>
 							<tr>
 								<td>
-									<code>trimHeaders</code>
-								</td>
-								<td>
-									If true leading/trailing spaces will be trimed from headers.
-								</td>
-							</tr>
-							<tr>
-								<td>
 									<code>transformHeader</code>
 								</td>
 								<td>
-									A function to apply on each header. Requires <code>header</code> to be <code>true</code>. The function receives the header as its first argument. The <code>transformHeader</code> function is applied after <code>trimHeaders</code> if enabled.
+									A function to apply on each header. Requires <code>header</code> to be <code>true</code>. The function receives the header as its first argument.
 								</td>
 							</tr>
 							<tr>
