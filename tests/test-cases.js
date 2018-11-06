@@ -581,9 +581,9 @@ var CORE_PARSER_TESTS = [
 	}
 ];
 
-describe('Core Parser Tests', function () {
+describe('Core Parser Tests', function() {
 	function generateTest(test) {
-		(test.disabled ? it.skip : it)(test.description, function () {
+		(test.disabled ? it.skip : it)(test.description, function() {
 			var actual = new Papa.Parser(test.config).parse(test.input);
 			assert.deepEqual(JSON.stringify(actual.errors), JSON.stringify(test.expected.errors));
 			assert.deepEqual(actual.data, test.expected.data);
@@ -809,7 +809,7 @@ var PARSE_TESTS = [
 		description: "Callback delimiter",
 		input: 'a$ b$ c',
 		config: {
-			delimiter: function (input) {
+			delimiter: function(input) {
 				return input[1] + ' ';
 			}
 		},
@@ -881,7 +881,7 @@ var PARSE_TESTS = [
 		description: "Dynamic typing by indices can be determined by function",
 		input: '001,002,003',
 		config: {
-			dynamicTyping: function (field) {
+			dynamicTyping: function(field) {
 				return (field % 2) === 0;
 			}
 		},
@@ -894,7 +894,7 @@ var PARSE_TESTS = [
 		description: "Dynamic typing by headers can be determined by function",
 		input: 'A_as_int,B,C_as_int\r\n001,002,003',
 		config: {
-			header: true, dynamicTyping: function (field) {
+			header: true, dynamicTyping: function(field) {
 				return /_as_int$/.test(field);
 			}
 		},
@@ -916,7 +916,7 @@ var PARSE_TESTS = [
 		description: "Custom transform function is applied to values",
 		input: 'A,B,C\r\nd,e,f',
 		config: {
-			transform: function (value) {
+			transform: function(value) {
 				return value.toLowerCase();
 			}
 		},
@@ -1374,9 +1374,9 @@ var PARSE_TESTS = [
 	}
 ];
 
-describe('Parse Tests', function () {
+describe('Parse Tests', function() {
 	function generateTest(test) {
-		(test.disabled ? it.skip : it)(test.description, function () {
+		(test.disabled ? it.skip : it)(test.description, function() {
 			var actual = Papa.parse(test.input, test.config);
 			// allows for testing the meta object if present in the test
 			if (test.expected.meta) {
@@ -1455,18 +1455,18 @@ var PARSE_ASYNC_TESTS = [
 	}
 ];
 
-describe('Parse Async Tests', function () {
+describe('Parse Async Tests', function() {
 	function generateTest(test) {
-		(test.disabled ? it.skip : it)(test.description, function (done) {
+		(test.disabled ? it.skip : it)(test.description, function(done) {
 			var config = test.config;
 
-			config.complete = function (actual) {
+			config.complete = function(actual) {
 				assert.deepEqual(JSON.stringify(actual.errors), JSON.stringify(test.expected.errors));
 				assert.deepEqual(actual.data, test.expected.data);
 				done();
 			};
 
-			config.error = function (err) {
+			config.error = function(err) {
 				throw err;
 			};
 
@@ -1696,9 +1696,9 @@ var UNPARSE_TESTS = [
 	}
 ];
 
-describe('Unparse Tests', function () {
+describe('Unparse Tests', function() {
 	function generateTest(test) {
-		(test.disabled ? it.skip : it)(test.description, function () {
+		(test.disabled ? it.skip : it)(test.description, function() {
 			var actual;
 
 			try {
@@ -1725,10 +1725,10 @@ var CUSTOM_TESTS = [
 		description: "Complete is called with all results if neither step nor chunk is defined",
 		expected: [['A', 'b', 'c'], ['d', 'E', 'f'], ['G', 'h', 'i']],
 		disabled: !FILES_ENABLED,
-		run: function (callback) {
+		run: function(callback) {
 			Papa.parse(new File(['A,b,c\nd,E,f\nG,h,i'], 'sample.csv'), {
 				chunkSize: 3,
-				complete: function (response) {
+				complete: function(response) {
 					callback(response.data);
 				}
 			});
@@ -1737,13 +1737,13 @@ var CUSTOM_TESTS = [
 	{
 		description: "Step is called for each row",
 		expected: 2,
-		run: function (callback) {
+		run: function(callback) {
 			var callCount = 0;
 			Papa.parse('A,b,c\nd,E,f', {
-				step: function () {
+				step: function() {
 					callCount++;
 				},
-				complete: function () {
+				complete: function() {
 					callback(callCount);
 				}
 			});
@@ -1752,9 +1752,9 @@ var CUSTOM_TESTS = [
 	{
 		description: "Step is called with the contents of the row",
 		expected: ['A', 'b', 'c'],
-		run: function (callback) {
+		run: function(callback) {
 			Papa.parse('A,b,c', {
-				step: function (response) {
+				step: function(response) {
 					callback(response.data[0]);
 				}
 			});
@@ -1763,13 +1763,13 @@ var CUSTOM_TESTS = [
 	{
 		description: "Step is called with the last cursor position",
 		expected: [6, 12, 17],
-		run: function (callback) {
+		run: function(callback) {
 			var updates = [];
 			Papa.parse('A,b,c\nd,E,f\nG,h,i', {
-				step: function (response) {
+				step: function(response) {
 					updates.push(response.meta.cursor);
 				},
-				complete: function () {
+				complete: function() {
 					callback(updates);
 				}
 			});
@@ -1779,14 +1779,14 @@ var CUSTOM_TESTS = [
 		description: "Step exposes cursor for downloads",
 		expected: [129, 287, 452, 595, 727, 865, 1031, 1209],
 		disabled: !XHR_ENABLED,
-		run: function (callback) {
+		run: function(callback) {
 			var updates = [];
 			Papa.parse("/tests/long-sample.csv", {
 				download: true,
-				step: function (response) {
+				step: function(response) {
 					updates.push(response.meta.cursor);
 				},
-				complete: function () {
+				complete: function() {
 					callback(updates);
 				}
 			});
@@ -1796,15 +1796,15 @@ var CUSTOM_TESTS = [
 		description: "Step exposes cursor for chunked downloads",
 		expected: [129, 287, 452, 595, 727, 865, 1031, 1209],
 		disabled: !XHR_ENABLED,
-		run: function (callback) {
+		run: function(callback) {
 			var updates = [];
 			Papa.parse("/tests/long-sample.csv", {
 				download: true,
 				chunkSize: 500,
-				step: function (response) {
+				step: function(response) {
 					updates.push(response.meta.cursor);
 				},
-				complete: function () {
+				complete: function() {
 					callback(updates);
 				}
 			});
@@ -1814,16 +1814,16 @@ var CUSTOM_TESTS = [
 		description: "Step exposes cursor for workers",
 		expected: [452, 452, 452, 865, 865, 865, 1209, 1209],
 		disabled: !XHR_ENABLED,
-		run: function (callback) {
+		run: function(callback) {
 			var updates = [];
 			Papa.parse("/tests/long-sample.csv", {
 				download: true,
 				chunkSize: 500,
 				worker: true,
-				step: function (response) {
+				step: function(response) {
 					updates.push(response.meta.cursor);
 				},
-				complete: function () {
+				complete: function() {
 					callback(updates);
 				}
 			});
@@ -1833,15 +1833,15 @@ var CUSTOM_TESTS = [
 		description: "Chunk is called for each chunk",
 		expected: [3, 3, 2],
 		disabled: !XHR_ENABLED,
-		run: function (callback) {
+		run: function(callback) {
 			var updates = [];
 			Papa.parse("/tests/long-sample.csv", {
 				download: true,
 				chunkSize: 500,
-				chunk: function (response) {
+				chunk: function(response) {
 					updates.push(response.data.length);
 				},
-				complete: function () {
+				complete: function() {
 					callback(updates);
 				}
 			});
@@ -1851,15 +1851,15 @@ var CUSTOM_TESTS = [
 		description: "Chunk is called with cursor position",
 		expected: [452, 865, 1209],
 		disabled: !XHR_ENABLED,
-		run: function (callback) {
+		run: function(callback) {
 			var updates = [];
 			Papa.parse("/tests/long-sample.csv", {
 				download: true,
 				chunkSize: 500,
-				chunk: function (response) {
+				chunk: function(response) {
 					updates.push(response.meta.cursor);
 				},
-				complete: function () {
+				complete: function() {
 					callback(updates);
 				}
 			});
@@ -1870,16 +1870,16 @@ var CUSTOM_TESTS = [
 		expected: [
 			[['A', 'b', 'c']]
 		],
-		run: function (callback) {
+		run: function(callback) {
 			var updates = [];
 			Papa.parse('A,b,c\nd,E,f\nG,h,i', {
 				chunkSize: 10,
-				chunk: function (response, handle) {
+				chunk: function(response, handle) {
 					updates.push(response.data);
 					handle.pause();
 					callback(updates);
 				},
-				complete: function () {
+				complete: function() {
 					callback(new Error('incorrect complete callback'));
 				}
 			});
@@ -1891,24 +1891,24 @@ var CUSTOM_TESTS = [
 			[['A', 'b', 'c']],
 			[['d', 'E', 'f'], ['G', 'h', 'i']]
 		],
-		run: function (callback) {
+		run: function(callback) {
 			var updates = [];
 			var handle = null;
 			var first = true;
 			Papa.parse('A,b,c\nd,E,f\nG,h,i', {
 				chunkSize: 10,
-				chunk: function (response, h) {
+				chunk: function(response, h) {
 					updates.push(response.data);
 					if (!first) return;
 					handle = h;
 					handle.pause();
 					first = false;
 				},
-				complete: function () {
+				complete: function() {
 					callback(updates);
 				}
 			});
-			setTimeout(function () {
+			setTimeout(function() {
 				handle.resume();
 			}, 500);
 		}
@@ -1918,17 +1918,17 @@ var CUSTOM_TESTS = [
 		expected: [
 			[['A', 'b', 'c']]
 		],
-		run: function (callback) {
+		run: function(callback) {
 			var updates = [];
 			Papa.parse('A,b,c\nd,E,f\nG,h,i', {
 				chunkSize: 1,
-				chunk: function (response, handle) {
+				chunk: function(response, handle) {
 					if (response.data.length) {
 						updates.push(response.data);
 						handle.abort();
 					}
 				},
-				complete: function (response) {
+				complete: function(response) {
 					callback(updates);
 				}
 			});
@@ -1938,14 +1938,14 @@ var CUSTOM_TESTS = [
 		description: "Step exposes indexes for files",
 		expected: [6, 12, 17],
 		disabled: !FILES_ENABLED,
-		run: function (callback) {
+		run: function(callback) {
 			var updates = [];
 			Papa.parse(new File(['A,b,c\nd,E,f\nG,h,i'], 'sample.csv'), {
 				download: true,
-				step: function (response) {
+				step: function(response) {
 					updates.push(response.meta.cursor);
 				},
-				complete: function () {
+				complete: function() {
 					callback(updates);
 				}
 			});
@@ -1955,14 +1955,14 @@ var CUSTOM_TESTS = [
 		description: "Step exposes indexes for chunked files",
 		expected: [6, 12, 17],
 		disabled: !FILES_ENABLED,
-		run: function (callback) {
+		run: function(callback) {
 			var updates = [];
 			Papa.parse(new File(['A,b,c\nd,E,f\nG,h,i'], 'sample.csv'), {
 				chunkSize: 3,
-				step: function (response) {
+				step: function(response) {
 					updates.push(response.meta.cursor);
 				},
-				complete: function () {
+				complete: function() {
 					callback(updates);
 				}
 			});
@@ -1972,14 +1972,14 @@ var CUSTOM_TESTS = [
 		description: "Quoted line breaks near chunk boundaries are handled",
 		expected: [['A', 'B', 'C'], ['X', 'Y\n1\n2\n3', 'Z']],
 		disabled: !FILES_ENABLED,
-		run: function (callback) {
+		run: function(callback) {
 			var updates = [];
 			Papa.parse(new File(['A,B,C\nX,"Y\n1\n2\n3",Z'], 'sample.csv'), {
 				chunkSize: 3,
-				step: function (response) {
+				step: function(response) {
 					updates.push(response.data[0]);
 				},
-				complete: function () {
+				complete: function() {
 					callback(updates);
 				}
 			});
@@ -1988,10 +1988,10 @@ var CUSTOM_TESTS = [
 	{
 		description: "Step functions can abort parsing",
 		expected: [['A', 'b', 'c']],
-		run: function (callback) {
+		run: function(callback) {
 			var updates = [];
 			Papa.parse('A,b,c\nd,E,f\nG,h,i', {
-				step: function (response, handle) {
+				step: function(response, handle) {
 					updates.push(response.data[0]);
 					handle.abort();
 					callback(updates);
@@ -2003,13 +2003,13 @@ var CUSTOM_TESTS = [
 	{
 		description: "Complete is called after aborting",
 		expected: true,
-		run: function (callback) {
+		run: function(callback) {
 			Papa.parse('A,b,c\nd,E,f\nG,h,i', {
-				step: function (response, handle) {
+				step: function(response, handle) {
 					handle.abort();
 				},
 				chunkSize: 6,
-				complete: function (response) {
+				complete: function(response) {
 					callback(response.meta.aborted);
 				}
 			});
@@ -2018,15 +2018,15 @@ var CUSTOM_TESTS = [
 	{
 		description: "Step functions can pause parsing",
 		expected: [['A', 'b', 'c']],
-		run: function (callback) {
+		run: function(callback) {
 			var updates = [];
 			Papa.parse('A,b,c\nd,E,f\nG,h,i', {
-				step: function (response, handle) {
+				step: function(response, handle) {
 					updates.push(response.data[0]);
 					handle.pause();
 					callback(updates);
 				},
-				complete: function () {
+				complete: function() {
 					callback('incorrect complete callback');
 				}
 			});
@@ -2035,23 +2035,23 @@ var CUSTOM_TESTS = [
 	{
 		description: "Step functions can resume parsing",
 		expected: [['A', 'b', 'c'], ['d', 'E', 'f'], ['G', 'h', 'i']],
-		run: function (callback) {
+		run: function(callback) {
 			var updates = [];
 			var handle = null;
 			var first = true;
 			Papa.parse('A,b,c\nd,E,f\nG,h,i', {
-				step: function (response, h) {
+				step: function(response, h) {
 					updates.push(response.data[0]);
 					if (!first) return;
 					handle = h;
 					handle.pause();
 					first = false;
 				},
-				complete: function () {
+				complete: function() {
 					callback(updates);
 				}
 			});
-			setTimeout(function () {
+			setTimeout(function() {
 				handle.resume();
 			}, 500);
 		}
@@ -2060,17 +2060,17 @@ var CUSTOM_TESTS = [
 		description: "Step functions can abort workers",
 		expected: 1,
 		disabled: !XHR_ENABLED,
-		run: function (callback) {
+		run: function(callback) {
 			var updates = 0;
 			Papa.parse("/tests/long-sample.csv", {
 				worker: true,
 				download: true,
 				chunkSize: 500,
-				step: function (response, handle) {
+				step: function(response, handle) {
 					updates++;
 					handle.abort();
 				},
-				complete: function () {
+				complete: function() {
 					callback(updates);
 				}
 			});
@@ -2080,18 +2080,18 @@ var CUSTOM_TESTS = [
 		description: "beforeFirstChunk manipulates only first chunk",
 		expected: 7,
 		disabled: !XHR_ENABLED,
-		run: function (callback) {
+		run: function(callback) {
 			var updates = 0;
 			Papa.parse("/tests/long-sample.csv", {
 				download: true,
 				chunkSize: 500,
-				beforeFirstChunk: function (chunk) {
+				beforeFirstChunk: function(chunk) {
 					return chunk.replace(/.*?\n/, '');
 				},
-				step: function (response) {
+				step: function(response) {
 					updates++;
 				},
-				complete: function () {
+				complete: function() {
 					callback(updates);
 				}
 			});
@@ -2101,17 +2101,17 @@ var CUSTOM_TESTS = [
 		description: "First chunk not modified if beforeFirstChunk returns nothing",
 		expected: 8,
 		disabled: !XHR_ENABLED,
-		run: function (callback) {
+		run: function(callback) {
 			var updates = 0;
 			Papa.parse("/tests/long-sample.csv", {
 				download: true,
 				chunkSize: 500,
-				beforeFirstChunk: function (chunk) {
+				beforeFirstChunk: function(chunk) {
 				},
-				step: function (response) {
+				step: function(response) {
 					updates++;
 				},
-				complete: function () {
+				complete: function() {
 					callback(updates);
 				}
 			});
@@ -2121,7 +2121,7 @@ var CUSTOM_TESTS = [
 		description: "Should not assume we own the worker unless papaworker is in the search string",
 		disabled: typeof Worker === 'undefined',
 		expected: [false, true, true, true, true],
-		run: function (callback) {
+		run: function(callback) {
 			var searchStrings = [
 				'',
 				'?papaworker',
@@ -2129,23 +2129,23 @@ var CUSTOM_TESTS = [
 				'?x=1&papaworker&y=1',
 				'?x=1&papaworker=1'
 			];
-			var results = searchStrings.map(function () {
+			var results = searchStrings.map(function() {
 				return false;
 			});
 			var workers = [];
 
 			// Give it .5s to do something
-			setTimeout(function () {
-				workers.forEach(function (w) {
+			setTimeout(function() {
+				workers.forEach(function(w) {
 					w.terminate();
 				});
 				callback(results);
 			}, 500);
 
-			searchStrings.forEach(function (searchString, idx) {
+			searchStrings.forEach(function(searchString, idx) {
 				var w = new Worker('../papaparse.js' + searchString);
 				workers.push(w);
-				w.addEventListener('message', function () {
+				w.addEventListener('message', function() {
 					results[idx] = true;
 				});
 				w.postMessage({input: 'a,b,c\n1,2,3'});
@@ -2155,10 +2155,10 @@ var CUSTOM_TESTS = [
 
 ];
 
-describe('Custom Tests', function () {
+describe('Custom Tests', function() {
 	function generateTest(test) {
-		(test.disabled ? it.skip : it)(test.description, function (done) {
-			test.run(function (actual) {
+		(test.disabled ? it.skip : it)(test.description, function(done) {
+			test.run(function(actual) {
 				assert.deepEqual(JSON.stringify(actual), JSON.stringify(test.expected));
 				done();
 			});
