@@ -418,6 +418,14 @@ var CORE_PARSER_TESTS = [
 		}
 	},
 	{
+		description: "Pipes with decimal numbers and comma as decimal separator",
+		input: 'a|3,4|b\r\nc|3,4|d',
+		expected: {
+			data: [['a', '3,4', 'b'], ['c', '3,4', 'd']],
+			errors: []
+		}
+	},
+	{
 		description: "Commented line at end",
 		input: 'a,true,false\n# Comment',
 		config: {comments: true},
@@ -1578,14 +1586,6 @@ var UNPARSE_TESTS = [
 		input: [['a', 'b', 'c'], ['d', 'e', 'f']],
 		config: {newline: '\r'},
 		expected: 'a,b,c\rd,e,f'
-	},
-	{
-		description: "Pipes with decimal numbers and comma as decimal separator",
-		input: 'a|3,4|b\r\nc|3,4|d',
-		expected: {
-			data: [['a', '3,4', 'b'], ['c', '3,4', 'd']],
-			errors: []
-		}
 	},
 	{
 		description: "Custom line ending (\\n)",
