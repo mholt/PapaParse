@@ -13,13 +13,15 @@ var FILES_ENABLED = false;
 try {
 	new File([""], ""); // eslint-disable-line no-new
 	FILES_ENABLED = true;
-} catch (e) {} // safari, ie
+} catch (e) {
+} // safari, ie
 
 var XHR_ENABLED = false;
 try {
 	new XMLHttpRequest(); // eslint-disable-line no-new
 	XHR_ENABLED = true;
-} catch (e) {} // safari, ie
+} catch (e) {
+} // safari, ie
 
 // Tests for the core parser using new Papa.Parser().parse() (CSV to JSON)
 var CORE_PARSER_TESTS = [
@@ -225,13 +227,13 @@ var CORE_PARSER_TESTS = [
 				"row": 0,
 				"index": 3
 			},
-            {
-                "type": "Quotes",
-                "code": "MissingQuotes",
-                "message": "Quoted field unterminated",
-                "row": 0,
-                "index": 3
-            }]
+			{
+				"type": "Quotes",
+				"code": "MissingQuotes",
+				"message": "Quoted field unterminated",
+				"row": 0,
+				"index": 3
+			}]
 		}
 	},
 	{
@@ -247,13 +249,13 @@ var CORE_PARSER_TESTS = [
 				"row": 0,
 				"index": 3
 			},
-            {
-                "type": "Quotes",
-                "code": "MissingQuotes",
-                "message": "Quoted field unterminated",
-                "row": 0,
-                "index": 3
-            }]
+			{
+				"type": "Quotes",
+				"code": "MissingQuotes",
+				"message": "Quoted field unterminated",
+				"row": 0,
+				"index": 3
+			}]
 		}
 	},
 	{
@@ -269,13 +271,13 @@ var CORE_PARSER_TESTS = [
 				"row": 0,
 				"index": 3
 			},
-            {
-                "type": "Quotes",
-                "code": "MissingQuotes",
-                "message": "Quoted field unterminated",
-                "row": 0,
-                "index": 3
-            }]
+			{
+				"type": "Quotes",
+				"code": "MissingQuotes",
+				"message": "Quoted field unterminated",
+				"row": 0,
+				"index": 3
+			}]
 		}
 	},
 	{
@@ -400,7 +402,7 @@ var CORE_PARSER_TESTS = [
 	{
 		description: "Commented line at beginning",
 		input: '# Comment!\na,b,c',
-		config: { comments: true },
+		config: {comments: true},
 		expected: {
 			data: [['a', 'b', 'c']],
 			errors: []
@@ -409,7 +411,7 @@ var CORE_PARSER_TESTS = [
 	{
 		description: "Commented line in middle",
 		input: 'a,b,c\n# Comment\nd,e,f',
-		config: { comments: true },
+		config: {comments: true},
 		expected: {
 			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
 			errors: []
@@ -418,7 +420,7 @@ var CORE_PARSER_TESTS = [
 	{
 		description: "Commented line at end",
 		input: 'a,true,false\n# Comment',
-		config: { comments: true },
+		config: {comments: true},
 		expected: {
 			data: [['a', 'true', 'false']],
 			errors: []
@@ -427,7 +429,7 @@ var CORE_PARSER_TESTS = [
 	{
 		description: "Two comment lines consecutively",
 		input: 'a,b,c\n#comment1\n#comment2\nd,e,f',
-		config: { comments: true },
+		config: {comments: true},
 		expected: {
 			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
 			errors: []
@@ -436,7 +438,7 @@ var CORE_PARSER_TESTS = [
 	{
 		description: "Two comment lines consecutively at end of file",
 		input: 'a,b,c\n#comment1\n#comment2',
-		config: { comments: true },
+		config: {comments: true},
 		expected: {
 			data: [['a', 'b', 'c']],
 			errors: []
@@ -445,7 +447,7 @@ var CORE_PARSER_TESTS = [
 	{
 		description: "Three comment lines consecutively at beginning of file",
 		input: '#comment1\n#comment2\n#comment3\na,b,c',
-		config: { comments: true },
+		config: {comments: true},
 		expected: {
 			data: [['a', 'b', 'c']],
 			errors: []
@@ -454,7 +456,7 @@ var CORE_PARSER_TESTS = [
 	{
 		description: "Entire file is comment lines",
 		input: '#comment1\n#comment2\n#comment3',
-		config: { comments: true },
+		config: {comments: true},
 		expected: {
 			data: [],
 			errors: []
@@ -463,7 +465,7 @@ var CORE_PARSER_TESTS = [
 	{
 		description: "Comment with non-default character",
 		input: 'a,b,c\n!Comment goes here\nd,e,f',
-		config: { comments: '!' },
+		config: {comments: '!'},
 		expected: {
 			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
 			errors: []
@@ -473,7 +475,7 @@ var CORE_PARSER_TESTS = [
 		description: "Bad comments value specified",
 		notes: "Should silently disable comment parsing",
 		input: 'a,b,c\n5comment\nd,e,f',
-		config: { comments: 5 },
+		config: {comments: 5},
 		expected: {
 			data: [['a', 'b', 'c'], ['5comment'], ['d', 'e', 'f']],
 			errors: []
@@ -482,7 +484,7 @@ var CORE_PARSER_TESTS = [
 	{
 		description: "Multi-character comment string",
 		input: 'a,b,c\n=N(Comment)\nd,e,f',
-		config: { comments: "=N(" },
+		config: {comments: "=N("},
 		expected: {
 			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
 			errors: []
@@ -491,7 +493,7 @@ var CORE_PARSER_TESTS = [
 	{
 		description: "Input with only a commented line",
 		input: '#commented line',
-		config: { comments: true, delimiter: ',' },
+		config: {comments: true, delimiter: ','},
 		expected: {
 			data: [],
 			errors: []
@@ -500,7 +502,7 @@ var CORE_PARSER_TESTS = [
 	{
 		description: "Input with only a commented line and blank line after",
 		input: '#commented line\n',
-		config: { comments: true, delimiter: ',' },
+		config: {comments: true, delimiter: ','},
 		expected: {
 			data: [['']],
 			errors: []
@@ -509,7 +511,7 @@ var CORE_PARSER_TESTS = [
 	{
 		description: "Input with only a commented line, without comments enabled",
 		input: '#commented line',
-		config: { delimiter: ',' },
+		config: {delimiter: ','},
 		expected: {
 			data: [['#commented line']],
 			errors: []
@@ -518,7 +520,7 @@ var CORE_PARSER_TESTS = [
 	{
 		description: "Input without comments with line starting with whitespace",
 		input: 'a\n b\nc',
-		config: { delimiter: ',' },
+		config: {delimiter: ','},
 		notes: "\" \" == false, but \" \" !== false, so === comparison is required",
 		expected: {
 			data: [['a'], [' b'], ['c']],
@@ -544,7 +546,7 @@ var CORE_PARSER_TESTS = [
 	{
 		description: "Fast mode, basic",
 		input: 'a,b,c\nd,e,f',
-		config: { fastMode: true },
+		config: {fastMode: true},
 		expected: {
 			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
 			errors: []
@@ -553,7 +555,7 @@ var CORE_PARSER_TESTS = [
 	{
 		description: "Fast mode with comments",
 		input: '// Commented line\na,b,c',
-		config: { fastMode: true, comments: "//" },
+		config: {fastMode: true, comments: "//"},
 		expected: {
 			data: [['a', 'b', 'c']],
 			errors: []
@@ -562,7 +564,7 @@ var CORE_PARSER_TESTS = [
 	{
 		description: "Fast mode with preview",
 		input: 'a,b,c\nd,e,f\nh,j,i\n',
-		config: { fastMode: true, preview: 2 },
+		config: {fastMode: true, preview: 2},
 		expected: {
 			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
 			errors: []
@@ -571,7 +573,7 @@ var CORE_PARSER_TESTS = [
 	{
 		description: "Fast mode with blank line at end",
 		input: 'a,b,c\n',
-		config: { fastMode: true },
+		config: {fastMode: true},
 		expected: {
 			data: [['a', 'b', 'c'], ['']],
 			errors: []
@@ -579,9 +581,9 @@ var CORE_PARSER_TESTS = [
 	}
 ];
 
-describe('Core Parser Tests', function() {
+describe('Core Parser Tests', function () {
 	function generateTest(test) {
-		(test.disabled ? it.skip : it)(test.description, function() {
+		(test.disabled ? it.skip : it)(test.description, function () {
 			var actual = new Papa.Parser(test.config).parse(test.input);
 			assert.deepEqual(JSON.stringify(actual.errors), JSON.stringify(test.expected.errors));
 			assert.deepEqual(actual.data, test.expected.data);
@@ -592,7 +594,6 @@ describe('Core Parser Tests', function() {
 		generateTest(CORE_PARSER_TESTS[i]);
 	}
 });
-
 
 
 // Tests for Papa.parse() function -- high-level wrapped parser (CSV to JSON)
@@ -641,7 +642,7 @@ var PARSE_TESTS = [
 		description: "Quoted fields with spaces between closing quote and next delimiter",
 		input: 'A,"B" ,C,D\r\nE,F,"G"  ,H',
 		expected: {
-			data: [['A', 'B', 'C','D'],['E', 'F', 'G','H']],
+			data: [['A', 'B', 'C', 'D'], ['E', 'F', 'G', 'H']],
 			errors: []
 		}
 	},
@@ -649,7 +650,7 @@ var PARSE_TESTS = [
 		description: "Quoted fields with spaces between closing quote and next new line",
 		input: 'A,B,C,"D" \r\nE,F,G,"H"  \r\nQ,W,E,R',
 		expected: {
-			data: [['A', 'B', 'C','D'],['E', 'F', 'G','H'],['Q', 'W', 'E','R']],
+			data: [['A', 'B', 'C', 'D'], ['E', 'F', 'G', 'H'], ['Q', 'W', 'E', 'R']],
 			errors: []
 		}
 	},
@@ -657,7 +658,7 @@ var PARSE_TESTS = [
 		description: "Quoted fields with spaces after closing quote",
 		input: 'A,"B" ,C,"D" \r\nE,F,"G"  ,"H"  \r\nQ,W,"E" ,R',
 		expected: {
-			data: [['A', 'B', 'C','D'],['E', 'F', 'G','H'],['Q', 'W', 'E','R']],
+			data: [['A', 'B', 'C', 'D'], ['E', 'F', 'G', 'H'], ['Q', 'W', 'E', 'R']],
 			errors: []
 		}
 	},
@@ -672,7 +673,7 @@ var PARSE_TESTS = [
 	{
 		description: "Header row with one row of data",
 		input: 'A,B,C\r\na,b,c',
-		config: { header: true },
+		config: {header: true},
 		expected: {
 			data: [{"A": "a", "B": "b", "C": "c"}],
 			errors: []
@@ -681,7 +682,7 @@ var PARSE_TESTS = [
 	{
 		description: "Header row only",
 		input: 'A,B,C',
-		config: { header: true },
+		config: {header: true},
 		expected: {
 			data: [],
 			errors: []
@@ -690,7 +691,7 @@ var PARSE_TESTS = [
 	{
 		description: "Row with too few fields",
 		input: 'A,B,C\r\na,b',
-		config: { header: true },
+		config: {header: true},
 		expected: {
 			data: [{"A": "a", "B": "b"}],
 			errors: [{
@@ -704,7 +705,7 @@ var PARSE_TESTS = [
 	{
 		description: "Row with too many fields",
 		input: 'A,B,C\r\na,b,c,d,e\r\nf,g,h',
-		config: { header: true },
+		config: {header: true},
 		expected: {
 			data: [{"A": "a", "B": "b", "C": "c", "__parsed_extra": ["d", "e"]}, {"A": "f", "B": "g", "C": "h"}],
 			errors: [{
@@ -718,7 +719,7 @@ var PARSE_TESTS = [
 	{
 		description: "Row with enough fields but blank field at end",
 		input: 'A,B,C\r\na,b,',
-		config: { header: true },
+		config: {header: true},
 		expected: {
 			data: [{"A": "a", "B": "b", "C": ""}],
 			errors: []
@@ -727,7 +728,7 @@ var PARSE_TESTS = [
 	{
 		description: "Header rows are trimmed when trimHeaders is set",
 		input: '  A , B  ,  C  \r\na,b ,c',
-		config: { header: true, trimHeaders: true },
+		config: {header: true, trimHeaders: true},
 		expected: {
 			data: [{"A": "a", "B": "b ", "C": "c"}],
 			errors: []
@@ -752,7 +753,7 @@ var PARSE_TESTS = [
 	{
 		description: "Tab delimiter",
 		input: 'a\tb\tc\r\nd\te\tf',
-		config: { delimiter: "\t" },
+		config: {delimiter: "\t"},
 		expected: {
 			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
 			errors: []
@@ -761,7 +762,7 @@ var PARSE_TESTS = [
 	{
 		description: "Pipe delimiter",
 		input: 'a|b|c\r\nd|e|f',
-		config: { delimiter: "|" },
+		config: {delimiter: "|"},
 		expected: {
 			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
 			errors: []
@@ -770,7 +771,7 @@ var PARSE_TESTS = [
 	{
 		description: "ASCII 30 delimiter",
 		input: 'a' + RECORD_SEP + 'b' + RECORD_SEP + 'c\r\nd' + RECORD_SEP + 'e' + RECORD_SEP + 'f',
-		config: { delimiter: RECORD_SEP },
+		config: {delimiter: RECORD_SEP},
 		expected: {
 			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
 			errors: []
@@ -779,7 +780,7 @@ var PARSE_TESTS = [
 	{
 		description: "ASCII 31 delimiter",
 		input: 'a' + UNIT_SEP + 'b' + UNIT_SEP + 'c\r\nd' + UNIT_SEP + 'e' + UNIT_SEP + 'f',
-		config: { delimiter: UNIT_SEP },
+		config: {delimiter: UNIT_SEP},
 		expected: {
 			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
 			errors: []
@@ -788,7 +789,7 @@ var PARSE_TESTS = [
 	{
 		description: "Bad delimiter (\\n)",
 		input: 'a,b,c',
-		config: { delimiter: "\n" },
+		config: {delimiter: "\n"},
 		notes: "Should silently default to comma",
 		expected: {
 			data: [['a', 'b', 'c']],
@@ -798,7 +799,7 @@ var PARSE_TESTS = [
 	{
 		description: "Multi-character delimiter",
 		input: 'a, b, c',
-		config: { delimiter: ", " },
+		config: {delimiter: ", "},
 		expected: {
 			data: [['a', 'b', 'c']],
 			errors: []
@@ -807,7 +808,11 @@ var PARSE_TESTS = [
 	{
 		description: "Callback delimiter",
 		input: 'a$ b$ c',
-		config: { delimiter: function(input) { return input[1] + ' '; } },
+		config: {
+			delimiter: function (input) {
+				return input[1] + ' ';
+			}
+		},
 		expected: {
 			data: [['a', 'b', 'c']],
 			errors: []
@@ -816,7 +821,7 @@ var PARSE_TESTS = [
 	{
 		description: "Dynamic typing converts numeric literals",
 		input: '1,2.2,1e3\r\n-4,-4.5,-4e-5\r\n-,5a,5-2',
-		config: { dynamicTyping: true },
+		config: {dynamicTyping: true},
 		expected: {
 			data: [[1, 2.2, 1000], [-4, -4.5, -0.00004], ["-", "5a", "5-2"]],
 			errors: []
@@ -825,7 +830,7 @@ var PARSE_TESTS = [
 	{
 		description: "Dynamic typing converts boolean literals",
 		input: 'true,false,T,F,TRUE,FALSE,True,False',
-		config: { dynamicTyping: true },
+		config: {dynamicTyping: true},
 		expected: {
 			data: [[true, false, "T", "F", true, false, "True", "False"]],
 			errors: []
@@ -834,7 +839,7 @@ var PARSE_TESTS = [
 	{
 		description: "Dynamic typing doesn't convert other types",
 		input: 'A,B,C\r\nundefined,null,[\r\nvar,float,if',
-		config: { dynamicTyping: true },
+		config: {dynamicTyping: true},
 		expected: {
 			data: [["A", "B", "C"], ["undefined", "null", "["], ["var", "float", "if"]],
 			errors: []
@@ -843,7 +848,7 @@ var PARSE_TESTS = [
 	{
 		description: "Dynamic typing applies to specific columns",
 		input: 'A,B,C\r\n1,2.2,1e3\r\n-4,-4.5,-4e-5',
-		config: { header: true, dynamicTyping: { A: true, C: true } },
+		config: {header: true, dynamicTyping: {A: true, C: true}},
 		expected: {
 			data: [{"A": 1, "B": "2.2", "C": 1000}, {"A": -4, "B": "-4.5", "C": -0.00004}],
 			errors: []
@@ -852,7 +857,7 @@ var PARSE_TESTS = [
 	{
 		description: "Dynamic typing applies to specific columns by index",
 		input: '1,2.2,1e3\r\n-4,-4.5,-4e-5\r\n-,5a,5-2',
-		config: { dynamicTyping: { 1: true } },
+		config: {dynamicTyping: {1: true}},
 		expected: {
 			data: [["1", 2.2, "1e3"], ["-4", -4.5, "-4e-5"], ["-", "5a", "5-2"]],
 			errors: []
@@ -861,7 +866,7 @@ var PARSE_TESTS = [
 	{
 		description: "Dynamic typing can be applied to `__parsed_extra`",
 		input: 'A,B,C\r\n1,2.2,1e3,5.5\r\n-4,-4.5,-4e-5',
-		config: { header: true, dynamicTyping: { A: true, C: true, __parsed_extra: true } },
+		config: {header: true, dynamicTyping: {A: true, C: true, __parsed_extra: true}},
 		expected: {
 			data: [{"A": 1, "B": "2.2", "C": 1000, "__parsed_extra": [5.5]}, {"A": -4, "B": "-4.5", "C": -0.00004}],
 			errors: [{
@@ -875,7 +880,11 @@ var PARSE_TESTS = [
 	{
 		description: "Dynamic typing by indices can be determined by function",
 		input: '001,002,003',
-		config: { dynamicTyping: function(field) { return (field % 2) === 0; } },
+		config: {
+			dynamicTyping: function (field) {
+				return (field % 2) === 0;
+			}
+		},
 		expected: {
 			data: [[1, "002", 3]],
 			errors: []
@@ -884,7 +893,11 @@ var PARSE_TESTS = [
 	{
 		description: "Dynamic typing by headers can be determined by function",
 		input: 'A_as_int,B,C_as_int\r\n001,002,003',
-		config: { header: true, dynamicTyping: function(field) { return /_as_int$/.test(field); } },
+		config: {
+			header: true, dynamicTyping: function (field) {
+				return /_as_int$/.test(field);
+			}
+		},
 		expected: {
 			data: [{"A_as_int": 1, "B": "002", "C_as_int": 3}],
 			errors: []
@@ -893,7 +906,7 @@ var PARSE_TESTS = [
 	{
 		description: "Dynamic typing converts empty values into NULL",
 		input: '1,2.2,1e3\r\n,NULL,\r\n-,5a,null',
-		config: { dynamicTyping: true },
+		config: {dynamicTyping: true},
 		expected: {
 			data: [[1, 2.2, 1000], [null, "NULL", null], ["-", "5a", "null"]],
 			errors: []
@@ -903,19 +916,19 @@ var PARSE_TESTS = [
 		description: "Custom transform function is applied to values",
 		input: 'A,B,C\r\nd,e,f',
 		config: {
-			transform: function(value) {
+			transform: function (value) {
 				return value.toLowerCase();
 			}
 		},
 		expected: {
-			data: [["a","b","c"], ["d","e","f"]],
+			data: [["a", "b", "c"], ["d", "e", "f"]],
 			errors: []
 		}
 	},
 	{
 		description: "Dynamic typing converts ISO date strings to Dates",
 		input: 'ISO date,long date\r\n2018-05-04T21:08:03.269Z,Fri May 04 2018 14:08:03 GMT-0700 (PDT)\r\n2018-05-08T15:20:22.642Z,Tue May 08 2018 08:20:22 GMT-0700 (PDT)',
-		config: { dynamicTyping: true },
+		config: {dynamicTyping: true},
 		expected: {
 			data: [["ISO date", "long date"], [new Date("2018-05-04T21:08:03.269Z"), "Fri May 04 2018 14:08:03 GMT-0700 (PDT)"], [new Date("2018-05-08T15:20:22.642Z"), "Tue May 08 2018 08:20:22 GMT-0700 (PDT)"]],
 			errors: []
@@ -924,7 +937,7 @@ var PARSE_TESTS = [
 	{
 		description: "Blank line at beginning",
 		input: '\r\na,b,c\r\nd,e,f',
-		config: { newline: '\r\n' },
+		config: {newline: '\r\n'},
 		expected: {
 			data: [[''], ['a', 'b', 'c'], ['d', 'e', 'f']],
 			errors: []
@@ -933,7 +946,7 @@ var PARSE_TESTS = [
 	{
 		description: "Blank line in middle",
 		input: 'a,b,c\r\n\r\nd,e,f',
-		config: { newline: '\r\n' },
+		config: {newline: '\r\n'},
 		expected: {
 			data: [['a', 'b', 'c'], [''], ['d', 'e', 'f']],
 			errors: []
@@ -1016,7 +1029,7 @@ var PARSE_TESTS = [
 	{
 		description: "Preview 0 rows should default to parsing all",
 		input: 'a,b,c\r\nd,e,f\r\ng,h,i',
-		config: { preview: 0 },
+		config: {preview: 0},
 		expected: {
 			data: [['a', 'b', 'c'], ['d', 'e', 'f'], ['g', 'h', 'i']],
 			errors: []
@@ -1025,7 +1038,7 @@ var PARSE_TESTS = [
 	{
 		description: "Preview 1 row",
 		input: 'a,b,c\r\nd,e,f\r\ng,h,i',
-		config: { preview: 1 },
+		config: {preview: 1},
 		expected: {
 			data: [['a', 'b', 'c']],
 			errors: []
@@ -1034,7 +1047,7 @@ var PARSE_TESTS = [
 	{
 		description: "Preview 2 rows",
 		input: 'a,b,c\r\nd,e,f\r\ng,h,i',
-		config: { preview: 2 },
+		config: {preview: 2},
 		expected: {
 			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
 			errors: []
@@ -1043,7 +1056,7 @@ var PARSE_TESTS = [
 	{
 		description: "Preview all (3) rows",
 		input: 'a,b,c\r\nd,e,f\r\ng,h,i',
-		config: { preview: 3 },
+		config: {preview: 3},
 		expected: {
 			data: [['a', 'b', 'c'], ['d', 'e', 'f'], ['g', 'h', 'i']],
 			errors: []
@@ -1052,7 +1065,7 @@ var PARSE_TESTS = [
 	{
 		description: "Preview more rows than input has",
 		input: 'a,b,c\r\nd,e,f\r\ng,h,i',
-		config: { preview: 4 },
+		config: {preview: 4},
 		expected: {
 			data: [['a', 'b', 'c'], ['d', 'e', 'f'], ['g', 'h', 'i']],
 			errors: []
@@ -1061,7 +1074,7 @@ var PARSE_TESTS = [
 	{
 		description: "Preview should count rows, not lines",
 		input: 'a,b,c\r\nd,e,"f\r\nf",g,h,i',
-		config: { preview: 2 },
+		config: {preview: 2},
 		expected: {
 			data: [['a', 'b', 'c'], ['d', 'e', 'f\r\nf', 'g', 'h', 'i']],
 			errors: []
@@ -1071,7 +1084,7 @@ var PARSE_TESTS = [
 		description: "Preview with header row",
 		notes: "Preview is defined to be number of rows of input not including header row",
 		input: 'a,b,c\r\nd,e,f\r\ng,h,i\r\nj,k,l',
-		config: { header: true, preview: 2 },
+		config: {header: true, preview: 2},
 		expected: {
 			data: [{"a": "d", "b": "e", "c": "f"}, {"a": "g", "b": "h", "c": "i"}],
 			errors: []
@@ -1080,7 +1093,7 @@ var PARSE_TESTS = [
 	{
 		description: "Empty lines",
 		input: '\na,b,c\n\nd,e,f\n\n',
-		config: { delimiter: ',' },
+		config: {delimiter: ','},
 		expected: {
 			data: [[''], ['a', 'b', 'c'], [''], ['d', 'e', 'f'], [''], ['']],
 			errors: []
@@ -1089,7 +1102,7 @@ var PARSE_TESTS = [
 	{
 		description: "Skip empty lines",
 		input: 'a,b,c\n\nd,e,f',
-		config: { skipEmptyLines: true },
+		config: {skipEmptyLines: true},
 		expected: {
 			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
 			errors: []
@@ -1098,7 +1111,7 @@ var PARSE_TESTS = [
 	{
 		description: "Skip empty lines, with newline at end of input",
 		input: 'a,b,c\r\n\r\nd,e,f\r\n',
-		config: { skipEmptyLines: true },
+		config: {skipEmptyLines: true},
 		expected: {
 			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
 			errors: []
@@ -1107,7 +1120,7 @@ var PARSE_TESTS = [
 	{
 		description: "Skip empty lines, with empty input",
 		input: '',
-		config: { skipEmptyLines: true },
+		config: {skipEmptyLines: true},
 		expected: {
 			data: [],
 			errors: [
@@ -1123,7 +1136,7 @@ var PARSE_TESTS = [
 		description: "Skip empty lines, with first line only whitespace",
 		notes: "A line must be absolutely empty to be considered empty",
 		input: ' \na,b,c',
-		config: { skipEmptyLines: true, delimiter: ',' },
+		config: {skipEmptyLines: true, delimiter: ','},
 		expected: {
 			data: [[" "], ['a', 'b', 'c']],
 			errors: []
@@ -1133,7 +1146,7 @@ var PARSE_TESTS = [
 		description: "Skip empty lines while detecting delimiter",
 		notes: "Parsing correctly newline-terminated short data with delimiter:auto and skipEmptyLines:true",
 		input: 'a,b\n1,2\n3,4\n',
-		config: { header: true, skipEmptyLines: true },
+		config: {header: true, skipEmptyLines: true},
 		expected: {
 			data: [{'a': '1', 'b': '2'}, {'a': '3', 'b': '4'}],
 			errors: []
@@ -1143,9 +1156,9 @@ var PARSE_TESTS = [
 		description: "Lines with comments are not used when guessing the delimiter in an escaped file",
 		notes: "Guessing the delimiter should work even if there are many lines of comments at the start of the file",
 		input: '#1\n#2\n#3\n#4\n#5\n#6\n#7\n#8\n#9\n#10\none,"t,w,o",three\nfour,five,six',
-		config: { comments: '#' },
+		config: {comments: '#'},
 		expected: {
-			data: [['one','t,w,o','three'],['four','five','six']],
+			data: [['one', 't,w,o', 'three'], ['four', 'five', 'six']],
 			errors: []
 		}
 	},
@@ -1153,9 +1166,9 @@ var PARSE_TESTS = [
 		description: "Lines with comments are not used when guessing the delimiter in a non-escaped file",
 		notes: "Guessing the delimiter should work even if there are many lines of comments at the start of the file",
 		input: '#1\n#2\n#3\n#4\n#5\n#6\n#7\n#8\n#9\n#10\n#11\none,two,three\nfour,five,six',
-		config: { comments: '#' },
+		config: {comments: '#'},
 		expected: {
-			data: [['one','two','three'],['four','five','six']],
+			data: [['one', 'two', 'three'], ['four', 'five', 'six']],
 			errors: []
 		}
 	},
@@ -1163,7 +1176,7 @@ var PARSE_TESTS = [
 		description: "Single quote as quote character",
 		notes: "Must parse correctly when single quote is specified as a quote character",
 		input: "a,b,'c,d'",
-		config: { quoteChar: "'" },
+		config: {quoteChar: "'"},
 		expected: {
 			data: [['a', 'b', 'c,d']],
 			errors: []
@@ -1173,7 +1186,7 @@ var PARSE_TESTS = [
 		description: "Custom escape character in the middle",
 		notes: "Must parse correctly if the backslash sign (\\) is configured as a custom escape character",
 		input: 'a,b,"c\\"d\\"f"',
-		config: { escapeChar: '\\' },
+		config: {escapeChar: '\\'},
 		expected: {
 			data: [['a', 'b', 'c"d"f']],
 			errors: []
@@ -1183,7 +1196,7 @@ var PARSE_TESTS = [
 		description: "Custom escape character at the end",
 		notes: "Must parse correctly if the backslash sign (\\) is configured as a custom escape character and the escaped quote character appears at the end of the column",
 		input: 'a,b,"c\\"d\\""',
-		config: { escapeChar: '\\' },
+		config: {escapeChar: '\\'},
 		expected: {
 			data: [['a', 'b', 'c"d"']],
 			errors: []
@@ -1193,7 +1206,7 @@ var PARSE_TESTS = [
 		description: "Custom escape character not used for escaping",
 		notes: "Must parse correctly if the backslash sign (\\) is configured as a custom escape character and appears as regular character in the text",
 		input: 'a,b,"c\\d"',
-		config: { escapeChar: '\\' },
+		config: {escapeChar: '\\'},
 		expected: {
 			data: [['a', 'b', 'c\\d']],
 			errors: []
@@ -1203,7 +1216,7 @@ var PARSE_TESTS = [
 		description: "Header row with preceding comment",
 		notes: "Must parse correctly headers if they are preceded by comments",
 		input: '#Comment\na,b\nc,d\n',
-		config: { header: true, comments: '#', skipEmptyLines: true, delimiter: ',' },
+		config: {header: true, comments: '#', skipEmptyLines: true, delimiter: ','},
 		expected: {
 			data: [{'a': 'c', 'b': 'd'}],
 			errors: []
@@ -1326,7 +1339,7 @@ var PARSE_TESTS = [
 	{
 		description: "Using reserved regex characters as quote characters",
 		input: '.a\na.,b\r\nc,d\r\ne,f\r\ng,h\r\ni,j',
-		config: { quoteChar: '.' },
+		config: {quoteChar: '.'},
 		expected: {
 			data: [['a\na', 'b'], ['c', 'd'], ['e', 'f'], ['g', 'h'], ['i', 'j']],
 			errors: [],
@@ -1343,7 +1356,7 @@ var PARSE_TESTS = [
 		description: "Parsing with skipEmptyLines set to 'greedy'",
 		notes: "Must parse correctly without lines with no content",
 		input: 'a,b\n\n,\nc,d\n , \n""," "\n	,	\n,,,,\n',
-		config: { skipEmptyLines: 'greedy' },
+		config: {skipEmptyLines: 'greedy'},
 		expected: {
 			data: [['a', 'b'], ['c', 'd']],
 			errors: []
@@ -1353,7 +1366,7 @@ var PARSE_TESTS = [
 		description: "Parsing with skipEmptyLines set to 'greedy' with quotes and delimiters as content",
 		notes: "Must include lines with escaped delimiters and quotes",
 		input: 'a,b\n\n,\nc,d\n" , ",","\n""" """,""""""\n\n\n',
-		config: { skipEmptyLines: 'greedy' },
+		config: {skipEmptyLines: 'greedy'},
 		expected: {
 			data: [['a', 'b'], ['c', 'd'], [' , ', ','], ['" "', '""']],
 			errors: []
@@ -1361,9 +1374,9 @@ var PARSE_TESTS = [
 	}
 ];
 
-describe('Parse Tests', function() {
+describe('Parse Tests', function () {
 	function generateTest(test) {
-		(test.disabled ? it.skip : it)(test.description, function() {
+		(test.disabled ? it.skip : it)(test.description, function () {
 			var actual = Papa.parse(test.input, test.config);
 			// allows for testing the meta object if present in the test
 			if (test.expected.meta) {
@@ -1380,7 +1393,6 @@ describe('Parse Tests', function() {
 });
 
 
-
 // Tests for Papa.parse() that involve asynchronous operation
 var PARSE_ASYNC_TESTS = [
 	{
@@ -1390,7 +1402,7 @@ var PARSE_ASYNC_TESTS = [
 			worker: true,
 		},
 		expected: {
-			data: [['A','B','C'],['X','Y','Z']],
+			data: [['A', 'B', 'C'], ['X', 'Y', 'Z']],
 			errors: []
 		}
 	},
@@ -1402,7 +1414,7 @@ var PARSE_ASYNC_TESTS = [
 		},
 		disabled: !XHR_ENABLED,
 		expected: {
-			data: [['A','B','C'],['X','Y','Z']],
+			data: [['A', 'B', 'C'], ['X', 'Y', 'Z']],
 			errors: []
 		}
 	},
@@ -1415,7 +1427,7 @@ var PARSE_ASYNC_TESTS = [
 		},
 		disabled: !XHR_ENABLED,
 		expected: {
-			data: [['A','B','C'],['X','Y','Z']],
+			data: [['A', 'B', 'C'], ['X', 'Y', 'Z']],
 			errors: []
 		}
 	},
@@ -1423,10 +1435,9 @@ var PARSE_ASYNC_TESTS = [
 		description: "Simple file",
 		disabled: !FILES_ENABLED,
 		input: FILES_ENABLED ? new File(["A,B,C\nX,Y,Z"], "sample.csv") : false,
-		config: {
-		},
+		config: {},
 		expected: {
-			data: [['A','B','C'],['X','Y','Z']],
+			data: [['A', 'B', 'C'], ['X', 'Y', 'Z']],
 			errors: []
 		}
 	},
@@ -1438,24 +1449,24 @@ var PARSE_ASYNC_TESTS = [
 			worker: true,
 		},
 		expected: {
-			data: [['A','B','C'],['X','Y','Z']],
+			data: [['A', 'B', 'C'], ['X', 'Y', 'Z']],
 			errors: []
 		}
 	}
 ];
 
-describe('Parse Async Tests', function() {
+describe('Parse Async Tests', function () {
 	function generateTest(test) {
-		(test.disabled ? it.skip : it)(test.description, function(done) {
+		(test.disabled ? it.skip : it)(test.description, function (done) {
 			var config = test.config;
 
-			config.complete = function(actual) {
+			config.complete = function (actual) {
 				assert.deepEqual(JSON.stringify(actual.errors), JSON.stringify(test.expected.errors));
 				assert.deepEqual(actual.data, test.expected.data);
 				done();
 			};
 
-			config.error = function(err) {
+			config.error = function (err) {
 				throw err;
 			};
 
@@ -1467,7 +1478,6 @@ describe('Parse Async Tests', function() {
 		generateTest(PARSE_ASYNC_TESTS[i]);
 	}
 });
-
 
 
 // Tests for Papa.unparse() function (JSON to CSV)
@@ -1495,122 +1505,122 @@ var UNPARSE_TESTS = [
 	},
 	{
 		description: "Array of objects (header row)",
-		input: [{ "Col1": "a", "Col2": "b", "Col3": "c" }, { "Col1": "d", "Col2": "e", "Col3": "f" }],
+		input: [{"Col1": "a", "Col2": "b", "Col3": "c"}, {"Col1": "d", "Col2": "e", "Col3": "f"}],
 		expected: 'Col1,Col2,Col3\r\na,b,c\r\nd,e,f'
 	},
 	{
 		description: "With header row, missing a field in a row",
-		input: [{ "Col1": "a", "Col2": "b", "Col3": "c" }, { "Col1": "d", "Col3": "f" }],
+		input: [{"Col1": "a", "Col2": "b", "Col3": "c"}, {"Col1": "d", "Col3": "f"}],
 		expected: 'Col1,Col2,Col3\r\na,b,c\r\nd,,f'
 	},
 	{
 		description: "With header row, with extra field in a row",
 		notes: "Extra field should be ignored; first object in array dictates header row",
-		input: [{ "Col1": "a", "Col2": "b", "Col3": "c" }, { "Col1": "d", "Col2": "e", "Extra": "g", "Col3": "f" }],
+		input: [{"Col1": "a", "Col2": "b", "Col3": "c"}, {"Col1": "d", "Col2": "e", "Extra": "g", "Col3": "f"}],
 		expected: 'Col1,Col2,Col3\r\na,b,c\r\nd,e,f'
 	},
 	{
 		description: "Specifying column names and data separately",
-		input: { fields: ["Col1", "Col2", "Col3"], data: [["a", "b", "c"], ["d", "e", "f"]] },
+		input: {fields: ["Col1", "Col2", "Col3"], data: [["a", "b", "c"], ["d", "e", "f"]]},
 		expected: 'Col1,Col2,Col3\r\na,b,c\r\nd,e,f'
 	},
 	{
 		description: "Specifying column names only (no data)",
 		notes: "Papa should add a data property that is an empty array to prevent errors (no copy is made)",
-		input: { fields: ["Col1", "Col2", "Col3"] },
+		input: {fields: ["Col1", "Col2", "Col3"]},
 		expected: 'Col1,Col2,Col3'
 	},
 	{
 		description: "Specifying data only (no field names), improperly",
 		notes: "A single array for a single row is wrong, but it can be compensated.<br>Papa should add empty fields property to prevent errors.",
-		input: { data: ["abc", "d", "ef"] },
+		input: {data: ["abc", "d", "ef"]},
 		expected: 'abc,d,ef'
 	},
 	{
 		description: "Specifying data only (no field names), properly",
 		notes: "An array of arrays, even if just a single row.<br>Papa should add empty fields property to prevent errors.",
-		input: { data: [["a", "b", "c"]] },
+		input: {data: [["a", "b", "c"]]},
 		expected: 'a,b,c'
 	},
 	{
 		description: "Custom delimiter (semicolon)",
 		input: [['A', 'b', 'c'], ['d', 'e', 'f']],
-		config: { delimiter: ';' },
+		config: {delimiter: ';'},
 		expected: 'A;b;c\r\nd;e;f'
 	},
 	{
 		description: "Custom delimiter (tab)",
 		input: [['Ab', 'cd', 'ef'], ['g', 'h', 'ij']],
-		config: { delimiter: '\t' },
+		config: {delimiter: '\t'},
 		expected: 'Ab\tcd\tef\r\ng\th\tij'
 	},
 	{
 		description: "Custom delimiter (ASCII 30)",
 		input: [['a', 'b', 'c'], ['d', 'e', 'f']],
-		config: { delimiter: RECORD_SEP },
+		config: {delimiter: RECORD_SEP},
 		expected: 'a' + RECORD_SEP + 'b' + RECORD_SEP + 'c\r\nd' + RECORD_SEP + 'e' + RECORD_SEP + 'f'
 	},
 	{
 		description: "Custom delimiter (Multi-character)",
 		input: [['A', 'b', 'c'], ['d', 'e', 'f']],
-		config: { delimiter: ', ' },
+		config: {delimiter: ', '},
 		expected: 'A, b, c\r\nd, e, f'
 	},
 	{
 		description: "Bad delimiter (\\n)",
 		notes: "Should default to comma",
 		input: [['a', 'b', 'c'], ['d', 'e', 'f']],
-		config: { delimiter: '\n' },
+		config: {delimiter: '\n'},
 		expected: 'a,b,c\r\nd,e,f'
 	},
 	{
 		description: "Custom line ending (\\r)",
 		input: [['a', 'b', 'c'], ['d', 'e', 'f']],
-		config: { newline: '\r' },
+		config: {newline: '\r'},
 		expected: 'a,b,c\rd,e,f'
 	},
 	{
 		description: "Pipes with decimal numbers and comma as decimal separator",
 		input: 'a|3,4|b\r\nc|3,4|d',
 		expected: {
-			data: [['a','3,4','b'],['c','3,4','d']],
+			data: [['a', '3,4', 'b'], ['c', '3,4', 'd']],
 			errors: []
 		}
 	},
 	{
 		description: "Custom line ending (\\n)",
 		input: [['a', 'b', 'c'], ['d', 'e', 'f']],
-		config: { newline: '\n' },
+		config: {newline: '\n'},
 		expected: 'a,b,c\nd,e,f'
 	},
 	{
 		description: "Custom, but strange, line ending ($)",
 		input: [['a', 'b', 'c'], ['d', 'e', 'f']],
-		config: { newline: '$' },
+		config: {newline: '$'},
 		expected: 'a,b,c$d,e,f'
 	},
 	{
 		description: "Force quotes around all fields",
 		input: [['a', 'b', 'c'], ['d', 'e', 'f']],
-		config: { quotes: true },
+		config: {quotes: true},
 		expected: '"a","b","c"\r\n"d","e","f"'
 	},
 	{
 		description: "Force quotes around all fields (with header row)",
-		input: [{ "Col1": "a", "Col2": "b", "Col3": "c" }, { "Col1": "d", "Col2": "e", "Col3": "f" }],
-		config: { quotes: true },
+		input: [{"Col1": "a", "Col2": "b", "Col3": "c"}, {"Col1": "d", "Col2": "e", "Col3": "f"}],
+		config: {quotes: true},
 		expected: '"Col1","Col2","Col3"\r\n"a","b","c"\r\n"d","e","f"'
 	},
 	{
 		description: "Force quotes around certain fields only",
 		input: [['a', 'b', 'c'], ['d', 'e', 'f']],
-		config: { quotes: [true, false, true] },
+		config: {quotes: [true, false, true]},
 		expected: '"a",b,"c"\r\n"d",e,"f"'
 	},
 	{
 		description: "Force quotes around certain fields only (with header row)",
-		input: [{ "Col1": "a", "Col2": "b", "Col3": "c" }, { "Col1": "d", "Col2": "e", "Col3": "f" }],
-		config: { quotes: [true, false, true] },
+		input: [{"Col1": "a", "Col2": "b", "Col3": "c"}, {"Col1": "d", "Col2": "e", "Col3": "f"}],
+		config: {quotes: [true, false, true]},
 		expected: '"Col1",Col2,"Col3"\r\n"a",b,"c"\r\n"d",e,"f"'
 	},
 	{
@@ -1625,13 +1635,13 @@ var UNPARSE_TESTS = [
 	},
 	{
 		description: "JSON null is treated as empty value",
-		input: [{ "Col1": "a", "Col2": null, "Col3": "c" }],
+		input: [{"Col1": "a", "Col2": null, "Col3": "c"}],
 		expected: 'Col1,Col2,Col3\r\na,,c'
 	},
 	{
 		description: "Custom quote character (single quote)",
-		input: [['a,d','b','c']],
-		config: { quoteChar: "'"},
+		input: [['a,d', 'b', 'c']],
+		config: {quoteChar: "'"},
 		expected: "'a,d',b,c"
 	},
 	{
@@ -1642,7 +1652,10 @@ var UNPARSE_TESTS = [
 	},
 	{
 		description: "Date objects are exported in its ISO representation",
-		input: [{date: new Date("2018-05-04T21:08:03.269Z"), "not a date": 16}, {date: new Date("Tue May 08 2018 08:20:22 GMT-0700 (PDT)"), "not a date": 32}],
+		input: [{
+			date: new Date("2018-05-04T21:08:03.269Z"),
+			"not a date": 16
+		}, {date: new Date("Tue May 08 2018 08:20:22 GMT-0700 (PDT)"), "not a date": 32}],
 		expected: 'date,not a date\r\n2018-05-04T21:08:03.269Z,16\r\n2018-05-08T15:20:22.000Z,32'
 	},
 	{
@@ -1683,9 +1696,9 @@ var UNPARSE_TESTS = [
 	}
 ];
 
-describe('Unparse Tests', function() {
+describe('Unparse Tests', function () {
 	function generateTest(test) {
-		(test.disabled ? it.skip : it)(test.description, function() {
+		(test.disabled ? it.skip : it)(test.description, function () {
 			var actual;
 
 			try {
@@ -1707,16 +1720,15 @@ describe('Unparse Tests', function() {
 });
 
 
-
 var CUSTOM_TESTS = [
 	{
 		description: "Complete is called with all results if neither step nor chunk is defined",
 		expected: [['A', 'b', 'c'], ['d', 'E', 'f'], ['G', 'h', 'i']],
 		disabled: !FILES_ENABLED,
-		run: function(callback) {
+		run: function (callback) {
 			Papa.parse(new File(['A,b,c\nd,E,f\nG,h,i'], 'sample.csv'), {
 				chunkSize: 3,
-				complete: function(response) {
+				complete: function (response) {
 					callback(response.data);
 				}
 			});
@@ -1725,13 +1737,13 @@ var CUSTOM_TESTS = [
 	{
 		description: "Step is called for each row",
 		expected: 2,
-		run: function(callback) {
+		run: function (callback) {
 			var callCount = 0;
 			Papa.parse('A,b,c\nd,E,f', {
-				step: function() {
+				step: function () {
 					callCount++;
 				},
-				complete: function() {
+				complete: function () {
 					callback(callCount);
 				}
 			});
@@ -1740,9 +1752,9 @@ var CUSTOM_TESTS = [
 	{
 		description: "Step is called with the contents of the row",
 		expected: ['A', 'b', 'c'],
-		run: function(callback) {
+		run: function (callback) {
 			Papa.parse('A,b,c', {
-				step: function(response) {
+				step: function (response) {
 					callback(response.data[0]);
 				}
 			});
@@ -1751,13 +1763,13 @@ var CUSTOM_TESTS = [
 	{
 		description: "Step is called with the last cursor position",
 		expected: [6, 12, 17],
-		run: function(callback) {
+		run: function (callback) {
 			var updates = [];
 			Papa.parse('A,b,c\nd,E,f\nG,h,i', {
-				step: function(response) {
+				step: function (response) {
 					updates.push(response.meta.cursor);
 				},
-				complete: function() {
+				complete: function () {
 					callback(updates);
 				}
 			});
@@ -1765,16 +1777,16 @@ var CUSTOM_TESTS = [
 	},
 	{
 		description: "Step exposes cursor for downloads",
-		expected: [129,	287, 452, 595, 727, 865, 1031, 1209],
+		expected: [129, 287, 452, 595, 727, 865, 1031, 1209],
 		disabled: !XHR_ENABLED,
-		run: function(callback) {
+		run: function (callback) {
 			var updates = [];
 			Papa.parse("/tests/long-sample.csv", {
 				download: true,
-				step: function(response) {
+				step: function (response) {
 					updates.push(response.meta.cursor);
 				},
-				complete: function() {
+				complete: function () {
 					callback(updates);
 				}
 			});
@@ -1782,17 +1794,17 @@ var CUSTOM_TESTS = [
 	},
 	{
 		description: "Step exposes cursor for chunked downloads",
-		expected: [129,	287, 452, 595, 727, 865, 1031, 1209],
+		expected: [129, 287, 452, 595, 727, 865, 1031, 1209],
 		disabled: !XHR_ENABLED,
-		run: function(callback) {
+		run: function (callback) {
 			var updates = [];
 			Papa.parse("/tests/long-sample.csv", {
 				download: true,
 				chunkSize: 500,
-				step: function(response) {
+				step: function (response) {
 					updates.push(response.meta.cursor);
 				},
-				complete: function() {
+				complete: function () {
 					callback(updates);
 				}
 			});
@@ -1802,16 +1814,16 @@ var CUSTOM_TESTS = [
 		description: "Step exposes cursor for workers",
 		expected: [452, 452, 452, 865, 865, 865, 1209, 1209],
 		disabled: !XHR_ENABLED,
-		run: function(callback) {
+		run: function (callback) {
 			var updates = [];
 			Papa.parse("/tests/long-sample.csv", {
 				download: true,
 				chunkSize: 500,
 				worker: true,
-				step: function(response) {
+				step: function (response) {
 					updates.push(response.meta.cursor);
 				},
-				complete: function() {
+				complete: function () {
 					callback(updates);
 				}
 			});
@@ -1821,15 +1833,15 @@ var CUSTOM_TESTS = [
 		description: "Chunk is called for each chunk",
 		expected: [3, 3, 2],
 		disabled: !XHR_ENABLED,
-		run: function(callback) {
+		run: function (callback) {
 			var updates = [];
 			Papa.parse("/tests/long-sample.csv", {
 				download: true,
 				chunkSize: 500,
-				chunk: function(response) {
+				chunk: function (response) {
 					updates.push(response.data.length);
 				},
-				complete: function() {
+				complete: function () {
 					callback(updates);
 				}
 			});
@@ -1839,15 +1851,15 @@ var CUSTOM_TESTS = [
 		description: "Chunk is called with cursor position",
 		expected: [452, 865, 1209],
 		disabled: !XHR_ENABLED,
-		run: function(callback) {
+		run: function (callback) {
 			var updates = [];
 			Papa.parse("/tests/long-sample.csv", {
 				download: true,
 				chunkSize: 500,
-				chunk: function(response) {
+				chunk: function (response) {
 					updates.push(response.meta.cursor);
 				},
-				complete: function() {
+				complete: function () {
 					callback(updates);
 				}
 			});
@@ -1858,16 +1870,16 @@ var CUSTOM_TESTS = [
 		expected: [
 			[['A', 'b', 'c']]
 		],
-		run: function(callback) {
+		run: function (callback) {
 			var updates = [];
 			Papa.parse('A,b,c\nd,E,f\nG,h,i', {
 				chunkSize: 10,
-				chunk: function(response, handle) {
+				chunk: function (response, handle) {
 					updates.push(response.data);
 					handle.pause();
 					callback(updates);
 				},
-				complete: function() {
+				complete: function () {
 					callback(new Error('incorrect complete callback'));
 				}
 			});
@@ -1879,24 +1891,24 @@ var CUSTOM_TESTS = [
 			[['A', 'b', 'c']],
 			[['d', 'E', 'f'], ['G', 'h', 'i']]
 		],
-		run: function(callback) {
+		run: function (callback) {
 			var updates = [];
 			var handle = null;
 			var first = true;
 			Papa.parse('A,b,c\nd,E,f\nG,h,i', {
 				chunkSize: 10,
-				chunk: function(response, h) {
+				chunk: function (response, h) {
 					updates.push(response.data);
 					if (!first) return;
 					handle = h;
 					handle.pause();
 					first = false;
 				},
-				complete: function() {
+				complete: function () {
 					callback(updates);
 				}
 			});
-			setTimeout(function() {
+			setTimeout(function () {
 				handle.resume();
 			}, 500);
 		}
@@ -1906,17 +1918,17 @@ var CUSTOM_TESTS = [
 		expected: [
 			[['A', 'b', 'c']]
 		],
-		run: function(callback) {
+		run: function (callback) {
 			var updates = [];
 			Papa.parse('A,b,c\nd,E,f\nG,h,i', {
 				chunkSize: 1,
-				chunk: function(response, handle) {
+				chunk: function (response, handle) {
 					if (response.data.length) {
 						updates.push(response.data);
 						handle.abort();
 					}
 				},
-				complete: function(response) {
+				complete: function (response) {
 					callback(updates);
 				}
 			});
@@ -1926,14 +1938,14 @@ var CUSTOM_TESTS = [
 		description: "Step exposes indexes for files",
 		expected: [6, 12, 17],
 		disabled: !FILES_ENABLED,
-		run: function(callback) {
+		run: function (callback) {
 			var updates = [];
 			Papa.parse(new File(['A,b,c\nd,E,f\nG,h,i'], 'sample.csv'), {
 				download: true,
-				step: function(response) {
+				step: function (response) {
 					updates.push(response.meta.cursor);
 				},
-				complete: function() {
+				complete: function () {
 					callback(updates);
 				}
 			});
@@ -1943,14 +1955,14 @@ var CUSTOM_TESTS = [
 		description: "Step exposes indexes for chunked files",
 		expected: [6, 12, 17],
 		disabled: !FILES_ENABLED,
-		run: function(callback) {
+		run: function (callback) {
 			var updates = [];
 			Papa.parse(new File(['A,b,c\nd,E,f\nG,h,i'], 'sample.csv'), {
 				chunkSize: 3,
-				step: function(response) {
+				step: function (response) {
 					updates.push(response.meta.cursor);
 				},
-				complete: function() {
+				complete: function () {
 					callback(updates);
 				}
 			});
@@ -1960,14 +1972,14 @@ var CUSTOM_TESTS = [
 		description: "Quoted line breaks near chunk boundaries are handled",
 		expected: [['A', 'B', 'C'], ['X', 'Y\n1\n2\n3', 'Z']],
 		disabled: !FILES_ENABLED,
-		run: function(callback) {
+		run: function (callback) {
 			var updates = [];
 			Papa.parse(new File(['A,B,C\nX,"Y\n1\n2\n3",Z'], 'sample.csv'), {
 				chunkSize: 3,
-				step: function(response) {
+				step: function (response) {
 					updates.push(response.data[0]);
 				},
-				complete: function() {
+				complete: function () {
 					callback(updates);
 				}
 			});
@@ -1976,10 +1988,10 @@ var CUSTOM_TESTS = [
 	{
 		description: "Step functions can abort parsing",
 		expected: [['A', 'b', 'c']],
-		run: function(callback) {
+		run: function (callback) {
 			var updates = [];
 			Papa.parse('A,b,c\nd,E,f\nG,h,i', {
-				step: function(response, handle) {
+				step: function (response, handle) {
 					updates.push(response.data[0]);
 					handle.abort();
 					callback(updates);
@@ -1991,13 +2003,13 @@ var CUSTOM_TESTS = [
 	{
 		description: "Complete is called after aborting",
 		expected: true,
-		run: function(callback) {
+		run: function (callback) {
 			Papa.parse('A,b,c\nd,E,f\nG,h,i', {
-				step: function(response, handle) {
+				step: function (response, handle) {
 					handle.abort();
 				},
 				chunkSize: 6,
-				complete: function(response) {
+				complete: function (response) {
 					callback(response.meta.aborted);
 				}
 			});
@@ -2006,15 +2018,15 @@ var CUSTOM_TESTS = [
 	{
 		description: "Step functions can pause parsing",
 		expected: [['A', 'b', 'c']],
-		run: function(callback) {
+		run: function (callback) {
 			var updates = [];
 			Papa.parse('A,b,c\nd,E,f\nG,h,i', {
-				step: function(response, handle) {
+				step: function (response, handle) {
 					updates.push(response.data[0]);
 					handle.pause();
 					callback(updates);
 				},
-				complete: function() {
+				complete: function () {
 					callback('incorrect complete callback');
 				}
 			});
@@ -2023,23 +2035,23 @@ var CUSTOM_TESTS = [
 	{
 		description: "Step functions can resume parsing",
 		expected: [['A', 'b', 'c'], ['d', 'E', 'f'], ['G', 'h', 'i']],
-		run: function(callback) {
+		run: function (callback) {
 			var updates = [];
 			var handle = null;
 			var first = true;
 			Papa.parse('A,b,c\nd,E,f\nG,h,i', {
-				step: function(response, h) {
+				step: function (response, h) {
 					updates.push(response.data[0]);
 					if (!first) return;
 					handle = h;
 					handle.pause();
 					first = false;
 				},
-				complete: function() {
+				complete: function () {
 					callback(updates);
 				}
 			});
-			setTimeout(function() {
+			setTimeout(function () {
 				handle.resume();
 			}, 500);
 		}
@@ -2048,17 +2060,17 @@ var CUSTOM_TESTS = [
 		description: "Step functions can abort workers",
 		expected: 1,
 		disabled: !XHR_ENABLED,
-		run: function(callback) {
+		run: function (callback) {
 			var updates = 0;
 			Papa.parse("/tests/long-sample.csv", {
 				worker: true,
 				download: true,
 				chunkSize: 500,
-				step: function(response, handle) {
+				step: function (response, handle) {
 					updates++;
 					handle.abort();
 				},
-				complete: function() {
+				complete: function () {
 					callback(updates);
 				}
 			});
@@ -2068,18 +2080,18 @@ var CUSTOM_TESTS = [
 		description: "beforeFirstChunk manipulates only first chunk",
 		expected: 7,
 		disabled: !XHR_ENABLED,
-		run: function(callback) {
+		run: function (callback) {
 			var updates = 0;
 			Papa.parse("/tests/long-sample.csv", {
 				download: true,
 				chunkSize: 500,
-				beforeFirstChunk: function(chunk) {
+				beforeFirstChunk: function (chunk) {
 					return chunk.replace(/.*?\n/, '');
 				},
-				step: function(response) {
+				step: function (response) {
 					updates++;
 				},
-				complete: function() {
+				complete: function () {
 					callback(updates);
 				}
 			});
@@ -2089,17 +2101,17 @@ var CUSTOM_TESTS = [
 		description: "First chunk not modified if beforeFirstChunk returns nothing",
 		expected: 8,
 		disabled: !XHR_ENABLED,
-		run: function(callback) {
+		run: function (callback) {
 			var updates = 0;
 			Papa.parse("/tests/long-sample.csv", {
 				download: true,
 				chunkSize: 500,
-				beforeFirstChunk: function(chunk) {
+				beforeFirstChunk: function (chunk) {
 				},
-				step: function(response) {
+				step: function (response) {
 					updates++;
 				},
-				complete: function() {
+				complete: function () {
 					callback(updates);
 				}
 			});
@@ -2109,7 +2121,7 @@ var CUSTOM_TESTS = [
 		description: "Should not assume we own the worker unless papaworker is in the search string",
 		disabled: typeof Worker === 'undefined',
 		expected: [false, true, true, true, true],
-		run: function(callback) {
+		run: function (callback) {
 			var searchStrings = [
 				'',
 				'?papaworker',
@@ -2117,19 +2129,23 @@ var CUSTOM_TESTS = [
 				'?x=1&papaworker&y=1',
 				'?x=1&papaworker=1'
 			];
-			var results = searchStrings.map(function() { return false; });
+			var results = searchStrings.map(function () {
+				return false;
+			});
 			var workers = [];
 
 			// Give it .5s to do something
-			setTimeout(function() {
-				workers.forEach(function(w) { w.terminate(); });
+			setTimeout(function () {
+				workers.forEach(function (w) {
+					w.terminate();
+				});
 				callback(results);
 			}, 500);
 
-			searchStrings.forEach(function(searchString, idx) {
+			searchStrings.forEach(function (searchString, idx) {
 				var w = new Worker('../papaparse.js' + searchString);
 				workers.push(w);
-				w.addEventListener('message', function() {
+				w.addEventListener('message', function () {
 					results[idx] = true;
 				});
 				w.postMessage({input: 'a,b,c\n1,2,3'});
@@ -2139,10 +2155,10 @@ var CUSTOM_TESTS = [
 
 ];
 
-describe('Custom Tests', function() {
+describe('Custom Tests', function () {
 	function generateTest(test) {
-		(test.disabled ? it.skip : it)(test.description, function(done) {
-			test.run(function(actual) {
+		(test.disabled ? it.skip : it)(test.description, function (done) {
+			test.run(function (actual) {
 				assert.deepEqual(JSON.stringify(actual), JSON.stringify(test.expected));
 				done();
 			});
