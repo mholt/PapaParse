@@ -225,13 +225,13 @@ var CORE_PARSER_TESTS = [
 				"row": 0,
 				"index": 3
 			},
-				{
-					"type": "Quotes",
-					"code": "MissingQuotes",
-					"message": "Quoted field unterminated",
-					"row": 0,
-					"index": 3
-				}]
+            {
+                "type": "Quotes",
+                "code": "MissingQuotes",
+                "message": "Quoted field unterminated",
+                "row": 0,
+                "index": 3
+            }]
 		}
 	},
 	{
@@ -247,13 +247,13 @@ var CORE_PARSER_TESTS = [
 				"row": 0,
 				"index": 3
 			},
-				{
-					"type": "Quotes",
-					"code": "MissingQuotes",
-					"message": "Quoted field unterminated",
-					"row": 0,
-					"index": 3
-				}]
+            {
+                "type": "Quotes",
+                "code": "MissingQuotes",
+                "message": "Quoted field unterminated",
+                "row": 0,
+                "index": 3
+            }]
 		}
 	},
 	{
@@ -269,13 +269,13 @@ var CORE_PARSER_TESTS = [
 				"row": 0,
 				"index": 3
 			},
-				{
-					"type": "Quotes",
-					"code": "MissingQuotes",
-					"message": "Quoted field unterminated",
-					"row": 0,
-					"index": 3
-				}]
+            {
+                "type": "Quotes",
+                "code": "MissingQuotes",
+                "message": "Quoted field unterminated",
+                "row": 0,
+                "index": 3
+            }]
 		}
 	},
 	{
@@ -1570,11 +1570,11 @@ var UNPARSE_TESTS = [
 		expected: 'a,b,c\rd,e,f'
 	},
 	{
-		description:"Pipes with decimal numbers and comma as decimal separator",
-		input:'a|3,4|b\r\nc|3,4|d',
-		expected:{
-			data:[['a','3,4','b'],['c','3,4','d']],
-			errors:[]
+		description: "Pipes with decimal numbers and comma as decimal separator",
+		input: 'a|3,4|b\r\nc|3,4|d',
+		expected: {
+			data: [['a','3,4','b'],['c','3,4','d']],
+			errors: []
 		}
 	},
 	{
