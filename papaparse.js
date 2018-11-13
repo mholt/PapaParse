@@ -1151,6 +1151,10 @@ if (!Array.isArray)
 						header = header.trim();
 					}
 
+					if (_config.transformHeaders) {
+						header = _config.transformHeaders(header);
+					}
+
 					_fields.push(header);
 				}
 			_results.data.splice(0, 1);
