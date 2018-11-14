@@ -898,13 +898,11 @@ if (!Array.isArray)
 		this._onCsvData = function(results)
 		{
 			var data = results.data;
-			for (var i = 0; i < data.length; i++) {
-				if (!stream.push(data[i]) && !this._handle.paused()) {
-					// the writeable consumer buffer has filled up
-					// so we need to pause until more items
-					// can be processed
-					this._handle.pause();
-				}
+			if (!stream.push(data) && !this._handle.paused()) {
+				// the writeable consumer buffer has filled up
+				// so we need to pause until more items
+				// can be processed
+				this._handle.pause();
 			}
 		};
 
