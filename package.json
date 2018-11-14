@@ -42,7 +42,7 @@
 		"grunt": "^1.0.2",
 		"grunt-contrib-uglify": "^3.3.0",
 		"mocha": "^5.2.0",
-		"mocha-chrome": "github:pgn-vole/mocha-chrome#node-v6-compat",
+		"mocha-chrome": "^1.1.0",
 		"open": "0.0.5",
 		"phantomjs-prebuilt": "^2.1.16",
 		"serve-static": "^1.7.1"
