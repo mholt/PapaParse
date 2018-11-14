@@ -331,7 +331,7 @@ if (!Array.isArray)
 		}
 
 		// Default (any valid paths should return before this)
-		throw 'exception: Unable to serialize unrecognized input';
+		throw new Error('Unable to serialize unrecognized input');
 
 
 		function unpackConfig()
@@ -1368,7 +1368,7 @@ if (!Array.isArray)
 
 		// Comment character must be valid
 		if (comments === delim)
-			throw 'Comment character same as delimiter';
+			throw new Error('Comment character same as delimiter');
 		else if (comments === true)
 			comments = '#';
 		else if (typeof comments !== 'string'
@@ -1387,7 +1387,7 @@ if (!Array.isArray)
 		{
 			// For some reason, in Chrome, this speeds things up (!?)
 			if (typeof input !== 'string')
-				throw 'Input must be a string';
+				throw new Error('Input must be a string');
 
 			// We don't need to compute some of these every time parse() is called,
 			// but having them in a more local scope seems to perform better
@@ -1770,7 +1770,7 @@ if (!Array.isArray)
 	}
 
 	function notImplemented() {
-		throw 'Not implemented.';
+		throw new Error('Not implemented.');
 	}
 
 	/** Callback when worker thread receives a message */
