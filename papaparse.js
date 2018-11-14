@@ -651,7 +651,6 @@ if (!Array.isArray)
 			{
 				var end = this._start + this._config.chunkSize - 1;	// minus one because byte range is inclusive
 				xhr.setRequestHeader('Range', 'bytes=' + this._start + '-' + end);
-				xhr.setRequestHeader('If-None-Match', 'webkit-no-cache'); // https://bugs.webkit.org/show_bug.cgi?id=82672
 			}
 
 			try {
