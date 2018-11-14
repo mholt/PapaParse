@@ -1649,10 +1649,11 @@ if (!Array.isArray)
 			}
 
 			/** Returns an object with the results, errors, and meta. */
-			function returnable(stopped)
+			function returnable(stopped, step)
 			{
+				var isStep = step || false;
 				return {
-					data: data,
+					data: isStep ? data[0]  : data,
 					errors: errors,
 					meta: {
 						delimiter: delim,
@@ -1667,7 +1668,7 @@ if (!Array.isArray)
 			/** Executes the user's step function and resets data & errors. */
 			function doStep()
 			{
-				step(returnable());
+				step(returnable(undefined, true));
 				data = [];
 				errors = [];
 			}
