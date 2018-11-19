@@ -84,7 +84,7 @@
 
 					<h6 id="combine">Can I put other libraries in the same file as Papa Parse?</h6>
 					<p>
-						Yes, but then don't use the Web Worker feature unless your other dependencies are battle-hardened for worker threads. A worker thread loads an entire file, not just a function, so all those dependencies would be executed in an environment without a DOM and other <code>window</code> features. If any of those dependencies crash (<code>Cannot read property "defaultView" of undefined</code> <a href="https://github.com/mholt/PapaParse/issues/114">is</a> <a href="https://github.com/mholt/PapaParse/issues/163">common</a>), the whole worker thread will crash and parsing will not succeed.
+						Yes.
 					</p>
 
 
@@ -96,7 +96,7 @@
 
 					<h6 id="async">Can Papa Parse be loaded asynchronously (after the page loads)?</h6>
 					<p>
-						Yes.
+						Yes. 
 					</p>
 
 
@@ -209,7 +209,7 @@
 
 					<h6>Can I use a worker if I combine/concatenate my Javascript files?</h6>
 					<p>
-						Probably not. It's safest to concatenate the rest of your dependencies and include Papa Parse in a seperate file. Any library that expects to have access to the <code>window</code> or DOM will crash when executed in a worker thread. Only put <a href="/faq#combine">other libraries in the same file</a> if they are ready to be used in worker threads.
+						Yes.
 					</p>
 
 					<h6>When should I use a worker?</h6>
