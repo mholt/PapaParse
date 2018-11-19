@@ -7,6 +7,7 @@ if (typeof module !== 'undefined' && module.exports) {
 
 var assert = chai.assert;
 
+var BASE_PATH = (typeof document === 'undefined') ? './' : document.getElementById('test-cases').src.replace(/test-cases\.js$/, '');
 var RECORD_SEP = String.fromCharCode(30);
 var UNIT_SEP = String.fromCharCode(31);
 var FILES_ENABLED = false;
@@ -1396,7 +1397,7 @@ var PARSE_ASYNC_TESTS = [
 	},
 	{
 		description: "Simple download",
-		input: "sample.csv",
+		input: BASE_PATH + "sample.csv",
 		config: {
 			download: true
 		},
@@ -1408,7 +1409,7 @@ var PARSE_ASYNC_TESTS = [
 	},
 	{
 		description: "Simple download + worker",
-		input: "tests/sample.csv",
+		input: BASE_PATH + "sample.csv",
 		config: {
 			worker: true,
 			download: true
@@ -1761,7 +1762,7 @@ var CUSTOM_TESTS = [
 		disabled: !XHR_ENABLED,
 		run: function(callback) {
 			var updates = [];
-			Papa.parse("/tests/long-sample.csv", {
+			Papa.parse(BASE_PATH + "long-sample.csv", {
 				download: true,
 				step: function(response) {
 					updates.push(response.meta.cursor);
@@ -1778,7 +1779,7 @@ var CUSTOM_TESTS = [
 		disabled: !XHR_ENABLED,
 		run: function(callback) {
 			var updates = [];
-			Papa.parse("/tests/long-sample.csv", {
+			Papa.parse(BASE_PATH + "long-sample.csv", {
 				download: true,
 				chunkSize: 500,
 				step: function(response) {
@@ -1796,7 +1797,7 @@ var CUSTOM_TESTS = [
 		disabled: !XHR_ENABLED,
 		run: function(callback) {
 			var updates = [];
-			Papa.parse("/tests/long-sample.csv", {
+			Papa.parse(BASE_PATH + "long-sample.csv", {
 				download: true,
 				chunkSize: 500,
 				worker: true,
@@ -1815,7 +1816,7 @@ var CUSTOM_TESTS = [
 		disabled: !XHR_ENABLED,
 		run: function(callback) {
 			var updates = [];
-			Papa.parse("/tests/long-sample.csv", {
+			Papa.parse(BASE_PATH + "long-sample.csv", {
 				download: true,
 				chunkSize: 500,
 				chunk: function(response) {
@@ -1833,7 +1834,7 @@ var CUSTOM_TESTS = [
 		disabled: !XHR_ENABLED,
 		run: function(callback) {
 			var updates = [];
-			Papa.parse("/tests/long-sample.csv", {
+			Papa.parse(BASE_PATH + "long-sample.csv", {
 				download: true,
 				chunkSize: 500,
 				chunk: function(response) {
@@ -2042,7 +2043,7 @@ var CUSTOM_TESTS = [
 		disabled: !XHR_ENABLED,
 		run: function(callback) {
 			var updates = 0;
-			Papa.parse("/tests/long-sample.csv", {
+			Papa.parse(BASE_PATH + "long-sample.csv", {
 				worker: true,
 				download: true,
 				chunkSize: 500,
@@ -2062,7 +2063,7 @@ var CUSTOM_TESTS = [
 		disabled: !XHR_ENABLED,
 		run: function(callback) {
 			var updates = 0;
-			Papa.parse("/tests/long-sample.csv", {
+			Papa.parse(BASE_PATH + "long-sample.csv", {
 				download: true,
 				chunkSize: 500,
 				beforeFirstChunk: function(chunk) {
@@ -2083,7 +2084,7 @@ var CUSTOM_TESTS = [
 		disabled: !XHR_ENABLED,
 		run: function(callback) {
 			var updates = 0;
-			Papa.parse("/tests/long-sample.csv", {
+			Papa.parse(BASE_PATH + "long-sample.csv", {
 				download: true,
 				chunkSize: 500,
 				beforeFirstChunk: function(chunk) {
@@ -2094,37 +2095,6 @@ var CUSTOM_TESTS = [
 				complete: function() {
 					callback(updates);
 				}
-			});
-		}
-	},
-	{
-		description: "Should not assume we own the worker unless papaworker is in the search string",
-		disabled: typeof Worker === 'undefined',
-		expected: [false, true, true, true, true],
-		run: function(callback) {
-			var searchStrings = [
-				'',
-				'?papaworker',
-				'?x=1&papaworker',
-				'?x=1&papaworker&y=1',
-				'?x=1&papaworker=1'
-			];
-			var results = searchStrings.map(function() { return false; });
-			var workers = [];
-
-			// Give it .5s to do something
-			setTimeout(function() {
-				workers.forEach(function(w) { w.terminate(); });
-				callback(results);
-			}, 500);
-
-			searchStrings.forEach(function(searchString, idx) {
-				var w = new Worker('../papaparse.js' + searchString);
-				workers.push(w);
-				w.addEventListener('message', function() {
-					results[idx] = true;
-				});
-				w.postMessage({input: 'a,b,c\n1,2,3'});
 			});
 		}
 	}

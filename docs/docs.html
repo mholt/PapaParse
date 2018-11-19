@@ -447,7 +447,7 @@ var csv = Papa.unparse({
 									<code>worker</code>
 								</td>
 								<td>
-									Whether or not to use a <a href="/faq#workers">worker thread</a>. Using a worker will keep your page reactive, but may be slightly slower. Web Workers also load the entire Javascript file, so be careful when <a href="/faq#combine">combining other libraries</a> in the same file as Papa Parse. Note that worker option is only available when parsing files and not when converting from JSON to CSV.
+									Whether or not to use a <a href="/faq#workers">worker thread</a>. Using a worker will keep your page reactive, but may be slightly slower.
 								</td>
 							</tr>
 							<tr>
@@ -747,12 +747,6 @@ var csv = Papa.unparse({
 								<td><code>Papa.WORKERS_SUPPORTED</code></td>
 								<td>
 									Whether or not the browser supports HTML5 Web Workers. If false, <code>worker: true</code> will have no effect.
-								</td>
-							</tr>
-							<tr>
-								<td><code>Papa.SCRIPT_PATH</code></td>
-								<td>
-									The relative path to Papa Parse. This is automatically detected when Papa Parse is loaded synchronously. However, if you load Papa Parse asynchronously (e.g. with RequireJS), you need to set this variable manually in order to use Web Workers. (In those cases, this variable is <i>not</i> read-only and you should set it!)
 								</td>
 							</tr>
 						</table>
