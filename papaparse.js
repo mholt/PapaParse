@@ -56,13 +56,9 @@ if (!Array.isArray)
 
 
 	function getWorkerBlob() {
-		try {
-			var URL = global.URL || global.webkitURL || null;
-			var code = moduleFactory.toString();
-			return Papa.BLOB_URL || (Papa.BLOB_URL = URL.createObjectURL(new Blob(['(', code, ')();'], {type: 'text/javascript'})));
-		} catch (e) {
-			return null;
-		}
+		var URL = global.URL || global.webkitURL || null;
+		var code = moduleFactory.toString();
+		return Papa.BLOB_URL || (Papa.BLOB_URL = URL.createObjectURL(new Blob(['(', code, ')();'], {type: 'text/javascript'})));
 	}
 
 	var IS_WORKER = !global.document && !!global.postMessage,
