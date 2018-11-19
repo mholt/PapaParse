@@ -34,7 +34,10 @@ if (!Array.isArray)
 		// Browser globals (root is window)
 		root.Papa = factory();
 	}
-}(this, function()
+	// in strict mode we cannot access arguments.callee, so we need a named reference to
+	// stringify the factory method for the blob worker
+	// eslint-disable-next-line func-name
+}(this, function moduleFactory()
 {
 	'use strict';
 
@@ -51,8 +54,19 @@ if (!Array.isArray)
 		return {};
 	})();
 
+
+	function getWorkerBlob() {
+		try {
+			var URL = global.URL || global.webkitURL || null;
+			var code = moduleFactory.toString();
+			return Papa.BLOB_URL || (Papa.BLOB_URL = URL.createObjectURL(new Blob(['(', code, ')();'], {type: 'text/javascript'})));
+		} catch (e) {
+			return null;
+		}
+	}
+
 	var IS_WORKER = !global.document && !!global.postMessage,
-		IS_PAPA_WORKER = IS_WORKER && /(\?|&)papaworker(=|&|$)/.test(global.location.search),
+		IS_PAPA_WORKER = IS_WORKER && (/blob:/i.test(global.location.protocol) || /(\?|&)papaworker(=|&|$)/.test(global.location.search)),
 		LOADED_SYNC = false, AUTO_SCRIPT_PATH;
 	var workers = {}, workerIdCounter = 0;
 
@@ -1705,6 +1719,8 @@ if (!Array.isArray)
 		var workerUrl = Papa.SCRIPT_PATH || AUTO_SCRIPT_PATH;
 		// Append 'papaworker' to the search string to tell papaparse that this is our worker.
 		workerUrl += (workerUrl.indexOf('?') !== -1 ? '&' : '?') + 'papaworker';
+		if (Papa.SCRIPT_PATH === 'blob')
+			workerUrl = getWorkerBlob();
 		var w = new global.Worker(workerUrl);
 		w.onmessage = mainThreadReceivedMessage;
 		w.id = workerIdCounter++;
