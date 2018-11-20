@@ -15,13 +15,8 @@
 	<div id="mocha"></div>
 
 	<script>
-		if (window.mochaPhantomJS) {
-			mochaPhantomJS.run();
-
-		} else {
-			mocha.checkLeaks();
-			mocha.run();
-		}
+		mocha.checkLeaks();
+		mocha.run();
 	</script>
 	</body>
 </html>

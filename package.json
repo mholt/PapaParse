@@ -45,7 +45,6 @@
 		"mocha": "^5.2.0",
 		"mocha-headless-chrome": "^2.0.1",
 		"open": "0.0.5",
-		"phantomjs-prebuilt": "^2.1.16",
 		"serve-static": "^1.7.1"
 	},
 	"scripts": {
