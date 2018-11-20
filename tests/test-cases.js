@@ -1957,7 +1957,7 @@ var CUSTOM_TESTS = [
 			Papa.parse(new File(['A,B,C\nX,"Y\n1\n2\n3",Z'], 'sample.csv'), {
 				chunkSize: 3,
 				step: function(response) {
-					updates.push(response.data[0]);
+					updates.push(response.data);
 				},
 				complete: function() {
 					callback(updates);
