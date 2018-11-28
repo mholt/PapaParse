@@ -914,6 +914,39 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Custom transform accepts column number also",
+		input: 'A,B,C\r\nd,e,f',
+		config: {
+			transform: function(value, column) {
+				if (column % 2) {
+					value = value.toLowerCase();
+				}
+				return value;
+			}
+		},
+		expected: {
+			data: [["A","b","C"], ["d","e","f"]],
+			errors: []
+		}
+	},
+	{
+		description: "Custom transform accepts header name when using header",
+		input: 'A,B,C\r\nd,e,f',
+		config: {
+			header: true,
+			transform: function(value, name) {
+				if (name === 'B') {
+					value = value.toUpperCase();
+				}
+				return value;
+			}
+		},
+		expected: {
+			data: [{'A': "d", 'B': "E", 'C': "f"}],
+			errors: []
+		}
+	},
+	{
 		description: "Dynamic typing converts ISO date strings to Dates",
 		input: 'ISO date,long date\r\n2018-05-04T21:08:03.269Z,Fri May 04 2018 14:08:03 GMT-0700 (PDT)\r\n2018-05-08T15:20:22.642Z,Tue May 08 2018 08:20:22 GMT-0700 (PDT)',
 		config: { dynamicTyping: true },
