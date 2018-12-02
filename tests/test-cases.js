@@ -1376,7 +1376,7 @@ var PARSE_TESTS = [
 	{
 		description: "Using reserved regex character | as quote character",
 		input: '|a\na|,b\r\nc,d\r\ne,f\r\ng,h\r\ni,j',
-		config: { quoteChar: '(' },
+		config: { quoteChar: '|' },
 		expected: {
 			data: [['a\na', 'b'], ['c', 'd'], ['e', 'f'], ['g', 'h'], ['i', 'j']],
 			errors: [],
