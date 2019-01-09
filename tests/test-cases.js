@@ -1194,6 +1194,16 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Pipe delimiter is guessed correctly when mixed with comas",
+		notes: "Guessing the delimiter should work even if there are many lines of comments at the start of the file",
+		input: 'one|two,two|three\nfour|five,five|six',
+		config: {},
+		expected: {
+			data: [['one','two,two','three'],['four','five,five','six']],
+			errors: []
+		}
+	},
+	{
 		description: "Single quote as quote character",
 		notes: "Must parse correctly when single quote is specified as a quote character",
 		input: "a,b,'c,d'",
