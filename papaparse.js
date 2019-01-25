@@ -1125,18 +1125,25 @@ License: MIT
 		{
 			if (!_results)
 				return;
-			for (var i = 0; needsHeaderRow() && i < _results.data.length; i++)
-				for (var j = 0; j < _results.data[i].length; j++)
-				{
-					var header = _results.data[i][j];
 
-					if (isFunction(_config.transformHeader)) {
-						header = _config.transformHeader(header);
-					}
+			function addHeder(header)
+			{
+				if (isFunction(_config.transformHeader))
+					header = _config.transformHeader(header);
 
-					_fields.push(header);
-				}
-			_results.data.splice(0, 1);
+				_fields.push(header);
+			}
+
+			if (Array.isArray(_results.data[0]))
+			{
+				for (var i = 0; needsHeaderRow() && i < _results.data.length; i++)
+					_results.data[i].forEach(addHeder);
+
+				_results.data.splice(0, 1);
+			}
+			// if _results.data[0] is not an array, we are in a step where _results.data is the row.
+			else
+				_results.data.forEach(addHeder);
 		}
 
 		function shouldApplyDynamicTyping(field) {
@@ -1170,15 +1177,15 @@ License: MIT
 			if (!_results || (!_config.header && !_config.dynamicTyping && !_config.transform))
 				return _results;
 
-			for (var i = 0; i < _results.data.length; i++)
+			function processRow(rowSource, i)
 			{
 				var row = _config.header ? {} : [];
 
 				var j;
-				for (j = 0; j < _results.data[i].length; j++)
+				for (j = 0; j < rowSource.length; j++)
 				{
 					var field = j;
-					var value = _results.data[i][j];
+					var value = rowSource[j];
 
 					if (_config.header)
 						field = j >= _fields.length ? '__parsed_extra' : _fields[j];
@@ -1197,7 +1204,6 @@ License: MIT
 						row[field] = value;
 				}
 
-				_results.data[i] = row;
 
 				if (_config.header)
 				{
@@ -1206,12 +1212,24 @@ License: MIT
 					else if (j < _fields.length)
 						addError('FieldMismatch', 'TooFewFields', 'Too few fields: expected ' + _fields.length + ' fields but parsed ' + j, _rowCounter + i);
 				}
+
+				return row;
 			}
+
+			var incrementBy = 1;
+			if (!_results.data[0] || Array.isArray(_results.data[0]))
+			{
+				_results.data = _results.data.map(processRow);
+				incrementBy = _results.data.length;
+			}
+			else
+				_results.data = processRow(_results.data, 0);
+
 
 			if (_config.header && _results.meta)
 				_results.meta.fields = _fields;
 
-			_rowCounter += _results.data.length;
+			_rowCounter += incrementBy;
 			return _results;
 		}
 
