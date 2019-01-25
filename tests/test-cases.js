@@ -1790,6 +1790,37 @@ var CUSTOM_TESTS = [
 		}
 	},
 	{
+		description: "Data is correctly parsed with steps",
+		expected: [['A', 'b', 'c'], ['d', 'E', 'f']],
+		run: function(callback) {
+			var data = [];
+			Papa.parse('A,b,c\nd,E,f', {
+				step: function(results) {
+					data.push(results.data);
+				},
+				complete: function() {
+					callback(data);
+				}
+			});
+		}
+	},
+	{
+		description: "Data is correctly parsed with steps and worker",
+		expected: [['A', 'b', 'c'], ['d', 'E', 'f']],
+		run: function(callback) {
+			var data = [];
+			Papa.parse('A,b,c\nd,E,f', {
+				worker: true,
+				step: function(results) {
+					data.push(results.data);
+				},
+				complete: function() {
+					callback(data);
+				}
+			});
+		}
+	},
+	{
 		description: "Step is called with the contents of the row",
 		expected: ['A', 'b', 'c'],
 		run: function(callback) {

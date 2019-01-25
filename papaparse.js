@@ -1707,7 +1707,7 @@ License: MIT
 				for (var i = 0; i < msg.results.data.length; i++)
 				{
 					worker.userStep({
-						data: [msg.results.data[i]],
+						data: msg.results.data[i],
 						errors: msg.results.errors,
 						meta: msg.results.meta
 					}, handle);
