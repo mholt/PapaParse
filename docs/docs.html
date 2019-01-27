@@ -248,12 +248,12 @@
 {
 	quotes: false,
 	quoteChar: '"',
-	escapeChar: '"',
 	delimiter: ",",
 	header: true,
-	newline: "\r\n"
+	newline: "\r\n",
+	skipEmptyLines: false, //or 'greedy'
 }</code></pre>
-                                Set <code>quotes</code> to <code>true</code> to always enclose each field in quotes, or an array of true/false values correlating to specific to columns to force-quote. The character used to quote can be customized using <code>quoteChar</code>. The character used to escape the <code>quoteChar</code> within a field can be customized using <code>escapeChar</code>. The <code>delimiter</code> can be any valid delimiting character. The <code>newline</code> character(s) may also be customized. Setting <code>header</code> to <code>false</code> will omit the header row.
+																			Set <code>quotes</code> to <code>true</code> to always enclose each field in quotes, or an array of true/false values correlating to specific to columns to force-quote. The character used to quote can be customized using <code>quoteChar</code>. The <code>delimiter</code> can be any valid delimiting character. The <code>newline</code> character(s) may also be customized. Setting <code>header</code> to <code>false</code> will omit the header row. Setting <code>skipEmptyLines</code> to <code>true</code> will skip completely empty rows (those which evaluate to an empty string). If set to <code>'greedy'</code>, rows that don't have any content (those which have only whitespace after unparsing) will also be skipped.</code>
 							</li>
 						</ul>
 					</div>
