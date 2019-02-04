@@ -1805,6 +1805,39 @@ var CUSTOM_TESTS = [
 		}
 	},
 	{
+		description: "Data is correctly parsed with steps (headers)",
+		expected: [{One: 'A', Two: 'b', Three: 'c'}, {One: 'd', Two: 'E', Three: 'f'}],
+		run: function(callback) {
+			var data = [];
+			Papa.parse('One,Two,Three\nA,b,c\nd,E,f', {
+				header: true,
+				step: function(results) {
+					data.push(results.data);
+				},
+				complete: function() {
+					callback(data);
+				}
+			});
+		}
+	},
+	{
+		description: "Data is correctly parsed with steps and worker (headers)",
+		expected: [{One: 'A', Two: 'b', Three: 'c'}, {One: 'd', Two: 'E', Three: 'f'}],
+		run: function(callback) {
+			var data = [];
+			Papa.parse('One,Two,Three\nA,b,c\nd,E,f', {
+				header: true,
+				worker: true,
+				step: function(results) {
+					data.push(results.data);
+				},
+				complete: function() {
+					callback(data);
+				}
+			});
+		}
+	},
+	{
 		description: "Data is correctly parsed with steps and worker",
 		expected: [['A', 'b', 'c'], ['d', 'E', 'f']],
 		run: function(callback) {
