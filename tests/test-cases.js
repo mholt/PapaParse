@@ -2187,26 +2187,7 @@ var CUSTOM_TESTS = [
 				}
 			});
 		}
-	}
-];
-
-describe('Custom Tests', function() {
-	function generateTest(test) {
-		(test.disabled ? it.skip : it)(test.description, function(done) {
-			test.run(function(actual) {
-				assert.deepEqual(JSON.stringify(actual), JSON.stringify(test.expected));
-				done();
-			});
-		});
-	}
-
-	for (var i = 0; i < CUSTOM_TESTS.length; i++) {
-		generateTest(CUSTOM_TESTS[i]);
-	}
-});
-
-
-var DELIMITERS_TO_GUESS_TESTS = [
+	},
 	{
 		description: "Should correctly guess custom delimiter when passed delimiters to guess.",
 		expected: "~",
@@ -2227,7 +2208,7 @@ var DELIMITERS_TO_GUESS_TESTS = [
 	}
 ];
 
-describe('Delimiters to Guess Tests', function() {
+describe('Custom Tests', function() {
 	function generateTest(test) {
 		(test.disabled ? it.skip : it)(test.description, function(done) {
 			test.run(function(actual) {
@@ -2237,7 +2218,7 @@ describe('Delimiters to Guess Tests', function() {
 		});
 	}
 
-	for (var i = 0; i < DELIMITERS_TO_GUESS_TESTS.length; i++) {
-		generateTest(DELIMITERS_TO_GUESS_TESTS[i]);
+	for (var i = 0; i < CUSTOM_TESTS.length; i++) {
+		generateTest(CUSTOM_TESTS[i]);
 	}
 });
