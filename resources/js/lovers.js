@@ -78,5 +78,11 @@ var peopleLovePapa = [
 		name: "Novel.js",
 		description: "is a text adventure framework that uses Papa Parse to enable user-friendly translations.",
 		quote: "Papa saves countless hours of work and makes reading large CSV files so easy!"
+	},
+	{
+		link: "https://flatfile.io",
+		name: "Flatfile.io",
+		description: "is an add-in data importer for web-apps, providing the full UX to upload a spreadsheet, field match, and repair issues found during import.",
+		quote: "Papa is a core part of our importer, so much so that we're committed to helping maintain it!"
 	}
 ];
