@@ -273,6 +273,9 @@ License: MIT
 		/** quote character */
 		var _quoteChar = '"';
 
+		/** escaped quote character, either "" or <config.escapeChar>" */
+		var _escapedQuote = _quoteChar + _quoteChar;
+
 		/** whether to skip empty lines */
 		var _skipEmptyLines = false;
 
@@ -352,6 +355,10 @@ License: MIT
 				if (_config.columns.length === 0) throw new Error('Option columns is empty');
 
 				_columns = _config.columns;
+			}
+
+			if (_config.escapeChar !== undefined) {
+				_escapedQuote = _config.escapeChar + _quoteChar;
 			}
 		}
 
@@ -439,7 +446,7 @@ License: MIT
 			if (str.constructor === Date)
 				return JSON.stringify(str).slice(1, 25);
 
-			str = str.toString().replace(quoteCharRegex, _quoteChar + _quoteChar);
+			str = str.toString().replace(quoteCharRegex, _escapedQuote);
 
 			var needsQuotes = (typeof _quotes === 'boolean' && _quotes)
 							|| (Array.isArray(_quotes) && _quotes[col])
