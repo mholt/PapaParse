@@ -61,7 +61,7 @@ var peopleLovePapa = [
 		description: "created a video showing how to use Papa Parse and FileDrop.js to create a drag-and-drop CSV-JSON converter.",
 		quote: "It's often easy to convert data to CSV. With Papa, it's easy to turn that CSV into JSON."
 	},
-	{       
+	{
 		link: "http://www.yolpo.com/social/gist.github?1dbd4556e748bdb830b3&autoplay=1&interimresults=0&failfast=1",
 		name: "Yolpo",
 		description: "created a simple regression test for Papa Parse.",
