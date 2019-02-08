@@ -1732,6 +1732,12 @@ var UNPARSE_TESTS = [
 		input: [{a: null, b: ' '}, {}, {a: '1', b: '2'}],
 		config: {skipEmptyLines: 'greedy', header: true},
 		expected: 'a,b\r\n1,2'
+	},
+	{
+		description: "Use different escapeChar",
+		input: [{a: 'foo', b: '"quoted"'}],
+		config: {header: false, escapeChar: '\\'},
+		expected: 'foo,"\\"quoted\\""'
 	}
 ];
 
