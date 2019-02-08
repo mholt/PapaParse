@@ -99,7 +99,7 @@
 					</div>
 
 					<div class="grid-50">
-						<pre><code class="language-javascript">Papa.parse(csvString<i>[, <a href="#config">config</a>]</i>)</pre></code>
+						<pre><code class="language-javascript">Papa.parse(csvString<i>[, <a href="#config">config</a>]</i>)</code></pre>
 					</div>
 
 					<div class="grid-50">
@@ -188,7 +188,7 @@
 	reason: "Some reason",
 	config: <span class="comment">// altered config...</span>
 }</code></pre>
-								to alter the flow of parsing. Actions can be <code>"abort"</code> to skip this and all other files in the queue, <code>"skip"</code> to skip just this file, or <code>"continue"</code> to carry on (equivalent to returning nothing). <code>reason</code> can be a reason for aborting. <code>config</code> can be a modified <a href="#config">configuration</a> for parsing just this file.</li>
+								to alter the flow of parsing. Actions can be <code>"abort"</code> to skip this and all other files in the queue, <code>"skip"</code> to skip just this file, or <code>"continue"</code> to carry on (equivalent to returning nothing). <code>reason</code> can be a reason for aborting. <code>config</code> can be a modified <a href="#config">configuration</a> for parsing just this file.
 							</li>
 							<li>The <code>complete</code> callback shown here is executed after <i>all</i> files are finished and does not receive any data. Use the complete callback in <a href="#config">config</a> for per-file results.</li>
 						</ul>
@@ -358,8 +358,8 @@ var csv = Papa.unparse([
 					<div class="grid-33">
 						<pre><code class="language-javascript">// Specifying fields and data explicitly
 var csv = Papa.unparse({
-	fields: ["Column 1", "Column 2"],
-	data: [
+	"fields": ["Column 1", "Column 2"],
+	"data": [
 		["foo", "bar"],
 		["abc", "def"]
 	]
@@ -502,7 +502,7 @@ var csv = Papa.unparse({
 									<code>preview</code>
 								</td>
 								<td>
-									If > 0, only that many rows will be parsed.
+									If &gt; 0, only that many rows will be parsed.
 								</td>
 							</tr>
 							<tr>
