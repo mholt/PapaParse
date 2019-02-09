@@ -1732,6 +1732,20 @@ var UNPARSE_TESTS = [
 		input: [{a: null, b: ' '}, {}, {a: '1', b: '2'}],
 		config: {skipEmptyLines: 'greedy', header: true},
 		expected: 'a,b\r\n1,2'
+	},
+	{
+		description: "Column option used to manually specify keys",
+		notes: "Should not throw any error when attempting to serialize key not present in object. Columns are different than keys of the first object. When an object is missing a key then the serialized value should be an empty string.",
+		input: [{a: 1, b: '2'}, {}, {a: 3, d: 'd', c: 4,}],
+		config: {columns: ['a', 'b', 'c']},
+		expected: 'a,b,c\r\n1,2,\r\n\r\n3,,4'
+	},
+	{
+		description: "Column option is empty",
+		notes: "Header (columns) is empty so header is skipped",
+		input: [{a: 1, b: '2'}, {}, {a: 3, d: 'd', c: 4,}],
+		config: {columns: []},
+		expected: '\r\n\r\n'
 	}
 ];
 

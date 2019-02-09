@@ -276,6 +276,9 @@ License: MIT
 		/** whether to skip empty lines */
 		var _skipEmptyLines = false;
 
+		/** the columns (keys) we expect when we unparse objects */
+		var _columns = null;
+
 		unpackConfig();
 
 		var quoteCharRegex = new RegExp(escapeRegExp(_quoteChar), 'g');
@@ -288,7 +291,10 @@ License: MIT
 			if (!_input.length || Array.isArray(_input[0]))
 				return serialize(null, _input, _skipEmptyLines);
 			else if (typeof _input[0] === 'object')
-				return serialize(objectKeys(_input[0]), _input, _skipEmptyLines);
+				return serialize(
+					_columns ? _columns : objectKeys(_input[0]),
+					_input, _skipEmptyLines
+				);
 		}
 		else if (typeof _input === 'object')
 		{
@@ -343,6 +349,10 @@ License: MIT
 
 			if (typeof _config.header === 'boolean')
 				_writeHeader = _config.header;
+
+			if (Array.isArray(_config.columns)) {
+				_columns = _config.columns;
+			}
 		}
 
 
