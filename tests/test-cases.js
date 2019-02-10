@@ -1742,10 +1742,10 @@ var UNPARSE_TESTS = [
 	},
 	{
 		description: "Column option is empty",
-		notes: "Header (columns) is empty so header is skipped",
+		notes: "Columns is empty so no data can be generated",
 		input: [{a: 1, b: '2'}, {}, {a: 3, d: 'd', c: 4,}],
 		config: {columns: []},
-		expected: '\r\n\r\n'
+		expectsError: true
 	}
 ];
 
@@ -1753,6 +1753,14 @@ describe('Unparse Tests', function() {
 	function generateTest(test) {
 		(test.disabled ? it.skip : it)(test.description, function() {
 			var actual;
+
+			if (test.expectsError) {
+				assert.throws(function() {
+					Papa.unparse(test.input, test.config);
+				});
+
+				return;
+			}
 
 			try {
 				actual = Papa.unparse(test.input, test.config);

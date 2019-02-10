@@ -291,10 +291,7 @@ License: MIT
 			if (!_input.length || Array.isArray(_input[0]))
 				return serialize(null, _input, _skipEmptyLines);
 			else if (typeof _input[0] === 'object')
-				return serialize(
-					_columns ? _columns : objectKeys(_input[0]),
-					_input, _skipEmptyLines
-				);
+				return serialize(_columns || objectKeys(_input[0]), _input, _skipEmptyLines);
 		}
 		else if (typeof _input === 'object')
 		{
@@ -351,6 +348,9 @@ License: MIT
 				_writeHeader = _config.header;
 
 			if (Array.isArray(_config.columns)) {
+
+				if (_config.columns.length === 0) throw new Error('Option columns was empty');
+
 				_columns = _config.columns;
 			}
 		}
