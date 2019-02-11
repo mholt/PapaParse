@@ -349,7 +349,7 @@ License: MIT
 
 			if (Array.isArray(_config.columns)) {
 
-				if (_config.columns.length === 0) throw new Error('Option columns was empty');
+				if (_config.columns.length === 0) throw new Error('Option columns is empty');
 
 				_columns = _config.columns;
 			}

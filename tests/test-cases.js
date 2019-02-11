@@ -1739,13 +1739,6 @@ var UNPARSE_TESTS = [
 		input: [{a: 1, b: '2'}, {}, {a: 3, d: 'd', c: 4,}],
 		config: {columns: ['a', 'b', 'c']},
 		expected: 'a,b,c\r\n1,2,\r\n\r\n3,,4'
-	},
-	{
-		description: "Column option is empty",
-		notes: "Columns is empty so no data can be generated",
-		input: [{a: 1, b: '2'}, {}, {a: 3, d: 'd', c: 4,}],
-		config: {columns: []},
-		expectsError: true
 	}
 ];
 
@@ -1753,14 +1746,6 @@ describe('Unparse Tests', function() {
 	function generateTest(test) {
 		(test.disabled ? it.skip : it)(test.description, function() {
 			var actual;
-
-			if (test.expectsError) {
-				assert.throws(function() {
-					Papa.unparse(test.input, test.config);
-				});
-
-				return;
-			}
 
 			try {
 				actual = Papa.unparse(test.input, test.config);
