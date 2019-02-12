@@ -1745,6 +1745,12 @@ var UNPARSE_TESTS = [
 		input: [{a: 'foo', b: '"quoted"'}],
 		config: {header: false, escapeChar: '\\'},
 		expected: 'foo,"\\"quoted\\""'
+	},
+	{
+		description: "test defeault escapeChar",
+		input: [{a: 'foo', b: '"quoted"'}],
+		config: {header: false},
+		expected: 'foo,"""quoted"""'
 	}
 ];
 
