@@ -1739,6 +1739,18 @@ var UNPARSE_TESTS = [
 		input: [{a: 1, b: '2'}, {}, {a: 3, d: 'd', c: 4,}],
 		config: {columns: ['a', 'b', 'c']},
 		expected: 'a,b,c\r\n1,2,\r\n\r\n3,,4'
+	},
+	{
+		description: "Use different escapeChar",
+		input: [{a: 'foo', b: '"quoted"'}],
+		config: {header: false, escapeChar: '\\'},
+		expected: 'foo,"\\"quoted\\""'
+	},
+	{
+		description: "test defeault escapeChar",
+		input: [{a: 'foo', b: '"quoted"'}],
+		config: {header: false},
+		expected: 'foo,"""quoted"""'
 	}
 ];
 

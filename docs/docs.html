@@ -258,6 +258,7 @@
 {
 	quotes: false, //or array of booleans
 	quoteChar: '"',
+	escapeChar: '"',
 	delimiter: ",",
 	header: true,
 	newline: "\r\n",
@@ -291,6 +292,12 @@
 								<td><code>quoteChar</code></td>
 								<td>
 									The character used to quote fields.
+								</td>
+							</tr>
+							<tr>
+								<td><code>escapeChar</code></td>
+								<td>
+									The character used to escape <code>quoteChar</code> inside field values.
 								</td>
 							</tr>
 							<tr>
