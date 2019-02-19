@@ -1003,7 +1003,7 @@ License: MIT
 		// One goal is to minimize the use of regular expressions...
 		var FLOAT = /^\s*-?(\d*\.?\d+|\d+\.?\d*)(e[-+]?\d+)?\s*$/i;
 		var ISO_DATE = /(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))/;
-
+		const RESUME_RETRY_TIMEOUT = 3; // Milliseconds to wait before retrying a resume operation
 		var self = this;
 		var _stepCounter = 0;	// Number of times step was called (number of rows parsed)
 		var _rowCounter = 0;	// Number of rows that have been parsed so far
@@ -1104,7 +1104,9 @@ License: MIT
 				_paused = false;
 				self.streamer.parseChunk(_input, true);
 			} else {
-				setTimeout(this.resume, 3);
+				// Bugfix: #636 In case the processing hasn't halted yet
+				// wait for it to halt in order to resume
+				setTimeout(this.resume, RESUME_RETRY_TIMEOUT);
 			}
 		};
 
