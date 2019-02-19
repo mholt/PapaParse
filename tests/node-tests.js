@@ -65,7 +65,6 @@ describe('PapaParse', function() {
 					parser.pause();
 					parser.resume();
 					if (results.data && stepped % 200 === 0) {
-						//console.log(JSON.stringify(results.data));
 						dataRows.push(results.data);
 					}
 				}
