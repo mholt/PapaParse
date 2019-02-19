@@ -473,6 +473,7 @@ License: MIT
 		this._handle = null;
 		this._finished = false;
 		this._completed = false;
+		this._halted = false;
 		this._input = null;
 		this._baseIndex = 0;
 		this._partialLine = '';
@@ -497,6 +498,7 @@ License: MIT
 					chunk = modifiedChunk;
 			}
 			this.isFirstChunk = false;
+			this._halted = false;
 
 			// Rejoin the line we likely just split in two by chunking the file
 			var aggregate = this._partialLine + chunk;
@@ -504,8 +506,10 @@ License: MIT
 
 			var results = this._handle.parse(aggregate, this._baseIndex, !this._finished);
 
-			if (this._handle.paused() || this._handle.aborted())
+			if (this._handle.paused() || this._handle.aborted()) {
+				this._halted = true;
 				return;
+			}
 
 			var lastIndex = results.meta.cursor;
 
@@ -531,8 +535,10 @@ License: MIT
 			else if (isFunction(this._config.chunk) && !isFakeChunk)
 			{
 				this._config.chunk(results, this._handle);
-				if (this._handle.paused() || this._handle.aborted())
+				if (this._handle.paused() || this._handle.aborted()) {
+					this._halted = true;
 					return;
+				}
 				results = undefined;
 				this._completeResults = undefined;
 			}
@@ -553,6 +559,11 @@ License: MIT
 
 			return results;
 		};
+
+		this.halted = function() 
+		{
+			return this._halted;
+		}
 
 		this._sendError = function(error)
 		{
@@ -1089,8 +1100,12 @@ License: MIT
 
 		this.resume = function()
 		{
-			_paused = false;
-			self.streamer.parseChunk(_input, true);
+			if(self.streamer.halted()) {
+				_paused = false;
+				self.streamer.parseChunk(_input, true);
+			} else {
+				setTimeout(() => this.resume(), 3);
+			}
 		};
 
 		this.aborted = function()
