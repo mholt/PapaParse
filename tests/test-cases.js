@@ -1781,6 +1781,48 @@ describe('Unparse Tests', function() {
 
 var CUSTOM_TESTS = [
 	{
+		description: "Pause and resume works (Regression Test for Bug #636)",
+		disabled: !XHR_ENABLED,
+		expected: [2001, [
+			["Etiam a dolor vitae est vestibulum","84","DEF"],
+			["Etiam a dolor vitae est vestibulum","84","DEF"],
+			["Lorem ipsum dolor sit","42","ABC"],
+			["Etiam a dolor vitae est vestibulum","84","DEF"],
+			["Etiam a dolor vitae est vestibulum","84"],
+			["Lorem ipsum dolor sit","42","ABC"],
+			["Etiam a dolor vitae est vestibulum","84","DEF"],
+			["Etiam a dolor vitae est vestibulum","84","DEF"],
+			["Lorem ipsum dolor sit","42","ABC"],
+			["Lorem ipsum dolor sit","42"]
+		], 0],
+		run: function(callback) {
+			var stepped = 0;
+			var dataRows = [];
+			var errorCount = 0;
+			var output = [];
+			Papa.parse(BASE_PATH + "verylong-sample.csv", {
+				download: true,
+				step: function(results, parser) {
+					stepped++;
+					if (results)
+					{
+						parser.pause();
+						parser.resume();
+						if (results.data && stepped % 200 === 0) {
+							dataRows.push(results.data);
+						}
+					}
+				},
+				complete: function() {
+					output.push(stepped);
+					output.push(dataRows);
+					output.push(errorCount);
+					callback(output);
+				}
+			});
+		}
+	},
+	{
 		description: "Complete is called with all results if neither step nor chunk is defined",
 		expected: [['A', 'b', 'c'], ['d', 'E', 'f'], ['G', 'h', 'i']],
 		disabled: !FILES_ENABLED,
@@ -2261,6 +2303,7 @@ var CUSTOM_TESTS = [
 ];
 
 describe('Custom Tests', function() {
+	this.timeout(30000);
 	function generateTest(test) {
 		(test.disabled ? it.skip : it)(test.description, function(done) {
 			test.run(function(actual) {
