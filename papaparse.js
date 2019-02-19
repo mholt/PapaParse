@@ -1104,7 +1104,7 @@ License: MIT
 				_paused = false;
 				self.streamer.parseChunk(_input, true);
 			} else {
-				setTimeout(() => this.resume(), 3);
+				setTimeout(this.resume, 3);
 			}
 		};
 
