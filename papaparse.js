@@ -560,10 +560,10 @@ License: MIT
 			return results;
 		};
 
-		this.halted = function() 
+		this.halted = function()
 		{
 			return this._halted;
-		}
+		};
 
 		this._sendError = function(error)
 		{
