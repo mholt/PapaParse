@@ -1783,6 +1783,7 @@ var CUSTOM_TESTS = [
 	{
 		description: "Pause and resume works (Regression Test for Bug #636)",
 		disabled: !XHR_ENABLED,
+		timeout: 30000,
 		expected: [2001, [
 			["Etiam a dolor vitae est vestibulum","84","DEF"],
 			["Etiam a dolor vitae est vestibulum","84","DEF"],
@@ -2303,9 +2304,11 @@ var CUSTOM_TESTS = [
 ];
 
 describe('Custom Tests', function() {
-	this.timeout(30000);
 	function generateTest(test) {
 		(test.disabled ? it.skip : it)(test.description, function(done) {
+			if(test.timeout) {
+				this.timeout(test.timeout);
+			}
 			test.run(function(actual) {
 				assert.deepEqual(JSON.stringify(actual), JSON.stringify(test.expected));
 				done();
