@@ -473,6 +473,7 @@ License: MIT
 		this._handle = null;
 		this._finished = false;
 		this._completed = false;
+		this._halted = false;
 		this._input = null;
 		this._baseIndex = 0;
 		this._partialLine = '';
@@ -497,6 +498,7 @@ License: MIT
 					chunk = modifiedChunk;
 			}
 			this.isFirstChunk = false;
+			this._halted = false;
 
 			// Rejoin the line we likely just split in two by chunking the file
 			var aggregate = this._partialLine + chunk;
@@ -504,8 +506,10 @@ License: MIT
 
 			var results = this._handle.parse(aggregate, this._baseIndex, !this._finished);
 
-			if (this._handle.paused() || this._handle.aborted())
+			if (this._handle.paused() || this._handle.aborted()) {
+				this._halted = true;
 				return;
+			}
 
 			var lastIndex = results.meta.cursor;
 
@@ -531,8 +535,10 @@ License: MIT
 			else if (isFunction(this._config.chunk) && !isFakeChunk)
 			{
 				this._config.chunk(results, this._handle);
-				if (this._handle.paused() || this._handle.aborted())
+				if (this._handle.paused() || this._handle.aborted()) {
+					this._halted = true;
 					return;
+				}
 				results = undefined;
 				this._completeResults = undefined;
 			}
@@ -992,7 +998,6 @@ License: MIT
 		// One goal is to minimize the use of regular expressions...
 		var FLOAT = /^\s*-?(\d*\.?\d+|\d+\.?\d*)(e[-+]?\d+)?\s*$/i;
 		var ISO_DATE = /(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))/;
-
 		var self = this;
 		var _stepCounter = 0;	// Number of times step was called (number of rows parsed)
 		var _rowCounter = 0;	// Number of rows that have been parsed so far
@@ -1089,8 +1094,14 @@ License: MIT
 
 		this.resume = function()
 		{
-			_paused = false;
-			self.streamer.parseChunk(_input, true);
+			if(self.streamer._halted) {
+				_paused = false;
+				self.streamer.parseChunk(_input, true);
+			} else {
+				// Bugfix: #636 In case the processing hasn't halted yet
+				// wait for it to halt in order to resume
+				setTimeout(this.resume, 3);
+			}
 		};
 
 		this.aborted = function()
