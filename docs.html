@@ -350,6 +350,7 @@ var csv = Papa.unparse({
 	complete: undefined,
 	error: undefined,
 	download: false,
+	downloadRequestHeaders: undefined,
 	skipEmptyLines: false,
 	chunk: undefined,
 	fastMode: undefined,
@@ -499,6 +500,19 @@ var csv = Papa.unparse({
 								<td>
 									If true, this indicates that the string you passed as the first argument to <code>parse()</code> is actually a URL from which to download a file and parse its contents.
 								</td>
+							</tr>
+							<tr>
+								<td>
+									<code>downloadRequestHeaders</code>
+								</td>
+								<td>
+									If defined, should be an object that describes the headers, example:
+									
+									<pre>
+										<code class="language-javascript">downloadRequestHeaders: {
+'Authorization': 'token 123345678901234567890',
+}</code>
+									</pre>
 							</tr>
 							<tr>
 								<td>
