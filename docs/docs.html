@@ -429,6 +429,7 @@ var csv = Papa.unparse({
 	dynamicTyping: false,
 	preview: 0,
 	encoding: "",
+	decoder: undefined,
 	worker: false,
 	comments: false,
 	step: undefined,
@@ -528,6 +529,20 @@ var csv = Papa.unparse({
 								</td>
 								<td>
 									The encoding to use when opening local files. If specified, it must be a value supported by the FileReader API.
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<code>decoder</code>
+								</td>
+								<td>
+									A function which allows custom decoding for the buffer string.
+									The function get Buffer and Encoding, and returns a string.
+									i.e assuming const iconv = require('iconv-lite'):
+									(buf , encoding) => {
+										if (iconv.encodingExists(encoding)) { return iconv.decode(buf, encoding) };
+										throw new TypeError('[ERR_UNKNOWN_ENCODING]', 'Unknown encoding: ' + encoding)	   
+									}							
 								</td>
 							</tr>
 							<tr>

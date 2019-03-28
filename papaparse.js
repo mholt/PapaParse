@@ -852,7 +852,18 @@ License: MIT
 		{
 			try
 			{
-				queue.push(typeof chunk === 'string' ? chunk : chunk.toString(this._config.encoding));
+				var encoding = this._config.encoding;
+				var decoder = this._config.decoder;
+				var encodedString = '';
+
+				if (typeof decoder === 'function') {
+					encodedString = decoder(chunk, encoding);
+				} else if (typeof chunk === 'string') {
+					encodedString = chunk;
+				} else {
+					encodedString = chunk.toString(encoding);
+				}
+				queue.push(encodedString);
 
 				if (parseOnData)
 				{
@@ -941,7 +952,19 @@ License: MIT
 			// when too many items have been added without their
 			// callback being invoked
 			parseCallbackQueue.push(bindFunction(function() {
-				this.parseChunk(typeof chunk === 'string' ? chunk : chunk.toString(config.encoding));
+				var encoding = config.encoding;
+				var decoder = config.decoder;
+				var encodedString = '';
+
+				if (typeof decoder === 'function') {
+					encodedString = decoder(chunk, encoding);
+				} else if (typeof chunk === 'string') {
+					encodedString = chunk;
+				} else {
+					encodedString = chunk.toString(encoding);
+				}
+
+				this.parseChunk(encodedString);
 				if (isFunction(callback)) {
 					return callback();
 				}
