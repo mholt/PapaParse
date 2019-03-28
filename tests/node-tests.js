@@ -273,22 +273,29 @@ describe('PapaParse', function() {
 		});
 	});
 
-	it('should fail on TypeError in Node when encoding is SJIS without custom decoder due to lack of supporting by Buffer ', function(done) {
-		Papa.parse(fs.createReadStream(__dirname + '/sjis-sample.csv'), {
-			chunk: function(results, parser) {
-			},
-			encoding: 'sjis',
-			error: function(err) {
-				if (err instanceof TypeError) {
-					done();
-				} else {
+	it('should fail on TypeError in Node when encoding is SJIS without custom decoder due to lack of supporting by Buffer', function(done) {
+		if (!Buffer.isEncoding('sjis')) {
+			// as long as Node Buffer isn't supporting SJIS this check will run.
+
+			Papa.parse(fs.createReadStream(__dirname + '/sjis-sample.csv'), {
+				chunk: function(results, parser) {
+				},
+				encoding: 'sjis',
+				error: function(err) {
+					if (err instanceof TypeError) {
+						done();
+					} else {
+						assert.fail('sjis encoding without decoder should fail on TypeError');
+					}
+				},
+				complete: function() {
 					assert.fail('sjis encoding without decoder should fail on TypeError');
 				}
-			},
-			complete: function() {
-				assert.fail('sjis encoding without decoder should fail on TypeError');
-			}
-		});
+			});
+		} else {
+			// once sjis will be supported, continue to the next test without failing the tests.
+			done();
+		}
 	});
 
 	it('should use decoder and parse it correctly for SJIS', function(done) {
