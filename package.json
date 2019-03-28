@@ -42,6 +42,7 @@
 		"eslint": "^4.19.1",
 		"grunt": "^1.0.2",
 		"grunt-contrib-uglify": "^3.3.0",
+		"iconv-lite": "^0.4.24",
 		"mocha": "^5.2.0",
 		"mocha-headless-chrome": "^2.0.1",
 		"open": "0.0.5",

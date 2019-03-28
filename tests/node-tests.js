@@ -272,4 +272,82 @@ describe('PapaParse', function() {
 			}
 		});
 	});
+
+	it('should fail on TypeError in Node when encoding is SJIS without custom decoder due to lack of supporting by Buffer ', function(done) {
+		Papa.parse(fs.createReadStream(__dirname + '/sjis-sample.csv'), {
+			chunk: function(results, parser) {
+			},
+			encoding: 'sjis',
+			error: function(err) {
+				if (err instanceof TypeError) {
+					done();
+				} else {
+					assert.fail('sjis encoding without decoder should fail on TypeError');
+				}
+			},
+			complete: function() {
+				assert.fail('sjis encoding without decoder should fail on TypeError');
+			}
+		});
+	});
+
+	it('should use decoder and parse it correctly for SJIS', function(done) {
+		var iconv = require('iconv-lite');
+		var isFirstLine = true;
+		Papa.parse(fs.createReadStream(__dirname + '/sjis-sample.csv'), {
+			chunk: function(results) {
+				if (isFirstLine) {
+					isFirstLine = false;
+					assert.deepEqual(results.data, [["コントロールカラム","商品管理番号（商品URL）"]]);
+				} else {
+					done();
+				}
+			},
+			encoding: 'sjis',
+			decoder: function(buffer, encoding) {
+				if (iconv.encodingExists(encoding)) {
+					// used the weird 'concat' and 'Buffer.from' due to : https://github.com/ashtuchkin/iconv-lite/wiki/Use-Buffers-when-decoding
+					return iconv.decode(Buffer.concat([Buffer.from(buffer)]), encoding);
+				}
+				throw new TypeError('[ERR_UNKNOWN_ENCODING]', 'Unknown encoding: ' + encoding);
+			},
+			error: function(err) {
+				if (err) {
+					assert.fail(err);
+				} else {
+					done();
+				}
+			}
+		});
+	});
+
+	it('should use decoder but parse it wrongly for UTF-8', function(done) {
+		var iconv = require('iconv-lite');
+		var isFirstLine = true;
+		Papa.parse(fs.createReadStream(__dirname + '/sjis-sample.csv'), {
+			chunk: function(results) {
+				if (isFirstLine) {
+					isFirstLine = false;
+					assert.notDeepEqual(results.data, [["コントロールカラム","商品管理番号（商品URL）"]]);
+				} else {
+					done();
+				}
+			},
+			encoding: 'utf-8',
+			decoder: function(buffer, encoding) {
+				if (iconv.encodingExists(encoding)) {
+					// used the weird 'concat' and 'Buffer.from' due to : https://github.com/ashtuchkin/iconv-lite/wiki/Use-Buffers-when-decoding
+					return iconv.decode(Buffer.concat([Buffer.from(buffer)]), encoding);
+				}
+				throw new TypeError('[ERR_UNKNOWN_ENCODING]', 'Unknown encoding: ' + encoding);
+			},
+			error: function(err) {
+				if (err) {
+					assert.fail(err);
+				} else {
+					done();
+				}
+			}
+		});
+	});
 });
