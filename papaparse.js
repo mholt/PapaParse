@@ -854,16 +854,16 @@ License: MIT
 			{
 				var encoding = this._config.encoding;
 				var decoder = this._config.decoder;
-				var encodedString = '';
+				var decodedString = '';
 
 				if (typeof decoder === 'function') {
-					encodedString = decoder(chunk, encoding);
+					decodedString = decoder(chunk, encoding);
 				} else if (typeof chunk === 'string') {
-					encodedString = chunk;
+					decodedString = chunk;
 				} else {
-					encodedString = chunk.toString(encoding);
+					decodedString = chunk.toString(encoding);
 				}
-				queue.push(encodedString);
+				queue.push(decodedString);
 
 				if (parseOnData)
 				{
@@ -954,17 +954,17 @@ License: MIT
 			parseCallbackQueue.push(bindFunction(function() {
 				var encoding = config.encoding;
 				var decoder = config.decoder;
-				var encodedString = '';
+				var decodedString = '';
 
 				if (typeof decoder === 'function') {
-					encodedString = decoder(chunk, encoding);
+					decodedString = decoder(chunk, encoding);
 				} else if (typeof chunk === 'string') {
-					encodedString = chunk;
+					decodedString = chunk;
 				} else {
-					encodedString = chunk.toString(encoding);
+					decodedString = chunk.toString(encoding);
 				}
 
-				this.parseChunk(encodedString);
+				this.parseChunk(decodedString);
 				if (isFunction(callback)) {
 					return callback();
 				}
