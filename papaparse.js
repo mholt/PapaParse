@@ -1,9 +1,10 @@
-/*@license
-	Papa Parse
-	v4.6.0
-	https://github.com/mholt/PapaParse
-	License: MIT
+/* @license
+Papa Parse
+v5.0.0-beta.0
+https://github.com/mholt/PapaParse
+License: MIT
 */
+
 (function(root, factory)
 {
 	/* globals define */
@@ -24,7 +25,10 @@
 		// Browser globals (root is window)
 		root.Papa = factory();
 	}
-}(this, function()
+	// in strict mode we cannot access arguments.callee, so we need a named reference to
+	// stringify the factory method for the blob worker
+	// eslint-disable-next-line func-name
+}(this, function moduleFactory()
 {
 	'use strict';
 
@@ -42,9 +46,14 @@
 	})();
 
 
+	function getWorkerBlob() {
+		var URL = global.URL || global.webkitURL || null;
+		var code = moduleFactory.toString();
+		return Papa.BLOB_URL || (Papa.BLOB_URL = URL.createObjectURL(new Blob(['(', code, ')();'], {type: 'text/javascript'})));
+	}
+
 	var IS_WORKER = !global.document && !!global.postMessage,
-		IS_PAPA_WORKER = IS_WORKER && /(\?|&)papaworker(=|&|$)/.test(global.location.search),
-		LOADED_SYNC = false, AUTO_SCRIPT_PATH;
+		IS_PAPA_WORKER = IS_WORKER && /blob:/i.test((global.location || {}).protocol);
 	var workers = {}, workerIdCounter = 0;
 
 	var Papa = {};
@@ -57,7 +66,6 @@
 	Papa.BYTE_ORDER_MARK = '\ufeff';
 	Papa.BAD_DELIMITERS = ['\r', '\n', '"', Papa.BYTE_ORDER_MARK];
 	Papa.WORKERS_SUPPORTED = !IS_WORKER && !!global.Worker;
-	Papa.SCRIPT_PATH = null;	// Must be set by your code if you use workers and this lib is loaded asynchronously
 	Papa.NODE_STREAM_INPUT = 1;
 
 	// Configurable chunk sizes for local and remote files, respectively
@@ -72,7 +80,9 @@
 	Papa.FileStreamer = FileStreamer;
 	Papa.StringStreamer = StringStreamer;
 	Papa.ReadableStreamStreamer = ReadableStreamStreamer;
-	Papa.DuplexStreamStreamer = DuplexStreamStreamer;
+	if (typeof PAPA_BROWSER_CONTEXT === 'undefined') {
+		Papa.DuplexStreamStreamer = DuplexStreamStreamer;
+	}
 
 	if (global.jQuery)
 	{
@@ -173,23 +183,6 @@
 	{
 		global.onmessage = workerThreadReceivedMessage;
 	}
-	else if (Papa.WORKERS_SUPPORTED)
-	{
-		AUTO_SCRIPT_PATH = getScriptPath();
-
-		// Check if the script was loaded synchronously
-		if (!document.body)
-		{
-			// Body doesn't exist yet, must be synchronous
-			LOADED_SYNC = true;
-		}
-		else
-		{
-			document.addEventListener('DOMContentLoaded', function() {
-				LOADED_SYNC = true;
-			}, true);
-		}
-	}
 
 
 
@@ -232,7 +225,7 @@
 		}
 
 		var streamer = null;
-		if (_input === Papa.NODE_STREAM_INPUT)
+		if (_input === Papa.NODE_STREAM_INPUT && typeof PAPA_BROWSER_CONTEXT === 'undefined')
 		{
 			// create a node Duplex stream for use
 			// with .pipe
@@ -285,14 +278,14 @@
 
 		unpackConfig();
 
-		var quoteCharRegex = new RegExp(_quoteChar, 'g');
+		var quoteCharRegex = new RegExp(escapeRegExp(_quoteChar), 'g');
 
 		if (typeof _input === 'string')
 			_input = JSON.parse(_input);
 
-		if (_input instanceof Array)
+		if (Array.isArray(_input))
 		{
-			if (!_input.length || _input[0] instanceof Array)
+			if (!_input.length || Array.isArray(_input[0]))
 				return serialize(null, _input, _skipEmptyLines);
 			else if (typeof _input[0] === 'object')
 				return serialize(objectKeys(_input[0]), _input, _skipEmptyLines);
@@ -302,17 +295,17 @@
 			if (typeof _input.data === 'string')
 				_input.data = JSON.parse(_input.data);
 
-			if (_input.data instanceof Array)
+			if (Array.isArray(_input.data))
 			{
 				if (!_input.fields)
 					_input.fields =  _input.meta && _input.meta.fields;
 
 				if (!_input.fields)
-					_input.fields =  _input.data[0] instanceof Array
+					_input.fields =  Array.isArray(_input.data[0])
 						? _input.fields
 						: objectKeys(_input.data[0]);
 
-				if (!(_input.data[0] instanceof Array) && typeof _input.data[0] !== 'object')
+				if (!(Array.isArray(_input.data[0])) && typeof _input.data[0] !== 'object')
 					_input.data = [_input.data];	// handles input like [1,2,3] or ['asdf']
 			}
 
@@ -320,7 +313,7 @@
 		}
 
 		// Default (any valid paths should return before this)
-		throw 'exception: Unable to serialize unrecognized input';
+		throw new Error('Unable to serialize unrecognized input');
 
 
 		function unpackConfig()
@@ -335,7 +328,7 @@
 			}
 
 			if (typeof _config.quotes === 'boolean'
-				|| _config.quotes instanceof Array)
+				|| Array.isArray(_config.quotes))
 				_quotes = _config.quotes;
 
 			if (typeof _config.skipEmptyLines === 'boolean'
@@ -374,8 +367,8 @@
 			if (typeof data === 'string')
 				data = JSON.parse(data);
 
-			var hasHeader = fields instanceof Array && fields.length > 0;
-			var dataKeyedByField = !(data[0] instanceof Array);
+			var hasHeader = Array.isArray(fields) && fields.length > 0;
+			var dataKeyedByField = !(Array.isArray(data[0]));
 
 			// If there a header row, write it first
 			if (hasHeader && _writeHeader)
@@ -394,19 +387,34 @@
 			for (var row = 0; row < data.length; row++)
 			{
 				var maxCol = hasHeader ? fields.length : data[row].length;
-				var r = hasHeader ? fields : data[row];
 
-				if (skipEmptyLines !== 'greedy' || r.join('').trim() !== '')
+				var emptyLine = false;
+				var nullLine = hasHeader ? Object.keys(data[row]).length === 0 : data[row].length === 0;
+				if (skipEmptyLines && !hasHeader)
+				{
+					emptyLine = skipEmptyLines === 'greedy' ? data[row].join('').trim() === '' : data[row].length === 1 && data[row][0].length === 0;
+				}
+				if (skipEmptyLines === 'greedy' && hasHeader) {
+					var line = [];
+					for (var c = 0; c < maxCol; c++) {
+						var cx = dataKeyedByField ? fields[c] : c;
+						line.push(data[row][cx]);
+					}
+					emptyLine = line.join('').trim() === '';
+				}
+				if (!emptyLine)
 				{
 					for (var col = 0; col < maxCol; col++)
 					{
-						if (col > 0)
+						if (col > 0 && !nullLine)
 							csv += _delimiter;
 						var colIdx = hasHeader && dataKeyedByField ? fields[col] : col;
 						csv += safe(data[row][colIdx], col);
 					}
-					if (row < data.length - 1 && (!skipEmptyLines || maxCol > 0))
+					if (row < data.length - 1 && (!skipEmptyLines || (maxCol > 0 && !nullLine)))
+					{
 						csv += _newline;
+					}
 				}
 			}
 			return csv;
@@ -424,7 +432,7 @@
 			str = str.toString().replace(quoteCharRegex, _quoteChar + _quoteChar);
 
 			var needsQuotes = (typeof _quotes === 'boolean' && _quotes)
-							|| (_quotes instanceof Array && _quotes[col])
+							|| (Array.isArray(_quotes) && _quotes[col])
 							|| hasAny(str, Papa.BAD_DELIMITERS)
 							|| str.indexOf(_delimiter) > -1
 							|| str.charAt(0) === ' '
@@ -625,7 +633,6 @@
 			{
 				var end = this._start + this._config.chunkSize - 1;	// minus one because byte range is inclusive
 				xhr.setRequestHeader('Range', 'bytes=' + this._start + '-' + end);
-				xhr.setRequestHeader('If-None-Match', 'webkit-no-cache'); // https://bugs.webkit.org/show_bug.cgi?id=82672
 			}
 
 			try {
@@ -872,13 +879,11 @@
 		this._onCsvData = function(results)
 		{
 			var data = results.data;
-			for (var i = 0; i < data.length; i++) {
-				if (!stream.push(data[i]) && !this._handle.paused()) {
-					// the writeable consumer buffer has filled up
-					// so we need to pause until more items
-					// can be processed
-					this._handle.pause();
-				}
+			if (!stream.push(data) && !this._handle.paused()) {
+				// the writeable consumer buffer has filled up
+				// so we need to pause until more items
+				// can be processed
+				this._handle.pause();
 			}
 		};
 
@@ -958,8 +963,10 @@
 		});
 		stream.once('finish', bindFunction(this._onWriteComplete, this));
 	}
-	DuplexStreamStreamer.prototype = Object.create(ChunkStreamer.prototype);
-	DuplexStreamStreamer.prototype.constructor = DuplexStreamStreamer;
+	if (typeof PAPA_BROWSER_CONTEXT === 'undefined') {
+		DuplexStreamStreamer.prototype = Object.create(ChunkStreamer.prototype);
+		DuplexStreamStreamer.prototype.constructor = DuplexStreamStreamer;
+	}
 
 
 	// Use one ParserHandle per entire CSV file or string
@@ -1123,8 +1130,8 @@
 				{
 					var header = _results.data[i][j];
 
-					if (_config.trimHeaders) {
-						header = header.trim();
+					if (isFunction(_config.transformHeader)) {
+						header = _config.transformHeader(header);
 					}
 
 					_fields.push(header);
@@ -1340,7 +1347,7 @@
 
 		// Comment character must be valid
 		if (comments === delim)
-			throw 'Comment character same as delimiter';
+			throw new Error('Comment character same as delimiter');
 		else if (comments === true)
 			comments = '#';
 		else if (typeof comments !== 'string'
@@ -1359,7 +1366,7 @@
 		{
 			// For some reason, in Chrome, this speeds things up (!?)
 			if (typeof input !== 'string')
-				throw 'Input must be a string';
+				throw new Error('Input must be a string');
 
 			// We don't need to compute some of these every time parse() is called,
 			// but having them in a more local scope seems to perform better
@@ -1410,7 +1417,7 @@
 
 			var nextDelim = input.indexOf(delim, cursor);
 			var nextNewline = input.indexOf(newline, cursor);
-			var quoteCharRegex = new RegExp(escapeChar.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&') + quoteChar, 'g');
+			var quoteCharRegex = new RegExp(escapeRegExp(escapeChar) + escapeRegExp(quoteChar), 'g');
 			var quoteSearch;
 
 			// Parser loop
@@ -1621,10 +1628,11 @@
 			}
 
 			/** Returns an object with the results, errors, and meta. */
-			function returnable(stopped)
+			function returnable(stopped, step)
 			{
+				var isStep = step || false;
 				return {
-					data: data,
+					data: isStep ? data[0]  : data,
 					errors: errors,
 					meta: {
 						delimiter: delim,
@@ -1639,7 +1647,7 @@
 			/** Executes the user's step function and resets data & errors. */
 			function doStep()
 			{
-				step(returnable());
+				step(returnable(undefined, true));
 				data = [];
 				errors = [];
 			}
@@ -1659,26 +1667,12 @@
 	}
 
 
-	// If you need to load Papa Parse asynchronously and you also need worker threads, hard-code
-	// the script path here. See: https://github.com/mholt/PapaParse/issues/87#issuecomment-57885358
-	function getScriptPath()
-	{
-		var scripts = document.getElementsByTagName('script');
-		return scripts.length ? scripts[scripts.length - 1].src : '';
-	}
-
 	function newWorker()
 	{
 		if (!Papa.WORKERS_SUPPORTED)
 			return false;
-		if (!LOADED_SYNC && Papa.SCRIPT_PATH === null)
-			throw new Error(
-				'Script path cannot be determined automatically when Papa Parse is loaded asynchronously. ' +
-				'You need to set Papa.SCRIPT_PATH manually.'
-			);
-		var workerUrl = Papa.SCRIPT_PATH || AUTO_SCRIPT_PATH;
-		// Append 'papaworker' to the search string to tell papaparse that this is our worker.
-		workerUrl += (workerUrl.indexOf('?') !== -1 ? '&' : '?') + 'papaworker';
+
+		var workerUrl = getWorkerBlob();
 		var w = new global.Worker(workerUrl);
 		w.onmessage = mainThreadReceivedMessage;
 		w.id = workerIdCounter++;
@@ -1742,7 +1736,7 @@
 	}
 
 	function notImplemented() {
-		throw 'Not implemented.';
+		throw new Error('Not implemented.');
 	}
 
 	/** Callback when worker thread receives a message */
@@ -1778,7 +1772,7 @@
 	{
 		if (typeof obj !== 'object' || obj === null)
 			return obj;
-		var cpy = obj instanceof Array ? [] : {};
+		var cpy = Array.isArray(obj) ? [] : {};
 		for (var key in obj)
 			cpy[key] = copy(obj[key]);
 		return cpy;

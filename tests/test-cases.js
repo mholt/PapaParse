@@ -7,6 +7,7 @@ if (typeof module !== 'undefined' && module.exports) {
 
 var assert = chai.assert;
 
+var BASE_PATH = (typeof document === 'undefined') ? './' : document.getElementById('test-cases').src.replace(/test-cases\.js$/, '');
 var RECORD_SEP = String.fromCharCode(30);
 var UNIT_SEP = String.fromCharCode(31);
 var FILES_ENABLED = false;
@@ -725,11 +726,11 @@ var PARSE_TESTS = [
 		}
 	},
 	{
-		description: "Header rows are trimmed when trimHeaders is set",
-		input: '  A , B  ,  C  \r\na,b ,c',
-		config: { header: true, trimHeaders: true },
+		description: "Header rows are transformed when transformHeader function is provided",
+		input: 'A,B,C\r\na,b,c',
+		config: { header: true, transformHeader: function(header) { return header.toLowerCase(); } },
 		expected: {
-			data: [{"A": "a", "B": "b ", "C": "c"}],
+			data: [{"a": "a", "b": "b", "c": "c"}],
 			errors: []
 		}
 	},
@@ -909,6 +910,39 @@ var PARSE_TESTS = [
 		},
 		expected: {
 			data: [["a","b","c"], ["d","e","f"]],
+			errors: []
+		}
+	},
+	{
+		description: "Custom transform accepts column number also",
+		input: 'A,B,C\r\nd,e,f',
+		config: {
+			transform: function(value, column) {
+				if (column % 2) {
+					value = value.toLowerCase();
+				}
+				return value;
+			}
+		},
+		expected: {
+			data: [["A","b","C"], ["d","e","f"]],
+			errors: []
+		}
+	},
+	{
+		description: "Custom transform accepts header name when using header",
+		input: 'A,B,C\r\nd,e,f',
+		config: {
+			header: true,
+			transform: function(value, name) {
+				if (name === 'B') {
+					value = value.toUpperCase();
+				}
+				return value;
+			}
+		},
+		expected: {
+			data: [{'A': "d", 'B': "E", 'C': "f"}],
 			errors: []
 		}
 	},
@@ -1324,9 +1358,25 @@ var PARSE_TESTS = [
 		}
 	},
 	{
-		description: "Using reserved regex characters as quote characters",
+		description: "Using reserved regex character . as quote character",
 		input: '.a\na.,b\r\nc,d\r\ne,f\r\ng,h\r\ni,j',
 		config: { quoteChar: '.' },
+		expected: {
+			data: [['a\na', 'b'], ['c', 'd'], ['e', 'f'], ['g', 'h'], ['i', 'j']],
+			errors: [],
+			meta: {
+				linebreak: '\r\n',
+				delimiter: ',',
+				cursor: 27,
+				aborted: false,
+				truncated: false
+			}
+		}
+	},
+	{
+		description: "Using reserved regex character | as quote character",
+		input: '|a\na|,b\r\nc,d\r\ne,f\r\ng,h\r\ni,j',
+		config: { quoteChar: '|' },
 		expected: {
 			data: [['a\na', 'b'], ['c', 'd'], ['e', 'f'], ['g', 'h'], ['i', 'j']],
 			errors: [],
@@ -1396,7 +1446,7 @@ var PARSE_ASYNC_TESTS = [
 	},
 	{
 		description: "Simple download",
-		input: "sample.csv",
+		input: BASE_PATH + "sample.csv",
 		config: {
 			download: true
 		},
@@ -1408,7 +1458,7 @@ var PARSE_ASYNC_TESTS = [
 	},
 	{
 		description: "Simple download + worker",
-		input: "tests/sample.csv",
+		input: BASE_PATH + "sample.csv",
 		config: {
 			worker: true,
 			download: true
@@ -1654,6 +1704,24 @@ var UNPARSE_TESTS = [
 		input: [[null, ' '], [], ['1', '2']],
 		config: {skipEmptyLines: 'greedy'},
 		expected: '1,2'
+	},
+	{
+		description: "Returns empty rows when empty rows are passed and skipEmptyLines is false with headers",
+		input: [{a: null, b: ' '}, {}, {a: '1', b: '2'}],
+		config: {skipEmptyLines: false, header: true},
+		expected: 'a,b\r\n," "\r\n\r\n1,2'
+	},
+	{
+		description: "Returns without empty rows when skipEmptyLines is true with headers",
+		input: [{a: null, b: ' '}, {}, {a: '1', b: '2'}],
+		config: {skipEmptyLines: true, header: true},
+		expected: 'a,b\r\n," "\r\n1,2'
+	},
+	{
+		description: "Returns without rows with no content when skipEmptyLines is 'greedy' with headers",
+		input: [{a: null, b: ' '}, {}, {a: '1', b: '2'}],
+		config: {skipEmptyLines: 'greedy', header: true},
+		expected: 'a,b\r\n1,2'
 	}
 ];
 
@@ -1717,7 +1785,7 @@ var CUSTOM_TESTS = [
 		run: function(callback) {
 			Papa.parse('A,b,c', {
 				step: function(response) {
-					callback(response.data[0]);
+					callback(response.data);
 				}
 			});
 		}
@@ -1743,7 +1811,7 @@ var CUSTOM_TESTS = [
 		disabled: !XHR_ENABLED,
 		run: function(callback) {
 			var updates = [];
-			Papa.parse("/tests/long-sample.csv", {
+			Papa.parse(BASE_PATH + "long-sample.csv", {
 				download: true,
 				step: function(response) {
 					updates.push(response.meta.cursor);
@@ -1760,7 +1828,7 @@ var CUSTOM_TESTS = [
 		disabled: !XHR_ENABLED,
 		run: function(callback) {
 			var updates = [];
-			Papa.parse("/tests/long-sample.csv", {
+			Papa.parse(BASE_PATH + "long-sample.csv", {
 				download: true,
 				chunkSize: 500,
 				step: function(response) {
@@ -1778,7 +1846,7 @@ var CUSTOM_TESTS = [
 		disabled: !XHR_ENABLED,
 		run: function(callback) {
 			var updates = [];
-			Papa.parse("/tests/long-sample.csv", {
+			Papa.parse(BASE_PATH + "long-sample.csv", {
 				download: true,
 				chunkSize: 500,
 				worker: true,
@@ -1797,7 +1865,7 @@ var CUSTOM_TESTS = [
 		disabled: !XHR_ENABLED,
 		run: function(callback) {
 			var updates = [];
-			Papa.parse("/tests/long-sample.csv", {
+			Papa.parse(BASE_PATH + "long-sample.csv", {
 				download: true,
 				chunkSize: 500,
 				chunk: function(response) {
@@ -1815,7 +1883,7 @@ var CUSTOM_TESTS = [
 		disabled: !XHR_ENABLED,
 		run: function(callback) {
 			var updates = [];
-			Papa.parse("/tests/long-sample.csv", {
+			Papa.parse(BASE_PATH + "long-sample.csv", {
 				download: true,
 				chunkSize: 500,
 				chunk: function(response) {
@@ -1939,7 +2007,7 @@ var CUSTOM_TESTS = [
 			Papa.parse(new File(['A,B,C\nX,"Y\n1\n2\n3",Z'], 'sample.csv'), {
 				chunkSize: 3,
 				step: function(response) {
-					updates.push(response.data[0]);
+					updates.push(response.data);
 				},
 				complete: function() {
 					callback(updates);
@@ -1954,7 +2022,7 @@ var CUSTOM_TESTS = [
 			var updates = [];
 			Papa.parse('A,b,c\nd,E,f\nG,h,i', {
 				step: function(response, handle) {
-					updates.push(response.data[0]);
+					updates.push(response.data);
 					handle.abort();
 					callback(updates);
 				},
@@ -1984,7 +2052,7 @@ var CUSTOM_TESTS = [
 			var updates = [];
 			Papa.parse('A,b,c\nd,E,f\nG,h,i', {
 				step: function(response, handle) {
-					updates.push(response.data[0]);
+					updates.push(response.data);
 					handle.pause();
 					callback(updates);
 				},
@@ -2003,7 +2071,7 @@ var CUSTOM_TESTS = [
 			var first = true;
 			Papa.parse('A,b,c\nd,E,f\nG,h,i', {
 				step: function(response, h) {
-					updates.push(response.data[0]);
+					updates.push(response.data);
 					if (!first) return;
 					handle = h;
 					handle.pause();
@@ -2024,7 +2092,7 @@ var CUSTOM_TESTS = [
 		disabled: !XHR_ENABLED,
 		run: function(callback) {
 			var updates = 0;
-			Papa.parse("/tests/long-sample.csv", {
+			Papa.parse(BASE_PATH + "long-sample.csv", {
 				worker: true,
 				download: true,
 				chunkSize: 500,
@@ -2044,7 +2112,7 @@ var CUSTOM_TESTS = [
 		disabled: !XHR_ENABLED,
 		run: function(callback) {
 			var updates = 0;
-			Papa.parse("/tests/long-sample.csv", {
+			Papa.parse(BASE_PATH + "long-sample.csv", {
 				download: true,
 				chunkSize: 500,
 				beforeFirstChunk: function(chunk) {
@@ -2065,7 +2133,7 @@ var CUSTOM_TESTS = [
 		disabled: !XHR_ENABLED,
 		run: function(callback) {
 			var updates = 0;
-			Papa.parse("/tests/long-sample.csv", {
+			Papa.parse(BASE_PATH + "long-sample.csv", {
 				download: true,
 				chunkSize: 500,
 				beforeFirstChunk: function(chunk) {
@@ -2076,37 +2144,6 @@ var CUSTOM_TESTS = [
 				complete: function() {
 					callback(updates);
 				}
-			});
-		}
-	},
-	{
-		description: "Should not assume we own the worker unless papaworker is in the search string",
-		disabled: typeof Worker === 'undefined',
-		expected: [false, true, true, true, true],
-		run: function(callback) {
-			var searchStrings = [
-				'',
-				'?papaworker',
-				'?x=1&papaworker',
-				'?x=1&papaworker&y=1',
-				'?x=1&papaworker=1'
-			];
-			var results = searchStrings.map(function() { return false; });
-			var workers = [];
-
-			// Give it .5s to do something
-			setTimeout(function() {
-				workers.forEach(function(w) { w.terminate(); });
-				callback(results);
-			}, 500);
-
-			searchStrings.forEach(function(searchString, idx) {
-				var w = new Worker('../papaparse.js' + searchString);
-				workers.push(w);
-				w.addEventListener('message', function() {
-					results[idx] = true;
-				});
-				w.postMessage({input: 'a,b,c\n1,2,3'});
 			});
 		}
 	}
