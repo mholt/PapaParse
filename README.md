@@ -26,7 +26,7 @@ can be installed with the following command:
 
     npm install papaparse
 
-If you don't want to use npm, [papaparse.min.js](https://github.com/mholt/PapaParse/blob/master/papaparse.min.js) can be downloaded to your project source.
+If you don't want to use npm, [papaparse.min.js](https://unpkg.com/papaparse@latest/papaparse.min.js) can be downloaded to your project source.
 
 
 Homepage & Demo
@@ -39,9 +39,8 @@ To learn how to use Papa Parse:
 
 - [Documentation](http://papaparse.com/docs)
 
-The website is hosted on on [Github Pages](https://pages.github.com/).  If
-you want to contribute just clone the gh-branch of this repository and
-open a pull request.
+The website is hosted on on [Github Pages](https://pages.github.com/). It's content is also inclued on the docs folder of this repository.  If
+you want to contribute on it just clone the master of this repository and open a pull request.
 
 
 Papa Parse for Node

@@ -273,8 +273,14 @@ License: MIT
 		/** quote character */
 		var _quoteChar = '"';
 
+		/** escaped quote character, either "" or <config.escapeChar>" */
+		var _escapedQuote = _quoteChar + _quoteChar;
+
 		/** whether to skip empty lines */
 		var _skipEmptyLines = false;
+
+		/** the columns (keys) we expect when we unparse objects */
+		var _columns = null;
 
 		unpackConfig();
 
@@ -288,7 +294,7 @@ License: MIT
 			if (!_input.length || Array.isArray(_input[0]))
 				return serialize(null, _input, _skipEmptyLines);
 			else if (typeof _input[0] === 'object')
-				return serialize(objectKeys(_input[0]), _input, _skipEmptyLines);
+				return serialize(_columns || objectKeys(_input[0]), _input, _skipEmptyLines);
 		}
 		else if (typeof _input === 'object')
 		{
@@ -343,6 +349,17 @@ License: MIT
 
 			if (typeof _config.header === 'boolean')
 				_writeHeader = _config.header;
+
+			if (Array.isArray(_config.columns)) {
+
+				if (_config.columns.length === 0) throw new Error('Option columns is empty');
+
+				_columns = _config.columns;
+			}
+
+			if (_config.escapeChar !== undefined) {
+				_escapedQuote = _config.escapeChar + _quoteChar;
+			}
 		}
 
 
@@ -429,7 +446,7 @@ License: MIT
 			if (str.constructor === Date)
 				return JSON.stringify(str).slice(1, 25);
 
-			str = str.toString().replace(quoteCharRegex, _quoteChar + _quoteChar);
+			str = str.toString().replace(quoteCharRegex, _escapedQuote);
 
 			var needsQuotes = (typeof _quotes === 'boolean' && _quotes)
 							|| (Array.isArray(_quotes) && _quotes[col])
@@ -456,6 +473,7 @@ License: MIT
 		this._handle = null;
 		this._finished = false;
 		this._completed = false;
+		this._halted = false;
 		this._input = null;
 		this._baseIndex = 0;
 		this._partialLine = '';
@@ -480,6 +498,7 @@ License: MIT
 					chunk = modifiedChunk;
 			}
 			this.isFirstChunk = false;
+			this._halted = false;
 
 			// Rejoin the line we likely just split in two by chunking the file
 			var aggregate = this._partialLine + chunk;
@@ -487,8 +506,10 @@ License: MIT
 
 			var results = this._handle.parse(aggregate, this._baseIndex, !this._finished);
 
-			if (this._handle.paused() || this._handle.aborted())
+			if (this._handle.paused() || this._handle.aborted()) {
+				this._halted = true;
 				return;
+			}
 
 			var lastIndex = results.meta.cursor;
 
@@ -514,8 +535,10 @@ License: MIT
 			else if (isFunction(this._config.chunk) && !isFakeChunk)
 			{
 				this._config.chunk(results, this._handle);
-				if (this._handle.paused() || this._handle.aborted())
+				if (this._handle.paused() || this._handle.aborted()) {
+					this._halted = true;
 					return;
+				}
 				results = undefined;
 				this._completeResults = undefined;
 			}
@@ -975,7 +998,6 @@ License: MIT
 		// One goal is to minimize the use of regular expressions...
 		var FLOAT = /^\s*-?(\d*\.?\d+|\d+\.?\d*)(e[-+]?\d+)?\s*$/i;
 		var ISO_DATE = /(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))/;
-
 		var self = this;
 		var _stepCounter = 0;	// Number of times step was called (number of rows parsed)
 		var _rowCounter = 0;	// Number of rows that have been parsed so far
@@ -1031,7 +1053,7 @@ License: MIT
 			_delimiterError = false;
 			if (!_config.delimiter)
 			{
-				var delimGuess = guessDelimiter(input, _config.newline, _config.skipEmptyLines, _config.comments);
+				var delimGuess = guessDelimiter(input, _config.newline, _config.skipEmptyLines, _config.comments, _config.delimitersToGuess);
 				if (delimGuess.successful)
 					_config.delimiter = delimGuess.bestDelimiter;
 				else
@@ -1072,8 +1094,14 @@ License: MIT
 
 		this.resume = function()
 		{
-			_paused = false;
-			self.streamer.parseChunk(_input, true);
+			if(self.streamer._halted) {
+				_paused = false;
+				self.streamer.parseChunk(_input, true);
+			} else {
+				// Bugfix: #636 In case the processing hasn't halted yet
+				// wait for it to halt in order to resume
+				setTimeout(this.resume, 3);
+			}
 		};
 
 		this.aborted = function()
@@ -1125,18 +1153,25 @@ License: MIT
 		{
 			if (!_results)
 				return;
-			for (var i = 0; needsHeaderRow() && i < _results.data.length; i++)
-				for (var j = 0; j < _results.data[i].length; j++)
-				{
-					var header = _results.data[i][j];
 
-					if (isFunction(_config.transformHeader)) {
-						header = _config.transformHeader(header);
-					}
+			function addHeder(header)
+			{
+				if (isFunction(_config.transformHeader))
+					header = _config.transformHeader(header);
 
-					_fields.push(header);
-				}
-			_results.data.splice(0, 1);
+				_fields.push(header);
+			}
+
+			if (Array.isArray(_results.data[0]))
+			{
+				for (var i = 0; needsHeaderRow() && i < _results.data.length; i++)
+					_results.data[i].forEach(addHeder);
+
+				_results.data.splice(0, 1);
+			}
+			// if _results.data[0] is not an array, we are in a step where _results.data is the row.
+			else
+				_results.data.forEach(addHeder);
 		}
 
 		function shouldApplyDynamicTyping(field) {
@@ -1170,15 +1205,15 @@ License: MIT
 			if (!_results || (!_config.header && !_config.dynamicTyping && !_config.transform))
 				return _results;
 
-			for (var i = 0; i < _results.data.length; i++)
+			function processRow(rowSource, i)
 			{
 				var row = _config.header ? {} : [];
 
 				var j;
-				for (j = 0; j < _results.data[i].length; j++)
+				for (j = 0; j < rowSource.length; j++)
 				{
 					var field = j;
-					var value = _results.data[i][j];
+					var value = rowSource[j];
 
 					if (_config.header)
 						field = j >= _fields.length ? '__parsed_extra' : _fields[j];
@@ -1197,7 +1232,6 @@ License: MIT
 						row[field] = value;
 				}
 
-				_results.data[i] = row;
 
 				if (_config.header)
 				{
@@ -1206,23 +1240,36 @@ License: MIT
 					else if (j < _fields.length)
 						addError('FieldMismatch', 'TooFewFields', 'Too few fields: expected ' + _fields.length + ' fields but parsed ' + j, _rowCounter + i);
 				}
+
+				return row;
 			}
+
+			var incrementBy = 1;
+			if (!_results.data[0] || Array.isArray(_results.data[0]))
+			{
+				_results.data = _results.data.map(processRow);
+				incrementBy = _results.data.length;
+			}
+			else
+				_results.data = processRow(_results.data, 0);
+
 
 			if (_config.header && _results.meta)
 				_results.meta.fields = _fields;
 
-			_rowCounter += _results.data.length;
+			_rowCounter += incrementBy;
 			return _results;
 		}
 
-		function guessDelimiter(input, newline, skipEmptyLines, comments)
+		function guessDelimiter(input, newline, skipEmptyLines, comments, delimitersToGuess)
 		{
-			var delimChoices = [',', '\t', '|', ';', Papa.RECORD_SEP, Papa.UNIT_SEP];
 			var bestDelim, bestDelta, fieldCountPrevRow;
 
-			for (var i = 0; i < delimChoices.length; i++)
+			delimitersToGuess = delimitersToGuess || [',', '\t', '|', ';', Papa.RECORD_SEP, Papa.UNIT_SEP];
+
+			for (var i = 0; i < delimitersToGuess.length; i++)
 			{
-				var delim = delimChoices[i];
+				var delim = delimitersToGuess[i];
 				var delta = 0, avgFieldCount = 0, emptyLinesCount = 0;
 				fieldCountPrevRow = undefined;
 
@@ -1245,7 +1292,7 @@ License: MIT
 
 					if (typeof fieldCountPrevRow === 'undefined')
 					{
-						fieldCountPrevRow = fieldCount;
+						fieldCountPrevRow = 0;
 						continue;
 					}
 					else if (fieldCount > 1)
@@ -1258,7 +1305,7 @@ License: MIT
 				if (preview.data.length > 0)
 					avgFieldCount /= (preview.data.length - emptyLinesCount);
 
-				if ((typeof bestDelta === 'undefined' || delta < bestDelta)
+				if ((typeof bestDelta === 'undefined' || delta > bestDelta)
 					&& avgFieldCount > 1.99)
 				{
 					bestDelta = delta;
@@ -1707,7 +1754,7 @@ License: MIT
 				for (var i = 0; i < msg.results.data.length; i++)
 				{
 					worker.userStep({
-						data: [msg.results.data[i]],
+						data: msg.results.data[i],
 						errors: msg.results.errors,
 						meta: msg.results.meta
 					}, handle);

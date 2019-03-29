@@ -99,7 +99,7 @@
 					</div>
 
 					<div class="grid-50">
-						<pre><code class="language-javascript">Papa.parse(csvString<i>[, <a href="#config">config</a>]</i>)</pre></code>
+						<pre><code class="language-javascript">Papa.parse(csvString<i>[, <a href="#config">config</a>]</i>)</code></pre>
 					</div>
 
 					<div class="grid-50">
@@ -188,7 +188,7 @@
 	reason: "Some reason",
 	config: <span class="comment">// altered config...</span>
 }</code></pre>
-								to alter the flow of parsing. Actions can be <code>"abort"</code> to skip this and all other files in the queue, <code>"skip"</code> to skip just this file, or <code>"continue"</code> to carry on (equivalent to returning nothing). <code>reason</code> can be a reason for aborting. <code>config</code> can be a modified <a href="#config">configuration</a> for parsing just this file.</li>
+								to alter the flow of parsing. Actions can be <code>"abort"</code> to skip this and all other files in the queue, <code>"skip"</code> to skip just this file, or <code>"continue"</code> to carry on (equivalent to returning nothing). <code>reason</code> can be a reason for aborting. <code>config</code> can be a modified <a href="#config">configuration</a> for parsing just this file.
 							</li>
 							<li>The <code>complete</code> callback shown here is executed after <i>all</i> files are finished and does not receive any data. Use the complete callback in <a href="#config">config</a> for per-file results.</li>
 						</ul>
@@ -228,7 +228,7 @@
 
 
 					<div class="grid-50">
-						<pre><code class="language-javascript">Papa.unparse(data<i>[, config]</i>)</code></pre>
+						<pre><code class="language-javascript">Papa.unparse(data<i>[, <a href="#unparse-config-default">config</a>]</i>)</code></pre>
 					</div>
 
 					<div class="grid-50">
@@ -243,19 +243,104 @@
 								</ul>
 							</li>
 							<li>
-								<code>config</code> is an optional object with any of these properties:
-								<pre><code class="language-javascript">// defaults shown
+								<code>config</code> is an optional <a href="#unparse-config-default">config object</a>
+							</li>
+						</ul>
+					</div>
+					<div class="clear"></div>
+
+				<div class="grid-100">
+				<h5 id="unparse-config-default">Default Unparse Config with all options</h5>
+				</div>
+
+					<div class="prefix-25 grid-50 suffix-25">
+					<pre><code class="language-javascript">
 {
-	quotes: false,
+	quotes: false, //or array of booleans
 	quoteChar: '"',
 	escapeChar: '"',
 	delimiter: ",",
 	header: true,
-	newline: "\r\n"
-}</code></pre>
-                                Set <code>quotes</code> to <code>true</code> to always enclose each field in quotes, or an array of true/false values correlating to specific to columns to force-quote. The character used to quote can be customized using <code>quoteChar</code>. The character used to escape the <code>quoteChar</code> within a field can be customized using <code>escapeChar</code>. The <code>delimiter</code> can be any valid delimiting character. The <code>newline</code> character(s) may also be customized. Setting <code>header</code> to <code>false</code> will omit the header row.
-							</li>
-						</ul>
+	newline: "\r\n",
+	skipEmptyLines: false, //or 'greedy',
+	columns: null //or array of strings
+}
+					</code></pre>
+				</div>
+
+					<div class="clear"></div>
+
+					<div class="grid-100">
+						<h5>Unparse Config Options</h5>
+					</div>
+
+					<div class="grid-100" style="overflow-x: auto;">
+						<table>
+							<tr>
+								<th style="width: 20%;">Option</th>
+								<th style="width: 80%;">Explanation</th>
+							</tr>
+							<tr>
+								<td>
+									<code>quotes</code>
+								</td>
+								<td>
+									If <code>true</code>, forces all fields to be enclosed in quotes. If an array of <code>true/false</code> values, specifies which fields should be force-quoted (first boolean is for the first column, second boolean for the second column, ...).
+								</td>
+							</tr>
+							<tr>
+								<td><code>quoteChar</code></td>
+								<td>
+									The character used to quote fields.
+								</td>
+							</tr>
+							<tr>
+								<td><code>escapeChar</code></td>
+								<td>
+									The character used to escape <code>quoteChar</code> inside field values.
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<code>delimiter</code>
+								</td>
+								<td>
+									The delimiting character. It must not be found in <a href="#readonly">Papa.BAD_DELIMITERS</a>.
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<code>header</code>
+								</td>
+								<td>
+									If <code>false</code>, will omit the header row. If <code>data</code> is an array of arrays this option is ignored. If <code>data</code> is an array of objects the keys of the first object are the header row. If <code>data</code> is an object with the keys <code>fields</code> and <code>data</code> the <code>fields</code> are the header row.
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<code>newline</code>
+								</td>
+								<td>
+									The newline sequence. Must be one of <code>"\r"</code>, <code>"\n"</code>, or <code>"\r\n"</code>.
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<code>skipEmptyLines</code>
+								</td>
+								<td>
+									If <code>true</code>, lines that are completely empty (those which evaluate to an empty string) will be skipped. If set to <code>'greedy'</code>, lines that don't have any content (those which have only whitespace after parsing) will also be skipped.
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<code>columns</code>
+								</td>
+								<td>
+									If <code>data</code> is an array of objects this option can be used to manually specify the keys (columns) you expect in the objects. If not set the keys of the first objects are used as column.
+								</td>
+							</tr>
+						</table>
 					</div>
 					<div class="clear"></div>
 
@@ -289,8 +374,8 @@ var csv = Papa.unparse([
 					<div class="grid-33">
 						<pre><code class="language-javascript">// Specifying fields and data explicitly
 var csv = Papa.unparse({
-	fields: ["Column 1", "Column 2"],
-	data: [
+	"fields": ["Column 1", "Column 2"],
+	"data": [
 		["foo", "bar"],
 		["abc", "def"]
 	]
@@ -350,12 +435,14 @@ var csv = Papa.unparse({
 	complete: undefined,
 	error: undefined,
 	download: false,
+	downloadRequestHeaders: undefined,
 	skipEmptyLines: false,
 	chunk: undefined,
 	fastMode: undefined,
 	beforeFirstChunk: undefined,
 	withCredentials: undefined,
-	transform: undefined
+	transform: undefined,
+	delimitersToGuess: [',', '\t', '|', ';', <a href="#readonly">Papa.RECORD_SEP</a>, <a href="#readonly">Papa.UNIT_SEP</a>]
 }</code></pre>
 					</div>
 					<div class="clear"></div>
@@ -375,7 +462,7 @@ var csv = Papa.unparse({
 									<code>delimiter</code>
 								</td>
 								<td>
-									The delimiting character. Leave blank to auto-detect from a list of most common delimiters. It can be a string or a function. If string, it must be one of length 1. If a function, it must accept the input as first parameter and it must return a string which will be used as delimiter. In both cases it cannot be found in <a href="#readonly">Papa.BAD_DELIMITERS</a>.
+									The delimiting character. Leave blank to auto-detect from a list of most common delimiters, or any values passed in through <code>delimitersToGuess</code>. It can be a string or a function. If string, it must be one of length 1. If a function, it must accept the input as first parameter and it must return a string which will be used as delimiter. In both cases it cannot be found in <a href="#readonly">Papa.BAD_DELIMITERS</a>.
 								</td>
 							</tr>
 							<tr>
@@ -415,7 +502,8 @@ var csv = Papa.unparse({
 									<code>transformHeader</code>
 								</td>
 								<td>
-									A function to apply on each header. Requires <code>header</code> to be <code>true</code>. The function receives the header as its first argument.
+									A function to apply on each header. Requires <code>header</code> to be <code>true</code>. The function receives the header as its first argument.<br>
+									Only available starting with version 5.0.
 								</td>
 							</tr>
 							<tr>
@@ -431,7 +519,7 @@ var csv = Papa.unparse({
 									<code>preview</code>
 								</td>
 								<td>
-									If > 0, only that many rows will be parsed.
+									If &gt; 0, only that many rows will be parsed.
 								</td>
 							</tr>
 							<tr>
@@ -502,6 +590,19 @@ var csv = Papa.unparse({
 							</tr>
 							<tr>
 								<td>
+									<code>downloadRequestHeaders</code>
+								</td>
+								<td>
+									If defined, should be an object that describes the headers, example:
+
+ 									<pre>
+										<code class="language-javascript">downloadRequestHeaders: {
+'Authorization': 'token 123345678901234567890',
+}</code>
+									</pre>
+							</tr>
+							<tr>
+								<td>
 									<code>skipEmptyLines</code>
 								</td>
 								<td>
@@ -546,6 +647,14 @@ var csv = Papa.unparse({
 								</td>
 								<td>
 									A function to apply on each value. The function receives the value as its first argument and the column number or header name when enabled as its second argument. The return value of the function will replace the value it received. The transform function is applied before dynamicTyping.
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<code>delimitersToGuess</code>
+								</td>
+								<td>
+									An array of delimiters to guess from if the <code>delimiter</code> option is not set.
 								</td>
 							</tr>
 						</table>

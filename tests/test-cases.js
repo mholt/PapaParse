@@ -1194,6 +1194,16 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Pipe delimiter is guessed correctly when mixed with comas",
+		notes: "Guessing the delimiter should work even if there are many lines of comments at the start of the file",
+		input: 'one|two,two|three\nfour|five,five|six',
+		config: {},
+		expected: {
+			data: [['one','two,two','three'],['four','five,five','six']],
+			errors: []
+		}
+	},
+	{
 		description: "Single quote as quote character",
 		notes: "Must parse correctly when single quote is specified as a quote character",
 		input: "a,b,'c,d'",
@@ -1722,6 +1732,25 @@ var UNPARSE_TESTS = [
 		input: [{a: null, b: ' '}, {}, {a: '1', b: '2'}],
 		config: {skipEmptyLines: 'greedy', header: true},
 		expected: 'a,b\r\n1,2'
+	},
+	{
+		description: "Column option used to manually specify keys",
+		notes: "Should not throw any error when attempting to serialize key not present in object. Columns are different than keys of the first object. When an object is missing a key then the serialized value should be an empty string.",
+		input: [{a: 1, b: '2'}, {}, {a: 3, d: 'd', c: 4,}],
+		config: {columns: ['a', 'b', 'c']},
+		expected: 'a,b,c\r\n1,2,\r\n\r\n3,,4'
+	},
+	{
+		description: "Use different escapeChar",
+		input: [{a: 'foo', b: '"quoted"'}],
+		config: {header: false, escapeChar: '\\'},
+		expected: 'foo,"\\"quoted\\""'
+	},
+	{
+		description: "test defeault escapeChar",
+		input: [{a: 'foo', b: '"quoted"'}],
+		config: {header: false},
+		expected: 'foo,"""quoted"""'
 	}
 ];
 
@@ -1752,6 +1781,49 @@ describe('Unparse Tests', function() {
 
 var CUSTOM_TESTS = [
 	{
+		description: "Pause and resume works (Regression Test for Bug #636)",
+		disabled: !XHR_ENABLED,
+		timeout: 30000,
+		expected: [2001, [
+			["Etiam a dolor vitae est vestibulum","84","DEF"],
+			["Etiam a dolor vitae est vestibulum","84","DEF"],
+			["Lorem ipsum dolor sit","42","ABC"],
+			["Etiam a dolor vitae est vestibulum","84","DEF"],
+			["Etiam a dolor vitae est vestibulum","84"],
+			["Lorem ipsum dolor sit","42","ABC"],
+			["Etiam a dolor vitae est vestibulum","84","DEF"],
+			["Etiam a dolor vitae est vestibulum","84","DEF"],
+			["Lorem ipsum dolor sit","42","ABC"],
+			["Lorem ipsum dolor sit","42"]
+		], 0],
+		run: function(callback) {
+			var stepped = 0;
+			var dataRows = [];
+			var errorCount = 0;
+			var output = [];
+			Papa.parse(BASE_PATH + "verylong-sample.csv", {
+				download: true,
+				step: function(results, parser) {
+					stepped++;
+					if (results)
+					{
+						parser.pause();
+						parser.resume();
+						if (results.data && stepped % 200 === 0) {
+							dataRows.push(results.data);
+						}
+					}
+				},
+				complete: function() {
+					output.push(stepped);
+					output.push(dataRows);
+					output.push(errorCount);
+					callback(output);
+				}
+			});
+		}
+	},
+	{
 		description: "Complete is called with all results if neither step nor chunk is defined",
 		expected: [['A', 'b', 'c'], ['d', 'E', 'f'], ['G', 'h', 'i']],
 		disabled: !FILES_ENABLED,
@@ -1775,6 +1847,70 @@ var CUSTOM_TESTS = [
 				},
 				complete: function() {
 					callback(callCount);
+				}
+			});
+		}
+	},
+	{
+		description: "Data is correctly parsed with steps",
+		expected: [['A', 'b', 'c'], ['d', 'E', 'f']],
+		run: function(callback) {
+			var data = [];
+			Papa.parse('A,b,c\nd,E,f', {
+				step: function(results) {
+					data.push(results.data);
+				},
+				complete: function() {
+					callback(data);
+				}
+			});
+		}
+	},
+	{
+		description: "Data is correctly parsed with steps (headers)",
+		expected: [{One: 'A', Two: 'b', Three: 'c'}, {One: 'd', Two: 'E', Three: 'f'}],
+		run: function(callback) {
+			var data = [];
+			Papa.parse('One,Two,Three\nA,b,c\nd,E,f', {
+				header: true,
+				step: function(results) {
+					data.push(results.data);
+				},
+				complete: function() {
+					callback(data);
+				}
+			});
+		}
+	},
+	{
+		description: "Data is correctly parsed with steps and worker (headers)",
+		expected: [{One: 'A', Two: 'b', Three: 'c'}, {One: 'd', Two: 'E', Three: 'f'}],
+		run: function(callback) {
+			var data = [];
+			Papa.parse('One,Two,Three\nA,b,c\nd,E,f', {
+				header: true,
+				worker: true,
+				step: function(results) {
+					data.push(results.data);
+				},
+				complete: function() {
+					callback(data);
+				}
+			});
+		}
+	},
+	{
+		description: "Data is correctly parsed with steps and worker",
+		expected: [['A', 'b', 'c'], ['d', 'E', 'f']],
+		run: function(callback) {
+			var data = [];
+			Papa.parse('A,b,c\nd,E,f', {
+				worker: true,
+				step: function(results) {
+					data.push(results.data);
+				},
+				complete: function() {
+					callback(data);
 				}
 			});
 		}
@@ -2146,13 +2282,33 @@ var CUSTOM_TESTS = [
 				}
 			});
 		}
+	},
+	{
+		description: "Should correctly guess custom delimiter when passed delimiters to guess.",
+		expected: "~",
+		run: function(callback) {
+			var results = Papa.parse('"A"~"B"~"C"~"D"', {
+				delimitersToGuess: ['~', '@', '%']
+			});
+			callback(results.meta.delimiter);
+		}
+	},
+	{
+		description: "Should still correctly guess default delimiters when delimiters to guess are not given.",
+		expected: ",",
+		run: function(callback) {
+			var results = Papa.parse('"A","B","C","D"');
+			callback(results.meta.delimiter);
+		}
 	}
-
 ];
 
 describe('Custom Tests', function() {
 	function generateTest(test) {
 		(test.disabled ? it.skip : it)(test.description, function(done) {
+			if(test.timeout) {
+				this.timeout(test.timeout);
+			}
 			test.run(function(actual) {
 				assert.deepEqual(JSON.stringify(actual), JSON.stringify(test.expected));
 				done();
