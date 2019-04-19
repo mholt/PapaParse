@@ -84,5 +84,12 @@ var peopleLovePapa = [
 		name: "Flatfile.io",
 		description: "is an add-in data importer for web-apps, providing the full UX to upload a spreadsheet, field match, and repair issues found during import.",
 		quote: "Papa is a core part of our importer, so much so that we're committed to helping maintain it!"
+	},
+	{
+		link: "https://familiohq.com",
+		name: "Familio",
+		description: "is a brand-new messaging app made specifically for busy families. Automatically align all family members when sending text messages to parents in the kindergarten or school or when planning your kids birthday parties.",
+		quote: "With Papa it was a joy to implement our tool for importing messages and places from external systems."
 	}
+	
 ];
