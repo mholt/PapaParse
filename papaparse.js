@@ -1465,7 +1465,7 @@ License: MIT
 			var nextDelim = input.indexOf(delim, cursor);
 			var nextNewline = input.indexOf(newline, cursor);
 			var quoteCharRegex = new RegExp(escapeRegExp(escapeChar) + escapeRegExp(quoteChar), 'g');
-			var quoteSearch;
+			var quoteSearch = input.indexOf(quoteChar, cursor);
 
 			// Parser loop
 			for (;;)
@@ -1530,6 +1530,12 @@ License: MIT
 						{
 							row.push(input.substring(cursor, quoteSearch).replace(quoteCharRegex, quoteChar));
 							cursor = quoteSearch + 1 + spacesBetweenQuoteAndDelimiter + delimLen;
+
+							// If char after following delimiter is not quoteChar, we find next quote char position
+							if (input[quoteSearch + 1 + spacesBetweenQuoteAndDelimiter + delimLen] !== quoteChar)
+							{
+								quoteSearch = input.indexOf(quoteChar, cursor);
+							}
 							nextDelim = input.indexOf(delim, cursor);
 							nextNewline = input.indexOf(newline, cursor);
 							break;
@@ -1543,6 +1549,7 @@ License: MIT
 							row.push(input.substring(cursor, quoteSearch).replace(quoteCharRegex, quoteChar));
 							saveRow(quoteSearch + 1 + spacesBetweenQuoteAndNewLine + newlineLen);
 							nextDelim = input.indexOf(delim, cursor);	// because we may have skipped the nextDelim in the quoted field
+							quoteSearch = input.indexOf(quoteChar, cursor);	// we search for first quote in next line
 
 							if (stepIsFunction)
 							{
@@ -1586,13 +1593,29 @@ License: MIT
 					continue;
 				}
 
-				// Next delimiter comes before next newline, so we've reached end of field
 				if (nextDelim !== -1 && (nextDelim < nextNewline || nextNewline === -1))
 				{
-					row.push(input.substring(cursor, nextDelim));
-					cursor = nextDelim + delimLen;
-					nextDelim = input.indexOf(delim, cursor);
-					continue;
+					// we check, if we have quotes, because delimiter char may be part of field enclosed in quotes
+					if (quoteSearch !== -1) {
+						// we have quotes, so we try to find the next delimiter not enclosed in quotes and also next starting quote char
+						var nextDelimObj = getNextUnqotedDelimiter(nextDelim, quoteSearch, nextNewline);
+
+						// if we have next delimiter char which is not enclosed in quotes
+						if (nextDelimObj && nextDelimObj.nextDelim) {
+							nextDelim = nextDelimObj.nextDelim;
+							quoteSearch = nextDelimObj.quoteSearch;
+							row.push(input.substring(cursor, nextDelim));
+							cursor = nextDelim + delimLen;
+							// we look for next delimiter char
+							nextDelim = input.indexOf(delim, cursor);
+							continue;
+						}
+					} else {
+						row.push(input.substring(cursor, nextDelim));
+						cursor = nextDelim + delimLen;
+						nextDelim = input.indexOf(delim, cursor);
+						continue;
+					}
 				}
 
 				// End of row
@@ -1697,6 +1720,40 @@ License: MIT
 				step(returnable(undefined, true));
 				data = [];
 				errors = [];
+			}
+
+			/** Gets the delimiter character, which is not inside the quoted field */
+			function getNextUnqotedDelimiter(nextDelim, quoteSearch, newLine){
+				var result = {
+					nextDelim: undefined,
+					quoteSearch: undefined
+				};
+				// get the next closing quote character
+				var nextQuoteSearch = input.indexOf(quoteChar, quoteSearch + 1);
+
+				// if next delimiter is part of a field enclosed in quotes
+				if (nextDelim > quoteSearch && nextDelim < nextQuoteSearch && (nextQuoteSearch < newLine || newLine === -1)) {
+					// get the next delimiter character after this one
+					var nextNextDelim = input.indexOf(delim, nextQuoteSearch);
+
+					// if there is no next delimiter, return default result
+					if (nextNextDelim === -1) {
+						return result;
+					}
+					// find the next opening quote char position
+					if (nextNextDelim > nextQuoteSearch) {
+					nextQuoteSearch = input.indexOf(quoteChar, nextQuoteSearch + 1);
+					}
+					// try to get the next delimiter position
+					result = getNextUnqotedDelimiter(nextNextDelim, nextQuoteSearch, newLine);
+				} else {
+					result = {
+						nextDelim,
+						quoteSearch
+					};
+				}
+
+				return result;
 			}
 		};
 

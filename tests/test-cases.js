@@ -1204,6 +1204,26 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Pipe delimiter is guessed correctly when first field are enclosed in quotes and contain delimiter characters",
+		notes: "Guessing the delimiter should work if the first field is enclosed in quotes, but others are not",
+		input: '"Field1,1,1";Field2;"Field3";Field4;Field5;Field6',
+		config: {},
+		expected: {
+			data: [['Field1,1,1','Field2','Field3', 'Field4', 'Field5', 'Field6']],
+			errors: []
+		}
+	},
+	{
+		description: "Pipe delimiter is guessed correctly when some fields are enclosed in quotes and contain delimiter characters and escaoped quotes",
+		notes: "Guessing the delimiter should work even if the first field is not enclosed in quotes, but others are",
+		input: 'Field1;Field2;"Field,3,""3,3";Field4;Field5;"Field6,6"',
+		config: {},
+		expected: {
+			data: [['Field1','Field2','Field,3,"3,3', 'Field4', 'Field5', 'Field6,6']],
+			errors: []
+		}
+	},
+	{
 		description: "Single quote as quote character",
 		notes: "Must parse correctly when single quote is specified as a quote character",
 		input: "a,b,'c,d'",
