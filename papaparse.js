@@ -1723,7 +1723,7 @@ License: MIT
 			}
 
 			/** Gets the delimiter character, which is not inside the quoted field */
-			function getNextUnqotedDelimiter(nextDelim, quoteSearch, newLine){
+			function getNextUnqotedDelimiter(nextDelim, quoteSearch, newLine) {
 				var result = {
 					nextDelim: undefined,
 					quoteSearch: undefined
@@ -1742,7 +1742,7 @@ License: MIT
 					}
 					// find the next opening quote char position
 					if (nextNextDelim > nextQuoteSearch) {
-					nextQuoteSearch = input.indexOf(quoteChar, nextQuoteSearch + 1);
+						nextQuoteSearch = input.indexOf(quoteChar, nextQuoteSearch + 1);
 					}
 					// try to get the next delimiter position
 					result = getNextUnqotedDelimiter(nextNextDelim, nextQuoteSearch, newLine);
