@@ -1748,8 +1748,8 @@ License: MIT
 					result = getNextUnqotedDelimiter(nextNextDelim, nextQuoteSearch, newLine);
 				} else {
 					result = {
-						nextDelim,
-						quoteSearch
+						nextDelim: nextDelim,
+						quoteSearch: quoteSearch
 					};
 				}
 
