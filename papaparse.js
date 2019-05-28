@@ -1593,6 +1593,7 @@ License: MIT
 					continue;
 				}
 
+				// Next delimiter comes before next newline, so we've reached end of field
 				if (nextDelim !== -1 && (nextDelim < nextNewline || nextNewline === -1))
 				{
 					// we check, if we have quotes, because delimiter char may be part of field enclosed in quotes
