@@ -84,6 +84,7 @@ var peopleLovePapa = [
 		name: "Mailcheck.co",
 		description: "Mailcheck is email validation service. All emails usually stored in CSV's. We use Papa Parse to process data from our customers in browser",
 		quote: "Papa Parser allowed our customers to preview and process csv's in browser, without uploading them to server. It saves lots of time and space :)"
+	},
 	{
 		link: "https://flatfile.io",
 		name: "Flatfile.io",
