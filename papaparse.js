@@ -1261,14 +1261,12 @@ License: MIT
 			return _results;
 		}
 
-		function guessDelimiter(input, newline, skipEmptyLines, comments, delimitersToGuess)
-		{
-			var bestDelim, bestDelta, fieldCountPrevRow;
+		function guessDelimiter(input, newline, skipEmptyLines, comments, delimitersToGuess) {
+			var bestDelim, bestDelta, fieldCountPrevRow, maxFieldCount;
 
 			delimitersToGuess = delimitersToGuess || [',', '\t', '|', ';', Papa.RECORD_SEP, Papa.UNIT_SEP];
 
-			for (var i = 0; i < delimitersToGuess.length; i++)
-			{
+			for (var i = 0; i < delimitersToGuess.length; i++) {
 				var delim = delimitersToGuess[i];
 				var delta = 0, avgFieldCount = 0, emptyLinesCount = 0;
 				fieldCountPrevRow = undefined;
@@ -1280,23 +1278,19 @@ License: MIT
 					preview: 10
 				}).parse(input);
 
-				for (var j = 0; j < preview.data.length; j++)
-				{
-					if (skipEmptyLines && testEmptyLine(preview.data[j]))
-					{
+				for (var j = 0; j < preview.data.length; j++) {
+					if (skipEmptyLines && testEmptyLine(preview.data[j])) {
 						emptyLinesCount++;
 						continue;
 					}
 					var fieldCount = preview.data[j].length;
 					avgFieldCount += fieldCount;
 
-					if (typeof fieldCountPrevRow === 'undefined')
-					{
-						fieldCountPrevRow = 0;
+					if (typeof fieldCountPrevRow === 'undefined') {
+						fieldCountPrevRow = fieldCount;
 						continue;
 					}
-					else if (fieldCount > 1)
-					{
+					else if (fieldCount > 0) {
 						delta += Math.abs(fieldCount - fieldCountPrevRow);
 						fieldCountPrevRow = fieldCount;
 					}
@@ -1305,11 +1299,11 @@ License: MIT
 				if (preview.data.length > 0)
 					avgFieldCount /= (preview.data.length - emptyLinesCount);
 
-				if ((typeof bestDelta === 'undefined' || delta > bestDelta)
-					&& avgFieldCount > 1.99)
-				{
+				if ((typeof bestDelta === 'undefined' || delta <= bestDelta)
+					&& (typeof maxFieldCount === 'undefined' || avgFieldCount > maxFieldCount) && avgFieldCount > 1.99) {
 					bestDelta = delta;
 					bestDelim = delim;
+					maxFieldCount = avgFieldCount;
 				}
 			}
 
