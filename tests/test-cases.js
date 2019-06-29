@@ -1204,6 +1204,16 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Pipe delimiter is guessed correctly choose avgFildCount max one",
+		notes: "Guessing the delimiter should work choose the min delta one and the max one",
+		config: {},
+		input: 'a,b,c\na,b,c|d|e|f',
+		expected: {
+			data: [['a', 'b', 'c'], ['a','b','c|d|e|f']],
+			errors: []
+		}
+	},
+	{
 		description: "Pipe delimiter is guessed correctly when first field are enclosed in quotes and contain delimiter characters",
 		notes: "Guessing the delimiter should work if the first field is enclosed in quotes, but others are not",
 		input: '"Field1,1,1";Field2;"Field3";Field4;Field5;Field6',
