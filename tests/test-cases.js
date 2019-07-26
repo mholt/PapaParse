@@ -815,11 +815,11 @@ var PARSE_TESTS = [
 		}
 	},
 	{
-		description: "Dynamic typing converts numeric literals",
-		input: '1,2.2,1e3\r\n-4,-4.5,-4e-5\r\n-,5a,5-2',
+		description: "Dynamic typing converts numeric literals and maintains precision",
+		input: '1,2.2,1e3\r\n-4,-4.5,-4e-5\r\n-,5a,5-2\r\n16142028098527942586,9007199254740991,-9007199254740992',
 		config: { dynamicTyping: true },
 		expected: {
-			data: [[1, 2.2, 1000], [-4, -4.5, -0.00004], ["-", "5a", "5-2"]],
+			data: [[1, 2.2, 1000], [-4, -4.5, -0.00004], ["-", "5a", "5-2"], ["16142028098527942586", 9007199254740991, "-9007199254740992"]],
 			errors: []
 		}
 	},
