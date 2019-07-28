@@ -324,6 +324,14 @@ var CORE_PARSER_TESTS = [
 		}
 	},
 	{
+		description: "Line starts with unquoted empty field",
+		input: ',b,c\n"d",e,f',
+		expected: {
+			data: [['', 'b', 'c'], ['d', 'e', 'f']],
+			errors: []
+		}
+	},
+	{
 		description: "Line ends with quoted field",
 		input: 'a,b,c\nd,e,f\n"g","h","i"\n"j","k","l"',
 		expected: {
