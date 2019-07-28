@@ -1606,6 +1606,7 @@ License: MIT
 					if (quoteSearch !== -1) {
 						// we have quotes, so we try to find the next delimiter not enclosed in quotes and also next starting quote char
 						var nextDelimObj = getNextUnqotedDelimiter(nextDelim, quoteSearch, nextNewline);
+
 						// if we have next delimiter char which is not enclosed in quotes
 						if (nextDelimObj && typeof nextDelimObj.nextDelim !== 'undefined') {
 							nextDelim = nextDelimObj.nextDelim;
