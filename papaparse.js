@@ -1608,7 +1608,7 @@ License: MIT
 						var nextDelimObj = getNextUnqotedDelimiter(nextDelim, quoteSearch, nextNewline);
 
 						// if we have next delimiter char which is not enclosed in quotes
-						if (nextDelimObj && nextDelimObj.nextDelim) {
+						if (nextDelimObj && typeof nextDelimObj.nextDelim !== 'undefined') {
 							nextDelim = nextDelimObj.nextDelim;
 							quoteSearch = nextDelimObj.quoteSearch;
 							row.push(input.substring(cursor, nextDelim));
