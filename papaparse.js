@@ -1603,7 +1603,7 @@ License: MIT
 				if (nextDelim !== -1 && (nextDelim < nextNewline || nextNewline === -1))
 				{
 					// we check, if we have quotes, because delimiter char may be part of field enclosed in quotes
-					if (quoteSearch !== -1) {
+					if (quoteSearch > nextDelim) {
 						// we have quotes, so we try to find the next delimiter not enclosed in quotes and also next starting quote char
 						var nextDelimObj = getNextUnqotedDelimiter(nextDelim, quoteSearch, nextNewline);
 
