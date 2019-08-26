@@ -671,6 +671,14 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Misplaced quotes in data twice, not as opening quotes",
+		input: 'A,B",C\nD,E",F',
+		expected: {
+			data: [['A', 'B"', 'C'], ['D', 'E"', 'F']],
+			errors: []
+		}
+	},
+	{
 		description: "Mixed slash n and slash r should choose first as precident",
 		input: 'a,b,c\nd,e,f\rg,h,i\n',
 		expected: {
