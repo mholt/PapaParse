@@ -34,7 +34,7 @@
 						</div>
 					</div>
 					<div class="grid-20 hide-on-mobile text-center">
-						<a href="/" class="text-logo">Papa Parse 4</a>
+						<a href="/" class="text-logo">Papa Parse 5</a>
 					</div>
 					<div class="grid-40 mobile-grid-50 text-right">
 						<div class="links">
@@ -44,9 +44,6 @@
 							<a href="http://stackoverflow.com/questions/tagged/papaparse">
 								<i class="fa fa-stack-overflow fa-lg"></i> Help
 							</a>
-							<!-- <a href="https://matt.life/pay" class="donate">
-								<i class="fa fa-heart fa-lg"></i> Donate
-							</a> -->
 						</div>
 					</div>
 				</div>
@@ -99,7 +96,7 @@
 					</div>
 
 					<div class="grid-50">
-						<pre><code class="language-javascript">Papa.parse(csvString<i>[, <a href="#config">config</a>]</i>)</pre></code>
+						<pre><code class="language-javascript">Papa.parse(csvString<i>[, <a href="#config">config</a>]</i>)</code></pre>
 					</div>
 
 					<div class="grid-50">
@@ -188,7 +185,7 @@
 	reason: "Some reason",
 	config: <span class="comment">// altered config...</span>
 }</code></pre>
-								to alter the flow of parsing. Actions can be <code>"abort"</code> to skip this and all other files in the queue, <code>"skip"</code> to skip just this file, or <code>"continue"</code> to carry on (equivalent to returning nothing). <code>reason</code> can be a reason for aborting. <code>config</code> can be a modified <a href="#config">configuration</a> for parsing just this file.</li>
+								to alter the flow of parsing. Actions can be <code>"abort"</code> to skip this and all other files in the queue, <code>"skip"</code> to skip just this file, or <code>"continue"</code> to carry on (equivalent to returning nothing). <code>reason</code> can be a reason for aborting. <code>config</code> can be a modified <a href="#config">configuration</a> for parsing just this file.
 							</li>
 							<li>The <code>complete</code> callback shown here is executed after <i>all</i> files are finished and does not receive any data. Use the complete callback in <a href="#config">config</a> for per-file results.</li>
 						</ul>
@@ -228,7 +225,7 @@
 
 
 					<div class="grid-50">
-						<pre><code class="language-javascript">Papa.unparse(data<i>[, config]</i>)</code></pre>
+						<pre><code class="language-javascript">Papa.unparse(data<i>[, <a href="#unparse-config-default">config</a>]</i>)</code></pre>
 					</div>
 
 					<div class="grid-50">
@@ -243,19 +240,104 @@
 								</ul>
 							</li>
 							<li>
-								<code>config</code> is an optional object with any of these properties:
-								<pre><code class="language-javascript">// defaults shown
+								<code>config</code> is an optional <a href="#unparse-config-default">config object</a>
+							</li>
+						</ul>
+					</div>
+					<div class="clear"></div>
+
+				<div class="grid-100">
+				<h5 id="unparse-config-default">Default Unparse Config with all options</h5>
+				</div>
+
+					<div class="prefix-25 grid-50 suffix-25">
+					<pre><code class="language-javascript">
 {
-	quotes: false,
+	quotes: false, //or array of booleans
 	quoteChar: '"',
 	escapeChar: '"',
 	delimiter: ",",
 	header: true,
-	newline: "\r\n"
-}</code></pre>
-                                Set <code>quotes</code> to <code>true</code> to always enclose each field in quotes, or an array of true/false values correlating to specific to columns to force-quote. The character used to quote can be customized using <code>quoteChar</code>. The character used to escape the <code>quoteChar</code> within a field can be customized using <code>escapeChar</code>. The <code>delimiter</code> can be any valid delimiting character. The <code>newline</code> character(s) may also be customized. Setting <code>header</code> to <code>false</code> will omit the header row.
-							</li>
-						</ul>
+	newline: "\r\n",
+	skipEmptyLines: false, //or 'greedy',
+	columns: null //or array of strings
+}
+					</code></pre>
+				</div>
+
+					<div class="clear"></div>
+
+					<div class="grid-100">
+						<h5>Unparse Config Options</h5>
+					</div>
+
+					<div class="grid-100" style="overflow-x: auto;">
+						<table>
+							<tr>
+								<th style="width: 20%;">Option</th>
+								<th style="width: 80%;">Explanation</th>
+							</tr>
+							<tr>
+								<td>
+									<code>quotes</code>
+								</td>
+								<td>
+									If <code>true</code>, forces all fields to be enclosed in quotes. If an array of <code>true/false</code> values, specifies which fields should be force-quoted (first boolean is for the first column, second boolean for the second column, ...). If a function (accepting cell value & column index as parameters), returning <code>true</code> will force quotes for that value and <code>false</code> will not.
+								</td>
+							</tr>
+							<tr>
+								<td><code>quoteChar</code></td>
+								<td>
+									The character used to quote fields.
+								</td>
+							</tr>
+							<tr>
+								<td><code>escapeChar</code></td>
+								<td>
+									The character used to escape <code>quoteChar</code> inside field values.
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<code>delimiter</code>
+								</td>
+								<td>
+									The delimiting character. It must not be found in <a href="#readonly">Papa.BAD_DELIMITERS</a>.
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<code>header</code>
+								</td>
+								<td>
+									If <code>false</code>, will omit the header row. If <code>data</code> is an array of arrays this option is ignored. If <code>data</code> is an array of objects the keys of the first object are the header row. If <code>data</code> is an object with the keys <code>fields</code> and <code>data</code> the <code>fields</code> are the header row.
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<code>newline</code>
+								</td>
+								<td>
+									The newline sequence. Must be one of <code>"\r"</code>, <code>"\n"</code>, or <code>"\r\n"</code>.
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<code>skipEmptyLines</code>
+								</td>
+								<td>
+									If <code>true</code>, lines that are completely empty (those which evaluate to an empty string) will be skipped. If set to <code>'greedy'</code>, lines that don't have any content (those which have only whitespace after parsing) will also be skipped.
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<code>columns</code>
+								</td>
+								<td>
+									If <code>data</code> is an array of objects this option can be used to manually specify the keys (columns) you expect in the objects. If not set the keys of the first objects are used as column.
+								</td>
+							</tr>
+						</table>
 					</div>
 					<div class="clear"></div>
 
@@ -289,8 +371,8 @@ var csv = Papa.unparse([
 					<div class="grid-33">
 						<pre><code class="language-javascript">// Specifying fields and data explicitly
 var csv = Papa.unparse({
-	fields: ["Column 1", "Column 2"],
-	data: [
+	"fields": ["Column 1", "Column 2"],
+	"data": [
 		["foo", "bar"],
 		["abc", "def"]
 	]
@@ -340,7 +422,7 @@ var csv = Papa.unparse({
 	quoteChar: '"',
 	escapeChar: '"',
 	header: false,
-	trimHeaders: false,
+	transformHeader: undefined,
 	dynamicTyping: false,
 	preview: 0,
 	encoding: "",
@@ -350,12 +432,14 @@ var csv = Papa.unparse({
 	complete: undefined,
 	error: undefined,
 	download: false,
+	downloadRequestHeaders: undefined,
 	skipEmptyLines: false,
 	chunk: undefined,
 	fastMode: undefined,
 	beforeFirstChunk: undefined,
 	withCredentials: undefined,
-	transform: undefined
+	transform: undefined,
+	delimitersToGuess: [',', '\t', '|', ';', <a href="#readonly">Papa.RECORD_SEP</a>, <a href="#readonly">Papa.UNIT_SEP</a>]
 }</code></pre>
 					</div>
 					<div class="clear"></div>
@@ -375,7 +459,7 @@ var csv = Papa.unparse({
 									<code>delimiter</code>
 								</td>
 								<td>
-									The delimiting character. Leave blank to auto-detect from a list of most common delimiters. It can be a string or a function. If string, it must be one of length 1. If a function, it must accept the input as first parameter and it must return a string which will be used as delimiter. In both cases it cannot be found in <a href="#readonly">Papa.BAD_DELIMITERS</a>.
+									The delimiting character. Leave blank to auto-detect from a list of most common delimiters, or any values passed in through <code>delimitersToGuess</code>. It can be a string or a function. If string, it must be one of length 1. If a function, it must accept the input as first parameter and it must return a string which will be used as delimiter. In both cases it cannot be found in <a href="#readonly">Papa.BAD_DELIMITERS</a>.
 								</td>
 							</tr>
 							<tr>
@@ -412,10 +496,11 @@ var csv = Papa.unparse({
 							</tr>
 							<tr>
 								<td>
-									<code>trimHeaders</code>
+									<code>transformHeader</code>
 								</td>
 								<td>
-									If true leading/trailing spaces will be trimed from headers.
+									A function to apply on each header. Requires <code>header</code> to be <code>true</code>. The function receives the header as its first argument.<br>
+									Only available starting with version 5.0.
 								</td>
 							</tr>
 							<tr>
@@ -423,7 +508,7 @@ var csv = Papa.unparse({
 									<code>dynamicTyping</code>
 								</td>
 								<td>
-									If true, numeric and boolean data will be converted to their type instead of remaining strings. Numeric data must conform to the definition of a decimal literal. European-formatted numbers must have commas and dots swapped. If also accepts an object or a function. If object it's values should be a boolean to indicate if dynamic typing should be applied for each column number (or header name if using headers). If it's a function, it should return a boolean value for each field number (or name if using headers) which will be passed as first argument.
+									If true, numeric and boolean data will be converted to their type instead of remaining strings. Numeric data must conform to the definition of a decimal literal. Numerical values greater than <code>2^53</code> or less than <code>-2^53</code> will not be converted to numbers to preserve precision. European-formatted numbers must have commas and dots swapped. If also accepts an object or a function. If object it's values should be a boolean to indicate if dynamic typing should be applied for each column number (or header name if using headers). If it's a function, it should return a boolean value for each field number (or name if using headers) which will be passed as first argument.
 								</td>
 							</tr>
 							<tr>
@@ -431,7 +516,7 @@ var csv = Papa.unparse({
 									<code>preview</code>
 								</td>
 								<td>
-									If > 0, only that many rows will be parsed.
+									If &gt; 0, only that many rows will be parsed.
 								</td>
 							</tr>
 							<tr>
@@ -447,7 +532,7 @@ var csv = Papa.unparse({
 									<code>worker</code>
 								</td>
 								<td>
-									Whether or not to use a <a href="/faq#workers">worker thread</a>. Using a worker will keep your page reactive, but may be slightly slower. Web Workers also load the entire Javascript file, so be careful when <a href="/faq#combine">combining other libraries</a> in the same file as Papa Parse. Note that worker option is only available when parsing files and not when converting from JSON to CSV.
+									Whether or not to use a <a href="/faq#workers">worker thread</a>. Using a worker will keep your page reactive, but may be slightly slower.
 								</td>
 							</tr>
 							<tr>
@@ -502,10 +587,23 @@ var csv = Papa.unparse({
 							</tr>
 							<tr>
 								<td>
+									<code>downloadRequestHeaders</code>
+								</td>
+								<td>
+									If defined, should be an object that describes the headers, example:
+
+ 									<pre>
+										<code class="language-javascript">downloadRequestHeaders: {
+'Authorization': 'token 123345678901234567890',
+}</code>
+									</pre>
+							</tr>
+							<tr>
+								<td>
 									<code>skipEmptyLines</code>
 								</td>
 								<td>
-									If true, lines that are completely empty will be skipped. An empty line is defined to be one which evaluates to empty string.
+									If true, lines that are completely empty (those which evaluate to an empty string) will be skipped. If set to <code>'greedy'</code>, lines that don't have any content (those which have only whitespace after parsing) will also be skipped.
 								</td>
 							</tr>
 							<tr>
@@ -545,7 +643,15 @@ var csv = Papa.unparse({
 									<code>transform</code>
 								</td>
 								<td>
-									A function to apply on each value. The function receives the value as its first argument and the column number as its second argument. The return value of the function will replace the value it received. The transform function is applied before dynamicTyping.
+									A function to apply on each value. The function receives the value as its first argument and the column number or header name when enabled as its second argument. The return value of the function will replace the value it received. The transform function is applied before dynamicTyping.
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<code>delimitersToGuess</code>
+								</td>
+								<td>
+									An array of delimiters to guess from if the <code>delimiter</code> option is not set.
 								</td>
 							</tr>
 						</table>
@@ -749,12 +855,6 @@ var csv = Papa.unparse({
 									Whether or not the browser supports HTML5 Web Workers. If false, <code>worker: true</code> will have no effect.
 								</td>
 							</tr>
-							<tr>
-								<td><code>Papa.SCRIPT_PATH</code></td>
-								<td>
-									The relative path to Papa Parse. This is automatically detected when Papa Parse is loaded synchronously. However, if you load Papa Parse asynchronously (e.g. with RequireJS), you need to set this variable manually in order to use Web Workers. (In those cases, this variable is <i>not</i> read-only and you should set it!)
-								</td>
-							</tr>
 						</table>
 					</div>
 
@@ -812,7 +912,7 @@ var csv = Papa.unparse({
 						<br><br>
 						Papa Parse by <a href="https://twitter.com/mholt6">Matt Holt</a>
 						<br>
-						&copy; 2013-2018
+						&copy; 2013-2019
 					</div>
 					<div class="grid-15 mobile-grid-50 links">
 						<h5>Learn</h5>
@@ -822,7 +922,7 @@ var csv = Papa.unparse({
 					</div>
 					<div class="grid-15 mobile-grid-50 links">
 						<h5>Project</h5>
-						<a href="https://gratipay.com/mholt">Donate</a>
+						<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=S6VTL9FQ6L8EN&item_name=PapaParse&currency_code=EUR&source=url">Donate</a>
 						<a href="https://github.com/mholt/PapaParse">GitHub</a>
 						<a href="https://twitter.com/search?q=%23PapaParse">Share</a>
 					</div>

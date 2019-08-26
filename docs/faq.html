@@ -35,7 +35,7 @@
 						</div>
 					</div>
 					<div class="grid-20 hide-on-mobile text-center">
-						<a href="/" class="text-logo">Papa Parse 4</a>
+						<a href="/" class="text-logo">Papa Parse 5</a>
 					</div>
 					<div class="grid-40 mobile-grid-50 text-right">
 						<div class="links">
@@ -45,9 +45,6 @@
 							<a href="http://stackoverflow.com/questions/tagged/papaparse">
 								<i class="fa fa-stack-overflow fa-lg"></i> Help
 							</a>
-							<!-- <a href="https://matt.life/pay" class="donate">
-								<i class="fa fa-heart fa-lg"></i> Donate
-							</a> -->
 						</div>
 					</div>
 				</div>
@@ -84,7 +81,7 @@
 
 					<h6 id="combine">Can I put other libraries in the same file as Papa Parse?</h6>
 					<p>
-						Yes, but then don't use the Web Worker feature unless your other dependencies are battle-hardened for worker threads. A worker thread loads an entire file, not just a function, so all those dependencies would be executed in an environment without a DOM and other <code>window</code> features. If any of those dependencies crash (<code>Cannot read property "defaultView" of undefined</code> <a href="https://github.com/mholt/PapaParse/issues/114">is</a> <a href="https://github.com/mholt/PapaParse/issues/163">common</a>), the whole worker thread will crash and parsing will not succeed.
+						Yes.
 					</p>
 
 
@@ -96,7 +93,7 @@
 
 					<h6 id="async">Can Papa Parse be loaded asynchronously (after the page loads)?</h6>
 					<p>
-						Yes. But if you want to use Web Workers, you'll need to specify the relative path to Papa Parse. To do this, set <a href="/docs#readonly">Papa.SCRIPT_PATH</a> to the relative path of the Papa Parse file. In synchronous loading, this is automatically detected.
+						Yes.
 					</p>
 
 
@@ -209,7 +206,7 @@
 
 					<h6>Can I use a worker if I combine/concatenate my Javascript files?</h6>
 					<p>
-						Probably not. It's safest to concatenate the rest of your dependencies and include Papa Parse in a seperate file. Any library that expects to have access to the <code>window</code> or DOM will crash when executed in a worker thread. Only put <a href="/faq#combine">other libraries in the same file</a> if they are ready to be used in worker threads.
+						Yes.
 					</p>
 
 					<h6>When should I use a worker?</h6>
@@ -241,6 +238,11 @@
 					<p>
 						No. This would drastically slow down parsing, as it would require the worker to wait after every chunk for a "continue" signal from the main thread. But you <i>can</i> abort workers by calling <code>.abort()</code> on the parser that gets passed to your callback function.
 					</p>
+
+					<h6>I set worker:true and now I'm getting an error: "window is not defined." How do I fix it?</h6>
+					<p>
+						This is a fairly common issue with configuration and it appears to be related to the use of React or other third party tools. Since this is a configuration issue, the exact steps needed to solve it may vary. See <a href="https://github.com/mholt/PapaParse/issues/655">Issue #655</a> on GitHub for a solution that worked for one person, and for links to other related issues.
+					</p>
 				</div>
 			</div>
 		</main>
@@ -257,7 +259,7 @@
 						<br><br>
 						Papa Parse by <a href="https://twitter.com/mholt6">Matt Holt</a>
 						<br>
-						&copy; 2013-2018
+						&copy; 2013-2019
 					</div>
 					<div class="grid-15 mobile-grid-50 links">
 						<h5>Learn</h5>
@@ -267,7 +269,7 @@
 					</div>
 					<div class="grid-15 mobile-grid-50 links">
 						<h5>Project</h5>
-						<a href="https://gratipay.com/mholt">Donate</a>
+						<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=S6VTL9FQ6L8EN&item_name=PapaParse&currency_code=EUR&source=url">Donate</a>
 						<a href="https://github.com/mholt/PapaParse">GitHub</a>
 						<a href="https://twitter.com/search?q=%23PapaParse">Share</a>
 					</div>

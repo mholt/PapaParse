@@ -61,7 +61,7 @@ var peopleLovePapa = [
 		description: "created a video showing how to use Papa Parse and FileDrop.js to create a drag-and-drop CSV-JSON converter.",
 		quote: "It's often easy to convert data to CSV. With Papa, it's easy to turn that CSV into JSON."
 	},
-	{       
+	{
 		link: "http://www.yolpo.com/social/gist.github?1dbd4556e748bdb830b3&autoplay=1&interimresults=0&failfast=1",
 		name: "Yolpo",
 		description: "created a simple regression test for Papa Parse.",
@@ -78,5 +78,24 @@ var peopleLovePapa = [
 		name: "Novel.js",
 		description: "is a text adventure framework that uses Papa Parse to enable user-friendly translations.",
 		quote: "Papa saves countless hours of work and makes reading large CSV files so easy!"
+	},
+	{
+		link: "https://mailcheck.co",
+		name: "Mailcheck.co",
+		description: "Mailcheck is email validation service. All emails usually stored in CSV's. We use Papa Parse to process data from our customers in browser",
+		quote: "Papa Parser allowed our customers to preview and process csv's in browser, without uploading them to server. It saves lots of time and space :)"
+	},
+	{
+		link: "https://flatfile.io",
+		name: "Flatfile.io",
+		description: "is an add-in data importer for web-apps, providing the full UX to upload a spreadsheet, field match, and repair issues found during import.",
+		quote: "Papa is a core part of our importer, so much so that we're committed to helping maintain it!"
+	},
+	{
+		link: "https://familiohq.com",
+		name: "Familio",
+		description: "is a brand-new messaging app made specifically for busy families. Automatically align all family members when sending text messages to parents in the kindergarten or school or when planning your kids birthday parties.",
+		quote: "With Papa it was a joy to implement our tool for importing messages and places from external systems."
 	}
+	
 ];
