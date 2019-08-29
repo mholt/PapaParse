@@ -1712,6 +1712,18 @@ var UNPARSE_TESTS = [
 		expected: '"Col1",Col2,"Col3"\r\n"a",b,"c"\r\n"d",e,"f"'
 	},
 	{
+		description: "Force quotes around string fields only",
+		input: [['a', 'b', 'c'], ['d', 10, true]],
+		config: { quotes: function(value) { return typeof value === 'string'; } },
+		expected: '"a","b","c"\r\n"d",10,true'
+	},
+	{
+		description: "Force quotes around string fields only (with header row)",
+		input: [{ "Col1": "a", "Col2": "b", "Col3": "c" }, { "Col1": "d", "Col2": 10, "Col3": true }],
+		config: { quotes: function(value) { return typeof value === 'string'; } },
+		expected: '"Col1","Col2","Col3"\r\n"a","b","c"\r\n"d",10,true'
+	},
+	{
 		description: "Empty input",
 		input: [],
 		expected: ''
