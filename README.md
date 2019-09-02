@@ -39,7 +39,7 @@ To learn how to use Papa Parse:
 
 - [Documentation](http://papaparse.com/docs)
 
-The website is hosted on [Github Pages](https://pages.github.com/). It's content is also include in the docs folder of this repository. If you want to contribute on it just clone the master of this repository and open a pull request.
+The website is hosted on [Github Pages](https://pages.github.com/). Its content is also included in the docs folder of this repository. If you want to contribute on it just clone the master of this repository and open a pull request.
 
 
 Papa Parse for Node
