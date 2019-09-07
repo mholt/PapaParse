@@ -96,6 +96,12 @@ var peopleLovePapa = [
 		name: "Familio",
 		description: "is a brand-new messaging app made specifically for busy families. Automatically align all family members when sending text messages to parents in the kindergarten or school or when planning your kids birthday parties.",
 		quote: "With Papa it was a joy to implement our tool for importing messages and places from external systems."
+	},
+	{
+		link: "https://explore.hua-gallery.com",
+		name: "Hua Explore",
+		description: "The premier destination for information on Contemporary Chinese Art.",
+		quote: "Papa makes processing data that galleries send us totally seamless."
 	}
 	
 ];
