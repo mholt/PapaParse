@@ -162,6 +162,21 @@ describe('PapaParse', function() {
 		});
 	});
 
+
+	it('piped streaming CSV should be correctly parsed when header is true', function(done) {
+		var data = [];
+		var readStream = fs.createReadStream(__dirname + '/sample-header.csv', 'utf8');
+		var csvStream = readStream.pipe(Papa.parse(Papa.NODE_STREAM_INPUT, {header: true}));
+		csvStream.on('data', function(item) {
+			data.push(item);
+		});
+		csvStream.on('end', function() {
+			assert.deepEqual(data[0], { title: 'test title 01', name: 'test name 01' });
+			assert.deepEqual(data[1],  { title: '', name: 'test name 02' });
+			done();
+		});
+	});
+
 	it('should support pausing and resuming on same tick when streaming', function(done) {
 		var rows = [];
 		Papa.parse(fs.createReadStream(__dirname + '/long-sample.csv', 'utf8'), {

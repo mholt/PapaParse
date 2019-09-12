@@ -1259,7 +1259,7 @@ License: MIT
 			}
 
 			var incrementBy = 1;
-			if (!_results.data[0] || Array.isArray(_results.data[0]))
+			if (!_results.data.length || Array.isArray(_results.data[0]))
 			{
 				_results.data = _results.data.map(processRow);
 				incrementBy = _results.data.length;
