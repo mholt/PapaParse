@@ -669,8 +669,6 @@ License: MIT
 
 			if (IS_WORKER && xhr.status === 0)
 				this._chunkError();
-			else
-				this._start += this._config.chunkSize;
 		};
 
 		this._chunkLoaded = function()
@@ -684,7 +682,8 @@ License: MIT
 				return;
 			}
 
-			this._finished = !this._config.chunkSize || this._start > getFileSize(xhr);
+			this._start += xhr.responseText.length;
+			this._finished = !this._config.chunkSize || this._start >= getFileSize(xhr);
 			this.parseChunk(xhr.responseText);
 		};
 
