@@ -1,6 +1,6 @@
 /* @license
 Papa Parse
-v5.0.2
+v5.1.0
 https://github.com/mholt/PapaParse
 License: MIT
 */
