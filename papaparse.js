@@ -683,9 +683,7 @@ License: MIT
 			}
 
 			this._start += xhr.responseText.length;
-
 			this._finished = !this._config.chunkSize || this._start >= getFileSize(xhr);
-
 			this.parseChunk(xhr.responseText);
 		};
 
