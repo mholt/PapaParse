@@ -22,6 +22,61 @@ try {
 	XHR_ENABLED = true;
 } catch (e) {} // safari, ie
 
+var __substring = String.prototype.substring;
+var __substr = String.prototype.substr;
+
+function checkedSubstr(_indexStart, _length) {
+	throw new TypeError("Avoid depreciated method");
+}
+
+function checkedSubstring(indexStart, indexEnd) {
+	var length = this.length;
+	if(isNaN(indexStart) || typeof indexStart !== "number") {
+		throw new TypeError("indexStart is not a number. ");
+	}
+	if(indexStart < 0) {
+		// Block this because it is likely a bug, but substring clamps it as max(0, indexStart)
+		throw new TypeError("indexStart is less than zero. " + String(indexStart));
+	}
+	if(indexStart > length) {
+		// Block this because it is likely a bug, but substring clamps it as min(indexStart, length)
+		throw new TypeError("indexStart is greater than string length. " + String(indexStart) + " " + String(length));
+	}
+
+	if(indexEnd !== undefined) {
+		if(isNaN(indexEnd) || typeof indexEnd !== "number") {
+			throw new TypeError("indexEnd is not a number. ");
+		}
+		if(indexEnd < 0) {
+			// Block this because it is likely a bug, but substring treats it as max(0, indexEnd)
+			throw new TypeError("indexEnd is less than zero. " + String(indexEnd));
+		}
+		if(indexStart > indexEnd) {
+			// Block this because it is likely a bug, but substring flips its arguments to compensate.
+			throw new TypeError("indexStart is greater than indexEnd. " + String(indexStart) + " " + String(indexEnd));
+		}
+		// Allow indexEnd to be greater than limit, which will functionally truncate to limit.
+
+	}
+	return __substring.call(this, indexStart, indexEnd);
+}
+
+function updateStringSubstring() {
+	String.prototype.substring = checkedSubstring; // eslint-disable-line no-extend-native
+}
+
+function restoreStringSubstring() {
+	String.prototype.substring = __substring; // eslint-disable-line no-extend-native
+}
+
+function updateStringSubstr() {
+	String.prototype.substr = checkedSubstr; // eslint-disable-line no-extend-native
+}
+
+function restoreStringSubstr() {
+	String.prototype.substr = __substr; // eslint-disable-line no-extend-native
+}
+
 // Tests for the core parser using new Papa.Parser().parse() (CSV to JSON)
 var CORE_PARSER_TESTS = [
 	{
@@ -194,7 +249,7 @@ var CORE_PARSER_TESTS = [
 				"code": "MissingQuotes",
 				"message": "Quoted field unterminated",
 				"row": 0,
-				"index": 3
+				"index": 2
 			}]
 		}
 	},
@@ -209,7 +264,23 @@ var CORE_PARSER_TESTS = [
 				"code": "InvalidQuotes",
 				"message": "Trailing quote on quoted field is malformed",
 				"row": 0,
-				"index": 1
+				"index": 0
+			}]
+		}
+	},
+	{
+		description: "Quoted field has invalid trailing quote after delimiter with a valid closer",
+		input: '"a,"b,c"\nd,e,f',
+		notes: "The input is malformed, opening quotes identified, trailing quote is malformed. Trailing quote should be escaped or followed by valid new line or delimiter to be valid",
+		config: { strictQuote: true },
+		expected: {
+			data: [['"a','b,c'], ['d', 'e', 'f']],
+			errors: [{
+				"type": "Quotes",
+				"code": "InvalidQuotes",
+				"message": "Trailing quote on quoted field is malformed",
+				"row": 0,
+				"index": 0
 			}]
 		}
 	},
@@ -224,14 +295,14 @@ var CORE_PARSER_TESTS = [
 				"code": "InvalidQuotes",
 				"message": "Trailing quote on quoted field is malformed",
 				"row": 0,
-				"index": 3
+				"index": 2
 			},
 			{
 				"type": "Quotes",
 				"code": "MissingQuotes",
 				"message": "Quoted field unterminated",
 				"row": 0,
-				"index": 3
+				"index": 2
 			}]
 		}
 	},
@@ -246,14 +317,14 @@ var CORE_PARSER_TESTS = [
 				"code": "InvalidQuotes",
 				"message": "Trailing quote on quoted field is malformed",
 				"row": 0,
-				"index": 3
+				"index": 2
 			},
 			{
 				"type": "Quotes",
 				"code": "MissingQuotes",
 				"message": "Quoted field unterminated",
 				"row": 0,
-				"index": 3
+				"index": 2
 			}]
 		}
 	},
@@ -268,14 +339,14 @@ var CORE_PARSER_TESTS = [
 				"code": "InvalidQuotes",
 				"message": "Trailing quote on quoted field is malformed",
 				"row": 0,
-				"index": 3
+				"index": 2
 			},
 			{
 				"type": "Quotes",
 				"code": "MissingQuotes",
 				"message": "Quoted field unterminated",
 				"row": 0,
-				"index": 3
+				"index": 2
 			}]
 		}
 	},
@@ -289,11 +360,29 @@ var CORE_PARSER_TESTS = [
 		}
 	},
 	{
+		description: "Quoted field has valid trailing quote via delimiter and contains delimiter",
+		input: 'a,"b,",c\nd,e,f',
+		notes: "Trailing quote is valid due to trailing delimiter",
+		expected: {
+			data: [['a', 'b,', 'c'], ['d', 'e', 'f']],
+			errors: []
+		}
+	},
+	{
 		description: "Quoted field has valid trailing quote via \\n",
 		input: 'a,b,"c"\nd,e,f',
 		notes: "Trailing quote is valid due to trailing new line delimiter",
 		expected: {
 			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
+			errors: []
+		}
+	},
+	{
+		description: "Quoted field has valid trailing quote via \\n and contains delimiter and newline",
+		input: 'a,b,"c,\n"\nd,e,f',
+		notes: "Trailing quote is valid due to trailing new line delimiter",
+		expected: {
+			data: [['a', 'b', 'c,\n'], ['d', 'e', 'f']],
 			errors: []
 		}
 	},
@@ -591,8 +680,16 @@ var CORE_PARSER_TESTS = [
 describe('Core Parser Tests', function() {
 	function generateTest(test) {
 		(test.disabled ? it.skip : it)(test.description, function() {
-			var actual = new Papa.Parser(test.config).parse(test.input);
-			assert.deepEqual(JSON.stringify(actual.errors), JSON.stringify(test.expected.errors));
+			var actual;
+			updateStringSubstr();
+			updateStringSubstring();
+			try {
+				actual = new Papa.Parser(test.config).parse(test.input);
+			} finally {
+				restoreStringSubstring();
+				restoreStringSubstr();
+			}
+			assert.deepEqual(JSON.parse(JSON.stringify(actual.errors)), test.expected.errors);
 			assert.deepEqual(actual.data, test.expected.data);
 		});
 	}
@@ -651,6 +748,14 @@ var PARSE_TESTS = [
 		input: 'A,"B" ,C,D\r\nE,F,"G"  ,H',
 		expected: {
 			data: [['A', 'B', 'C','D'],['E', 'F', 'G','H']],
+			errors: []
+		}
+	},
+	{
+		description: "Quoted fields with spaces between closing quote and next delimiter and contains delimiter",
+		input: 'A,",B" ,C,D\r\nE,F,",G"  ,H',
+		expected: {
+			data: [['A', ',B', 'C','D'],['E', 'F', ',G','H']],
 			errors: []
 		}
 	},
@@ -1475,7 +1580,7 @@ describe('Parse Tests', function() {
 			if (test.expected.meta) {
 				assert.deepEqual(actual.meta, test.expected.meta);
 			}
-			assert.deepEqual(JSON.stringify(actual.errors), JSON.stringify(test.expected.errors));
+			assert.deepEqual(JSON.parse(JSON.stringify(actual.errors)), test.expected.errors);
 			assert.deepEqual(actual.data, test.expected.data);
 		});
 	}
@@ -1556,7 +1661,7 @@ describe('Parse Async Tests', function() {
 			var config = test.config;
 
 			config.complete = function(actual) {
-				assert.deepEqual(JSON.stringify(actual.errors), JSON.stringify(test.expected.errors));
+				assert.deepEqual(JSON.parse(JSON.stringify(actual.errors)), test.expected.errors);
 				assert.deepEqual(actual.data, test.expected.data);
 				done();
 			};
@@ -2368,7 +2473,7 @@ describe('Custom Tests', function() {
 				this.timeout(test.timeout);
 			}
 			test.run(function(actual) {
-				assert.deepEqual(JSON.stringify(actual), JSON.stringify(test.expected));
+				assert.deepEqual(JSON.parse(JSON.stringify(actual)), test.expected);
 				done();
 			});
 		});

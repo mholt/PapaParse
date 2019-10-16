@@ -699,7 +699,7 @@ License: MIT
 			if (contentRange === null) { // no content range, then finish!
 				return -1;
 			}
-			return parseInt(contentRange.substr(contentRange.lastIndexOf('/') + 1));
+			return parseInt(contentRange.substring(contentRange.lastIndexOf('/') + 1));
 		}
 	}
 	NetworkStreamer.prototype = Object.create(ChunkStreamer.prototype);
@@ -786,10 +786,17 @@ License: MIT
 		};
 		this._nextChunk = function()
 		{
+			var chunk;
 			if (this._finished) return;
 			var size = this._config.chunkSize;
-			var chunk = size ? remaining.substr(0, size) : remaining;
-			remaining = size ? remaining.substr(size) : '';
+			if(size) {
+				var limit = Math.min(remaining.length, Math.max(0, size));
+				chunk = remaining.substring(0, limit);
+				remaining = remaining.substring(limit);
+			} else {
+				chunk = remaining;
+				remaining = '';
+			}
 			this._finished = !remaining;
 			return this.parseChunk(chunk);
 		};
@@ -1092,7 +1099,7 @@ License: MIT
 		{
 			_paused = true;
 			_parser.abort();
-			_input = _input.substr(_parser.getCharIndex());
+			_input = _input.substring(_parser.getCharIndex());
 		};
 
 		this.resume = function()
@@ -1330,7 +1337,7 @@ License: MIT
 
 		function guessLineEndings(input, quoteChar)
 		{
-			input = input.substr(0, 1024 * 1024);	// max length 1 MB
+			input = input.substring(0, 1024 * 1024);	// max length 1 MB
 			// Replace all the text inside quotes
 			var re = new RegExp(escapeRegExp(quoteChar) + '([^]*?)' + escapeRegExp(quoteChar), 'gm');
 			input = input.replace(re, '');
@@ -1382,6 +1389,8 @@ License: MIT
 		var step = config.step;
 		var preview = config.preview;
 		var fastMode = config.fastMode;
+		var temp1;
+		var strictQuote = (temp1 = config.strictQuote) !== undefined ? temp1 : false;
 		var quoteChar;
 		/** Allows for no quoteChar by setting quoteChar to undefined in config */
 		if (config.quoteChar === undefined) {
@@ -1448,7 +1457,7 @@ License: MIT
 						cursor += newline.length;
 					else if (ignoreLastRow)
 						return returnable();
-					if (comments && row.substr(0, commentsLen) === comments)
+					if (comments && row.substring(0, commentsLen) === comments)
 						continue;
 					if (stepIsFunction)
 					{
@@ -1473,6 +1482,10 @@ License: MIT
 			var nextNewline = input.indexOf(newline, cursor);
 			var quoteCharRegex = new RegExp(escapeRegExp(escapeChar) + escapeRegExp(quoteChar), 'g');
 			var quoteSearch = input.indexOf(quoteChar, cursor);
+			var quoteError = false;
+			var savedNextDelim;
+			var savedNextNewline;
+			var savedQuoteSearch;
 
 			// Parser loop
 			for (;;)
@@ -1480,11 +1493,9 @@ License: MIT
 				// Field has opening quote
 				if (input[cursor] === quoteChar)
 				{
+					saveQuoteState();
 					// Start our search for the closing quote where the cursor is
 					quoteSearch = cursor;
-
-					// Skip the opening quote
-					cursor++;
 
 					for (;;)
 					{
@@ -1494,6 +1505,10 @@ License: MIT
 						//No other quotes are found - no other delimiters
 						if (quoteSearch === -1)
 						{
+							if(strictQuote) {
+								backtrackQuote();
+								break;
+							}
 							if (!ignoreLastRow) {
 								// No closing quote... what a pity
 								errors.push({
@@ -1504,13 +1519,14 @@ License: MIT
 									index: cursor
 								});
 							}
+							cursor++;
 							return finish();
 						}
 
 						// Closing quote at EOF
 						if (quoteSearch === inputLen - 1)
 						{
-							var value = input.substring(cursor, quoteSearch).replace(quoteCharRegex, quoteChar);
+							var value = input.substring(cursor + 1, quoteSearch).replace(quoteCharRegex, quoteChar);
 							return finish(value);
 						}
 
@@ -1528,6 +1544,14 @@ License: MIT
 							continue;
 						}
 
+						// update indexes if they are less than current cursor
+						if(nextNewline !== -1 && (quoteSearch + 1) > nextNewline) {
+							nextNewline = input.indexOf(newline, quoteSearch + 1);
+						}
+						if(nextDelim !== -1 && (quoteSearch + 1) > nextDelim) {
+							nextDelim = input.indexOf(delim, quoteSearch + 1);
+						}
+
 						// Check up to nextDelim or nextNewline, whichever is closest
 						var checkUpTo = nextNewline === -1 ? nextDelim : Math.min(nextDelim, nextNewline);
 						var spacesBetweenQuoteAndDelimiter = extraSpaces(checkUpTo);
@@ -1535,7 +1559,7 @@ License: MIT
 						// Closing quote followed by delimiter or 'unnecessary spaces + delimiter'
 						if (input[quoteSearch + 1 + spacesBetweenQuoteAndDelimiter] === delim)
 						{
-							row.push(input.substring(cursor, quoteSearch).replace(quoteCharRegex, quoteChar));
+							row.push(input.substring(cursor + 1, quoteSearch).replace(quoteCharRegex, quoteChar));
 							cursor = quoteSearch + 1 + spacesBetweenQuoteAndDelimiter + delimLen;
 
 							// If char after following delimiter is not quoteChar, we find next quote char position
@@ -1551,9 +1575,9 @@ License: MIT
 						var spacesBetweenQuoteAndNewLine = extraSpaces(nextNewline);
 
 						// Closing quote followed by newline or 'unnecessary spaces + newLine'
-						if (input.substr(quoteSearch + 1 + spacesBetweenQuoteAndNewLine, newlineLen) === newline)
+						if (input.substring(quoteSearch + 1 + spacesBetweenQuoteAndNewLine, quoteSearch + 1 + spacesBetweenQuoteAndNewLine + newlineLen) === newline)
 						{
-							row.push(input.substring(cursor, quoteSearch).replace(quoteCharRegex, quoteChar));
+							row.push(input.substring(cursor + 1, quoteSearch).replace(quoteCharRegex, quoteChar));
 							saveRow(quoteSearch + 1 + spacesBetweenQuoteAndNewLine + newlineLen);
 							nextDelim = input.indexOf(delim, cursor);	// because we may have skipped the nextDelim in the quoted field
 							quoteSearch = input.indexOf(quoteChar, cursor);	// we search for first quote in next line
@@ -1581,16 +1605,23 @@ License: MIT
 							index: cursor
 						});
 
+						if(strictQuote) {
+							backtrackQuote();
+							break;
+						}
+
 						quoteSearch++;
 						continue;
 
 					}
 
-					continue;
+					if(!quoteError) {
+						continue;
+					}
 				}
 
 				// Comment found at start of new line
-				if (comments && row.length === 0 && input.substr(cursor, commentsLen) === comments)
+				if (comments && row.length === 0 && input.substring(cursor, cursor + commentsLen) === comments)
 				{
 					if (nextNewline === -1)	// Comment ends at EOF
 						return returnable();
@@ -1606,7 +1637,7 @@ License: MIT
 					// we check, if we have quotes, because delimiter char may be part of field enclosed in quotes
 					if (quoteSearch > nextDelim) {
 						// we have quotes, so we try to find the next delimiter not enclosed in quotes and also next starting quote char
-						var nextDelimObj = getNextUnqotedDelimiter(nextDelim, quoteSearch, nextNewline);
+						var nextDelimObj = getNextUnquotedDelimiter(nextDelim, quoteSearch, nextNewline);
 
 						// if we have next delimiter char which is not enclosed in quotes
 						if (nextDelimObj && typeof nextDelimObj.nextDelim !== 'undefined') {
@@ -1651,6 +1682,18 @@ License: MIT
 
 			return finish();
 
+			function saveQuoteState() {
+				savedNextDelim = nextDelim;
+				savedNextNewline = nextNewline;
+				savedQuoteSearch = quoteSearch;
+				quoteError = false;
+			}
+			function backtrackQuote() {
+				quoteSearch = savedQuoteSearch;
+				nextNewline = savedNextNewline;
+				nextDelim = savedNextDelim;
+				quoteError = true;
+			}
 
 			function pushRow(row)
 			{
@@ -1682,7 +1725,7 @@ License: MIT
 				if (ignoreLastRow)
 					return returnable();
 				if (typeof value === 'undefined')
-					value = input.substr(cursor);
+					value = input.substring(cursor);
 				row.push(value);
 				cursor = inputLen;	// important in case parsing is paused
 				pushRow(row);
@@ -1731,7 +1774,7 @@ License: MIT
 			}
 
 			/** Gets the delimiter character, which is not inside the quoted field */
-			function getNextUnqotedDelimiter(nextDelim, quoteSearch, newLine) {
+			function getNextUnquotedDelimiter(nextDelim, quoteSearch, newLine) {
 				var result = {
 					nextDelim: undefined,
 					quoteSearch: undefined
@@ -1753,7 +1796,7 @@ License: MIT
 						nextQuoteSearch = input.indexOf(quoteChar, nextQuoteSearch + 1);
 					}
 					// try to get the next delimiter position
-					result = getNextUnqotedDelimiter(nextNextDelim, nextQuoteSearch, newLine);
+					result = getNextUnquotedDelimiter(nextNextDelim, nextQuoteSearch, newLine);
 				} else {
 					result = {
 						nextDelim: nextDelim,
