@@ -1036,8 +1036,10 @@ License: MIT
 					_stepCounter += results.data.length;
 					if (_config.preview && _stepCounter > _config.preview)
 						_parser.abort();
-					else
+					else {
+						_results.data = _results.data[0];
 						userStep(_results, self);
+					}
 				}
 			};
 		}
@@ -1706,11 +1708,10 @@ License: MIT
 			}
 
 			/** Returns an object with the results, errors, and meta. */
-			function returnable(stopped, step)
+			function returnable(stopped)
 			{
-				var isStep = step || false;
 				return {
-					data: isStep ? data[0]  : data,
+					data: data,
 					errors: errors,
 					meta: {
 						delimiter: delim,
@@ -1725,7 +1726,7 @@ License: MIT
 			/** Executes the user's step function and resets data & errors. */
 			function doStep()
 			{
-				step(returnable(undefined, true));
+				step(returnable());
 				data = [];
 				errors = [];
 			}

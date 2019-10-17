@@ -1974,6 +1974,22 @@ var CUSTOM_TESTS = [
 		}
 	},
 	{
+		description: "Data is correctly parsed with steps when skipping empty lines",
+		expected: [['A', 'b', 'c'], ['d', 'E', 'f']],
+		run: function(callback) {
+			var data = [];
+			Papa.parse('A,b,c\n\nd,E,f', {
+				skipEmptyLines: true,
+				step: function(results) {
+					data.push(results.data);
+				},
+				complete: function() {
+					callback(data);
+				}
+			});
+		}
+	},
+	{
 		description: "Step is called with the contents of the row",
 		expected: ['A', 'b', 'c'],
 		run: function(callback) {
