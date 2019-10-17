@@ -44,7 +44,7 @@
 		"grunt-contrib-uglify": "^3.3.0",
 		"mocha": "^5.2.0",
 		"mocha-headless-chrome": "^2.0.1",
-		"open": "0.0.5",
+		"open": "7.0.0",
 		"serve-static": "^1.7.1"
 	},
 	"scripts": {
