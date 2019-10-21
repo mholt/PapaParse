@@ -592,7 +592,7 @@ describe('Core Parser Tests', function() {
 	function generateTest(test) {
 		(test.disabled ? it.skip : it)(test.description, function() {
 			var actual = new Papa.Parser(test.config).parse(test.input);
-			assert.deepEqual(JSON.stringify(actual.errors), JSON.stringify(test.expected.errors));
+			assert.deepEqual(actual.errors, test.expected.errors);
 			assert.deepEqual(actual.data, test.expected.data);
 		});
 	}
@@ -1475,7 +1475,7 @@ describe('Parse Tests', function() {
 			if (test.expected.meta) {
 				assert.deepEqual(actual.meta, test.expected.meta);
 			}
-			assert.deepEqual(JSON.stringify(actual.errors), JSON.stringify(test.expected.errors));
+			assert.deepEqual(actual.errors, test.expected.errors);
 			assert.deepEqual(actual.data, test.expected.data);
 		});
 	}
@@ -1556,7 +1556,7 @@ describe('Parse Async Tests', function() {
 			var config = test.config;
 
 			config.complete = function(actual) {
-				assert.deepEqual(JSON.stringify(actual.errors), JSON.stringify(test.expected.errors));
+				assert.deepEqual(actual.errors, test.expected.errors);
 				assert.deepEqual(actual.data, test.expected.data);
 				done();
 			};
@@ -2384,7 +2384,7 @@ describe('Custom Tests', function() {
 				this.timeout(test.timeout);
 			}
 			test.run(function(actual) {
-				assert.deepEqual(JSON.stringify(actual), JSON.stringify(test.expected));
+				assert.deepEqual(actual, test.expected);
 				done();
 			});
 		});
