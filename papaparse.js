@@ -699,7 +699,7 @@ License: MIT
 			if (contentRange === null) { // no content range, then finish!
 				return -1;
 			}
-			return parseInt(contentRange.substr(contentRange.lastIndexOf('/') + 1));
+			return parseInt(contentRange.substring(contentRange.lastIndexOf('/') + 1));
 		}
 	}
 	NetworkStreamer.prototype = Object.create(ChunkStreamer.prototype);
@@ -788,8 +788,14 @@ License: MIT
 		{
 			if (this._finished) return;
 			var size = this._config.chunkSize;
-			var chunk = size ? remaining.substr(0, size) : remaining;
-			remaining = size ? remaining.substr(size) : '';
+			var chunk;
+			if(size) {
+				chunk = remaining.substring(0, size);
+				remaining = remaining.substring(size);
+			} else {
+				chunk = remaining;
+				remaining = '';
+			}
 			this._finished = !remaining;
 			return this.parseChunk(chunk);
 		};
@@ -1094,7 +1100,7 @@ License: MIT
 		{
 			_paused = true;
 			_parser.abort();
-			_input = _input.substr(_parser.getCharIndex());
+			_input = _input.substring(_parser.getCharIndex());
 		};
 
 		this.resume = function()
@@ -1332,7 +1338,7 @@ License: MIT
 
 		function guessLineEndings(input, quoteChar)
 		{
-			input = input.substr(0, 1024 * 1024);	// max length 1 MB
+			input = input.substring(0, 1024 * 1024);	// max length 1 MB
 			// Replace all the text inside quotes
 			var re = new RegExp(escapeRegExp(quoteChar) + '([^]*?)' + escapeRegExp(quoteChar), 'gm');
 			input = input.replace(re, '');
@@ -1450,7 +1456,7 @@ License: MIT
 						cursor += newline.length;
 					else if (ignoreLastRow)
 						return returnable();
-					if (comments && row.substr(0, commentsLen) === comments)
+					if (comments && row.substring(0, commentsLen) === comments)
 						continue;
 					if (stepIsFunction)
 					{
@@ -1553,7 +1559,7 @@ License: MIT
 						var spacesBetweenQuoteAndNewLine = extraSpaces(nextNewline);
 
 						// Closing quote followed by newline or 'unnecessary spaces + newLine'
-						if (input.substr(quoteSearch + 1 + spacesBetweenQuoteAndNewLine, newlineLen) === newline)
+						if (input.substring(quoteSearch + 1 + spacesBetweenQuoteAndNewLine, quoteSearch + 1 + spacesBetweenQuoteAndNewLine + newlineLen) === newline)
 						{
 							row.push(input.substring(cursor, quoteSearch).replace(quoteCharRegex, quoteChar));
 							saveRow(quoteSearch + 1 + spacesBetweenQuoteAndNewLine + newlineLen);
@@ -1592,7 +1598,7 @@ License: MIT
 				}
 
 				// Comment found at start of new line
-				if (comments && row.length === 0 && input.substr(cursor, commentsLen) === comments)
+				if (comments && row.length === 0 && input.substring(cursor, cursor + commentsLen) === comments)
 				{
 					if (nextNewline === -1)	// Comment ends at EOF
 						return returnable();
@@ -1684,7 +1690,7 @@ License: MIT
 				if (ignoreLastRow)
 					return returnable();
 				if (typeof value === 'undefined')
-					value = input.substr(cursor);
+					value = input.substring(cursor);
 				row.push(value);
 				cursor = inputLen;	// important in case parsing is paused
 				pushRow(row);
