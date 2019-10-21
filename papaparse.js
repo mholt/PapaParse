@@ -1608,7 +1608,7 @@ License: MIT
 					// we check, if we have quotes, because delimiter char may be part of field enclosed in quotes
 					if (quoteSearch > nextDelim) {
 						// we have quotes, so we try to find the next delimiter not enclosed in quotes and also next starting quote char
-						var nextDelimObj = getNextUnqotedDelimiter(nextDelim, quoteSearch, nextNewline);
+						var nextDelimObj = getNextUnquotedDelimiter(nextDelim, quoteSearch, nextNewline);
 
 						// if we have next delimiter char which is not enclosed in quotes
 						if (nextDelimObj && typeof nextDelimObj.nextDelim !== 'undefined') {
@@ -1732,7 +1732,7 @@ License: MIT
 			}
 
 			/** Gets the delimiter character, which is not inside the quoted field */
-			function getNextUnqotedDelimiter(nextDelim, quoteSearch, newLine) {
+			function getNextUnquotedDelimiter(nextDelim, quoteSearch, newLine) {
 				var result = {
 					nextDelim: undefined,
 					quoteSearch: undefined
@@ -1754,7 +1754,7 @@ License: MIT
 						nextQuoteSearch = input.indexOf(quoteChar, nextQuoteSearch + 1);
 					}
 					// try to get the next delimiter position
-					result = getNextUnqotedDelimiter(nextNextDelim, nextQuoteSearch, newLine);
+					result = getNextUnquotedDelimiter(nextNextDelim, nextQuoteSearch, newLine);
 				} else {
 					result = {
 						nextDelim: nextDelim,
