@@ -1364,12 +1364,15 @@ License: MIT
 
 		function addError(type, code, msg, row)
 		{
-			_results.errors.push({
+			var error = {
 				type: type,
 				code: code,
-				message: msg,
-				row: row
-			});
+				message: msg
+			};
+			if(row !== undefined) {
+				error.row = row;
+			}
+			_results.errors.push(error);
 		}
 	}
 
