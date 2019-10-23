@@ -1539,6 +1539,12 @@ License: MIT
 							continue;
 						}
 
+						if(nextDelim !== -1 && nextDelim < (quoteSearch + 1)) {
+							nextDelim = input.indexOf(delim, (quoteSearch + 1));
+						}
+						if(nextNewline !== -1 && nextNewline < (quoteSearch + 1)) {
+							nextNewline = input.indexOf(newline, (quoteSearch + 1));
+						}
 						// Check up to nextDelim or nextNewline, whichever is closest
 						var checkUpTo = nextNewline === -1 ? nextDelim : Math.min(nextDelim, nextNewline);
 						var spacesBetweenQuoteAndDelimiter = extraSpaces(checkUpTo);
