@@ -1464,6 +1464,22 @@ var PARSE_TESTS = [
 			data: [['a', 'b'], ['c', 'd'], [' , ', ','], ['" "', '""']],
 			errors: []
 		}
+	},
+	{
+		description: "Quoted fields with spaces between closing quote and next delimiter and contains delimiter",
+		input: 'A,",B" ,C,D\nE,F,G,H',
+		expected: {
+			data: [['A', ',B', 'C', 'D'],['E', 'F', 'G', 'H']],
+			errors: []
+		}
+	},
+	{
+		description: "Quoted fields with spaces between closing quote and newline and contains newline",
+		input: 'a,b,"c\n" \nd,e,f',
+		expected: {
+			data: [['a', 'b', 'c\n'], ['d', 'e', 'f']],
+			errors: []
+		}
 	}
 ];
 
