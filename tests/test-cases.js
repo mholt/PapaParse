@@ -616,8 +616,7 @@ var CORE_PARSER_TESTS = [
 				"index": 2
 			}]
 		}
-	},
-
+	}
 ];
 
 describe('Core Parser Tests', function() {
