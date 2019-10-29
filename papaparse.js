@@ -1510,6 +1510,9 @@ License: MIT
 						//No other quotes are found - no other delimiters
 						if (quoteSearch === -1)
 						{
+							if(ignoreLastRow)
+								return returnable();
+
 							if(strictQuote) {
 								errors.push({
 									type: 'Quotes',
@@ -1522,16 +1525,14 @@ License: MIT
 								quoteFallThrough = true;
 								break; // fall through to parse as non-quote.
 							}
-							if (!ignoreLastRow) {
-								// No closing quote... what a pity
-								errors.push({
-									type: 'Quotes',
-									code: 'MissingQuotes',
-									message: 'Quoted field unterminated',
-									row: data.length,	// row has yet to be inserted
-									index: cursor
-								});
-							}
+							// No closing quote... what a pity
+							errors.push({
+								type: 'Quotes',
+								code: 'MissingQuotes',
+								message: 'Quoted field unterminated',
+								row: data.length,	// row has yet to be inserted
+								index: cursor
+							});
 							return finish(input.substring(cursor + 1));
 						}
 
