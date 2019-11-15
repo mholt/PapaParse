@@ -37,9 +37,9 @@ License: MIT
 		// but without using `eval` (which is disabled when
 		// using Content Security Policy).
 
-		if (typeof self !== 'undefined') { return self; }
-		if (typeof window !== 'undefined') { return window; }
-		if (typeof global !== 'undefined') { return global; }
+		if (typeof self !== 'undefined' && self !== null) { return self; }
+		if (typeof window !== 'undefined' && window !== null) { return window; }
+		if (typeof global !== 'undefined' && global !== null) { return global; }
 
 		// When running tests none of the above have been defined
 		return {};
