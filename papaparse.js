@@ -1419,10 +1419,6 @@ License: MIT
 			|| Papa.BAD_DELIMITERS.indexOf(comments) > -1)
 			comments = false;
 
-		// Newline must be valid: \r, \n, or \r\n
-		if (newline !== '\n' && newline !== '\r' && newline !== '\r\n')
-			newline = '\n';
-
 		// We're gonna need these at the Parser scope
 		var cursor = 0;
 		var aborted = false;
