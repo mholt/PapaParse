@@ -1913,9 +1913,10 @@ var CUSTOM_TESTS = [
 
 					if (chunkNum === 2) {
 						callback(results.data[0]);
-					} else {
-						parser.resume();
+						return;
 					}
+
+					parser.resume();
 				},
 				complete: function() {
 					callback(new Error("Should have more than 2 chunks"));
@@ -1943,9 +1944,10 @@ var CUSTOM_TESTS = [
 
 						if (chunkNum === 2) {
 							callback(results.data[0]);
-						} else {
-							parser.resume();
+							return;
 						}
+
+						parser.resume();
 					},
 					complete: function() {
 						callback(new Error("Should have more than 2 chunks"));
@@ -1958,6 +1960,7 @@ var CUSTOM_TESTS = [
 				xhr.send();
 			} catch (err) {
 				callback(err);
+				return;
 			}
 		}
 	},
@@ -1982,9 +1985,10 @@ var CUSTOM_TESTS = [
 
 						if (chunkNum === 2) {
 							callback(results.data[0]);
-						} else {
-							parser.resume();
+							return;
 						}
+
+						parser.resume();
 					},
 					complete: function() {
 						callback(new Error("Should have more than 2 chunks"));
@@ -1997,6 +2001,7 @@ var CUSTOM_TESTS = [
 				xhr.send();
 			} catch (err) {
 				callback(err);
+				return;
 			}
 		}
 	},
