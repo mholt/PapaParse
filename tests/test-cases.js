@@ -1898,6 +1898,114 @@ var CUSTOM_TESTS = [
 		}
 	},
 	{
+		description: "Pause and resume works for chunks with NetworkStreamer (for Bug #736)",
+		disabled: !XHR_ENABLED,
+		timeout: 30000,
+		expected: ["SembCorp Industries Ltd", "Singapore", "SCIL.SI", "10%", "Yes", "0.30%"],
+		run: function(callback) {
+			var chunkNum = 0;
+			var actual = [];
+			Papa.parse(BASE_PATH + "duplicate.csv", {
+				download: true,
+				chunkSize: 250000,
+				chunk: function(results, parser) {
+					chunkNum++;
+					parser.pause();
+
+					if (chunkNum === 2) {
+						callback(results.data[0]);
+					} else {
+						parser.resume();
+					}
+				},
+				complete: function() {
+					callback(new Error("Should have more than 2 chunks"));
+				}
+			});
+		}
+	},
+	{
+		description: "Pause and resume works for chunks with FileStreamer (for Bug #736)",
+		disabled: !XHR_ENABLED,
+		timeout: 30000,
+		expected: ["SembCorp Industries Ltd", "Singapore", "SCIL.SI", "10%", "Yes", "0.30%"],
+		run: function(callback) {
+			var chunkNum = 0;
+			var actual = [];
+
+			// A little bit of a hack but this allows us to test the FileStreamer for local files. Essentially, this uses the
+			// AJAX request to get the full content and fake the local file.
+			var xhr = new XMLHttpRequest();
+			xhr.onload = function() {
+				Papa.parse(new File([xhr.responseText], './duplicate.csv'), {
+					chunkSize: 250000,
+					chunk: function(results, parser) {
+						chunkNum++;
+						parser.pause();
+
+						if (chunkNum === 2) {
+							callback(results.data[0]);
+						} else {
+							parser.resume();
+						}
+					},
+					complete: function() {
+						callback(new Error("Should have more than 2 chunks"));
+					}
+				});
+			}
+
+			xhr.open("GET", BASE_PATH + "duplicate.csv");
+			try {
+				xhr.send();
+			} catch (err) {
+				callback(err);
+			}
+		}
+	},
+	{
+		description: "Pause and resume works for chunks with StringStreamer (for Bug #736)",
+		disabled: !XHR_ENABLED,
+		timeout: 30000,
+		// For those wondering why this is different than the two above, reading by byte size isn't exactly the same as a
+		// string's length (a string with a length of 10 can have a byte size of 12 for example)
+		expected: ["SembCorp Marine Ltd", "Singapore", "SCMN.SI", "15%", "Yes", "0.30%"],
+		run: function(callback) {
+			var chunkNum = 0;
+			var actual = [];
+
+			// Same hack for testing FileStreamer but this time, we just provide the content
+			var xhr = new XMLHttpRequest();
+			xhr.onload = function() {
+				debugger;
+				Papa.parse(xhr.responseText, {
+					chunkSize: 250000,
+					chunk: function(results, parser) {
+						debugger;
+						chunkNum++;
+						parser.pause();
+
+						if (chunkNum === 2) {
+							callback(results.data[0]);
+						} else {
+							parser.resume();
+						}
+					},
+					complete: function() {
+						callback(new Error("Should have more than 2 chunks"));
+					}
+				});
+			}
+
+			xhr.open("GET", BASE_PATH + "duplicate.csv");
+			try {
+				xhr.send();
+			} catch (err) {
+				callback(err);
+			}
+		}
+	},
+	{
 		description: "Complete is called with all results if neither step nor chunk is defined",
 		expected: [['A', 'b', 'c'], ['d', 'E', 'f'], ['G', 'h', 'i']],
 		disabled: !FILES_ENABLED,
