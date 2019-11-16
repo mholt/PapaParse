@@ -1904,7 +1904,6 @@ var CUSTOM_TESTS = [
 		expected: ["SembCorp Industries Ltd", "Singapore", "SCIL.SI", "10%", "Yes", "0.30%"],
 		run: function(callback) {
 			var chunkNum = 0;
-			var actual = [];
 			Papa.parse(BASE_PATH + "duplicate.csv", {
 				download: true,
 				chunkSize: 250000,
@@ -1931,7 +1930,6 @@ var CUSTOM_TESTS = [
 		expected: ["SembCorp Industries Ltd", "Singapore", "SCIL.SI", "10%", "Yes", "0.30%"],
 		run: function(callback) {
 			var chunkNum = 0;
-			var actual = [];
 
 			// A little bit of a hack but this allows us to test the FileStreamer for local files. Essentially, this uses the
 			// AJAX request to get the full content and fake the local file.
@@ -1953,7 +1951,7 @@ var CUSTOM_TESTS = [
 						callback(new Error("Should have more than 2 chunks"));
 					}
 				});
-			}
+			};
 
 			xhr.open("GET", BASE_PATH + "duplicate.csv");
 			try {
@@ -1972,16 +1970,13 @@ var CUSTOM_TESTS = [
 		expected: ["SembCorp Marine Ltd", "Singapore", "SCMN.SI", "15%", "Yes", "0.30%"],
 		run: function(callback) {
 			var chunkNum = 0;
-			var actual = [];
 
 			// Same hack for testing FileStreamer but this time, we just provide the content
 			var xhr = new XMLHttpRequest();
 			xhr.onload = function() {
-				debugger;
 				Papa.parse(xhr.responseText, {
 					chunkSize: 250000,
 					chunk: function(results, parser) {
-						debugger;
 						chunkNum++;
 						parser.pause();
 
@@ -1995,7 +1990,7 @@ var CUSTOM_TESTS = [
 						callback(new Error("Should have more than 2 chunks"));
 					}
 				});
-			}
+			};
 
 			xhr.open("GET", BASE_PATH + "duplicate.csv");
 			try {
