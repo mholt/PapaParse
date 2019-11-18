@@ -1965,8 +1965,7 @@ var CUSTOM_TESTS = [
 		description: "Pause and resume works for chunks with StringStreamer",
 		disabled: !XHR_ENABLED,
 		timeout: 30000,
-		// For those wondering why this is different than the two above, reading by byte size isn't exactly the same as a
-		// string's length (a string with a length of 10 can have a byte size of 12 for example)
+		// Test also with string as byte size may be diferent
 		expected: ["Etiam a dolor vitae est vestibulum", "84", "DEF"],
 		run: function(callback) {
 			var chunkNum = 0;
