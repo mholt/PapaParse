@@ -1898,15 +1898,15 @@ var CUSTOM_TESTS = [
 		}
 	},
 	{
-		description: "Pause and resume works for chunks with NetworkStreamer (for Bug #736)",
+		description: "Pause and resume works for chunks with NetworkStreamer",
 		disabled: !XHR_ENABLED,
 		timeout: 30000,
-		expected: ["SembCorp Industries Ltd", "Singapore", "SCIL.SI", "10%", "Yes", "0.30%"],
+		expected: ["Etiam a dolor vitae est vestibulum", "84", "DEF"],
 		run: function(callback) {
 			var chunkNum = 0;
-			Papa.parse(BASE_PATH + "duplicate.csv", {
+			Papa.parse(BASE_PATH + "verylong-sample.csv", {
 				download: true,
-				chunkSize: 250000,
+				chunkSize: 1000,
 				chunk: function(results, parser) {
 					chunkNum++;
 					parser.pause();
@@ -1919,25 +1919,22 @@ var CUSTOM_TESTS = [
 					parser.resume();
 				},
 				complete: function() {
-					callback(new Error("Should have more than 2 chunks"));
+					callback(new Error("Should have found matched row before parsing whole file"));
 				}
 			});
 		}
 	},
 	{
-		description: "Pause and resume works for chunks with FileStreamer (for Bug #736)",
+		description: "Pause and resume works for chunks with FileStreamer",
 		disabled: !XHR_ENABLED,
 		timeout: 30000,
-		expected: ["SembCorp Industries Ltd", "Singapore", "SCIL.SI", "10%", "Yes", "0.30%"],
+		expected: ["Etiam a dolor vitae est vestibulum", "84", "DEF"],
 		run: function(callback) {
 			var chunkNum = 0;
-
-			// A little bit of a hack but this allows us to test the FileStreamer for local files. Essentially, this uses the
-			// AJAX request to get the full content and fake the local file.
 			var xhr = new XMLHttpRequest();
 			xhr.onload = function() {
-				Papa.parse(new File([xhr.responseText], './duplicate.csv'), {
-					chunkSize: 250000,
+				Papa.parse(new File([xhr.responseText], './verylong-sample.csv'), {
+					chunkSize: 1000,
 					chunk: function(results, parser) {
 						chunkNum++;
 						parser.pause();
@@ -1950,12 +1947,12 @@ var CUSTOM_TESTS = [
 						parser.resume();
 					},
 					complete: function() {
-						callback(new Error("Should have more than 2 chunks"));
+						callback(new Error("Should have found matched row before parsing whole file"));
 					}
 				});
 			};
 
-			xhr.open("GET", BASE_PATH + "duplicate.csv");
+			xhr.open("GET", BASE_PATH + "verylong-sample.csv");
 			try {
 				xhr.send();
 			} catch (err) {
@@ -1965,20 +1962,18 @@ var CUSTOM_TESTS = [
 		}
 	},
 	{
-		description: "Pause and resume works for chunks with StringStreamer (for Bug #736)",
+		description: "Pause and resume works for chunks with StringStreamer",
 		disabled: !XHR_ENABLED,
 		timeout: 30000,
 		// For those wondering why this is different than the two above, reading by byte size isn't exactly the same as a
 		// string's length (a string with a length of 10 can have a byte size of 12 for example)
-		expected: ["SembCorp Marine Ltd", "Singapore", "SCMN.SI", "15%", "Yes", "0.30%"],
+		expected: ["Etiam a dolor vitae est vestibulum", "84", "DEF"],
 		run: function(callback) {
 			var chunkNum = 0;
-
-			// Same hack for testing FileStreamer but this time, we just provide the content
 			var xhr = new XMLHttpRequest();
 			xhr.onload = function() {
 				Papa.parse(xhr.responseText, {
-					chunkSize: 250000,
+					chunkSize: 1000,
 					chunk: function(results, parser) {
 						chunkNum++;
 						parser.pause();
@@ -1991,12 +1986,12 @@ var CUSTOM_TESTS = [
 						parser.resume();
 					},
 					complete: function() {
-						callback(new Error("Should have more than 2 chunks"));
+						callback(new Error("Should have found matched row before parsing whole file"));
 					}
 				});
 			};
 
-			xhr.open("GET", BASE_PATH + "duplicate.csv");
+			xhr.open("GET", BASE_PATH + "verylong-sample.csv");
 			try {
 				xhr.send();
 			} catch (err) {

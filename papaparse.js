@@ -682,9 +682,7 @@ License: MIT
 				return;
 			}
 
-			// The length of the responseText doesn't corresponds to the actual size we requested due to potential encoding
-			// of some characters that has more than 1 byte. As such, better to just increment the start index by the chunk
-			// size if it was given
+			// Use chunckSize as it may be a diference on reponse lentgh due to characters with more than 1 byte
 			this._start += this._config.chunkSize ? this._config.chunkSize : xhr.responseText.length;
 			this._finished = !this._config.chunkSize || this._start >= getFileSize(xhr);
 			this.parseChunk(xhr.responseText);
