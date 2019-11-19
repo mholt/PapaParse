@@ -1388,12 +1388,13 @@ License: MIT
 		// Unpack the config object
 		config = config || {};
 		var delim = config.delimiter;
-		var newline = config.newline;
 		var comments = config.comments;
 		var step = config.step;
 		var preview = config.preview;
 		var fastMode = config.fastMode;
 		var quoteChar;
+		var newline;
+		
 		/** Allows for no quoteChar by setting quoteChar to undefined in config */
 		if (config.quoteChar === undefined) {
 			quoteChar = '"';
@@ -1404,7 +1405,10 @@ License: MIT
 		if (config.escapeChar !== undefined) {
 			escapeChar = config.escapeChar;
 		}
-
+		
+		if (newline === undefined) {
+			newline = '\n';
+		}
 		// Delimiter must be valid
 		if (typeof delim !== 'string'
 			|| Papa.BAD_DELIMITERS.indexOf(delim) > -1)
@@ -1418,7 +1422,8 @@ License: MIT
 		else if (typeof comments !== 'string'
 			|| Papa.BAD_DELIMITERS.indexOf(comments) > -1)
 			comments = false;
-
+		
+		
 		// We're gonna need these at the Parser scope
 		var cursor = 0;
 		var aborted = false;
