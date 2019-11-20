@@ -1898,6 +1898,108 @@ var CUSTOM_TESTS = [
 		}
 	},
 	{
+		description: "Pause and resume works for chunks with NetworkStreamer",
+		disabled: !XHR_ENABLED,
+		timeout: 30000,
+		expected: ["Etiam a dolor vitae est vestibulum", "84", "DEF"],
+		run: function(callback) {
+			var chunkNum = 0;
+			Papa.parse(BASE_PATH + "verylong-sample.csv", {
+				download: true,
+				chunkSize: 1000,
+				chunk: function(results, parser) {
+					chunkNum++;
+					parser.pause();
+
+					if (chunkNum === 2) {
+						callback(results.data[0]);
+						return;
+					}
+
+					parser.resume();
+				},
+				complete: function() {
+					callback(new Error("Should have found matched row before parsing whole file"));
+				}
+			});
+		}
+	},
+	{
+		description: "Pause and resume works for chunks with FileStreamer",
+		disabled: !XHR_ENABLED,
+		timeout: 30000,
+		expected: ["Etiam a dolor vitae est vestibulum", "84", "DEF"],
+		run: function(callback) {
+			var chunkNum = 0;
+			var xhr = new XMLHttpRequest();
+			xhr.onload = function() {
+				Papa.parse(new File([xhr.responseText], './verylong-sample.csv'), {
+					chunkSize: 1000,
+					chunk: function(results, parser) {
+						chunkNum++;
+						parser.pause();
+
+						if (chunkNum === 2) {
+							callback(results.data[0]);
+							return;
+						}
+
+						parser.resume();
+					},
+					complete: function() {
+						callback(new Error("Should have found matched row before parsing whole file"));
+					}
+				});
+			};
+
+			xhr.open("GET", BASE_PATH + "verylong-sample.csv");
+			try {
+				xhr.send();
+			} catch (err) {
+				callback(err);
+				return;
+			}
+		}
+	},
+	{
+		description: "Pause and resume works for chunks with StringStreamer",
+		disabled: !XHR_ENABLED,
+		timeout: 30000,
+		// Test also with string as byte size may be diferent
+		expected: ["Etiam a dolor vitae est vestibulum", "84", "DEF"],
+		run: function(callback) {
+			var chunkNum = 0;
+			var xhr = new XMLHttpRequest();
+			xhr.onload = function() {
+				Papa.parse(xhr.responseText, {
+					chunkSize: 1000,
+					chunk: function(results, parser) {
+						chunkNum++;
+						parser.pause();
+
+						if (chunkNum === 2) {
+							callback(results.data[0]);
+							return;
+						}
+
+						parser.resume();
+					},
+					complete: function() {
+						callback(new Error("Should have found matched row before parsing whole file"));
+					}
+				});
+			};
+
+			xhr.open("GET", BASE_PATH + "verylong-sample.csv");
+			try {
+				xhr.send();
+			} catch (err) {
+				callback(err);
+				return;
+			}
+		}
+	},
+	{
 		description: "Complete is called with all results if neither step nor chunk is defined",
 		expected: [['A', 'b', 'c'], ['d', 'E', 'f'], ['G', 'h', 'i']],
 		disabled: !FILES_ENABLED,

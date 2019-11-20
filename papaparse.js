@@ -682,7 +682,8 @@ License: MIT
 				return;
 			}
 
-			this._start += xhr.responseText.length;
+			// Use chunckSize as it may be a diference on reponse lentgh due to characters with more than 1 byte
+			this._start += this._config.chunkSize ? this._config.chunkSize : xhr.responseText.length;
 			this._finished = !this._config.chunkSize || this._start >= getFileSize(xhr);
 			this.parseChunk(xhr.responseText);
 		};
@@ -1100,7 +1101,10 @@ License: MIT
 		{
 			_paused = true;
 			_parser.abort();
-			_input = _input.substring(_parser.getCharIndex());
+
+			// If it is streaming via "chunking", the reader will start appending correctly already so no need to substring,
+			// otherwise we can get duplicate content within a row
+			_input = isFunction(_config.chunk) ? "" : _input.substring(_parser.getCharIndex());
 		};
 
 		this.resume = function()
