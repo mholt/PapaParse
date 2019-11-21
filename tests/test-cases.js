@@ -534,7 +534,7 @@ var CORE_PARSER_TESTS = [
 			errors: []
 		}
 	},
-  {
+	{
 		description: "Skipped line at beginning",
 		input: 'Skipped_line\na,b,c',
 		config: { skipLines: 1 },
@@ -543,13 +543,13 @@ var CORE_PARSER_TESTS = [
 			errors: []
 		}
 	},
-  {
-    description: "Skipped line at beginning followed by comment line",
+	{
+		description: "Skipped line at beginning followed by comment line",
 		input: 'Skipped_line\n# Comment\na,b,c',
 		config: {
-      skipLines: 1,
-      comments: true
-    },
+			skipLines: 1,
+			comments: true
+		},
 		expected: {
 			data: [['a', 'b', 'c']],
 			errors: []
