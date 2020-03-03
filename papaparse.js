@@ -1115,7 +1115,7 @@ License: MIT
 			} else {
 				// Bugfix: #636 In case the processing hasn't halted yet
 				// wait for it to halt in order to resume
-				setTimeout(this.resume, 3);
+				setTimeout(self.resume, 3);
 			}
 		};
 
