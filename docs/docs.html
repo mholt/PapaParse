@@ -433,6 +433,7 @@ var csv = Papa.unparse({
 	error: undefined,
 	download: false,
 	downloadRequestHeaders: undefined,
+	downloadRequestBody: undefined,
 	skipEmptyLines: false,
 	chunk: undefined,
 	fastMode: undefined,
@@ -597,6 +598,14 @@ var csv = Papa.unparse({
 'Authorization': 'token 123345678901234567890',
 }</code>
 									</pre>
+							</tr>
+							<tr>
+								<td>
+									<code>downloadRequestBody</code>
+								</td>
+								<td>
+									If defined and the download property is true, a POST request will be made instead of a GET request and the passed argument will be set as the body of the request.
+								</td>
 							</tr>
 							<tr>
 								<td>
