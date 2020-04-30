@@ -328,7 +328,7 @@ License: MIT
 				return;
 
 			if (typeof _config.delimiter === 'string'
-                && !Papa.BAD_DELIMITERS.filter(function(value) { return _config.delimiter.indexOf(value) !== -1; }).length)
+				&& !Papa.BAD_DELIMITERS.filter(function(value) { return _config.delimiter.indexOf(value) !== -1; }).length)
 			{
 				_delimiter = _config.delimiter;
 			}
@@ -589,7 +589,6 @@ License: MIT
 		}
 	}
 
-
 	function NetworkStreamer(config)
 	{
 		config = config || {};
@@ -643,6 +642,9 @@ License: MIT
 			}
 
 			xhr.open(this._config.downloadRequestBody ? 'POST' : 'GET', this._input, !IS_WORKER);
+			xhr.timeout = this._config.downloadTimeout;
+			xhr.ontimeout = bindFunction(function() { this._chunkError('timeout'); }, this);
+
 			// Headers can only be set when once the request state is OPENED
 			if (this._config.downloadRequestHeaders)
 			{
@@ -1397,6 +1399,7 @@ License: MIT
 		var step = config.step;
 		var preview = config.preview;
 		var fastMode = config.fastMode;
+		var downloadTimeout;
 		var quoteChar;
 		/** Allows for no quoteChar by setting quoteChar to undefined in config */
 		if (config.quoteChar === undefined) {
@@ -1427,6 +1430,16 @@ License: MIT
 		if (newline !== '\n' && newline !== '\r' && newline !== '\r\n')
 			newline = '\n';
 
+		if (config.downloadTimeout) {
+			downloadTimeout = parseInt(config.downloadTimeout);
+			if (!isNaN(downloadTimeout)) {
+				config.downloadTimeout = downloadTimeout;
+			} else {
+				throw new Error('Config downloadTimeout value (' + config.downloadTimeout + ') not parsable by parseInt(val).');
+			}
+		} else {
+			config.downloadTimeout = 0;
+		}
 		// We're gonna need these at the Parser scope
 		var cursor = 0;
 		var aborted = false;
@@ -1680,9 +1693,9 @@ License: MIT
 			}
 
 			/**
-             * checks if there are extra spaces after closing quote and given index without any text
-             * if Yes, returns the number of spaces
-             */
+			 * checks if there are extra spaces after closing quote and given index without any text
+			 * if Yes, returns the number of spaces
+			 */
 			function extraSpaces(index) {
 				var spaceLength = 0;
 				if (index !== -1) {

@@ -1518,8 +1518,6 @@ describe('Parse Tests', function() {
 	}
 });
 
-
-
 // Tests for Papa.parse() that involve asynchronous operation
 var PARSE_ASYNC_TESTS = [
 	{
@@ -1580,7 +1578,21 @@ var PARSE_ASYNC_TESTS = [
 			data: [['A','B','C'],['X','Y','Z']],
 			errors: []
 		}
-	}
+	},
+	{
+		description: "Simple download with int timeout timed out",
+		input: BASE_PATH + "verylong-sample.csv",
+		config: {
+			download: true,
+			downloadTimeout: 1
+		},
+		disabled: !XHR_ENABLED,
+		expected: {
+			exception: {
+				"message": "timeout"
+			}
+		}
+	},
 ];
 
 describe('Parse Async Tests', function() {
@@ -1595,7 +1607,12 @@ describe('Parse Async Tests', function() {
 			};
 
 			config.error = function(err) {
-				throw err;
+				if (!test.expected.exception) {
+					throw err;
+				} else {
+					assert.equal(err.message, test.expected.exception.message);
+					done();
+				}
 			};
 
 			Papa.parse(test.input, config);
