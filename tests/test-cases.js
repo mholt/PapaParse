@@ -733,6 +733,23 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Row with enough fields but blank field in the begining",
+		input: 'A,B,C\r\n,b1,c1\r\na2,b2,c2',
+		expected: {
+			data: [["A", "B", "C"], ['', 'b1', 'c1'], ['a2', 'b2', 'c2']],
+			errors: []
+		}
+	},
+	{
+		description: "Row with enough fields but blank field in the begining using headers",
+		input: 'A,B,C\r\n,b1,c1\r\n,b2,c2',
+		config: { header: true },
+		expected: {
+			data: [{"A": "", "B": "b1", "C": "c1"}, {"A": "", "B": "b2", "C": "c2"}],
+			errors: []
+		}
+	},
+	{
 		description: "Row with enough fields but blank field at end",
 		input: 'A,B,C\r\na,b,',
 		config: { header: true },
