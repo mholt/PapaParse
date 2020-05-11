@@ -28,7 +28,7 @@ License: MIT
 	// in strict mode we cannot access arguments.callee, so we need a named reference to
 	// stringify the factory method for the blob worker
 	// eslint-disable-next-line func-name
-}(this, function moduleFactory()
+}(self, function moduleFactory()
 {
 	'use strict';
 
