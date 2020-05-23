@@ -1842,7 +1842,36 @@ var UNPARSE_TESTS = [
 		input: [{a: 'foo', b: '"quoted"'}],
 		config: {header: false},
 		expected: 'foo,"""quoted"""'
-	}
+	},
+	{
+		description: "Escape formulae",
+		input: [{ "Col1": "=danger", "Col2": "@danger", "Col3": "safe" }, { "Col1": "safe=safe", "Col2": "+danger", "Col3": "-danger, danger" }, { "Col1": "'+safe", "Col2": "'@safe", "Col3": "safe, safe" }],
+		config: { escapeFormulae: true },
+		expected: 'Col1,Col2,Col3\r\n\'=danger,\'@danger,safe\r\nsafe=safe,\'+danger,"\'-danger, danger"\r\n\'+safe,\'@safe,"safe, safe"'
+	},
+	{
+		description: "Don't escape formulae by default",
+		input: [{ "Col1": "=danger", "Col2": "@danger", "Col3": "safe" }, { "Col1": "safe=safe", "Col2": "+danger", "Col3": "-danger, danger" }, { "Col1": "'+safe", "Col2": "'@safe", "Col3": "safe, safe" }],
+		expected: 'Col1,Col2,Col3\r\n=danger,@danger,safe\r\nsafe=safe,+danger,"-danger, danger"\r\n\'+safe,\'@safe,"safe, safe"'
+	},
+	{
+		description: "Escape formulae with forced quotes",
+		input: [{ "Col1": "=danger", "Col2": "@danger", "Col3": "safe" }, { "Col1": "safe=safe", "Col2": "+danger", "Col3": "-danger, danger" }, { "Col1": "'+safe", "Col2": "'@safe", "Col3": "safe, safe" }],
+		config: { escapeFormulae: true, quotes: true },
+		expected: '"Col1","Col2","Col3"\r\n"\'=danger","\'@danger","safe"\r\n"safe=safe","\'+danger","\'-danger, danger"\r\n"\'+safe","\'@safe","safe, safe"'
+	},
+	{
+		description: "Escape formulae with single-quote quoteChar and escapeChar",
+		input: [{ "Col1": "=danger", "Col2": "@danger", "Col3": "safe" }, { "Col1": "safe=safe", "Col2": "+danger", "Col3": "-danger, danger" }, { "Col1": "'+safe", "Col2": "'@safe", "Col3": "safe, safe" }],
+		config: { escapeFormulae: true, quoteChar: "'", escapeChar: "'" },
+		expected: 'Col1,Col2,Col3\r\n\'\'=danger,\'\'@danger,safe\r\nsafe=safe,\'\'+danger,\'\'\'-danger, danger\'\r\n\'\'+safe,\'\'@safe,\'safe, safe\''
+	},
+	{
+		description: "Escape formulae with single-quote quoteChar and escapeChar and forced quotes",
+		input: [{ "Col1": "=danger", "Col2": "@danger", "Col3": "safe" }, { "Col1": "safe=safe", "Col2": "+danger", "Col3": "-danger, danger" }, { "Col1": "'+safe", "Col2": "'@safe", "Col3": "safe, safe" }],
+		config: { escapeFormulae: true, quotes: true, quoteChar: "'", escapeChar: "'" },
+		expected: '\'Col1\',\'Col2\',\'Col3\'\r\n\'\'\'=danger\',\'\'\'@danger\',\'safe\'\r\n\'safe=safe\',\'\'\'+danger\',\'\'\'-danger, danger\'\r\n\'\'\'+safe\',\'\'\'@safe\',\'safe, safe\''
+	},
 ];
 
 describe('Unparse Tests', function() {
