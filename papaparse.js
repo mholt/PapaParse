@@ -282,6 +282,9 @@ License: MIT
 		/** the columns (keys) we expect when we unparse objects */
 		var _columns = null;
 
+		/** whether to prevent outputting cells that can be parsed as formulae by spreadsheet software (Excel and LibreOffice) */
+		var _escapeFormulae = false;
+
 		unpackConfig();
 
 		var quoteCharRegex = new RegExp(escapeRegExp(_quoteChar), 'g');
@@ -361,6 +364,9 @@ License: MIT
 			if (_config.escapeChar !== undefined) {
 				_escapedQuote = _config.escapeChar + _quoteChar;
 			}
+
+			if (typeof _config.escapeFormulae === 'boolean')
+				_escapeFormulae = _config.escapeFormulae;
 		}
 
 
@@ -446,6 +452,10 @@ License: MIT
 
 			if (str.constructor === Date)
 				return JSON.stringify(str).slice(1, 25);
+
+			if (_escapeFormulae === true && typeof str === "string" && (str.match(/^[=+\-@].*$/) !== null)) {
+				str = "'" + str;
+			}
 
 			var escapedQuoteStr = str.toString().replace(quoteCharRegex, _escapedQuote);
 

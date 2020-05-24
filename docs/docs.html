@@ -337,6 +337,14 @@
 									If <code>data</code> is an array of objects this option can be used to manually specify the keys (columns) you expect in the objects. If not set the keys of the first objects are used as column.
 								</td>
 							</tr>
+							<tr>
+								<td>
+									<code>escapeFormulae</code>
+								</td>
+								<td>
+									If <code>true</code>, field values that begin with <code>=</code>, <code>+</code>, <code>-</code>, or <code>@</code>, will be prepended with a <code>'</code> to defend against <a href="https://www.contextis.com/en/blog/comma-separated-vulnerabilities" target="_blank" rel="noopener">injection attacks</a>, because Excel and LibreOffice will automatically parse such cells as formulae.
+								</td>
+							</tr>
 						</table>
 					</div>
 					<div class="clear"></div>
