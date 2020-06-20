@@ -1335,7 +1335,7 @@ License: MIT
 					avgFieldCount /= (preview.data.length - emptyLinesCount);
 
 				if ((typeof bestDelta === 'undefined' || delta <= bestDelta)
-					&& (typeof maxFieldCount === 'undefined' || avgFieldCount > maxFieldCount) && avgFieldCount > 1.99) {
+					&& ((typeof maxFieldCount === 'undefined' || avgFieldCount > maxFieldCount) || delta < bestDelta) && avgFieldCount > 1.99) {
 					bestDelta = delta;
 					bestDelim = delim;
 					maxFieldCount = avgFieldCount;
