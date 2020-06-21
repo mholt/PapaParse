@@ -4,7 +4,7 @@ if (typeof module !== 'undefined' && module.exports) {
 	chai = require('chai');
 	Papa = require('../papaparse.js');
 }
-var fs = require('fs');
+
 var assert = chai.assert;
 
 var BASE_PATH = (typeof document === 'undefined') ? './' : document.getElementById('test-cases').src.replace(/test-cases\.js$/, '');
@@ -2538,15 +2538,7 @@ var CUSTOM_TESTS = [
 			var results = Papa.parse('"A","B","C","D"');
 			callback(results.meta.delimiter);
 		}
-  },
-  {
-    description: "Should correctly guess default delimiters when other sign is used more often but not right delimiter.",
-    expected: ";",
-    run: function(callback) {            
-      var results = Papa.parse('ID;comment;geom\n1;HiThere;POLYGON(2 3, 3 4, 5 6, 4 5, 4 3, 2 3)\n2;HowAreYou;POLYGON(2 3, 3 4, 5 6, 4 5, 4 3, 2 3)\n3;WhatsUp;POLYGON(2 3, 3 4, 5 6, 4 5, 4 3, 2 3)\n4;Sunday;POLYGON(2 3, 3 4, 5 6, 4 5, 4 3, 2 3)');     
-      callback(results.meta.delimiter)
-    }
-  }
+	}
 ];
 
 describe('Custom Tests', function() {
