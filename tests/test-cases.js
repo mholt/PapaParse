@@ -768,6 +768,15 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "transformHeader accepts and optional index attribute",
+		input: 'A,B,C\r\na,b,c',
+		config: { header: true, transformHeader: function(header, i) { return i % 2 ? header.toLowerCase() : header; } },
+		expected: {
+			data: [{"A": "a", "b": "b", "C": "c"}],
+			errors: []
+		}
+	},
+	{
 		description: "Line ends with quoted field, first field of next line is empty using headers",
 		input: 'a,b,"c"\r\nd,e,"f"\r\n,"h","i"\r\n,"k","l"',
 		config: {
