@@ -376,8 +376,11 @@ License: MIT
 			if (typeof obj !== 'object')
 				return [];
 			var keys = [];
-			for (var key in obj)
-				keys.push(key);
+			for (var key in obj) {
+				if (Object.prototype.hasOwnProperty.call(obj, key)) {
+					keys.push(key);
+				}
+			}
 			return keys;
 		}
 
