@@ -444,6 +444,7 @@ var csv = Papa.unparse({
 	downloadRequestBody: undefined,
 	skipEmptyLines: false,
 	chunk: undefined,
+	chunkSize: undefined,
 	fastMode: undefined,
 	beforeFirstChunk: undefined,
 	withCredentials: undefined,
@@ -629,6 +630,14 @@ var csv = Papa.unparse({
 								</td>
 								<td>
 									A callback function, identical to step, which activates streaming. However, this function is executed after every <i>chunk</i> of the file is loaded and parsed rather than every row. Works only with local and remote files. Do not use both chunk and step callbacks together. For the function signature, see the documentation for the step function.
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<code>chunkSize</code>
+								</td>
+								<td>
+									Overrides <code>Papa.LocalChunkSize</code> and <code>Papa.RemoteChunkSize</code>. For more information see <a href="#configurable">configurable</a>.
 								</td>
 							</tr>
 							<tr>
