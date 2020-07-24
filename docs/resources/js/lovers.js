@@ -120,5 +120,11 @@ var peopleLovePapa = [
 		name: "Wholesaler for Shopify",
 		description: "Shopify App to offer Wholesaling within one unique Shopify store",
 		quote: "Super fast bulk Wholesale product price uploads. Love Papa!."
-	}	
+	},
+	{
+		link: "https://www.unnitmetaliya.com/sop-sample/",
+		name: "Visa SOP Sample",
+		description: "Providing free guide to international students.",
+		quote: "Use Papa Parse for many of side projects. Super fast and works all the time. Love it!"
+	}
 ];
