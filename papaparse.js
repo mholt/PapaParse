@@ -612,6 +612,19 @@ License: MIT
 		// Its value will be -1 to indicate the total size info can't be retrieve from Content-Range response header (or not available)
 		var totalContentSize = -1;
 
+		// the `this._config.chunkSize` could be large than total size of the file
+		// which lead to server response 416 (Range Not Satisfiable error) on the first chunk / range request
+		// If this happened on the first, we should only retry request content without range header once
+		var shouldDisableChunk = false;
+
+		// indicate we are processing the first chunk
+		// if http 416 error is captured, we will disable chunk and retry the request
+		var isFirstChunk = true;
+
+		// indicate we have retried the request without range header (or without end range if it's not the first chunk)
+		// we can check this field to make sure that we only ever retry once
+		var hasRetriedRequestFor416 = false;
+
 		if (IS_WORKER)
 		{
 			this._nextChunk = function()
@@ -667,7 +680,7 @@ License: MIT
 				}
 			}
 
-			if (this._config.chunkSize)
+			if (this._config.chunkSize && !shouldDisableChunk)
 			{
 				var end = this._start + this._config.chunkSize - 1;	// minus one because byte range is inclusive
 				if(totalContentSize > 1 && end > totalContentSize - 1) {
@@ -694,6 +707,15 @@ License: MIT
 			if (xhr.readyState !== 4)
 				return;
 
+			if (xhr.status === 416 && isFirstChunk && !hasRetriedRequestFor416) {
+				isFirstChunk = false;
+				hasRetriedRequestFor416 = true;
+				shouldDisableChunk = true;
+				// retry once
+				this._nextChunk();
+				return;
+			}
+
 			if (xhr.status < 200 || xhr.status >= 400)
 			{
 				this._chunkError();
@@ -702,7 +724,7 @@ License: MIT
 
 			var size = getFileSize(xhr);
 
-			if(size !== -1) {
+			if (size !== -1) {
 				// we only update totalContentSize when we can get valid content range header
 				totalContentSize = size;
 			}
