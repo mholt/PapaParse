@@ -592,7 +592,7 @@ describe('Core Parser Tests', function() {
 	function generateTest(test) {
 		(test.disabled ? it.skip : it)(test.description, function() {
 			var actual = new Papa.Parser(test.config).parse(test.input);
-			assert.deepEqual(JSON.stringify(actual.errors), JSON.stringify(test.expected.errors));
+			assert.deepEqual(actual.errors, test.expected.errors);
 			assert.deepEqual(actual.data, test.expected.data);
 		});
 	}
@@ -733,6 +733,23 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Row with enough fields but blank field in the begining",
+		input: 'A,B,C\r\n,b1,c1\r\na2,b2,c2',
+		expected: {
+			data: [["A", "B", "C"], ['', 'b1', 'c1'], ['a2', 'b2', 'c2']],
+			errors: []
+		}
+	},
+	{
+		description: "Row with enough fields but blank field in the begining using headers",
+		input: 'A,B,C\r\n,b1,c1\r\n,b2,c2',
+		config: { header: true },
+		expected: {
+			data: [{"A": "", "B": "b1", "C": "c1"}, {"A": "", "B": "b2", "C": "c2"}],
+			errors: []
+		}
+	},
+	{
 		description: "Row with enough fields but blank field at end",
 		input: 'A,B,C\r\na,b,',
 		config: { header: true },
@@ -747,6 +764,15 @@ var PARSE_TESTS = [
 		config: { header: true, transformHeader: function(header) { return header.toLowerCase(); } },
 		expected: {
 			data: [{"a": "a", "b": "b", "c": "c"}],
+			errors: []
+		}
+	},
+	{
+		description: "transformHeader accepts and optional index attribute",
+		input: 'A,B,C\r\na,b,c',
+		config: { header: true, transformHeader: function(header, i) { return i % 2 ? header.toLowerCase() : header; } },
+		expected: {
+			data: [{"A": "a", "b": "b", "C": "c"}],
 			errors: []
 		}
 	},
@@ -1464,6 +1490,22 @@ var PARSE_TESTS = [
 			data: [['a', 'b'], ['c', 'd'], [' , ', ','], ['" "', '""']],
 			errors: []
 		}
+	},
+	{
+		description: "Quoted fields with spaces between closing quote and next delimiter and contains delimiter",
+		input: 'A,",B" ,C,D\nE,F,G,H',
+		expected: {
+			data: [['A', ',B', 'C', 'D'],['E', 'F', 'G', 'H']],
+			errors: []
+		}
+	},
+	{
+		description: "Quoted fields with spaces between closing quote and newline and contains newline",
+		input: 'a,b,"c\n" \nd,e,f',
+		expected: {
+			data: [['a', 'b', 'c\n'], ['d', 'e', 'f']],
+			errors: []
+		}
 	}
 ];
 
@@ -1475,7 +1517,7 @@ describe('Parse Tests', function() {
 			if (test.expected.meta) {
 				assert.deepEqual(actual.meta, test.expected.meta);
 			}
-			assert.deepEqual(JSON.stringify(actual.errors), JSON.stringify(test.expected.errors));
+			assert.deepEqual(actual.errors, test.expected.errors);
 			assert.deepEqual(actual.data, test.expected.data);
 		});
 	}
@@ -1556,7 +1598,7 @@ describe('Parse Async Tests', function() {
 			var config = test.config;
 
 			config.complete = function(actual) {
-				assert.deepEqual(JSON.stringify(actual.errors), JSON.stringify(test.expected.errors));
+				assert.deepEqual(actual.errors, test.expected.errors);
 				assert.deepEqual(actual.data, test.expected.data);
 				done();
 			};
@@ -1809,7 +1851,36 @@ var UNPARSE_TESTS = [
 		input: [{a: 'foo', b: '"quoted"'}],
 		config: {header: false},
 		expected: 'foo,"""quoted"""'
-	}
+	},
+	{
+		description: "Escape formulae",
+		input: [{ "Col1": "=danger", "Col2": "@danger", "Col3": "safe" }, { "Col1": "safe=safe", "Col2": "+danger", "Col3": "-danger, danger" }, { "Col1": "'+safe", "Col2": "'@safe", "Col3": "safe, safe" }],
+		config: { escapeFormulae: true },
+		expected: 'Col1,Col2,Col3\r\n\'=danger,\'@danger,safe\r\nsafe=safe,\'+danger,"\'-danger, danger"\r\n\'+safe,\'@safe,"safe, safe"'
+	},
+	{
+		description: "Don't escape formulae by default",
+		input: [{ "Col1": "=danger", "Col2": "@danger", "Col3": "safe" }, { "Col1": "safe=safe", "Col2": "+danger", "Col3": "-danger, danger" }, { "Col1": "'+safe", "Col2": "'@safe", "Col3": "safe, safe" }],
+		expected: 'Col1,Col2,Col3\r\n=danger,@danger,safe\r\nsafe=safe,+danger,"-danger, danger"\r\n\'+safe,\'@safe,"safe, safe"'
+	},
+	{
+		description: "Escape formulae with forced quotes",
+		input: [{ "Col1": "=danger", "Col2": "@danger", "Col3": "safe" }, { "Col1": "safe=safe", "Col2": "+danger", "Col3": "-danger, danger" }, { "Col1": "'+safe", "Col2": "'@safe", "Col3": "safe, safe" }],
+		config: { escapeFormulae: true, quotes: true },
+		expected: '"Col1","Col2","Col3"\r\n"\'=danger","\'@danger","safe"\r\n"safe=safe","\'+danger","\'-danger, danger"\r\n"\'+safe","\'@safe","safe, safe"'
+	},
+	{
+		description: "Escape formulae with single-quote quoteChar and escapeChar",
+		input: [{ "Col1": "=danger", "Col2": "@danger", "Col3": "safe" }, { "Col1": "safe=safe", "Col2": "+danger", "Col3": "-danger, danger" }, { "Col1": "'+safe", "Col2": "'@safe", "Col3": "safe, safe" }],
+		config: { escapeFormulae: true, quoteChar: "'", escapeChar: "'" },
+		expected: 'Col1,Col2,Col3\r\n\'\'=danger,\'\'@danger,safe\r\nsafe=safe,\'\'+danger,\'\'\'-danger, danger\'\r\n\'\'+safe,\'\'@safe,\'safe, safe\''
+	},
+	{
+		description: "Escape formulae with single-quote quoteChar and escapeChar and forced quotes",
+		input: [{ "Col1": "=danger", "Col2": "@danger", "Col3": "safe" }, { "Col1": "safe=safe", "Col2": "+danger", "Col3": "-danger, danger" }, { "Col1": "'+safe", "Col2": "'@safe", "Col3": "safe, safe" }],
+		config: { escapeFormulae: true, quotes: true, quoteChar: "'", escapeChar: "'" },
+		expected: '\'Col1\',\'Col2\',\'Col3\'\r\n\'\'\'=danger\',\'\'\'@danger\',\'safe\'\r\n\'safe=safe\',\'\'\'+danger\',\'\'\'-danger, danger\'\r\n\'\'\'+safe\',\'\'\'@safe\',\'safe, safe\''
+	},
 ];
 
 describe('Unparse Tests', function() {
@@ -1879,6 +1950,108 @@ var CUSTOM_TESTS = [
 					callback(output);
 				}
 			});
+		}
+	},
+	{
+		description: "Pause and resume works for chunks with NetworkStreamer",
+		disabled: !XHR_ENABLED,
+		timeout: 30000,
+		expected: ["Etiam a dolor vitae est vestibulum", "84", "DEF"],
+		run: function(callback) {
+			var chunkNum = 0;
+			Papa.parse(BASE_PATH + "verylong-sample.csv", {
+				download: true,
+				chunkSize: 1000,
+				chunk: function(results, parser) {
+					chunkNum++;
+					parser.pause();
+
+					if (chunkNum === 2) {
+						callback(results.data[0]);
+						return;
+					}
+
+					parser.resume();
+				},
+				complete: function() {
+					callback(new Error("Should have found matched row before parsing whole file"));
+				}
+			});
+		}
+	},
+	{
+		description: "Pause and resume works for chunks with FileStreamer",
+		disabled: !XHR_ENABLED,
+		timeout: 30000,
+		expected: ["Etiam a dolor vitae est vestibulum", "84", "DEF"],
+		run: function(callback) {
+			var chunkNum = 0;
+			var xhr = new XMLHttpRequest();
+			xhr.onload = function() {
+				Papa.parse(new File([xhr.responseText], './verylong-sample.csv'), {
+					chunkSize: 1000,
+					chunk: function(results, parser) {
+						chunkNum++;
+						parser.pause();
+
+						if (chunkNum === 2) {
+							callback(results.data[0]);
+							return;
+						}
+
+						parser.resume();
+					},
+					complete: function() {
+						callback(new Error("Should have found matched row before parsing whole file"));
+					}
+				});
+			};
+
+			xhr.open("GET", BASE_PATH + "verylong-sample.csv");
+			try {
+				xhr.send();
+			} catch (err) {
+				callback(err);
+				return;
+			}
+		}
+	},
+	{
+		description: "Pause and resume works for chunks with StringStreamer",
+		disabled: !XHR_ENABLED,
+		timeout: 30000,
+		// Test also with string as byte size may be diferent
+		expected: ["Etiam a dolor vitae est vestibulum", "84", "DEF"],
+		run: function(callback) {
+			var chunkNum = 0;
+			var xhr = new XMLHttpRequest();
+			xhr.onload = function() {
+				Papa.parse(xhr.responseText, {
+					chunkSize: 1000,
+					chunk: function(results, parser) {
+						chunkNum++;
+						parser.pause();
+
+						if (chunkNum === 2) {
+							callback(results.data[0]);
+							return;
+						}
+
+						parser.resume();
+					},
+					complete: function() {
+						callback(new Error("Should have found matched row before parsing whole file"));
+					}
+				});
+			};
+
+			xhr.open("GET", BASE_PATH + "verylong-sample.csv");
+			try {
+				xhr.send();
+			} catch (err) {
+				callback(err);
+				return;
+			}
 		}
 	},
 	{
@@ -1964,6 +2137,22 @@ var CUSTOM_TESTS = [
 			var data = [];
 			Papa.parse('A,b,c\nd,E,f', {
 				worker: true,
+				step: function(results) {
+					data.push(results.data);
+				},
+				complete: function() {
+					callback(data);
+				}
+			});
+		}
+	},
+	{
+		description: "Data is correctly parsed with steps when skipping empty lines",
+		expected: [['A', 'b', 'c'], ['d', 'E', 'f']],
+		run: function(callback) {
+			var data = [];
+			Papa.parse('A,b,c\n\nd,E,f', {
+				skipEmptyLines: true,
 				step: function(results) {
 					data.push(results.data);
 				},
@@ -2368,7 +2557,7 @@ describe('Custom Tests', function() {
 				this.timeout(test.timeout);
 			}
 			test.run(function(actual) {
-				assert.deepEqual(JSON.stringify(actual), JSON.stringify(test.expected));
+				assert.deepEqual(actual, test.expected);
 				done();
 			});
 		});

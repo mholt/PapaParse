@@ -102,6 +102,29 @@ var peopleLovePapa = [
 		name: "Hua Explore",
 		description: "The premier destination for information on Contemporary Chinese Art.",
 		quote: "Papa makes processing data that galleries send us totally seamless."
+	},
+	{
+		link: "https://monei.net",
+		name: "MONEI",
+		description: "Digital payments made easy.",
+		quote: "With Papa life became much easier for us to manage huge csv payments files of our merchants."
+	},
+	{
+		link: "https://moonmail.io",
+		name: "MoonMail",
+		description: "OmniChannel Communication Platform powered by AWS PinPoint",
+		quote: "Papa makes contact imports a plain sailing."
+	},
+	{
+		link: "https://apps.shopify.com/wholesaler",
+		name: "Wholesaler for Shopify",
+		description: "Shopify App to offer Wholesaling within one unique Shopify store",
+		quote: "Super fast bulk Wholesale product price uploads. Love Papa!."
+	},
+	{
+		link: "https://www.unnitmetaliya.com/sop-sample/",
+		name: "Visa SOP Sample",
+		description: "Providing free guide to international students.",
+		quote: "Use Papa Parse for many of side projects. Super fast and works all the time. Love it!"
 	}
-	
 ];
