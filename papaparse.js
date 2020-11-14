@@ -297,7 +297,7 @@ License: MIT
 			if (!_input.length || Array.isArray(_input[0]))
 				return serialize(null, _input, _skipEmptyLines);
 			else if (typeof _input[0] === 'object')
-				return serialize(_columns || objectKeys(_input[0]), _input, _skipEmptyLines);
+				return serialize(_columns || Object.keys(_input[0]), _input, _skipEmptyLines);
 		}
 		else if (typeof _input === 'object')
 		{
@@ -312,7 +312,9 @@ License: MIT
 				if (!_input.fields)
 					_input.fields =  Array.isArray(_input.data[0])
 						? _input.fields
-						: objectKeys(_input.data[0]);
+						: typeof _input.data[0] === 'object'
+							? Object.keys(_input.data[0])
+							: [];
 
 				if (!(Array.isArray(_input.data[0])) && typeof _input.data[0] !== 'object')
 					_input.data = [_input.data];	// handles input like [1,2,3] or ['asdf']
@@ -369,17 +371,6 @@ License: MIT
 				_escapeFormulae = _config.escapeFormulae;
 		}
 
-
-		/** Turns an object's keys into an array */
-		function objectKeys(obj)
-		{
-			if (typeof obj !== 'object')
-				return [];
-			var keys = [];
-			for (var key in obj)
-				keys.push(key);
-			return keys;
-		}
 
 		/** The double for loop that iterates the data and writes out a CSV string including header row */
 		function serialize(fields, data, skipEmptyLines)
