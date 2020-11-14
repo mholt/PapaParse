@@ -1398,6 +1398,8 @@ License: MIT
 		var step = config.step;
 		var preview = config.preview;
 		var fastMode = config.fastMode;
+		var _strictQuote = config.strictQuote;
+		var strictQuote = _strictQuote === undefined ? false : Boolean(_strictQuote);
 		var quoteChar;
 		/** Allows for no quoteChar by setting quoteChar to undefined in config */
 		if (config.quoteChar === undefined) {
@@ -1489,6 +1491,9 @@ License: MIT
 			var nextNewline = input.indexOf(newline, cursor);
 			var quoteCharRegex = new RegExp(escapeRegExp(escapeChar) + escapeRegExp(quoteChar), 'g');
 			var quoteSearch = input.indexOf(quoteChar, cursor);
+			var savedNextDelim;
+			var savedNextNewline;
+			var savedQuoteSearch;
 
 			// Parser loop
 			for (;;)
@@ -1496,11 +1501,11 @@ License: MIT
 				// Field has opening quote
 				if (input[cursor] === quoteChar)
 				{
+					var quoteFallThrough = false;
+					quoteSaveState();
+
 					// Start our search for the closing quote where the cursor is
 					quoteSearch = cursor;
-
-					// Skip the opening quote
-					cursor++;
 
 					for (;;)
 					{
@@ -1510,8 +1515,10 @@ License: MIT
 						//No other quotes are found - no other delimiters
 						if (quoteSearch === -1)
 						{
-							if (!ignoreLastRow) {
-								// No closing quote... what a pity
+							if(ignoreLastRow)
+								return returnable();
+
+							if(strictQuote) {
 								errors.push({
 									type: 'Quotes',
 									code: 'MissingQuotes',
@@ -1519,14 +1526,25 @@ License: MIT
 									row: data.length,	// row has yet to be inserted
 									index: cursor
 								});
+								quoteRestoreState();
+								quoteFallThrough = true;
+								break; // fall through to parse as non-quote.
 							}
-							return finish();
+							// No closing quote... what a pity
+							errors.push({
+								type: 'Quotes',
+								code: 'MissingQuotes',
+								message: 'Quoted field unterminated',
+								row: data.length,	// row has yet to be inserted
+								index: cursor
+							});
+							return finish(input.substring(cursor + 1));
 						}
 
 						// Closing quote at EOF
 						if (quoteSearch === inputLen - 1)
 						{
-							var value = input.substring(cursor, quoteSearch).replace(quoteCharRegex, quoteChar);
+							var value = input.substring(cursor + 1, quoteSearch).replace(quoteCharRegex, quoteChar);
 							return finish(value);
 						}
 
@@ -1557,7 +1575,7 @@ License: MIT
 						// Closing quote followed by delimiter or 'unnecessary spaces + delimiter'
 						if (input[quoteSearch + 1 + spacesBetweenQuoteAndDelimiter] === delim)
 						{
-							row.push(input.substring(cursor, quoteSearch).replace(quoteCharRegex, quoteChar));
+							row.push(input.substring(cursor + 1, quoteSearch).replace(quoteCharRegex, quoteChar));
 							cursor = quoteSearch + 1 + spacesBetweenQuoteAndDelimiter + delimLen;
 
 							// If char after following delimiter is not quoteChar, we find next quote char position
@@ -1575,7 +1593,7 @@ License: MIT
 						// Closing quote followed by newline or 'unnecessary spaces + newLine'
 						if (input.substring(quoteSearch + 1 + spacesBetweenQuoteAndNewLine, quoteSearch + 1 + spacesBetweenQuoteAndNewLine + newlineLen) === newline)
 						{
-							row.push(input.substring(cursor, quoteSearch).replace(quoteCharRegex, quoteChar));
+							row.push(input.substring(cursor + 1, quoteSearch).replace(quoteCharRegex, quoteChar));
 							saveRow(quoteSearch + 1 + spacesBetweenQuoteAndNewLine + newlineLen);
 							nextDelim = input.indexOf(delim, cursor);	// because we may have skipped the nextDelim in the quoted field
 							quoteSearch = input.indexOf(quoteChar, cursor);	// we search for first quote in next line
@@ -1603,12 +1621,18 @@ License: MIT
 							index: cursor
 						});
 
+						if(strictQuote) {
+							quoteRestoreState();
+							quoteFallThrough = true;
+							break; // fall through to parse as non-quote.
+						}
 						quoteSearch++;
 						continue;
 
 					}
-
-					continue;
+					if(!quoteFallThrough) {
+						continue;
+					}
 				}
 
 				// Comment found at start of new line
@@ -1783,6 +1807,18 @@ License: MIT
 				}
 
 				return result;
+			}
+
+			function quoteSaveState() {
+				savedNextDelim = nextDelim;
+				savedNextNewline = nextNewline;
+				savedQuoteSearch = quoteSearch;
+			}
+
+			function quoteRestoreState() {
+				quoteSearch = savedQuoteSearch;
+				nextNewline = savedNextNewline;
+				nextDelim = savedNextDelim;
 			}
 		};
 
