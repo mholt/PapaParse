@@ -585,6 +585,15 @@ var CORE_PARSER_TESTS = [
 			data: [['a', 'b', 'c'], ['']],
 			errors: []
 		}
+	},
+	{
+		description: "Force uniform newline",
+		input: 'a,b,c\r\nd,e,f\ng,h,i\rj,k,l\n',
+		config: { forceUniformNewline: true },
+		expected: {
+			data: [['a', 'b', 'c'], ['d', 'e', 'f'], ['g', 'h', 'i'], ['j', 'k', 'l'], ['']],
+			errors: []
+		}
 	}
 ];
 

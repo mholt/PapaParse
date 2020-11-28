@@ -1398,6 +1398,7 @@ License: MIT
 		var step = config.step;
 		var preview = config.preview;
 		var fastMode = config.fastMode;
+		var forceUniformNewline = config.forceUniformNewline;
 		var quoteChar;
 		/** Allows for no quoteChar by setting quoteChar to undefined in config */
 		if (config.quoteChar === undefined) {
@@ -1437,6 +1438,9 @@ License: MIT
 			// For some reason, in Chrome, this speeds things up (!?)
 			if (typeof input !== 'string')
 				throw new Error('Input must be a string');
+
+			if (forceUniformNewline)
+				input = input.replace(/(\r\n|\r|\n)/g, newline);
 
 			// We don't need to compute some of these every time parse() is called,
 			// but having them in a more local scope seems to perform better
