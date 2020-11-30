@@ -449,7 +449,8 @@ var csv = Papa.unparse({
 	beforeFirstChunk: undefined,
 	withCredentials: undefined,
 	transform: undefined,
-	delimitersToGuess: [',', '\t', '|', ';', <a href="#readonly">Papa.RECORD_SEP</a>, <a href="#readonly">Papa.UNIT_SEP</a>]
+	delimitersToGuess: [',', '\t', '|', ';', <a href="#readonly">Papa.RECORD_SEP</a>, <a href="#readonly">Papa.UNIT_SEP</a>],
+	forceUniformNewline: undefined
 }</code></pre>
 					</div>
 					<div class="clear"></div>
@@ -477,7 +478,7 @@ var csv = Papa.unparse({
 									<code>newline</code>
 								</td>
 								<td>
-									The newline sequence. Leave blank to auto-detect. Must be one of \r, \n, or \r\n.
+									The newline sequence. Leave blank to auto-detect. Must be one of \r, \n, or \r\n. If you are working with file where newline characters vary then you can try setting <code>forceUniformNewline</code> to <code>true</code> to make sure there is only one variant before parsing.
 								</td>
 							</tr>
 							<tr>
@@ -678,6 +679,14 @@ var csv = Papa.unparse({
 								</td>
 								<td>
 									An array of delimiters to guess from if the <code>delimiter</code> option is not set.
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<code>forceUniformNewline</code>
+								</td>
+								<td>
+									When set to <code>true</code> replace all newline characters no matter what variant (\r, \n or \r\n) in the file to current <code>newline</code> before parsing. This is useful when newline characters vary in a file leading to inaccurate parsing. Use this with care however because this option will also replace quoted newline characters.
 								</td>
 							</tr>
 						</table>
