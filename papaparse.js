@@ -1625,27 +1625,11 @@ License: MIT
 				// Next delimiter comes before next newline, so we've reached end of field
 				if (nextDelim !== -1 && (nextDelim < nextNewline || nextNewline === -1))
 				{
-					// we check, if we have quotes, because delimiter char may be part of field enclosed in quotes
-					if (quoteSearch > nextDelim) {
-						// we have quotes, so we try to find the next delimiter not enclosed in quotes and also next starting quote char
-						var nextDelimObj = getNextUnquotedDelimiter(nextDelim, quoteSearch, nextNewline);
-
-						// if we have next delimiter char which is not enclosed in quotes
-						if (nextDelimObj && typeof nextDelimObj.nextDelim !== 'undefined') {
-							nextDelim = nextDelimObj.nextDelim;
-							quoteSearch = nextDelimObj.quoteSearch;
-							row.push(input.substring(cursor, nextDelim));
-							cursor = nextDelim + delimLen;
-							// we look for next delimiter char
-							nextDelim = input.indexOf(delim, cursor);
-							continue;
-						}
-					} else {
-						row.push(input.substring(cursor, nextDelim));
-						cursor = nextDelim + delimLen;
-						nextDelim = input.indexOf(delim, cursor);
-						continue;
-					}
+					row.push(input.substring(cursor, nextDelim));
+					cursor = nextDelim + delimLen;
+					// we look for next delimiter char
+					nextDelim = input.indexOf(delim, cursor);
+					continue;
 				}
 
 				// End of row
@@ -1749,40 +1733,6 @@ License: MIT
 				step(returnable());
 				data = [];
 				errors = [];
-			}
-
-			/** Gets the delimiter character, which is not inside the quoted field */
-			function getNextUnquotedDelimiter(nextDelim, quoteSearch, newLine) {
-				var result = {
-					nextDelim: undefined,
-					quoteSearch: undefined
-				};
-				// get the next closing quote character
-				var nextQuoteSearch = input.indexOf(quoteChar, quoteSearch + 1);
-
-				// if next delimiter is part of a field enclosed in quotes
-				if (nextDelim > quoteSearch && nextDelim < nextQuoteSearch && (nextQuoteSearch < newLine || newLine === -1)) {
-					// get the next delimiter character after this one
-					var nextNextDelim = input.indexOf(delim, nextQuoteSearch);
-
-					// if there is no next delimiter, return default result
-					if (nextNextDelim === -1) {
-						return result;
-					}
-					// find the next opening quote char position
-					if (nextNextDelim > nextQuoteSearch) {
-						nextQuoteSearch = input.indexOf(quoteChar, nextQuoteSearch + 1);
-					}
-					// try to get the next delimiter position
-					result = getNextUnquotedDelimiter(nextNextDelim, nextQuoteSearch, newLine);
-				} else {
-					result = {
-						nextDelim: nextDelim,
-						quoteSearch: quoteSearch
-					};
-				}
-
-				return result;
 			}
 		};
 
