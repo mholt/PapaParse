@@ -282,7 +282,8 @@
 									<code>quotes</code>
 								</td>
 								<td>
-									If <code>true</code>, forces all fields to be enclosed in quotes. If an array of <code>true/false</code> values, specifies which fields should be force-quoted (first boolean is for the first column, second boolean for the second column, ...). A function that returns a boolean values can be used to determine the quotes value of a cell. This function accepts the cell value and column index as parameters.
+									If <code>true</code>, forces all fields to be enclosed in quotes. If an array of <code>true/false</code> values, specifies which fields should be force-quoted (first boolean is for the first column, second boolean for the second column, ...). A function that returns a boolean values can be used to determine the quotes value of a cell. This function accepts the cell value and column index as parameters. <br />
+									Note that this option is ignored for <code>undefined</code>, <code>null</code> and <code>date-object</code> values. The option <code>escapeFormulae</code> also takes precedence over this.
 								</td>
 							</tr>
 							<tr>
