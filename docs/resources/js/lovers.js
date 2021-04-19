@@ -127,7 +127,7 @@ var peopleLovePapa = [
 		description: "Providing free guide to international students.",
 		quote: "Use Papa Parse for many of side projects. Super fast and works all the time. Love it!"
 	},
-		{
+	{
 		link: "https://retool.com/",
 		name: "Retool",
 		description: "A remarkably fast way to build internal tools.",
