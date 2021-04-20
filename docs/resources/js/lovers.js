@@ -126,5 +126,11 @@ var peopleLovePapa = [
 		name: "Visa SOP Sample",
 		description: "Providing free guide to international students.",
 		quote: "Use Papa Parse for many of side projects. Super fast and works all the time. Love it!"
+	},
+	{
+		link: "https://retool.com/",
+		name: "Retool",
+		description: "A remarkably fast way to build internal tools.",
+		quote: "Papa makes it easy for our users to customize CSV parsing to match their business logic."
 	}
 ];
