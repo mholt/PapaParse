@@ -998,6 +998,15 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Dynamic typing skips ISO date strings ocurring in other strings",
+		input: 'ISO date,String with ISO date\r\n2018-05-04T21:08:03.269Z,The date is 2018-05-04T21:08:03.269Z\r\n2018-05-08T15:20:22.642Z,The date is 2018-05-08T15:20:22.642Z',
+		config: { dynamicTyping: true },
+		expected: {
+			data: [["ISO date", "String with ISO date"], [new Date("2018-05-04T21:08:03.269Z"), "The date is 2018-05-04T21:08:03.269Z"], [new Date("2018-05-08T15:20:22.642Z"), "The date is 2018-05-08T15:20:22.642Z"]],
+			errors: []
+		}
+	},
+	{
 		description: "Blank line at beginning",
 		input: '\r\na,b,c\r\nd,e,f',
 		config: { newline: '\r\n' },
