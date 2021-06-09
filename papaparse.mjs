@@ -37,9 +37,7 @@ export var NODE_STREAM_INPUT = 1;
 
 // Configurable chunk sizes for local and remote files, respectively
 export var LocalChunkSize = 1024 * 1024 * 10;	// 10 MB
-// eslint-disable-next-line prefer-const
 export var RemoteChunkSize = 1024 * 1024 * 5;	// 5 MB
-// eslint-disable-next-line prefer-const
 export var DefaultDelimiter = ',';  			// Used if not specified and detection fails
 
 // Exposed for testing and development only
@@ -1732,7 +1730,7 @@ function newWorker()
 		return false;
 
 	var workerUrl = SCRIPT_URL;
-	var w = new global.Worker(workerUrl, { name: PAPA_WORKER_NAME });
+	var w = new global.Worker(workerUrl, { name: PAPA_WORKER_NAME, type: import.meta.papaIsUMD ? undefined : 'module' });
 	w.onmessage = mainThreadReceivedMessage;
 	w.id = workerIdCounter++;
 	workers[w.id] = w;

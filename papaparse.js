@@ -1736,7 +1736,7 @@
 			return false;
 
 		var workerUrl = SCRIPT_URL;
-		var w = new global.Worker(workerUrl, { name: PAPA_WORKER_NAME });
+		var w = new global.Worker(workerUrl, { name: PAPA_WORKER_NAME, type: true ? undefined : 'module' });
 		w.onmessage = mainThreadReceivedMessage;
 		w.id = workerIdCounter++;
 		workers[w.id] = w;

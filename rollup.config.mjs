@@ -18,8 +18,13 @@ export default {
 	plugins: [
 		{
 			resolveImportMeta(prop, { format }) {
-				if (prop === 'url' && format === 'umd') {
-					return 'global && global.document && global.document.currentScript && global.document.currentScript.src';
+				if (format === 'umd') {
+					if (prop === 'url') {
+						return 'global && global.document && global.document.currentScript && global.document.currentScript.src';
+					}
+					if (prop === 'papaIsUMD') {
+						return 'true';
+					}
 				}
 			}
 		}
