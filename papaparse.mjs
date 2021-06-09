@@ -19,45 +19,44 @@ var global = (function() {
 })();
 
 var workers = {}, workerIdCounter = 0;
-const PAPA_WORKER_NAME = 'papa-worker';
-let WORKER_ID;
-const SCRIPT_URL = import.meta.url;
+var PAPA_WORKER_NAME = 'papa-worker';
+var WORKER_ID;
+var SCRIPT_URL = import.meta.url;
 var IS_WORKER = !global.document && !!global.postMessage,
 	IS_PAPA_WORKER = IS_WORKER && global.name === PAPA_WORKER_NAME;
 
-export const parse = CsvToJson;
-export const unparse = JsonToCsv;
+export var parse = CsvToJson;
+export var unparse = JsonToCsv;
 
-export const RECORD_SEP = String.fromCharCode(30);
-export const UNIT_SEP = String.fromCharCode(31);
-export const BYTE_ORDER_MARK = '\ufeff';
-export const BAD_DELIMITERS = ['\r', '\n', '"', BYTE_ORDER_MARK];
-export const WORKERS_SUPPORTED = !IS_WORKER && !!global.Worker && SCRIPT_URL;
-export const NODE_STREAM_INPUT = 1;
+export var RECORD_SEP = String.fromCharCode(30);
+export var UNIT_SEP = String.fromCharCode(31);
+export var BYTE_ORDER_MARK = '\ufeff';
+export var BAD_DELIMITERS = ['\r', '\n', '"', BYTE_ORDER_MARK];
+export var WORKERS_SUPPORTED = !IS_WORKER && !!global.Worker && SCRIPT_URL;
+export var NODE_STREAM_INPUT = 1;
 
 // Configurable chunk sizes for local and remote files, respectively
+export var LocalChunkSize = 1024 * 1024 * 10;	// 10 MB
 // eslint-disable-next-line prefer-const
-export let LocalChunkSize = 1024 * 1024 * 10;	// 10 MB
+export var RemoteChunkSize = 1024 * 1024 * 5;	// 5 MB
 // eslint-disable-next-line prefer-const
-export let RemoteChunkSize = 1024 * 1024 * 5;	// 5 MB
-// eslint-disable-next-line prefer-const
-export let DefaultDelimiter = ',';  			// Used if not specified and detection fails
+export var DefaultDelimiter = ',';  			// Used if not specified and detection fails
 
 // Exposed for testing and development only
 /** @private */
-export const Parser = _Parser;
+export var Parser = _Parser;
 /** @private */
-export const ParserHandle = _ParserHandle;
+export var ParserHandle = _ParserHandle;
 /** @private */
-export const NetworkStreamer = _NetworkStreamer;
+export var NetworkStreamer = _NetworkStreamer;
 /** @private */
-export const FileStreamer = _FileStreamer;
+export var FileStreamer = _FileStreamer;
 /** @private */
-export const StringStreamer = _StringStreamer;
+export var StringStreamer = _StringStreamer;
 /** @private */
-export const ReadableStreamStreamer = _ReadableStreamStreamer;
+export var ReadableStreamStreamer = _ReadableStreamStreamer;
 /** @private */
-export const DuplexStreamStreamer = typeof PAPA_BROWSER_CONTEXT === 'undefined'
+export var DuplexStreamStreamer = typeof PAPA_BROWSER_CONTEXT === 'undefined'
 	? _DuplexStreamStreamer
 	: undefined;
 
