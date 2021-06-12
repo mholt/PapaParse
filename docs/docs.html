@@ -303,7 +303,7 @@
 									<code>delimiter</code>
 								</td>
 								<td>
-									The delimiting character. It must not be found in <a href="#readonly">Papa.BAD_DELIMITERS</a>.
+									The delimiting character. Multi-character delimiters are supported. It must not be found in <a href="#readonly">Papa.BAD_DELIMITERS</a>.
 								</td>
 							</tr>
 							<tr>
@@ -470,7 +470,7 @@ var csv = Papa.unparse({
 									<code>delimiter</code>
 								</td>
 								<td>
-									The delimiting character. Leave blank to auto-detect from a list of most common delimiters, or any values passed in through <code>delimitersToGuess</code>. It can be a string or a function. If string, it must be one of length 1. If a function, it must accept the input as first parameter and it must return a string which will be used as delimiter. In both cases it cannot be found in <a href="#readonly">Papa.BAD_DELIMITERS</a>.
+									The delimiting character. Leave blank to auto-detect from a list of most common delimiters, or any values passed in through <code>delimitersToGuess</code>. It can be a string or a function. If a string, it can be of any length (so multi-character delimiters are supported). If a function, it must accept the input as first parameter and it must return a string which will be used as delimiter. In both cases it cannot be found in <a href="#readonly">Papa.BAD_DELIMITERS</a>.
 								</td>
 							</tr>
 							<tr>
@@ -861,7 +861,7 @@ var csv = Papa.unparse({
 							<tr>
 								<td><code>Papa.BAD_DELIMITERS</code></td>
 								<td>
-									An array of characters that are not allowed as delimiters.
+									An array of characters that are not allowed as delimiters (<code>\r, \n, ", \ufeff</code>).
 								</td>
 							</tr>
 							<tr>

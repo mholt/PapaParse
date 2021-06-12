@@ -1555,7 +1555,7 @@ License: MIT
 						var spacesBetweenQuoteAndDelimiter = extraSpaces(checkUpTo);
 
 						// Closing quote followed by delimiter or 'unnecessary spaces + delimiter'
-						if (input[quoteSearch + 1 + spacesBetweenQuoteAndDelimiter] === delim)
+						if (input.substr(quoteSearch + 1 + spacesBetweenQuoteAndDelimiter, delimLen) === delim)
 						{
 							row.push(input.substring(cursor, quoteSearch).replace(quoteCharRegex, quoteChar));
 							cursor = quoteSearch + 1 + spacesBetweenQuoteAndDelimiter + delimLen;
