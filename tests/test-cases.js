@@ -848,6 +848,16 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Multi-character delimiter (length 2) with quoted field",
+		input: 'a, b, "c, e", d',
+		config: { delimiter: ", " },
+		notes: "The quotes must be immediately adjacent to the delimiter to indicate a quoted field",
+		expected: {
+			data: [['a', 'b', 'c, e', 'd']],
+			errors: []
+		}
+	},
+	{
 		description: "Callback delimiter",
 		input: 'a$ b$ c',
 		config: { delimiter: function(input) { return input[1] + ' '; } },
@@ -1712,6 +1722,12 @@ var UNPARSE_TESTS = [
 		input: [['A', 'b', 'c'], ['d', 'e', 'f']],
 		config: { delimiter: ', ' },
 		expected: 'A, b, c\r\nd, e, f'
+	},
+	{
+		description: "Custom delimiter (Multi-character), field contains custom delimiter",
+		input: [['A', 'b', 'c'], ['d', 'e', 'f, g']],
+		config: { delimiter: ', ' },
+		expected: 'A, b, c\r\nd, e, "f, g"'
 	},
 	{
 		description: "Bad delimiter (\\n)",
