@@ -34,21 +34,26 @@
 		"url": "https://twitter.com/mholt6"
 	},
 	"license": "MIT",
-	"main": "papaparse.js",
-	"browser": "papaparse.min.js",
+	"main": "./papaparse.js",
+	"browser": "./papaparse.min.js",
+	"exports": {
+		"import": "./papaparse.mjs",
+		"require": "./papaparse.js"
+	},
 	"devDependencies": {
 		"chai": "^4.2.0",
-		"connect": "^3.3.3",
-		"eslint": "^4.19.1",
-		"grunt": "^1.0.2",
-		"grunt-contrib-uglify": "^3.3.0",
-		"mocha": "^5.2.0",
-		"mocha-headless-chrome": "^2.0.1",
+		"connect": "^3.7.0",
+		"eslint": "^7.28.0",
+		"mocha": "^9.0.0",
+		"mocha-headless-chrome": "^3.1.0",
 		"open": "7.0.0",
-		"serve-static": "^1.7.1"
+		"rollup": "^2.51.1",
+		"rollup-plugin-terser": "^7.0.2",
+		"serve-static": "^1.14.1"
 	},
 	"scripts": {
-		"lint": "eslint --no-ignore papaparse.js Gruntfile.js .eslintrc.js 'tests/**/*.js'",
+		"build": "rollup -c rollup.config.mjs",
+		"lint": "eslint --no-ignore papaparse.mjs .eslintrc.js 'tests/**/*.js'",
 		"test-browser": "node tests/test.js",
 		"test-mocha-headless-chrome": "node tests/test.js --mocha-headless-chrome",
 		"test-node": "mocha tests/node-tests.js tests/test-cases.js",

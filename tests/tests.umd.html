@@ -1,0 +1,22 @@
+<html>
+	<head>
+		<title>Papa Parse Tests</title>
+		<meta charset="utf-8">
+		<link rel="stylesheet" href="../node_modules/mocha/mocha.css" />
+	</head>
+	<body>
+		<div id="mocha"></div>
+		<script src="../node_modules/mocha/mocha.js"defer></script>
+		<script src="../node_modules/chai/chai.js" defer></script>
+		<script type="module">
+			import * as Papa from '../papaparse.mjs';
+			window.Papa = Papa;
+			mocha.setup('bdd');
+			mocha.checkLeaks();
+		</script>
+		<script src="test-cases.js" id="test-cases" defer></script>
+		<script type="module">
+			mocha.run();
+		</script>
+	</body>
+</html>
