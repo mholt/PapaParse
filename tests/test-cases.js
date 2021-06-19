@@ -1906,6 +1906,13 @@ var UNPARSE_TESTS = [
 		config: { escapeFormulae: true, quotes: true, quoteChar: "'", escapeChar: "'" },
 		expected: '\'Col1\',\'Col2\',\'Col3\'\r\n\'\'\'=danger\',\'\'\'@danger\',\'safe\'\r\n\'safe=safe\',\'\'\'+danger\',\'\'\'-danger, danger\'\r\n\'\'\'+safe\',\'\'\'@safe\',\'safe, safe\''
 	},
+	{
+		description: "Use quoteDataWithSpaces set to false",
+		notes: "Papa should not add quotes to data with spaces in the start or in the end)",
+		input: { data: ["abc", "d", " ef "] },
+		config: { quoteDataWithSpaces: false },
+		expected: 'abc,d, ef '
+	},
 ];
 
 describe('Unparse Tests', function() {

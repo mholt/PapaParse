@@ -285,6 +285,9 @@ License: MIT
 		/** whether to prevent outputting cells that can be parsed as formulae by spreadsheet software (Excel and LibreOffice) */
 		var _escapeFormulae = false;
 
+		/** whether to surround every datum that has spaces in the start or in the end with quotes */
+		var _quoteDataWithSpaces = true;
+
 		unpackConfig();
 
 		var quoteCharRegex = new RegExp(escapeRegExp(_quoteChar), 'g');
@@ -369,6 +372,9 @@ License: MIT
 
 			if (typeof _config.escapeFormulae === 'boolean')
 				_escapeFormulae = _config.escapeFormulae;
+
+			if (typeof _config.quoteDataWithSpaces === 'boolean')
+				_quoteDataWithSpaces = _config.quoteDataWithSpaces;
 		}
 
 
@@ -455,8 +461,8 @@ License: MIT
 							|| (Array.isArray(_quotes) && _quotes[col])
 							|| hasAny(escapedQuoteStr, Papa.BAD_DELIMITERS)
 							|| escapedQuoteStr.indexOf(_delimiter) > -1
-							|| escapedQuoteStr.charAt(0) === ' '
-							|| escapedQuoteStr.charAt(escapedQuoteStr.length - 1) === ' ';
+							|| (_quoteDataWithSpaces && escapedQuoteStr.charAt(0) === ' ')
+							|| (_quoteDataWithSpaces && escapedQuoteStr.charAt(escapedQuoteStr.length - 1) === ' ');
 
 			return needsQuotes ? _quoteChar + escapedQuoteStr + _quoteChar : escapedQuoteStr;
 		}

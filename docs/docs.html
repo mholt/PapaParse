@@ -260,7 +260,8 @@
 	header: true,
 	newline: "\r\n",
 	skipEmptyLines: false, //other option is 'greedy', meaning skip delimiters, quotes, and whitespace.
-	columns: null //or array of strings
+	columns: null, //or array of strings
+	quoteDataWithSpaces: true
 }
 					</code></pre>
 				</div>
@@ -336,6 +337,14 @@
 								</td>
 								<td>
 									If <code>data</code> is an array of objects this option can be used to manually specify the keys (columns) you expect in the objects. If not set the keys of the first objects are used as column.
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<code>quoteDataWithSpaces</code>
+								</td>
+								<td>
+									If <code>false</code>, field values that have spaces in the start or in the end will not be enclosed in quotes.
 								</td>
 							</tr>
 							<tr>
