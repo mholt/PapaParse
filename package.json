@@ -36,7 +36,7 @@
 	"license": "MIT",
 	"main": "papaparse.js",
 	"module": "papaparse.esm.js",
-	"browser": "papaparse.min.js",
+	"browser": "papaparse.esm.js",
 	"devDependencies": {
 		"chai": "^4.2.0",
 		"connect": "^3.3.3",
