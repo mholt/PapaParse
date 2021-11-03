@@ -1181,10 +1181,10 @@ License: MIT
 				return;
 
 			var headerLines = _config.headerLines || 1;
-			function addHeader(j, header, i)
+			function addHeader(j, header, i, arr)
 			{
 				if (isFunction(_config.transformHeader))
-					header = _config.transformHeader(header, i, _fields[i] || '', j);
+					header = _config.transformHeader(header, i, arr, _fields[i] || '', j);
 
 				_fields[i] = header;
 			}

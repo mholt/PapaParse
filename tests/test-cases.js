@@ -770,7 +770,7 @@ var PARSE_TESTS = [
 	{
 		description: "Header row is generated from multiple rows when transformheader function is provided and config.headerLines is set",
 		input: "A,B,C\r\nD,E,F\r\nG,H,I\r\nadg,beh,cfi",
-		config: { header: true, transformHeader: function(header, i, acc, j) { return acc + (j % 2 ? header.toLowerCase() : header); }, headerLines: 3 },
+		config: { header: true, transformHeader: function(header, i, arr, acc, j) { return acc + (j % 2 ? header.toLowerCase() : header); }, headerLines: 3 },
 		expected: {
 			data: [{"AdG": "adg", "BeH": "beh", "CfI": "cfi"}],
 			errors: []
