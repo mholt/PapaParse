@@ -1180,24 +1180,26 @@ License: MIT
 			if (!_results)
 				return;
 
-			function addHeader(header, i)
+			var headerLines = _config.headerLines || 1;
+			function addHeader(j, header, i)
 			{
 				if (isFunction(_config.transformHeader))
-					header = _config.transformHeader(header, i);
+					header = _config.transformHeader(header, i, _fields[i] || '', j);
 
-				_fields.push(header);
+				_fields[i] = header;
 			}
-
 			if (Array.isArray(_results.data[0]))
 			{
-				for (var i = 0; needsHeaderRow() && i < _results.data.length; i++)
-					_results.data[i].forEach(addHeader);
-
-				_results.data.splice(0, 1);
+				for (var j = 0; j < Math.min(headerLines, _results.data.length); j++)
+				{
+					// A function which takes two arguments (header, i) where j is set by the fact it is called in this loop. It then calls addHeader() with all three arguments
+					_results.data[j].forEach(addHeader.bind(null, j));
+				}
+				_results.data.splice(0, headerLines);
 			}
 			// if _results.data[0] is not an array, we are in a step where _results.data is the row.
 			else
-				_results.data.forEach(addHeader);
+				_results.data.forEach(addHeader.bind(null, 0));
 		}
 
 		function shouldApplyDynamicTyping(field) {
