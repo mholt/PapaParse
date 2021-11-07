@@ -1,0 +1,66 @@
+# Syncs 'papaparse.min.js' to stand-alone library.
+name: Sync Minified Script
+
+# Create new tag.
+on:
+  create:
+
+jobs:
+  demo:
+    runs-on: ubuntu-latest
+    steps:
+      # Retrieves version number from the new tag.
+      - name: "Read Version Number"
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        run: echo "version=$VER_NAME" >> $GITHUB_ENV
+        env:
+          VER_NAME: ${{ github.event.ref }}
+      # Clone full repository.
+      - name: "Download Original Repository"
+        uses: actions/checkout@v2
+        with:
+            path: main
+            token: ${{ secrets.REPO_ACCESS_TOKEN }}
+      # Clone min repository.
+      - name: "Download Minified Repository"
+        uses: actions/checkout@v2
+        with:
+            repository: tjohnston-softdev/papaparse-min
+            path: min-repo
+            token: ${{ secrets.REPO_ACCESS_TOKEN }}
+      # Reads specific tag from full repository.
+      - name: "Read Version Snapshot"
+        run: |
+          cd ./main
+          git checkout tags/${{ env.version }}
+      # Syncs files from full to min.
+      - name: "Sync Target Files"
+        run: |
+          cd ./main
+          cp ./papaparse.min.js ../min-repo/papaparse.min.js
+          cp ./LICENSE ../min-repo/license.txt
+          date > ../min-repo/update-timestamp.txt
+      # Commit updates to min repository.
+      - name: "Update Minified Repository"
+        run: |
+          cd ./min-repo
+          npm --no-git-tag-version version ${{ env.version }}
+          git config --global user.email = "E-MAIL GOES HERE"
+          git config --global user.name = "USERNAME GOES HERE"
+          git add .
+          git commit -m "Update - ${{ env.version }}"
+          git tag ${{ env.version }}
+          git push origin main --tags
+      # Load NPM
+      - name: "Set Up NPM"
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
+          registry-url: https://registry.npmjs.org/
+      # Publish NPM update.
+      - name: "Publish Minified Script"
+        run: |
+          cd ./min-repo
+          npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
