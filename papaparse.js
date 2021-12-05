@@ -444,13 +444,17 @@ License: MIT
 			if (str.constructor === Date)
 				return JSON.stringify(str).slice(1, 25);
 
+			var needsQuotes = false;
+
 			if (_escapeFormulae && typeof str === "string" && _escapeFormulae.test(str)) {
 				str = "'" + str;
+				needsQuotes = true;
 			}
 
 			var escapedQuoteStr = str.toString().replace(quoteCharRegex, _escapedQuote);
 
-			var needsQuotes = (typeof _quotes === 'boolean' && _quotes)
+			needsQuotes = needsQuotes
+							|| _quotes === true
 							|| (typeof _quotes === 'function' && _quotes(str, col))
 							|| (Array.isArray(_quotes) && _quotes[col])
 							|| hasAny(escapedQuoteStr, Papa.BAD_DELIMITERS)
