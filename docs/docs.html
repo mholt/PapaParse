@@ -343,7 +343,7 @@
 									<code>escapeFormulae</code>
 								</td>
 								<td>
-									If <code>true</code>, field values that begin with <code>=</code>, <code>+</code>, <code>-</code>, or <code>@</code>, will be prepended with a <code>'</code> to defend against <a href="https://www.contextis.com/en/blog/comma-separated-vulnerabilities" target="_blank" rel="noopener">injection attacks</a>, because Excel and LibreOffice will automatically parse such cells as formulae.
+									If <code>true</code>, field values that begin with <code>=</code>, <code>+</code>, <code>-</code>, <code>@</code>, <code>\t</code>, or <code>\r</code>, will be prepended with a <code>'</code> to defend against <a href="https://owasp.org/www-community/attacks/CSV_Injection" target="_blank" rel="noopener">injection attacks</a>, because Excel and LibreOffice will automatically parse such cells as formulae. You can override those values by setting this option to a regular expression
 								</td>
 							</tr>
 						</table>

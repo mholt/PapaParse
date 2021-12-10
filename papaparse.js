@@ -367,10 +367,10 @@ License: MIT
 				_escapedQuote = _config.escapeChar + _quoteChar;
 			}
 
-			if (typeof _config.escapeFormulae === 'boolean')
-				_escapeFormulae = _config.escapeFormulae;
+			if (typeof _config.escapeFormulae === 'boolean' || _config.escapeFormulae instanceof RegExp) {
+				_escapeFormulae = _config.escapeFormulae instanceof RegExp ? _config.escapeFormulae : /^[=+\-@\t\r].*$/;
+			}
 		}
-
 
 		/** The double for loop that iterates the data and writes out a CSV string including header row */
 		function serialize(fields, data, skipEmptyLines)
@@ -444,13 +444,17 @@ License: MIT
 			if (str.constructor === Date)
 				return JSON.stringify(str).slice(1, 25);
 
-			if (_escapeFormulae === true && typeof str === "string" && (str.match(/^[=+\-@].*$/) !== null)) {
+			var needsQuotes = false;
+
+			if (_escapeFormulae && typeof str === "string" && _escapeFormulae.test(str)) {
 				str = "'" + str;
+				needsQuotes = true;
 			}
 
 			var escapedQuoteStr = str.toString().replace(quoteCharRegex, _escapedQuote);
 
-			var needsQuotes = (typeof _quotes === 'boolean' && _quotes)
+			needsQuotes = needsQuotes
+							|| _quotes === true
 							|| (typeof _quotes === 'function' && _quotes(str, col))
 							|| (Array.isArray(_quotes) && _quotes[col])
 							|| hasAny(escapedQuoteStr, Papa.BAD_DELIMITERS)

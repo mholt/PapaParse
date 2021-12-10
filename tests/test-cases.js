@@ -1881,7 +1881,7 @@ var UNPARSE_TESTS = [
 		description: "Escape formulae",
 		input: [{ "Col1": "=danger", "Col2": "@danger", "Col3": "safe" }, { "Col1": "safe=safe", "Col2": "+danger", "Col3": "-danger, danger" }, { "Col1": "'+safe", "Col2": "'@safe", "Col3": "safe, safe" }],
 		config: { escapeFormulae: true },
-		expected: 'Col1,Col2,Col3\r\n\'=danger,\'@danger,safe\r\nsafe=safe,\'+danger,"\'-danger, danger"\r\n\'+safe,\'@safe,"safe, safe"'
+		expected: 'Col1,Col2,Col3\r\n"\'=danger","\'@danger",safe\r\nsafe=safe,"\'+danger","\'-danger, danger"\r\n\'+safe,\'@safe,"safe, safe"'
 	},
 	{
 		description: "Don't escape formulae by default",
@@ -1898,13 +1898,38 @@ var UNPARSE_TESTS = [
 		description: "Escape formulae with single-quote quoteChar and escapeChar",
 		input: [{ "Col1": "=danger", "Col2": "@danger", "Col3": "safe" }, { "Col1": "safe=safe", "Col2": "+danger", "Col3": "-danger, danger" }, { "Col1": "'+safe", "Col2": "'@safe", "Col3": "safe, safe" }],
 		config: { escapeFormulae: true, quoteChar: "'", escapeChar: "'" },
-		expected: 'Col1,Col2,Col3\r\n\'\'=danger,\'\'@danger,safe\r\nsafe=safe,\'\'+danger,\'\'\'-danger, danger\'\r\n\'\'+safe,\'\'@safe,\'safe, safe\''
+		expected: 'Col1,Col2,Col3\r\n\'\'\'=danger\',\'\'\'@danger\',safe\r\nsafe=safe,\'\'\'+danger\',\'\'\'-danger, danger\'\r\n\'\'+safe,\'\'@safe,\'safe, safe\''
 	},
 	{
 		description: "Escape formulae with single-quote quoteChar and escapeChar and forced quotes",
 		input: [{ "Col1": "=danger", "Col2": "@danger", "Col3": "safe" }, { "Col1": "safe=safe", "Col2": "+danger", "Col3": "-danger, danger" }, { "Col1": "'+safe", "Col2": "'@safe", "Col3": "safe, safe" }],
 		config: { escapeFormulae: true, quotes: true, quoteChar: "'", escapeChar: "'" },
 		expected: '\'Col1\',\'Col2\',\'Col3\'\r\n\'\'\'=danger\',\'\'\'@danger\',\'safe\'\r\n\'safe=safe\',\'\'\'+danger\',\'\'\'-danger, danger\'\r\n\'\'\'+safe\',\'\'\'@safe\',\'safe, safe\''
+	},
+	// new escapeFormulae values:
+	{
+		description: "Escape formulae with tab and carriage-return",
+		input: [{ "Col1": "\tdanger", "Col2": "\rdanger,", "Col3": "safe\t\r" }],
+		config: { escapeFormulae: true },
+		expected: 'Col1,Col2,Col3\r\n"\'\tdanger","\'\rdanger,","safe\t\r"'
+	},
+	{
+		description: "Escape formulae with tab and carriage-return, with forced quotes",
+		input: [{ "Col1": "	danger", "Col2": "\rdanger,", "Col3": "safe\t\r" }],
+		config: { escapeFormulae: true, quotes: true },
+		expected: '"Col1","Col2","Col3"\r\n"\'\tdanger","\'\rdanger,","safe\t\r"'
+	},
+	{
+		description: "Escape formulae with tab and carriage-return, with single-quote quoteChar and escapeChar",
+		input: [{ "Col1": "	danger", "Col2": "\rdanger,", "Col3": "safe, \t\r" }],
+		config: { escapeFormulae: true, quoteChar: "'", escapeChar: "'" },
+		expected: 'Col1,Col2,Col3\r\n\'\'\'\tdanger\',\'\'\'\rdanger,\',\'safe, \t\r\''
+	},
+	{
+		description: "Escape formulae with tab and carriage-return, with single-quote quoteChar and escapeChar and forced quotes",
+		input: [{ "Col1": "	danger", "Col2": "\rdanger,", "Col3": "safe, \t\r" }],
+		config: { escapeFormulae: true, quotes: true, quoteChar: "'", escapeChar: "'" },
+		expected: '\'Col1\',\'Col2\',\'Col3\'\r\n\'\'\'\tdanger\',\'\'\'\rdanger,\',\'safe, \t\r\''
 	},
 ];
 
