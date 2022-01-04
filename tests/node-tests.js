@@ -4,6 +4,7 @@ var Papa = require("../papaparse.js");
 
 var fs = require('fs');
 var assert = require('assert');
+var PassThrough = require('stream').PassThrough;
 var longSampleRawCsv = fs.readFileSync(__dirname + '/long-sample.csv', 'utf8');
 
 function assertLongSampleParsedCorrectly(parsedCsv) {
@@ -286,5 +287,31 @@ describe('PapaParse', function() {
 				done();
 			}
 		});
+	});
+
+	it('should properly parse multi bytes UTF-8 characters splitted in different chunks', function(done) {
+
+		var csvFileString = 'first_name,last_name\nFrançois,Mitterrand\n';
+
+		var input = new PassThrough();
+		var parser = Papa.parse(Papa.NODE_STREAM_INPUT, {header: true});
+
+		var rows = [];
+		input.pipe(parser);
+
+		parser.on('data', function(row) {
+			rows.push(row);
+		});
+
+		parser.on('end', function() {
+			assert.deepEqual(rows, [
+				{first_name: 'François', last_name: 'Mitterrand'}
+			]);
+			done();
+		});
+
+		input.write(Buffer.from(csvFileString).slice(0, 26));
+		input.write(Buffer.from(csvFileString).slice(26));
+		input.end();
 	});
 });
