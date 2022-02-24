@@ -306,9 +306,10 @@ License: MIT
 
 			if (Array.isArray(_input.data))
 			{
-				if (!_input.fields)
-					_input.fields =  _input.meta && _input.meta.fields;
-
+				if (!_input.fields) {
+					_input.fields = _input.meta && _input.meta.fields || _columns;
+					console.log('input', _input.fields);
+				}
 				if (!_input.fields)
 					_input.fields =  Array.isArray(_input.data[0])
 						? _input.fields

@@ -1866,6 +1866,13 @@ var UNPARSE_TESTS = [
 		expected: 'a,b,c\r\n1,2,\r\n\r\n3,,4'
 	},
 	{
+		description: "Column option used to manually specify keys with input type object",
+		notes: "Should not throw any error when attempting to serialize key not present in object. Columns are different than keys of the first object. When an object is missing a key then the serialized value should be an empty string.",
+		input: { data: [{a: 1, b: '2'}, {}, {a: 3, d: 'd', c: 4,}] },
+		config: {columns: ['a', 'b', 'c']},
+		expected: 'a,b,c\r\n1,2,\r\n\r\n3,,4'
+	},
+	{
 		description: "Use different escapeChar",
 		input: [{a: 'foo', b: '"quoted"'}],
 		config: {header: false, escapeChar: '\\'},
