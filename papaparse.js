@@ -1,36 +1,15 @@
-/* @license
-Papa Parse
-v5.3.1
-https://github.com/mholt/PapaParse
-License: MIT
-*/
+(function (global, factory) {
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+	typeof define === 'function' && define.amd ? define(['exports'], factory) :
+	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.Papa = {}));
+}(this, (function (exports) { 'use strict';
 
-(function(root, factory)
-{
-	/* globals define */
-	if (typeof define === 'function' && define.amd)
-	{
-		// AMD. Register as an anonymous module.
-		define([], factory);
-	}
-	else if (typeof module === 'object' && typeof exports !== 'undefined')
-	{
-		// Node. Does not work with strict CommonJS, but
-		// only CommonJS-like environments that support module.exports,
-		// like Node.
-		module.exports = factory();
-	}
-	else
-	{
-		// Browser globals (root is window)
-		root.Papa = factory();
-	}
-	// in strict mode we cannot access arguments.callee, so we need a named reference to
-	// stringify the factory method for the blob worker
-	// eslint-disable-next-line func-name
-}(this, function moduleFactory()
-{
-	'use strict';
+	/* @license
+	Papa Parse
+	v5.3.1
+	https://github.com/mholt/PapaParse
+	License: MIT
+	*/
 
 	var global = (function() {
 		// alternative method, similar to `Function('return this')()`
@@ -45,44 +24,45 @@ License: MIT
 		return {};
 	})();
 
-
-	function getWorkerBlob() {
-		var URL = global.URL || global.webkitURL || null;
-		var code = moduleFactory.toString();
-		return Papa.BLOB_URL || (Papa.BLOB_URL = URL.createObjectURL(new Blob(['(', code, ')();'], {type: 'text/javascript'})));
-	}
-
-	var IS_WORKER = !global.document && !!global.postMessage,
-		IS_PAPA_WORKER = IS_WORKER && /blob:/i.test((global.location || {}).protocol);
 	var workers = {}, workerIdCounter = 0;
+	var PAPA_WORKER_NAME = 'papa-worker';
+	var WORKER_ID;
+	var SCRIPT_URL = global && global.document && global.document.currentScript && global.document.currentScript.src;
+	var IS_WORKER = !global.document && !!global.postMessage,
+		IS_PAPA_WORKER = IS_WORKER && global.name === PAPA_WORKER_NAME;
 
-	var Papa = {};
+	var parse = CsvToJson;
+	var unparse = JsonToCsv;
 
-	Papa.parse = CsvToJson;
-	Papa.unparse = JsonToCsv;
-
-	Papa.RECORD_SEP = String.fromCharCode(30);
-	Papa.UNIT_SEP = String.fromCharCode(31);
-	Papa.BYTE_ORDER_MARK = '\ufeff';
-	Papa.BAD_DELIMITERS = ['\r', '\n', '"', Papa.BYTE_ORDER_MARK];
-	Papa.WORKERS_SUPPORTED = !IS_WORKER && !!global.Worker;
-	Papa.NODE_STREAM_INPUT = 1;
+	var RECORD_SEP = String.fromCharCode(30);
+	var UNIT_SEP = String.fromCharCode(31);
+	var BYTE_ORDER_MARK = '\ufeff';
+	var BAD_DELIMITERS = ['\r', '\n', '"', BYTE_ORDER_MARK];
+	var WORKERS_SUPPORTED = !IS_WORKER && !!global.Worker && SCRIPT_URL;
+	var NODE_STREAM_INPUT = 1;
 
 	// Configurable chunk sizes for local and remote files, respectively
-	Papa.LocalChunkSize = 1024 * 1024 * 10;	// 10 MB
-	Papa.RemoteChunkSize = 1024 * 1024 * 5;	// 5 MB
-	Papa.DefaultDelimiter = ',';			// Used if not specified and detection fails
+	var LocalChunkSize = 1024 * 1024 * 10;	// 10 MB
+	var RemoteChunkSize = 1024 * 1024 * 5;	// 5 MB
+	var DefaultDelimiter = ',';  			// Used if not specified and detection fails
 
 	// Exposed for testing and development only
-	Papa.Parser = Parser;
-	Papa.ParserHandle = ParserHandle;
-	Papa.NetworkStreamer = NetworkStreamer;
-	Papa.FileStreamer = FileStreamer;
-	Papa.StringStreamer = StringStreamer;
-	Papa.ReadableStreamStreamer = ReadableStreamStreamer;
-	if (typeof PAPA_BROWSER_CONTEXT === 'undefined') {
-		Papa.DuplexStreamStreamer = DuplexStreamStreamer;
-	}
+	/** @private */
+	var Parser = _Parser;
+	/** @private */
+	var ParserHandle = _ParserHandle;
+	/** @private */
+	var NetworkStreamer = _NetworkStreamer;
+	/** @private */
+	var FileStreamer = _FileStreamer;
+	/** @private */
+	var StringStreamer = _StringStreamer;
+	/** @private */
+	var ReadableStreamStreamer = _ReadableStreamStreamer;
+	/** @private */
+	var DuplexStreamStreamer = typeof PAPA_BROWSER_CONTEXT === 'undefined'
+		? _DuplexStreamStreamer
+		: undefined;
 
 	if (global.jQuery)
 	{
@@ -161,7 +141,7 @@ License: MIT
 					fileComplete();
 				};
 
-				Papa.parse(f.file, f.instanceConfig);
+				parse(f.file, f.instanceConfig);
 			}
 
 			function error(name, file, elem, reason)
@@ -200,7 +180,7 @@ License: MIT
 
 		_config.transform = isFunction(_config.transform) ? _config.transform : false;
 
-		if (_config.worker && Papa.WORKERS_SUPPORTED)
+		if (_config.worker && WORKERS_SUPPORTED)
 		{
 			var w = newWorker();
 
@@ -225,26 +205,26 @@ License: MIT
 		}
 
 		var streamer = null;
-		if (_input === Papa.NODE_STREAM_INPUT && typeof PAPA_BROWSER_CONTEXT === 'undefined')
+		if (_input === NODE_STREAM_INPUT && typeof PAPA_BROWSER_CONTEXT === 'undefined')
 		{
 			// create a node Duplex stream for use
 			// with .pipe
-			streamer = new DuplexStreamStreamer(_config);
+			streamer = new _DuplexStreamStreamer(_config);
 			return streamer.getStream();
 		}
 		else if (typeof _input === 'string')
 		{
 			if (_config.download)
-				streamer = new NetworkStreamer(_config);
+				streamer = new _NetworkStreamer(_config);
 			else
-				streamer = new StringStreamer(_config);
+				streamer = new _StringStreamer(_config);
 		}
 		else if (_input.readable === true && isFunction(_input.read) && isFunction(_input.on))
 		{
-			streamer = new ReadableStreamStreamer(_config);
+			streamer = new _ReadableStreamStreamer(_config);
 		}
 		else if ((global.File && _input instanceof File) || _input instanceof Object)	// ...Safari. (see issue #106)
-			streamer = new FileStreamer(_config);
+			streamer = new _FileStreamer(_config);
 
 		return streamer.stream(_input);
 	}
@@ -333,7 +313,7 @@ License: MIT
 				return;
 
 			if (typeof _config.delimiter === 'string'
-                && !Papa.BAD_DELIMITERS.filter(function(value) { return _config.delimiter.indexOf(value) !== -1; }).length)
+				&& !BAD_DELIMITERS.filter(function(value) { return _config.delimiter.indexOf(value) !== -1; }).length)
 			{
 				_delimiter = _config.delimiter;
 			}
@@ -457,7 +437,7 @@ License: MIT
 							|| _quotes === true
 							|| (typeof _quotes === 'function' && _quotes(str, col))
 							|| (Array.isArray(_quotes) && _quotes[col])
-							|| hasAny(escapedQuoteStr, Papa.BAD_DELIMITERS)
+							|| hasAny(escapedQuoteStr, BAD_DELIMITERS)
 							|| escapedQuoteStr.indexOf(_delimiter) > -1
 							|| escapedQuoteStr.charAt(0) === ' '
 							|| escapedQuoteStr.charAt(escapedQuoteStr.length - 1) === ' ';
@@ -535,7 +515,7 @@ License: MIT
 			{
 				global.postMessage({
 					results: results,
-					workerId: Papa.WORKER_ID,
+					workerId: WORKER_ID,
 					finished: finishedIncludingPreview
 				});
 			}
@@ -574,7 +554,7 @@ License: MIT
 			else if (IS_PAPA_WORKER && this._config.error)
 			{
 				global.postMessage({
-					workerId: Papa.WORKER_ID,
+					workerId: WORKER_ID,
 					error: error,
 					finished: false
 				});
@@ -588,18 +568,18 @@ License: MIT
 			configCopy.chunkSize = parseInt(configCopy.chunkSize);	// parseInt VERY important so we don't concatenate strings!
 			if (!config.step && !config.chunk)
 				configCopy.chunkSize = null;  // disable Range header if not streaming; bad values break IIS - see issue #196
-			this._handle = new ParserHandle(configCopy);
+			this._handle = new _ParserHandle(configCopy);
 			this._handle.streamer = this;
 			this._config = configCopy;	// persist the copy to the caller
 		}
 	}
 
 
-	function NetworkStreamer(config)
+	function _NetworkStreamer(config)
 	{
 		config = config || {};
 		if (!config.chunkSize)
-			config.chunkSize = Papa.RemoteChunkSize;
+			config.chunkSize = RemoteChunkSize;
 		ChunkStreamer.call(this, config);
 
 		var xhr;
@@ -708,15 +688,15 @@ License: MIT
 			return parseInt(contentRange.substring(contentRange.lastIndexOf('/') + 1));
 		}
 	}
-	NetworkStreamer.prototype = Object.create(ChunkStreamer.prototype);
-	NetworkStreamer.prototype.constructor = NetworkStreamer;
+	_NetworkStreamer.prototype = Object.create(ChunkStreamer.prototype);
+	_NetworkStreamer.prototype.constructor = _NetworkStreamer;
 
 
-	function FileStreamer(config)
+	function _FileStreamer(config)
 	{
 		config = config || {};
 		if (!config.chunkSize)
-			config.chunkSize = Papa.LocalChunkSize;
+			config.chunkSize = LocalChunkSize;
 		ChunkStreamer.call(this, config);
 
 		var reader, slice;
@@ -775,11 +755,11 @@ License: MIT
 		};
 
 	}
-	FileStreamer.prototype = Object.create(ChunkStreamer.prototype);
-	FileStreamer.prototype.constructor = FileStreamer;
+	_FileStreamer.prototype = Object.create(ChunkStreamer.prototype);
+	_FileStreamer.prototype.constructor = _FileStreamer;
 
 
-	function StringStreamer(config)
+	function _StringStreamer(config)
 	{
 		config = config || {};
 		ChunkStreamer.call(this, config);
@@ -806,11 +786,11 @@ License: MIT
 			return this.parseChunk(chunk);
 		};
 	}
-	StringStreamer.prototype = Object.create(StringStreamer.prototype);
-	StringStreamer.prototype.constructor = StringStreamer;
+	_StringStreamer.prototype = Object.create(_StringStreamer.prototype);
+	_StringStreamer.prototype.constructor = _StringStreamer;
 
 
-	function ReadableStreamStreamer(config)
+	function _ReadableStreamStreamer(config)
 	{
 		config = config || {};
 
@@ -900,11 +880,11 @@ License: MIT
 			this._input.removeListener('error', this._streamError);
 		}, this);
 	}
-	ReadableStreamStreamer.prototype = Object.create(ChunkStreamer.prototype);
-	ReadableStreamStreamer.prototype.constructor = ReadableStreamStreamer;
+	_ReadableStreamStreamer.prototype = Object.create(ChunkStreamer.prototype);
+	_ReadableStreamStreamer.prototype.constructor = _ReadableStreamStreamer;
 
 
-	function DuplexStreamStreamer(_config) {
+	function _DuplexStreamStreamer(_config) {
 		var Duplex = require('stream').Duplex;
 		var config = copy(_config);
 		var parseOnWrite = true;
@@ -1000,13 +980,13 @@ License: MIT
 		stream.once('finish', bindFunction(this._onWriteComplete, this));
 	}
 	if (typeof PAPA_BROWSER_CONTEXT === 'undefined') {
-		DuplexStreamStreamer.prototype = Object.create(ChunkStreamer.prototype);
-		DuplexStreamStreamer.prototype.constructor = DuplexStreamStreamer;
+		_DuplexStreamStreamer.prototype = Object.create(ChunkStreamer.prototype);
+		_DuplexStreamStreamer.prototype.constructor = _DuplexStreamStreamer;
 	}
 
 
 	// Use one ParserHandle per entire CSV file or string
-	function ParserHandle(_config)
+	function _ParserHandle(_config)
 	{
 		// One goal is to minimize the use of regular expressions...
 		var MAX_FLOAT = Math.pow(2, 53);
@@ -1076,7 +1056,7 @@ License: MIT
 				else
 				{
 					_delimiterError = true;	// add error after parsing (otherwise it would be overwritten)
-					_config.delimiter = Papa.DefaultDelimiter;
+					_config.delimiter = DefaultDelimiter;
 				}
 				_results.meta.delimiter = _config.delimiter;
 			}
@@ -1091,7 +1071,7 @@ License: MIT
 				parserConfig.preview++;	// to compensate for header row
 
 			_input = input;
-			_parser = new Parser(parserConfig);
+			_parser = new _Parser(parserConfig);
 			_results = _parser.parse(_input, baseIndex, ignoreLastRow);
 			processResults();
 			return _paused ? { meta: { paused: true } } : (_results || { meta: { paused: false } });
@@ -1157,7 +1137,7 @@ License: MIT
 		{
 			if (_results && _delimiterError)
 			{
-				addError('Delimiter', 'UndetectableDelimiter', 'Unable to auto-detect delimiting character; defaulted to \'' + Papa.DefaultDelimiter + '\'');
+				addError('Delimiter', 'UndetectableDelimiter', 'Unable to auto-detect delimiting character; defaulted to \'' + DefaultDelimiter + '\'');
 				_delimiterError = false;
 			}
 
@@ -1294,14 +1274,14 @@ License: MIT
 		function guessDelimiter(input, newline, skipEmptyLines, comments, delimitersToGuess) {
 			var bestDelim, bestDelta, fieldCountPrevRow, maxFieldCount;
 
-			delimitersToGuess = delimitersToGuess || [',', '\t', '|', ';', Papa.RECORD_SEP, Papa.UNIT_SEP];
+			delimitersToGuess = delimitersToGuess || [',', '\t', '|', ';', RECORD_SEP, UNIT_SEP];
 
 			for (var i = 0; i < delimitersToGuess.length; i++) {
 				var delim = delimitersToGuess[i];
 				var delta = 0, avgFieldCount = 0, emptyLinesCount = 0;
 				fieldCountPrevRow = undefined;
 
-				var preview = new Parser({
+				var preview = new _Parser({
 					comments: comments,
 					delimiter: delim,
 					newline: newline,
@@ -1392,7 +1372,7 @@ License: MIT
 	}
 
 	/** The core parser implements speedy and correct CSV parsing */
-	function Parser(config)
+	function _Parser(config)
 	{
 		// Unpack the config object
 		config = config || {};
@@ -1416,7 +1396,7 @@ License: MIT
 
 		// Delimiter must be valid
 		if (typeof delim !== 'string'
-			|| Papa.BAD_DELIMITERS.indexOf(delim) > -1)
+			|| BAD_DELIMITERS.indexOf(delim) > -1)
 			delim = ',';
 
 		// Comment character must be valid
@@ -1425,7 +1405,7 @@ License: MIT
 		else if (comments === true)
 			comments = '#';
 		else if (typeof comments !== 'string'
-			|| Papa.BAD_DELIMITERS.indexOf(comments) > -1)
+			|| BAD_DELIMITERS.indexOf(comments) > -1)
 			comments = false;
 
 		// Newline must be valid: \r, \n, or \r\n
@@ -1669,9 +1649,9 @@ License: MIT
 			}
 
 			/**
-             * checks if there are extra spaces after closing quote and given index without any text
-             * if Yes, returns the number of spaces
-             */
+			 * checks if there are extra spaces after closing quote and given index without any text
+			 * if Yes, returns the number of spaces
+			 */
 			function extraSpaces(index) {
 				var spaceLength = 0;
 				if (index !== -1) {
@@ -1756,11 +1736,11 @@ License: MIT
 
 	function newWorker()
 	{
-		if (!Papa.WORKERS_SUPPORTED)
+		if (!WORKERS_SUPPORTED)
 			return false;
 
-		var workerUrl = getWorkerBlob();
-		var w = new global.Worker(workerUrl);
+		var workerUrl = SCRIPT_URL;
+		var w = new global.Worker(workerUrl, { name: PAPA_WORKER_NAME, type: true ? undefined : 'module' });
 		w.onmessage = mainThreadReceivedMessage;
 		w.id = workerIdCounter++;
 		workers[w.id] = w;
@@ -1831,23 +1811,23 @@ License: MIT
 	{
 		var msg = e.data;
 
-		if (typeof Papa.WORKER_ID === 'undefined' && msg)
-			Papa.WORKER_ID = msg.workerId;
+		if (typeof WORKER_ID === 'undefined' && msg)
+			WORKER_ID = msg.workerId;
 
 		if (typeof msg.input === 'string')
 		{
 			global.postMessage({
-				workerId: Papa.WORKER_ID,
-				results: Papa.parse(msg.input, msg.config),
+				workerId: WORKER_ID,
+				results: parse(msg.input, msg.config),
 				finished: true
 			});
 		}
 		else if ((global.File && msg.input instanceof File) || msg.input instanceof Object)	// thank you, Safari (see issue #106)
 		{
-			var results = Papa.parse(msg.input, msg.config);
+			var results = parse(msg.input, msg.config);
 			if (results)
 				global.postMessage({
-					workerId: Papa.WORKER_ID,
+					workerId: WORKER_ID,
 					results: results,
 					finished: true
 				});
@@ -1875,5 +1855,25 @@ License: MIT
 		return typeof func === 'function';
 	}
 
-	return Papa;
-}));
+	exports.BAD_DELIMITERS = BAD_DELIMITERS;
+	exports.BYTE_ORDER_MARK = BYTE_ORDER_MARK;
+	exports.DefaultDelimiter = DefaultDelimiter;
+	exports.DuplexStreamStreamer = DuplexStreamStreamer;
+	exports.FileStreamer = FileStreamer;
+	exports.LocalChunkSize = LocalChunkSize;
+	exports.NODE_STREAM_INPUT = NODE_STREAM_INPUT;
+	exports.NetworkStreamer = NetworkStreamer;
+	exports.Parser = Parser;
+	exports.ParserHandle = ParserHandle;
+	exports.RECORD_SEP = RECORD_SEP;
+	exports.ReadableStreamStreamer = ReadableStreamStreamer;
+	exports.RemoteChunkSize = RemoteChunkSize;
+	exports.StringStreamer = StringStreamer;
+	exports.UNIT_SEP = UNIT_SEP;
+	exports.WORKERS_SUPPORTED = WORKERS_SUPPORTED;
+	exports.parse = parse;
+	exports.unparse = unparse;
+
+	Object.defineProperty(exports, '__esModule', { value: true });
+
+})));
