@@ -56,24 +56,6 @@ var peopleLovePapa = [
 		description: "uses Papa Parse in VisualEditor to help article editors effortlessly build data tables from text files."
 	},
 	{
-		link: "https://www.webucator.com/webdesign/javascript.cfm",
-		name: "Webucator",
-		description: "created a video showing how to use Papa Parse and FileDrop.js to create a drag-and-drop CSV-JSON converter.",
-		quote: "It's often easy to convert data to CSV. With Papa, it's easy to turn that CSV into JSON."
-	},
-	{
-		link: "http://www.yolpo.com/social/gist.github?1dbd4556e748bdb830b3&autoplay=1&interimresults=0&failfast=1",
-		name: "Yolpo",
-		description: "created a simple regression test for Papa Parse.",
-		quote: "Papa's API is so intuitive, it took me no time to get it to work."
-	},
-	{
-		link: "https://www.appstax.com",
-		name: "Appstax",
-		description: "uses Papa Parse to import and export CSV data in their visual databrowser.",
-		quote: "Papa is a great for parsing CSV. And what a great tone of voice - love it!"
-	},
-	{
 		link: "https://github.com/Nanofus/novel.js",
 		name: "Novel.js",
 		description: "is a text adventure framework that uses Papa Parse to enable user-friendly translations.",
@@ -96,12 +78,6 @@ var peopleLovePapa = [
 		name: "Familio",
 		description: "is a brand-new messaging app made specifically for busy families. Automatically align all family members when sending text messages to parents in the kindergarten or school or when planning your kids birthday parties.",
 		quote: "With Papa it was a joy to implement our tool for importing messages and places from external systems."
-	},
-	{
-		link: "https://explore.hua-gallery.com",
-		name: "Hua Explore",
-		description: "The premier destination for information on Contemporary Chinese Art.",
-		quote: "Papa makes processing data that galleries send us totally seamless."
 	},
 	{
 		link: "https://monei.net",
