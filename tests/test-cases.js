@@ -1608,6 +1608,31 @@ var PARSE_ASYNC_TESTS = [
 			data: [['A','B','C'],['X','Y','Z']],
 			errors: []
 		}
+	},
+	{
+		description: "File with a few regular and lots of empty lines",
+		disabled: !FILES_ENABLED,
+		input: FILES_ENABLED ? new File(["A,B,C\nX,Y,Z\n" + new Array(500000).fill(",,").join("\n")], "sample.csv") : false,
+		config: {
+			skipEmptyLines: "greedy"
+		},
+		expected: {
+			data: [['A','B','C'],['X','Y','Z']],
+			errors: []
+		}
+	},
+	{
+		description: "File with a few regular and lots of empty lines + worker",
+		disabled: !FILES_ENABLED,
+		input: FILES_ENABLED ? new File(["A,B,C\nX,Y,Z\n" + new Array(500000).fill(",,").join("\n")], "sample.csv") : false,
+		config: {
+			worker: true,
+			skipEmptyLines: "greedy"
+		},
+		expected: {
+			data: [['A','B','C'],['X','Y','Z']],
+			errors: []
+		}
 	}
 ];
 
@@ -1836,9 +1861,9 @@ var UNPARSE_TESTS = [
 	},
 	{
 		description: "Returns without rows with no content when skipEmptyLines is 'greedy'",
-		input: [[null, ' '], [], ['1', '2']],
+		input: [[null, ' '], [], ['1', '2']].concat(new Array(500000).fill(['', ''])).concat([['3', '4']]),
 		config: {skipEmptyLines: 'greedy'},
-		expected: '1,2'
+		expected: '1,2\r\n3,4'
 	},
 	{
 		description: "Returns empty rows when empty rows are passed and skipEmptyLines is false with headers",
