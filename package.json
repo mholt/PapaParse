@@ -1,5 +1,5 @@
 {
-	"name": "papaparse",
+	"name": "@rippling/papaparse",
 	"version": "4.6.0",
 	"description": "Fast and powerful CSV parser for the browser that supports web workers and streaming large files. Converts CSV to JSON and JSON to CSV.",
 	"keywords": [
@@ -27,7 +27,7 @@
 	"homepage": "http://papaparse.com",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/mholt/PapaParse.git"
+		"url": "ssh://git@github.com/Rippling/PapaParse.git"
 	},
 	"author": {
 		"name": "Matthew Holt",
@@ -53,5 +53,8 @@
 		"test-phantomjs": "node tests/test.js --phantomjs",
 		"test-node": "mocha tests/node-tests.js tests/test-cases.js",
 		"test": "npm run lint && npm run test-node && npm run test-phantomjs"
+	},
+	"publishConfig": {
+		"registry": "https://npm.pkg.github.com/"
 	}
 }
