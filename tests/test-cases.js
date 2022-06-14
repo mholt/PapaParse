@@ -2649,3 +2649,52 @@ describe('Custom Tests', function() {
 		generateTest(CUSTOM_TESTS[i]);
 	}
 });
+
+(typeof window !== "undefined" ? describe : describe.skip)("Browser Tests", () => {
+	it("When parsing synchronously inside a web-worker not owned by PapaParse we should not invoke postMessage", async() => {
+		// Arrange
+		const papaParseScriptPath = new URL("../papaparse.js", window.document.baseURI).href;
+
+		// Define our custom web-worker that loads PapaParse and executes a synchronous parse
+		const blob = new Blob([
+			`
+				importScripts('${papaParseScriptPath}');
+				
+				self.addEventListener("message", function(event) {
+					if (event.data === "ExecuteParse") {
+						// Perform our synchronous parse, as requested
+						const results = Papa.parse('x\\ny\\n');
+						postMessage({type: "ParseExecutedSuccessfully", results});
+					} else {
+						// Otherwise, send whatever we received back. We shouldn't be hitting this (!) If we're reached
+						// this it means PapaParse thinks it is running inside a web-worker that it owns
+						postMessage(event.data);
+					}
+				});
+				`
+		], {type: 'text/javascript'});
+
+		const blobURL = window.URL.createObjectURL(blob);
+		const webWorker = new Worker(blobURL);
+
+		const receiveMessagePromise = new Promise((resolve, reject) => {
+			webWorker.addEventListener("message", (event) => {
+				if (event.data.type === "ParseExecutedSuccessfully") {
+					resolve(event.data);
+				} else {
+					const error = new Error(`Received unexpected message: ${JSON.stringify(event.data, null, 2)}`);
+					error.data = event.data;
+					reject(error);
+				}
+			});
+		});
+
+		// Act
+		webWorker.postMessage("ExecuteParse");
+		const webWorkerMessage = await receiveMessagePromise;
+
+		// Assert
+		assert.equal("ParseExecutedSuccessfully", webWorkerMessage.type);
+		assert.equal(3, webWorkerMessage.results.data.length);
+	});
+});
