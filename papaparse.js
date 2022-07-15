@@ -757,7 +757,7 @@ License: MIT
 				var end = Math.min(this._start + this._config.chunkSize, this._input.size);
 				input = slice.call(input, this._start, end);
 			}
-			var txt = reader.readAsText(input, this._config.encoding);
+			var txt = reader.readAsText(input, this._config.encoding || 'UTF-8');
 			if (!usingAsyncReader)
 				this._chunkLoaded({ target: { result: txt } });	// mimic the async signature
 		};
