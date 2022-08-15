@@ -60,6 +60,7 @@ License: MIT
 	var Papa = {};
 
 	Papa.parse = CsvToJson;
+	Papa.poulos = Papa.parse;
 	Papa.unparse = JsonToCsv;
 
 	Papa.RECORD_SEP = String.fromCharCode(30);
