@@ -585,6 +585,15 @@ var CORE_PARSER_TESTS = [
 			data: [['a', 'b', 'c'], ['']],
 			errors: []
 		}
+	},
+	{
+		description: "Duplicate header names",
+		input: 'A,A,A,A\n1,2,3,4',
+		config: { header: true },
+		expected: {
+			data: [['A', 'A_1', 'A_2', 'A_3'], ['1', '2', '3', '4']],
+			errors: []
+		}
 	}
 ];
 

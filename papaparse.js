@@ -1458,34 +1458,31 @@ License: MIT
 				return returnable();
 
 			// Rename headers if there are duplicates
-			let firstLine = input.split(newline)[0]
-			let separator = '_';
-			let headers = firstLine.split(delim) //headers array
-			let header_map = []; //map of headers after resolving duplicates
-			let header_count = {}; //count the headers
-			//process headers
-			for (var i in headers) {
-				var header = headers[i]
-				//check if header already exists
-				if (typeof header_count[header] === 'undefined') {
-					//print('new column ' + header);
-					header_count[header] = 1;
-				} else {
-					//rename header if existed starting with _1
-					var current_count = header_count[header];
-					header_count[header] += 1;
-					//append counter to header
-					let temp_header = header + separator;
-					//in case the porposed name already exists in the original csv
-					while (headers.indexOf(temp_header + current_count) > -1) {
-						temp_header += separator
-						//print(temp_header)
+			if (config.header)
+			{
+				let firstLine = input.split(newline)[0]
+				let separator = '_';
+				let headers = firstLine.split(delim) 
+				let header_map = []; 
+				let header_count = {};
+
+				for (var i in headers){
+					if (!header_map.includes(headers[i])){
+						header_map.push(headers[i])
 					}
-					header = temp_header + current_count;
-					header_count[header] = 1;
+					else{
+						if (!(headers[i] in header_count)){
+							header_count[headers[i]] = 1
+						}
+						else{
+							header_count[headers[i]] +=1
+						}
+						header_map.push(headers[i]+separator+header_count[headers[i]])
+					}
 				}
-				//add new header to header_map
-				header_map.push(header)
+				var edited_input = input.split(newline)
+				edited_input[0] = header_map.join(delim)
+				input = edited_input.join(newline)
 			}
 			
 			if (fastMode || (fastMode !== false && input.indexOf(quoteChar) === -1))
