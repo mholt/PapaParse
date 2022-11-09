@@ -27,6 +27,12 @@
 
 var peopleLovePapa = [
 	{
+		link: "https://www.vertex.io",
+		name: "The no-code database of the future.",
+		description: "No-code, Postgres-powered admin, internal tools, and backend suite.",
+		quote: "Vertex uses Papa to power all CSV related features!"
+	},
+	{
 		link: "https://www.circlehd.com",
 		name: "CircleHD Enterprise Video Platform",
 		description: "Makes provisioning users easy as cake in CircleHD",
