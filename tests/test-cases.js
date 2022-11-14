@@ -596,15 +596,6 @@ var CORE_PARSER_TESTS = [
 		}
 	},
 	{
-		description: "Duplicate header names where an original header matches intended substitution",
-		input: 'A,A,A,A,A_1\n1,2,3,4,5',
-		config: { header: true },
-		expected: {
-			data: [['A', 'A_1', 'A_2', 'A_3', 'A_1_1'], ['1', '2', '3', '4' ,'5']],
-			errors: []
-		}
-	},
-	{
 		description: "Duplicate header names with headerTransform",
 		input: 'A,A,A,A\n1,2,3,4',
 		config: { header: true, transformHeader: function(header) { return header.toLowerCase(); } },

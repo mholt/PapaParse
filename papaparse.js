@@ -1471,15 +1471,10 @@ License: MIT
 					if (isFunction(config.transformHeader))
 						header = config.transformHeader(header, i);
 					var header_name = header
-					if (header_map.includes(header_name)){
-						if (!(header in header_count)){
-							header_count[header] = 1
-						}
-						else{
-							header_count[header] +=1
-						}
-						header_name = header+separator+header_count[header]
-					}
+
+					let count = header_count[header] || 0
+					if (count > 0) header_name = header+separator+count;
+					header_count[header] = count+1
 
 					header_map.push(header_name)
 				}
