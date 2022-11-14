@@ -1461,24 +1461,27 @@ License: MIT
 			if (config.header)
 			{
 				let firstLine = input.split(newline)[0]
-				let separator = '_';
 				let headers = firstLine.split(delim) 
+				let separator = '_';
 				let header_map = []; 
 				let header_count = {};
 
 				for (var i in headers){
-					if (!header_map.includes(headers[i])){
-						header_map.push(headers[i])
-					}
-					else{
-						if (!(headers[i] in header_count)){
-							header_count[headers[i]] = 1
+					var header = headers[i]
+					if (isFunction(config.transformHeader))
+						header = config.transformHeader(header, i);
+					var header_name = header
+					if (header_map.includes(header_name)){
+						if (!(header in header_count)){
+							header_count[header] = 1
 						}
 						else{
-							header_count[headers[i]] +=1
+							header_count[header] +=1
 						}
-						header_map.push(headers[i]+separator+header_count[headers[i]])
+						header_name = header+separator+header_count[header]
 					}
+
+					header_map.push(header_name)
 				}
 				var edited_input = input.split(newline)
 				edited_input[0] = header_map.join(delim)
