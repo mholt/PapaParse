@@ -1460,27 +1460,34 @@ License: MIT
 			// Rename headers if there are duplicates
 			if (config.header)
 			{
-				let firstLine = input.split(newline)[0]
-				let headers = firstLine.split(delim) 
+				let firstLine = input.split(newline)[0];
+				let headers = firstLine.split(delim) ;
 				let separator = '_';
 				let header_map = []; 
 				let header_count = {};
 
 				for (var i in headers){
-					var header = headers[i]
+					var header = headers[i];
 					if (isFunction(config.transformHeader))
 						header = config.transformHeader(header, i);
-					var header_name = header
+						
+					var header_name = header;
 
-					let count = header_count[header] || 0
-					if (count > 0) header_name = header+separator+count;
-					header_count[header] = count+1
+					let count = header_count[header] || 0;
+					if (count > 0){
+						header_name = header+separator+count;
+					}
+					header_count[header] = count+1;
 
-					header_map.push(header_name)
+					header_map.push(header_name);
 				}
-				var edited_input = input.split(newline)
-				edited_input[0] = header_map.join(delim)
-				input = edited_input.join(newline)
+				
+				if (firstLine !== header_map.join(delim)){
+					var edited_input = input.split(newline);
+					edited_input[0] = header_map.join(delim);
+					input = edited_input.join(newline);
+				}
+
 			}
 			
 			if (fastMode || (fastMode !== false && input.indexOf(quoteChar) === -1))
