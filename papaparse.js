@@ -1465,6 +1465,7 @@ License: MIT
 				var separator = '_';
 				var headerMap = [];
 				var headerCount = {};
+				var duplicateHeaders = false;
 
 				for (var j in headers) {
 					var header = headers[j];
@@ -1474,13 +1475,14 @@ License: MIT
 
 					var count = headerCount[header] || 0;
 					if (count > 0) {
+						duplicateHeaders = true;
 						headerName = header + separator + count;
 					}
 					headerCount[header] = count + 1;
 
 					headerMap.push(headerName);
 				}
-				if (firstLine !== headerMap.join(delim)) {
+				if (duplicateHeaders) {
 					var editedInput = input.split(newline);
 					editedInput[0] = headerMap.join(delim);
 					input = editedInput.join(newline);
