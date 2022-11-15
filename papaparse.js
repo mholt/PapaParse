@@ -1457,6 +1457,37 @@ License: MIT
 			if (!input)
 				return returnable();
 
+			// Rename headers if there are duplicates
+			if (config.header)
+			{
+				var firstLine = input.split(newline)[0];
+				var headers = firstLine.split(delim);
+				var separator = '_';
+				var headerMap = [];
+				var headerCount = {};
+				var duplicateHeaders = false;
+
+				for (var j in headers) {
+					var header = headers[j];
+					if (isFunction(config.transformHeader))
+						header = config.transformHeader(header, j);
+					var headerName = header;
+
+					var count = headerCount[header] || 0;
+					if (count > 0) {
+						duplicateHeaders = true;
+						headerName = header + separator + count;
+					}
+					headerCount[header] = count + 1;
+
+					headerMap.push(headerName);
+				}
+				if (duplicateHeaders) {
+					var editedInput = input.split(newline);
+					editedInput[0] = headerMap.join(delim);
+					input = editedInput.join(newline);
+				}
+			}
 			if (fastMode || (fastMode !== false && input.indexOf(quoteChar) === -1))
 			{
 				var rows = input.split(newline);
