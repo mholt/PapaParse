@@ -5,6 +5,7 @@ var Papa = require("../papaparse.js");
 var fs = require('fs');
 var assert = require('assert');
 var longSampleRawCsv = fs.readFileSync(__dirname + '/long-sample.csv', 'utf8');
+var utf8BomSampleRawCsv = fs.readFileSync(__dirname + '/utf-8-bom-sample.csv', 'utf8');
 
 function assertLongSampleParsedCorrectly(parsedCsv) {
 	assert.equal(8, parsedCsv.data.length);
@@ -283,6 +284,16 @@ describe('PapaParse', function() {
 			},
 			error: function(err) {
 				assert.deepEqual(err, expectedError);
+				done();
+			}
+		});
+	});
+
+	it('handles utf-8 BOM encoded files', function(done) {
+		Papa.parse(utf8BomSampleRawCsv, {
+			header: true,
+			complete: function(parsedCsv) {
+				assert.deepEqual(parsedCsv.data[0], { A: 'X', B: 'Y', C: 'Z' });
 				done();
 			}
 		});
