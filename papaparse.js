@@ -235,6 +235,7 @@ License: MIT
 		}
 		else if (typeof _input === 'string')
 		{
+			_input = stripBom(_input);
 			if (_config.download)
 				streamer = new NetworkStreamer(_config);
 			else
@@ -248,6 +249,14 @@ License: MIT
 			streamer = new FileStreamer(_config);
 
 		return streamer.stream(_input);
+
+		// Strip character from UTF-8 BOM encoded files that cause issue parsing the file
+		function stripBom(string) {
+			if (string.charCodeAt(0) === 0xfeff) {
+				return string.slice(1);
+			}
+			return string;
+		}
 	}
 
 
