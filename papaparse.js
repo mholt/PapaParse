@@ -541,7 +541,7 @@ License: MIT
 
 			var finishedIncludingPreview = this._finished || (this._config.preview && this._rowCount >= this._config.preview);
 
-			if (IS_PAPA_WORKER)
+			if (IS_PAPA_WORKER && this._config.worker)
 			{
 				global.postMessage({
 					results: results,
