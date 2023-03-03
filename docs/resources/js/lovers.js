@@ -114,5 +114,11 @@ var peopleLovePapa = [
 		name: "Retool",
 		description: "A remarkably fast way to build internal tools.",
 		quote: "Papa makes it easy for our users to customize CSV parsing to match their business logic."
+	},
+	{
+		link: "https://usecsv.com/",
+		name: "UseCSV CSV importer",
+		description: "let's you add CSV import to your app in minutes.",
+		quote: "Papa is an essential part of our importer, and means we have a rock solid experience."
 	}
 ];
