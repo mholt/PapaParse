@@ -604,6 +604,15 @@ var CORE_PARSER_TESTS = [
 			errors: []
 		}
 	},
+	{
+		description: "Duplicate header names existing column",
+		input: 'c,c,c,c_1\n1,2,3,4',
+		config: { header: true },
+		expected: {
+			data: [['c', 'c_1', 'c_2', 'c_1_0'], ['1', '2', '3', '4']],
+			errors: []
+		}
+	},
 ];
 
 describe('Core Parser Tests', function() {

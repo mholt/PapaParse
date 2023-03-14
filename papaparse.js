@@ -1488,7 +1488,10 @@ License: MIT
 						headerName = header + separator + count;
 					}
 					headerCount[header] = count + 1;
-
+					// In case it already exists, we add more separtors
+					while (headerMap.includes(headerName)) {
+						headerName = headerName + separator + count;
+					}
 					headerMap.push(headerName);
 				}
 				if (duplicateHeaders) {
