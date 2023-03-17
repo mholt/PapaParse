@@ -2656,7 +2656,24 @@ var CUSTOM_TESTS = [
 			var results = Papa.parse('"A","B","C","D"');
 			callback(results.meta.delimiter);
 		}
-	}
+	},
+	{
+		description: "Data is correctly parsed with chunks and duplicated headers",
+		expected: [{h0: 'a', h1: 'a'}, {h0: 'b', h1: 'b'}],
+		run: function(callback) {
+			var data = [];
+			Papa.parse('h0,h1\na,a\nb,b', {
+				header: true,
+				chunkSize: 10,
+				chunk: function(results) {
+					data.push(results.data[0]);
+				},
+				complete: function() {
+					callback(data);
+				}
+			});
+		}
+	},
 ];
 
 describe('Custom Tests', function() {
