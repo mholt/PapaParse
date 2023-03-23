@@ -1,11 +1,11 @@
 Parse CSV with JavaScript
 ========================================
 
-Papa Parse is the [fastest](http://jsperf.com/javascript-csv-parsers/4) in-browser CSV (or delimited text) parser for JavaScript. It is reliable and correct according to [RFC 4180](https://tools.ietf.org/html/rfc4180), and it comes with these features:
+Papa Parse is the fastest in-browser CSV (or delimited text) parser for JavaScript. It is reliable and correct according to [RFC 4180](https://tools.ietf.org/html/rfc4180), and it comes with these features:
 
 - Easy to use
 - Parse CSV files directly (local or over the network)
-- Fast mode ([is really fast](http://jsperf.com/javascript-csv-parsers/3))
+- Fast mode
 - Stream large files (even via HTTP)
 - Reverse parsing (converts JSON to CSV)
 - Auto-detect delimiter
