@@ -1743,13 +1743,8 @@ License: MIT
 					}
 				};
 
-				if (config.header && fields.length > 0) {
-					var copiedFields = []; // prevent user from mutating internal state
-					for (var i = 0; i < fields.length; i++) {
-						copiedFields[i] = fields[i];
-					}
-					results.meta.fields = copiedFields;
-				}
+				if (config.header && fields.length > 0)
+					results.meta.fields = fields.concat([]);
 
 				return results;
 			}
