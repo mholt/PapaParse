@@ -1679,8 +1679,6 @@ License: MIT
 				}
 
 				fields = headerMap;
-
-				return headerMap;
 			}
 
 			/**
