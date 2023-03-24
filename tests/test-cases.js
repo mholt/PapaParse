@@ -2029,7 +2029,12 @@ describe('Unparse Tests', function() {
 var CUSTOM_TESTS = [
 	{
 		description: "Pause and resume works with headers and duplicate fields (Regression Test for Bug #985)",
-		expected: [["Column 1", "Column 2", "Column 3", "Column 4", "Column 5"], [
+		expected: [[
+			["Column 1", "Column 2", "Column 3", "Column 4", "Column 5"],
+			["Column 1", "Column 2", "Column 3", "Column 4", "Column 5"],
+			["Column 1", "Column 2", "Column 3", "Column 4", "Column 5"],
+			["Column 1", "Column 2", "Column 3", "Column 4", "Column 5"]
+		], [
 			{ "Column 1": "R1C1", "Column 2": "", "Column 3": "R1C3", "Column 4": "", "Column 5": "" },
 			{ "Column 1": "R2C1", "Column 2": "", "Column 3": "", "Column 4": "", "Column 5": "" },
 			{ "Column 1": "R3C1", "Column 2": "", "Column 3": "", "Column 4": "R3C4", "Column 5": "" },
@@ -2045,15 +2050,13 @@ var CUSTOM_TESTS = [
 			].join("\n");
 			var output = [];
 			var dataRows = [];
-			var headers = null;
+			var headerResults = [];
 			Papa.parse(inputString, {
 				header: true,
 				step: function(results, parser) {
 					if (results)
 					{
-						if (!headers) {
-							headers = results.meta.fields;
-						}
+						headerResults.push(results.meta.fields);
 						parser.pause();
 						parser.resume();
 						if (results.data) {
@@ -2062,7 +2065,7 @@ var CUSTOM_TESTS = [
 					}
 				},
 				complete: function() {
-					output.push(headers);
+					output.push(headerResults);
 					output.push(dataRows);
 					callback(output);
 				}
