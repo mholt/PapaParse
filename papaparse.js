@@ -1743,7 +1743,7 @@ License: MIT
 					}
 				};
 
-				if (config.header && fields && fields.length > 0) {
+				if (config.header && fields.length > 0) {
 					var copiedFields = []; // prevent user from mutating internal state
 					for (var i = 0; i < fields.length; i++) {
 						copiedFields[i] = fields[i];
