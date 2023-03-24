@@ -2674,6 +2674,20 @@ var CUSTOM_TESTS = [
 			});
 		}
 	},
+	{
+		description: "Array prototype pollution does not break in header transformation",
+		expected: [{H0: 'a', H1: 'a'}, {H0: 'b', H1: 'b'}],
+		run: function(callback) {
+			Array.prototype.myHandyFunction = function() {};  // eslint-disable-line no-extend-native
+			Papa.parse('h0,h1\na,a\nb,b', {
+				header: true,
+				transformHeader: (value) => value.toUpperCase(), // Function that assumes a header value is a String
+				complete: function(actual) {
+					callback(actual.data);
+				}
+			});
+		}
+	},
 ];
 
 describe('Custom Tests', function() {

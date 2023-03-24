@@ -1476,7 +1476,7 @@ License: MIT
 				var headerCount = {};
 				var duplicateHeaders = false;
 
-				for (var j in headers) {
+				for (var j = 0; j < headers.length; j++) {
 					var header = headers[j];
 					if (isFunction(config.transformHeader))
 						header = config.transformHeader(header, j);
