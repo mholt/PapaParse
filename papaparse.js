@@ -1413,6 +1413,8 @@ License: MIT
 		var preview = config.preview;
 		var fastMode = config.fastMode;
 		var quoteChar;
+		var renamedHeaders = null;
+
 		if (config.quoteChar === undefined || config.quoteChar === null) {
 			quoteChar = '"';
 		} else {
@@ -1475,7 +1477,6 @@ License: MIT
 				var headerMap = new Set();
 				var headerCount = {};
 				var duplicateHeaders = false;
-				var renamedHeaders = null;
 
 				for (var j in headers) {
 					var header = headers[j];
@@ -1777,7 +1778,8 @@ License: MIT
 						linebreak: newline,
 						aborted: aborted,
 						truncated: !!stopped,
-						cursor: lastCursor + (baseIndex || 0)
+						cursor: lastCursor + (baseIndex || 0),
+						renamedHeaders: renamedHeaders
 					}
 				};
 			}

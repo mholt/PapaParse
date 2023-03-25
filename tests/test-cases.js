@@ -29,7 +29,8 @@ var CORE_PARSER_TESTS = [
 		input: 'A,b,c',
 		expected: {
 			data: [['A', 'b', 'c']],
-			errors: []
+			errors: [],
+			meta: {delimiter: ',', renamedHeaders: null}
 		}
 	},
 	{
@@ -587,30 +588,33 @@ var CORE_PARSER_TESTS = [
 		}
 	},
 	{
-		description: "Simple duplicate header names",
+		description: "Simple duplicated header names",
 		input: 'A,A,A,A\n1,2,3,4',
 		config: { header: true },
 		expected: {
 			data: [['A', 'A_1', 'A_2', 'A_3'], ['1', '2', '3', '4']],
-			errors: []
+			errors: [],
+			meta: {renamedHeaders: {A_1: 'A', A_2: 'A', A_3: 'A'}}
 		}
 	},
 	{
-		description: "Duplicate header names with headerTransform",
+		description: "Duplicated header names with headerTransform",
 		input: 'A,A,A,A\n1,2,3,4',
 		config: { header: true, transformHeader: function(header) { return header.toLowerCase(); } },
 		expected: {
 			data: [['a', 'a_1', 'a_2', 'a_3'], ['1', '2', '3', '4']],
-			errors: []
+			errors: [],
+			meta: {renamedHeaders: {a_1: 'a', a_2: 'a', a_3: 'a'}}
 		}
 	},
 	{
-		description: "Duplicate header names existing column",
+		description: "Duplicated header names existing column",
 		input: 'c,c,c,c_1\n1,2,3,4',
 		config: { header: true },
 		expected: {
 			data: [['c', 'c_1', 'c_2', 'c_1_0'], ['1', '2', '3', '4']],
-			errors: []
+			errors: [],
+			meta: {renamedHeaders: {c_1: 'c', c_2: 'c'}}
 		}
 	},
 ];
@@ -621,6 +625,7 @@ describe('Core Parser Tests', function() {
 			var actual = new Papa.Parser(test.config).parse(test.input);
 			assert.deepEqual(actual.errors, test.expected.errors);
 			assert.deepEqual(actual.data, test.expected.data);
+			assert.deepNestedInclude(actual.meta, test.expected.meta || {});
 		});
 	}
 
