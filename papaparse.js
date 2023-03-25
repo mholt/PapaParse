@@ -1413,7 +1413,6 @@ License: MIT
 		var preview = config.preview;
 		var fastMode = config.fastMode;
 		var quoteChar;
-		var renamedHeaders = null;
 		if (config.quoteChar === undefined || config.quoteChar === null) {
 			quoteChar = '"';
 		} else {
@@ -1470,36 +1469,40 @@ License: MIT
 			// Rename headers if there are duplicates
 			if (config.header && !baseIndex)
 			{
-				renamedHeaders = {};
 				var firstLine = input.split(newline)[0];
 				var headers = firstLine.split(delim);
 				var separator = '_';
 				var headerMap = new Set();
 				var headerCount = {};
-				var duplicatedHeaders = false;
+				var duplicateHeaders = false;
+				var renamedHeaders = null;
 
 				for (var j in headers) {
-					var originalHeader = headers[j];
+					var header = headers[j];
 					if (isFunction(config.transformHeader))
-						var transformedHeader = config.transformHeader(originalHeader, j);
-					var headerName = transformedHeader;
+						header = config.transformHeader(header, j);
+					var headerName = header;
 
-					var count = headerCount[transformedHeader] || 0;
+					var count = headerCount[header] || 0;
 					if (count > 0) {
-						duplicatedHeaders = true;
-						headerName = transformedHeader + separator + count;
+						duplicateHeaders = true;
+						headerName = header + separator + count;
+						// Initialise the variable if it hasn't been.
+						if (renamedHeaders === null) {
+							renamedHeaders = {};
+						}
 					}
-					headerCount[transformedHeader] = count + 1;
+					headerCount[header] = count + 1;
 					// In case it already exists, we add more separators
 					while (headerMap.has(headerName)) {
 						headerName = headerName + separator + count;
 					}
 					headerMap.add(headerName);
 					if (count > 0) {
-						renamedHeaders[headerName] = transformedHeader;
+						renamedHeaders[headerName] = header;
 					}
 				}
-				if (duplicatedHeaders) {
+				if (duplicateHeaders) {
 					var editedInput = input.split(newline);
 					editedInput[0] = Array.from(headerMap).join(delim);
 					input = editedInput.join(newline);
@@ -1774,8 +1777,7 @@ License: MIT
 						linebreak: newline,
 						aborted: aborted,
 						truncated: !!stopped,
-						cursor: lastCursor + (baseIndex || 0),
-						renamedHeaders: renamedHeaders
+						cursor: lastCursor + (baseIndex || 0)
 					}
 				};
 			}
