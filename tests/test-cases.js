@@ -1406,7 +1406,8 @@ var PARSE_TESTS = [
 				delimiter: ',',
 				cursor: 23,
 				aborted: false,
-				truncated: false
+				truncated: false,
+				renamedHeaders: null
 			}
 		}
 	},
@@ -1422,7 +1423,8 @@ var PARSE_TESTS = [
 				delimiter: ',',
 				cursor: 19,
 				aborted: false,
-				truncated: false
+				truncated: false,
+				renamedHeaders: null
 			}
 		}
 	},
@@ -1438,7 +1440,8 @@ var PARSE_TESTS = [
 				delimiter: ',',
 				cursor: 28,
 				aborted: false,
-				truncated: false
+				truncated: false,
+				renamedHeaders: null
 			}
 		}
 	},
@@ -1454,7 +1457,8 @@ var PARSE_TESTS = [
 				delimiter: ',',
 				cursor: 27,
 				aborted: false,
-				truncated: false
+				truncated: false,
+				renamedHeaders: null
 			}
 		}
 	},
@@ -1470,7 +1474,8 @@ var PARSE_TESTS = [
 				delimiter: ',',
 				cursor: 29,
 				aborted: false,
-				truncated: false
+				truncated: false,
+				renamedHeaders: null
 			}
 		}
 	},
@@ -1486,7 +1491,8 @@ var PARSE_TESTS = [
 				delimiter: ',',
 				cursor: 24,
 				aborted: false,
-				truncated: false
+				truncated: false,
+				renamedHeaders: null
 			}
 		}
 	},
@@ -1502,7 +1508,8 @@ var PARSE_TESTS = [
 				delimiter: ',',
 				cursor: 27,
 				aborted: false,
-				truncated: false
+				truncated: false,
+				renamedHeaders: null
 			}
 		}
 	},
@@ -1518,7 +1525,8 @@ var PARSE_TESTS = [
 				delimiter: ',',
 				cursor: 27,
 				aborted: false,
-				truncated: false
+				truncated: false,
+				renamedHeaders: null
 			}
 		}
 	},
