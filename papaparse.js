@@ -1413,6 +1413,7 @@ License: MIT
 		var preview = config.preview;
 		var fastMode = config.fastMode;
 		var quoteChar;
+		var renamedHeaders = null;
 		if (config.quoteChar === undefined || config.quoteChar === null) {
 			quoteChar = '"';
 		} else {
@@ -1469,32 +1470,36 @@ License: MIT
 			// Rename headers if there are duplicates
 			if (config.header && !baseIndex)
 			{
+				renamedHeaders = {};
 				var firstLine = input.split(newline)[0];
 				var headers = firstLine.split(delim);
 				var separator = '_';
 				var headerMap = new Set();
 				var headerCount = {};
-				var duplicateHeaders = false;
+				var duplicatedHeaders = false;
 
 				for (var j in headers) {
-					var header = headers[j];
+					var originalHeader = headers[j];
 					if (isFunction(config.transformHeader))
-						header = config.transformHeader(header, j);
-					var headerName = header;
+						var transformedHeader = config.transformHeader(originalHeader, j);
+					var headerName = transformedHeader;
 
-					var count = headerCount[header] || 0;
+					var count = headerCount[transformedHeader] || 0;
 					if (count > 0) {
-						duplicateHeaders = true;
-						headerName = header + separator + count;
+						duplicatedHeaders = true;
+						headerName = transformedHeader + separator + count;
 					}
-					headerCount[header] = count + 1;
+					headerCount[transformedHeader] = count + 1;
 					// In case it already exists, we add more separators
 					while (headerMap.has(headerName)) {
 						headerName = headerName + separator + count;
 					}
 					headerMap.add(headerName);
+					if (count > 0) {
+						renamedHeaders[headerName] = transformedHeader;
+					}
 				}
-				if (duplicateHeaders) {
+				if (duplicatedHeaders) {
 					var editedInput = input.split(newline);
 					editedInput[0] = Array.from(headerMap).join(delim);
 					input = editedInput.join(newline);
@@ -1769,7 +1774,8 @@ License: MIT
 						linebreak: newline,
 						aborted: aborted,
 						truncated: !!stopped,
-						cursor: lastCursor + (baseIndex || 0)
+						cursor: lastCursor + (baseIndex || 0),
+						renamedHeaders: renamedHeaders
 					}
 				};
 			}
