@@ -1,6 +1,6 @@
 module.exports = {
 	"parserOptions": {
-		"ecmaVersion": 5
+		"ecmaVersion": 6
 	},
 	"env": {
 		"browser": true,
