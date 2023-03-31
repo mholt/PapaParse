@@ -1472,7 +1472,7 @@ License: MIT
 				var firstLine = input.split(newline)[0];
 				var headers = firstLine.split(delim);
 				var separator = '_';
-				var headerMap = [];
+				var headerMap = new Set();
 				var headerCount = {};
 				var duplicateHeaders = false;
 
@@ -1488,15 +1488,15 @@ License: MIT
 						headerName = header + separator + count;
 					}
 					headerCount[header] = count + 1;
-					// In case it already exists, we add more separtors
-					while (headerMap.includes(headerName)) {
+					// In case it already exists, we add more separators
+					while (headerMap.has(headerName)) {
 						headerName = headerName + separator + count;
 					}
-					headerMap.push(headerName);
+					headerMap.add(headerName);
 				}
 				if (duplicateHeaders) {
 					var editedInput = input.split(newline);
-					editedInput[0] = headerMap.join(delim);
+					editedInput[0] = Array.from(headerMap).join(delim);
 					input = editedInput.join(newline);
 				}
 			}
