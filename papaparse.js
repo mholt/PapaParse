@@ -1247,7 +1247,7 @@ License: MIT
 
 			function processRow(rowSource, i)
 			{
-				var row = _config.header ? {} : [];
+				var row = _config.header ? Object.create(null) : [];
 
 				var j;
 				for (j = 0; j < rowSource.length; j++)
@@ -1473,7 +1473,7 @@ License: MIT
 				var headers = firstLine.split(delim);
 				var separator = '_';
 				var headerMap = new Set();
-				var headerCount = {};
+				var headerCount = Object.create(null);
 				var duplicateHeaders = false;
 
 				for (var j in headers) {
