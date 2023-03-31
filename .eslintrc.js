@@ -3,6 +3,7 @@ module.exports = {
 		"ecmaVersion": 6
 	},
 	"env": {
+		"es6": true,
 		"browser": true,
 		"worker": true,
 		"node": true
