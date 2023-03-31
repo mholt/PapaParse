@@ -1097,11 +1097,8 @@ License: MIT
 			}
 
 			var parserConfig = copy(_config);
-			if (_config.preview && _config.header)
-				parserConfig.preview++;	// to compensate for header row
-
 			_input = input;
-			_parser = new Parser(parserConfig);
+			_parser = new Parser(parserConfig, _fields);
 			_results = _parser.parse(_input, baseIndex, ignoreLastRow);
 			processResults();
 			return _paused ? { meta: { paused: true } } : (_results || { meta: { paused: false } });
@@ -1178,8 +1175,9 @@ License: MIT
 				});
 			}
 
-			if (needsHeaderRow())
-				fillHeaderFields();
+			if (needsHeaderRow() && _results.meta.fields) {
+				_fields = _fields.concat(_results.meta.fields);
+			}
 
 			return applyHeaderAndDynamicTypingAndTransformation();
 		}
@@ -1187,31 +1185,6 @@ License: MIT
 		function needsHeaderRow()
 		{
 			return _config.header && _fields.length === 0;
-		}
-
-		function fillHeaderFields()
-		{
-			if (!_results)
-				return;
-
-			function addHeader(header, i)
-			{
-				if (isFunction(_config.transformHeader))
-					header = _config.transformHeader(header, i);
-
-				_fields.push(header);
-			}
-
-			if (Array.isArray(_results.data[0]))
-			{
-				for (var i = 0; needsHeaderRow() && i < _results.data.length; i++)
-					_results.data[i].forEach(addHeader);
-
-				_results.data.splice(0, 1);
-			}
-			// if _results.data[0] is not an array, we are in a step where _results.data is the row.
-			else
-				_results.data.forEach(addHeader);
 		}
 
 		function shouldApplyDynamicTyping(field) {
@@ -1316,7 +1289,7 @@ License: MIT
 					delimiter: delim,
 					newline: newline,
 					preview: 10
-				}).parse(input);
+				}, _fields).parse(input);
 
 				for (var j = 0; j < preview.data.length; j++) {
 					if (skipEmptyLines && testEmptyLine(preview.data[j])) {
@@ -1402,7 +1375,7 @@ License: MIT
 	}
 
 	/** The core parser implements speedy and correct CSV parsing */
-	function Parser(config)
+	function Parser(config, _fields)
 	{
 		// Unpack the config object
 		config = config || {};
@@ -1444,6 +1417,7 @@ License: MIT
 		// We're gonna need these at the Parser scope
 		var cursor = 0;
 		var aborted = false;
+		var fields = _fields;
 
 		this.parse = function(input, baseIndex, ignoreLastRow)
 		{
@@ -1466,40 +1440,6 @@ License: MIT
 			if (!input)
 				return returnable();
 
-			// Rename headers if there are duplicates
-			if (config.header && !baseIndex)
-			{
-				var firstLine = input.split(newline)[0];
-				var headers = firstLine.split(delim);
-				var separator = '_';
-				var headerMap = [];
-				var headerCount = {};
-				var duplicateHeaders = false;
-
-				for (var j in headers) {
-					var header = headers[j];
-					if (isFunction(config.transformHeader))
-						header = config.transformHeader(header, j);
-					var headerName = header;
-
-					var count = headerCount[header] || 0;
-					if (count > 0) {
-						duplicateHeaders = true;
-						headerName = header + separator + count;
-					}
-					headerCount[header] = count + 1;
-					// In case it already exists, we add more separtors
-					while (headerMap.includes(headerName)) {
-						headerName = headerName + separator + count;
-					}
-					headerMap.push(headerName);
-				}
-				if (duplicateHeaders) {
-					var editedInput = input.split(newline);
-					editedInput[0] = headerMap.join(delim);
-					input = editedInput.join(newline);
-				}
-			}
 			if (fastMode || (fastMode !== false && input.indexOf(quoteChar) === -1))
 			{
 				var rows = input.split(newline);
@@ -1707,8 +1647,38 @@ License: MIT
 
 			function pushRow(row)
 			{
-				data.push(row);
+				if (config.header && (fields.length === 0))
+					buildHeaders(row);
+				else
+					data.push(row);
 				lastCursor = cursor;
+			}
+
+			function buildHeaders(headers) {
+				// duplicate headers will have '_x" appended to them.
+				var separator = '_';
+				var headerMap = [];
+				var headerCount = {};
+
+				for (var j in headers) {
+					var header = headers[j];
+					if (isFunction(config.transformHeader))
+						header = config.transformHeader(header, j);
+					var headerName = header;
+
+					var count = headerCount[header] || 0;
+					if (count > 0) {
+						headerName = header + separator + count;
+					}
+					headerCount[header] = count + 1;
+					// In case it already exists, we add more separtors
+					while (headerMap.includes(headerName)) {
+						headerName = headerName + separator + count;
+					}
+					headerMap.push(headerName);
+				}
+
+				fields = headerMap;
 			}
 
 			/**
@@ -1761,7 +1731,7 @@ License: MIT
 			/** Returns an object with the results, errors, and meta. */
 			function returnable(stopped)
 			{
-				return {
+				var results = {
 					data: data,
 					errors: errors,
 					meta: {
@@ -1772,6 +1742,11 @@ License: MIT
 						cursor: lastCursor + (baseIndex || 0)
 					}
 				};
+
+				if (config.header && fields.length > 0)
+					results.meta.fields = fields.concat([]);
+
+				return results;
 			}
 
 			/** Executes the user's step function and resets data & errors. */
