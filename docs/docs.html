@@ -502,7 +502,8 @@ var csv = Papa.unparse({
 									<code>header</code>
 								</td>
 								<td>
-									If true, the first row of parsed data will be interpreted as field names. An array of field names will be returned in <a href="#meta">meta</a>, and each row of data will be an object of values keyed by field name instead of a simple array. Rows with a different number of fields from the header row will produce an error. Warning: Duplicate field names will overwrite values in previous fields having the same name.
+									If true, the first row of parsed data will be interpreted as field names. An array of field names will be returned in <a href="#meta">meta</a>, and each row of data will be an object of values keyed by field name instead of a simple array. Rows with a different number of fields from the header row will produce an error. 
+									Warning: Duplicated field names will be automatically renamed to avoid values in previous fields having the same name to be overwritten. Renamed fields with original (or transformed by <code>transformHeader</code>) are stored in <code>ParseResult.meta.renamedHeaders</code>
 								</td>
 							</tr>
 							<tr>
@@ -759,11 +760,13 @@ var csv = Papa.unparse({
 [
 	{
 		"Column 1": "foo",
-		"Column 2": "bar"
+		"Column 2": "bar",
+		"Column 1": "foo1",
 	},
 	{
 		"Column 1": "abc",
-		"Column 2": "def"
+		"Column 2": "def",
+		"Column 1": "abc1",
 	}
 ]</code></pre>
 					</div>
@@ -811,6 +814,7 @@ var csv = Papa.unparse({
 	aborted:   // Whether process was aborted
 	fields:    // Array of field names
 	truncated: // Whether preview consumed all input
+	renamedHeaders: // Headers that are automatically renamed by the library to avoid duplication. {Column 1_1: 'Column 1' // the later header 'Column 1' was renamed to 'Column 1_1'}
 }</code></pre>
 					</div>
 					<div class="grid-50">

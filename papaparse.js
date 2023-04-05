@@ -1413,6 +1413,8 @@ License: MIT
 		var preview = config.preview;
 		var fastMode = config.fastMode;
 		var quoteChar;
+		var renamedHeaders = null;
+
 		if (config.quoteChar === undefined || config.quoteChar === null) {
 			quoteChar = '"';
 		} else {
@@ -1486,6 +1488,10 @@ License: MIT
 					if (count > 0) {
 						duplicateHeaders = true;
 						headerName = header + separator + count;
+						// Initialise the variable if it hasn't been.
+						if (renamedHeaders === null) {
+							renamedHeaders = {};
+						}
 					}
 					headerCount[header] = count + 1;
 					// In case it already exists, we add more separators
@@ -1493,6 +1499,9 @@ License: MIT
 						headerName = headerName + separator + count;
 					}
 					headerMap.add(headerName);
+					if (count > 0) {
+						renamedHeaders[headerName] = header;
+					}
 				}
 				if (duplicateHeaders) {
 					var editedInput = input.split(newline);
@@ -1769,7 +1778,8 @@ License: MIT
 						linebreak: newline,
 						aborted: aborted,
 						truncated: !!stopped,
-						cursor: lastCursor + (baseIndex || 0)
+						cursor: lastCursor + (baseIndex || 0),
+						renamedHeaders: renamedHeaders
 					}
 				};
 			}

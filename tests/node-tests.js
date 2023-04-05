@@ -32,6 +32,7 @@ function assertLongSampleParsedCorrectly(parsedCsv) {
 		"linebreak": "\n",
 		"aborted": false,
 		"truncated": false,
+		renamedHeaders: null,
 		"cursor": 1209
 	});
 	assert.equal(parsedCsv.errors.length, 0);
