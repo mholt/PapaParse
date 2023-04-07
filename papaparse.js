@@ -1476,6 +1476,7 @@ License: MIT
 				var headerCount = {};
 				var duplicateHeaders = false;
 
+				// Using old-style 'for' loop to avoid prototype pollution that would be picked up with 'var j in headers'
 				for (var j = 0; j < headers.length; j++) {
 					var header = headers[j];
 					if (isFunction(config.transformHeader))
