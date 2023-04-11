@@ -27,6 +27,12 @@
 
 var peopleLovePapa = [
 	{
+		link: "http://doctempleapp.com",
+		name: "DocTemple",
+		description: "helps you effortlessly populate .docx documents with .csv data using scalable templating solution.",
+		quote: "Papa Parse made it extremely easy to load user CSV files in the browser. Implementing it was a breeze and it works perfect!"
+	},
+	{
 		link: "https://www.vertex.io",
 		name: "The no-code database of the future.",
 		description: "No-code, Postgres-powered admin, internal tools, and backend suite.",
