@@ -1469,9 +1469,10 @@ License: MIT
 				return returnable();
 
 			// Rename headers if there are duplicates
+			var firstLine;
 			if (config.header && !baseIndex)
 			{
-				var firstLine = input.split(newline)[0];
+				firstLine = input.split(newline)[0];
 				var headers = firstLine.split(delim);
 				var separator = '_';
 				var headerMap = new Set();
@@ -1516,7 +1517,12 @@ License: MIT
 				for (var i = 0; i < rows.length; i++)
 				{
 					row = rows[i];
-					cursor += row.length;
+					// use firstline as row length may be changed due to duplicated headers
+					if (i === 0 && firstLine !== undefined) {
+						cursor += firstLine.length;
+					}else{
+						cursor += row.length;
+					}
 					if (i !== rows.length - 1)
 						cursor += newline.length;
 					else if (ignoreLastRow)

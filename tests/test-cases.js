@@ -594,7 +594,10 @@ var CORE_PARSER_TESTS = [
 		expected: {
 			data: [['A', 'A_1', 'A_2', 'A_3'], ['1', '2', '3', '4']],
 			errors: [],
-			meta: {renamedHeaders: {A_1: 'A', A_2: 'A', A_3: 'A'}}
+			meta: {
+				renamedHeaders: {A_1: 'A', A_2: 'A', A_3: 'A'},
+				cursor: 15
+			}
 		}
 	},
 	{
@@ -604,7 +607,10 @@ var CORE_PARSER_TESTS = [
 		expected: {
 			data: [['a', 'a_1', 'a_2', 'a_3'], ['1', '2', '3', '4']],
 			errors: [],
-			meta: {renamedHeaders: {a_1: 'a', a_2: 'a', a_3: 'a'}}
+			meta: {
+				renamedHeaders: {a_1: 'a', a_2: 'a', a_3: 'a'},
+				cursor: 15
+			}
 		}
 	},
 	{
@@ -614,7 +620,10 @@ var CORE_PARSER_TESTS = [
 		expected: {
 			data: [['c', 'c_1', 'c_2', 'c_1_0'], ['1', '2', '3', '4']],
 			errors: [],
-			meta: {renamedHeaders: {c_1: 'c', c_2: 'c'}}
+			meta: {
+				renamedHeaders: {c_1: 'c', c_2: 'c'},
+				cursor: 17
+			}
 		}
 	},
 ];
