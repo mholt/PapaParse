@@ -2686,17 +2686,17 @@ var CUSTOM_TESTS = [
 	{
 		description: "Pause and resume works with headers and duplicate fields (Regression Test for Bug #985)",
 		expected: [[
-			["Column 1", "Column 2", "Column 3"],
-			["Column 1", "Column 2", "Column 3"],
+			["Column 1", "Column 2", "Column 3", "Column 4"],
+			["Column 1", "Column 2", "Column 3", "Column 4"],
 		], [
-			{ "Column 1": "R1C1", "Column 2": "", "Column 3": "R1C3" },
-			{ "Column 1": "R2C1", "Column 2": "", "Column 3": "" },
+			{ "Column 1": "R1C1", "Column 2": "", "Column 3": "R1C3", "Column 4": "" },
+			{ "Column 1": "R2C1", "Column 2": "", "Column 3": "", "Column 4": "" },
 		]],
 		run: function(callback) {
 			var inputString = [
-				"Column 1,Column 2,Column 3",
-				"R1C1,,R1C3",
-				"R2C1,,"
+				"Column 1,Column 2,Column 3,Column 4",
+				"R1C1,,R1C3,",
+				"R2C1,,,"
 			].join("\n");
 			var output = [];
 			var dataRows = [];
