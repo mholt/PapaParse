@@ -2028,51 +2028,6 @@ describe('Unparse Tests', function() {
 
 var CUSTOM_TESTS = [
 	{
-		description: "Pause and resume works with headers and duplicate fields (Regression Test for Bug #985)",
-		expected: [[
-			["Column 1", "Column 2", "Column 3", "Column 4", "Column 5"],
-			["Column 1", "Column 2", "Column 3", "Column 4", "Column 5"],
-			["Column 1", "Column 2", "Column 3", "Column 4", "Column 5"],
-			["Column 1", "Column 2", "Column 3", "Column 4", "Column 5"]
-		], [
-			{ "Column 1": "R1C1", "Column 2": "", "Column 3": "R1C3", "Column 4": "", "Column 5": "" },
-			{ "Column 1": "R2C1", "Column 2": "", "Column 3": "", "Column 4": "", "Column 5": "" },
-			{ "Column 1": "R3C1", "Column 2": "", "Column 3": "", "Column 4": "R3C4", "Column 5": "" },
-			{ "Column 1": "R4C1", "Column 2": "", "Column 3": "", "Column 4": "", "Column 5": "" },
-		]],
-		run: function(callback) {
-			var inputString = [
-				"Column 1,Column 2,Column 3,Column 4,Column 5",
-				"R1C1,,R1C3,,",
-				"R2C1,,,,",
-				"R3C1,,,R3C4,",
-				"R4C1,,,,"
-			].join("\n");
-			var output = [];
-			var dataRows = [];
-			var headerResults = [];
-			Papa.parse(inputString, {
-				header: true,
-				step: function(results, parser) {
-					if (results)
-					{
-						headerResults.push(results.meta.fields);
-						parser.pause();
-						parser.resume();
-						if (results.data) {
-							dataRows.push(results.data);
-						}
-					}
-				},
-				complete: function() {
-					output.push(headerResults);
-					output.push(dataRows);
-					callback(output);
-				}
-			});
-		}
-	},
-	{
 		description: "Pause and resume works (Regression Test for Bug #636)",
 		disabled: !XHR_ENABLED,
 		timeout: 30000,
@@ -2724,6 +2679,45 @@ var CUSTOM_TESTS = [
 				},
 				complete: function() {
 					callback(data);
+				}
+			});
+		}
+	},
+	{
+		description: "Pause and resume works with headers and duplicate fields (Regression Test for Bug #985)",
+		expected: [[
+			["Column 1", "Column 2", "Column 3"],
+			["Column 1", "Column 2", "Column 3"],
+		], [
+			{ "Column 1": "R1C1", "Column 2": "", "Column 3": "R1C3" },
+			{ "Column 1": "R2C1", "Column 2": "", "Column 3": "" },
+		]],
+		run: function(callback) {
+			var inputString = [
+				"Column 1,Column 2,Column 3",
+				"R1C1,,R1C3",
+				"R2C1,,"
+			].join("\n");
+			var output = [];
+			var dataRows = [];
+			var headerResults = [];
+			Papa.parse(inputString, {
+				header: true,
+				step: function(results, parser) {
+					if (results)
+					{
+						headerResults.push(results.meta.fields);
+						parser.pause();
+						parser.resume();
+						if (results.data) {
+							dataRows.push(results.data);
+						}
+					}
+				},
+				complete: function() {
+					output.push(headerResults);
+					output.push(dataRows);
+					callback(output);
 				}
 			});
 		}
