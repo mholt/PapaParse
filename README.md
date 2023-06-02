@@ -28,6 +28,14 @@ can be installed with the following command:
 
 If you don't want to use npm, [papaparse.min.js](https://unpkg.com/papaparse@latest/papaparse.min.js) can be downloaded to your project source.
 
+Usage
+-----
+
+    import Papa from 'papaparse';
+
+    Papa.parse(file, config);
+    
+    const csv = Papa.unparse(data[, config]);
 
 Homepage & Demo
 ----------------
