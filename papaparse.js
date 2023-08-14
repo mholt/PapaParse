@@ -924,7 +924,7 @@ License: MIT
 
 		this._onCsvData = function(results)
 		{
-			var data = results.data;
+			var data = _config.streamIncludeMetaAndErrors ? results : results.data;
 			if (!stream.push(data) && !this._handle.paused()) {
 				// the writeable consumer buffer has filled up
 				// so we need to pause until more items
