@@ -1463,7 +1463,7 @@ License: MIT
 
 			// Establish starting state
 			cursor = 0;
-			var data = [], errors = [], row = [], lastCursor = 0;
+			var data = [], errors = [], row = [], lastCursor = 0, inputExpansion = 0;
 
 			if (!input)
 				return returnable();
@@ -1508,6 +1508,10 @@ License: MIT
 				if (duplicateHeaders) {
 					var editedInput = input.split(newline);
 					editedInput[0] = Array.from(headerMap).join(delim);
+					// If we expanded the input due to duplicate headers then reduce cursor
+					// by the amount we expanded the input.
+					// This is needed for keeping leftover aggregate in parseChunk.
+					inputExpansion = editedInput[0].length - firstLine.length;
 					input = editedInput.join(newline);
 				}
 			}
@@ -1517,12 +1521,7 @@ License: MIT
 				for (var i = 0; i < rows.length; i++)
 				{
 					row = rows[i];
-					// use firstline as row length may be changed due to duplicated headers
-					if (i === 0 && firstLine !== undefined) {
-						cursor += firstLine.length;
-					}else{
-						cursor += row.length;
-					}
+					cursor += row.length;
 					if (i !== rows.length - 1)
 						cursor += newline.length;
 					else if (ignoreLastRow)
@@ -1724,7 +1723,7 @@ License: MIT
 			function pushRow(row)
 			{
 				data.push(row);
-				lastCursor = cursor;
+				lastCursor = cursor - inputExpansion;
 			}
 
 			/**
