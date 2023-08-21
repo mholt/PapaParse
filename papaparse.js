@@ -1508,11 +1508,17 @@ License: MIT
 				if (duplicateHeaders) {
 					var editedInput = input.split(newline);
 					editedInput[0] = Array.from(headerMap).join(delim);
-					// If we expanded the input due to duplicate headers then reduce cursor
-					// by the amount we expanded the input.
-					// This is needed for keeping leftover aggregate in parseChunk.
+					// If we change the size of the input due to duplicate headers
+					// or header renaming from transformHeader, then we need to
+					// record the difference so that we can adjust the cursor accordingly
+					// in `meta.cursor` value of the `parse` result.
+					// This is because the consumers of this method (e.g. ChunkStreamer)
+					// use the resulting `cursor` value to know how much of the input was
+					// consumed by the parser and are not aware of the parser implementation
+					// details for handling duplicate headers.
 					inputExpansion = editedInput[0].length - firstLine.length;
 					input = editedInput.join(newline);
+					inputLen = input.length;
 				}
 			}
 			if (fastMode || (fastMode !== false && input.indexOf(quoteChar) === -1))
@@ -1723,7 +1729,7 @@ License: MIT
 			function pushRow(row)
 			{
 				data.push(row);
-				lastCursor = cursor - inputExpansion;
+				lastCursor = cursor;
 			}
 
 			/**
@@ -1784,7 +1790,7 @@ License: MIT
 						linebreak: newline,
 						aborted: aborted,
 						truncated: !!stopped,
-						cursor: lastCursor + (baseIndex || 0),
+						cursor: lastCursor + (baseIndex || 0) - inputExpansion,
 						renamedHeaders: renamedHeaders
 					}
 				};
