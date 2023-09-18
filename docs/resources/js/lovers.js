@@ -4,15 +4,10 @@
 	If you use Papa Parse, add your site/project/company to the list
 	below. Here is a description of the fields:
 
-		link: (optional) The URL to your web site
+		link: https://serp.co/tools/convert/json-to-csv/
+		name: SERP
 
-		name: The name of the site/project/company
-
-		description: Say why Papa Parse is important to your
-		             application. The name is prepended to this
-		             description when rendered. Make sure that it
-		             reads as a fluid sentence when the name is
-		             concatenated with the description.
+		description: I'm javascript inept but have always wanted to make small tools! ty!
 
 		quote: (optional) A short testimonial of what you think
 		       of Papa Parse.
