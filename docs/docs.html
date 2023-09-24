@@ -450,7 +450,8 @@ var csv = Papa.unparse({
 	beforeFirstChunk: undefined,
 	withCredentials: undefined,
 	transform: undefined,
-	delimitersToGuess: [',', '\t', '|', ';', <a href="#readonly">Papa.RECORD_SEP</a>, <a href="#readonly">Papa.UNIT_SEP</a>]
+	delimitersToGuess: [',', '\t', '|', ';', <a href="#readonly">Papa.RECORD_SEP</a>, <a href="#readonly">Papa.UNIT_SEP</a>],
+	skipFirstNLines: 0
 }</code></pre>
 					</div>
 					<div class="clear"></div>
@@ -680,6 +681,14 @@ var csv = Papa.unparse({
 								</td>
 								<td>
 									An array of delimiters to guess from if the <code>delimiter</code> option is not set.
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<code>skipFirstNLines</code>
+								</td>
+								<td>
+									To skip first N number of lines when converting a CSV file to JSON 
 								</td>
 							</tr>
 						</table>
