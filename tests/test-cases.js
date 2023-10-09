@@ -1574,6 +1574,42 @@ var PARSE_TESTS = [
 			data: [['a', 'b', 'c\n'], ['d', 'e', 'f']],
 			errors: []
 		}
+	},
+	{
+		description: "Skip First N number of lines , with header and 2 rows",
+		input: 'a,b,c,d\n1,2,3,4',
+		config: { header: true, skipFirstNLines: 1 },
+		expected: {
+			data: [],
+			errors: []
+		}
+	},
+	{
+		description: "Skip First N number of lines , with header and 3 rows",
+		input: 'a,b,c,d\n1,2,3,4\n4,5,6,7',
+		config: { header: true, skipFirstNLines: 1 },
+		expected: {
+			data: [{a: '4', b: '5', c: '6', d: '7'}],
+			errors: []
+		}
+	},
+	{
+		description: "Skip First N number of lines , with header false",
+		input: 'a,b,c,d\n1,2,3,4\n4,5,6,7',
+		config: { header: false, skipFirstNLines: 1 },
+		expected: {
+			data: [['1','2','3','4'],['4','5','6','7']],
+			errors: []
+		}
+	},
+	{
+		description: "Skip First N number of lines , with header false and skipFirstNLines as negative value",
+		input: 'a,b,c,d\n1,2,3,4\n4,5,6,7',
+		config: { header: false, skipFirstNLines: -2 },
+		expected: {
+			data: [['a','b','c','d'],['1','2','3','4'],['4','5','6','7']],
+			errors: []
+		}
 	}
 ];
 

@@ -108,6 +108,7 @@ function buildConfig()
 		skipEmptyLines: $('#skipEmptyLines').prop('checked'),
 		chunk: $('#chunk').prop('checked') ? chunkFn : undefined,
 		beforeFirstChunk: undefined,
+		skipFirstNLines: $('#skipFirstNLines').val()
 	};
 
 	function getLineEnding()

@@ -486,6 +486,7 @@ License: MIT
 		}
 	}
 
+
 	/** ChunkStreamer is the base prototype for various streamer implementations. */
 	function ChunkStreamer(config)
 	{
@@ -521,8 +522,23 @@ License: MIT
 
 			// Rejoin the line we likely just split in two by chunking the file
 			var aggregate = this._partialLine + chunk;
+			this._pendingSkip = parseInt(this._config.skipFirstNLines) || 0;
+			this._skipHeader = 0;
+			if (this._config.header) {
+				this._skipHeader++;
+			}
+			if (this._pendingSkip > 0) {
+				var splitChunk = aggregate.split('\n');
+				var currentChunkLength = splitChunk.length;
+				if (currentChunkLength <= this._pendingSkip) {
+					aggregate = this._partialLine;
+				}
+				else{
+					aggregate = this._partialLine + [...splitChunk.slice(0, this._skipHeader), ...splitChunk.slice(this._skipHeader + this._pendingSkip)].join('\n');
+				}
+				this._pendingSkip -= currentChunkLength;
+			}
 			this._partialLine = '';
-
 			var results = this._handle.parse(aggregate, this._baseIndex, !this._finished);
 
 			if (this._handle.paused() || this._handle.aborted()) {
@@ -1931,7 +1947,6 @@ License: MIT
 	{
 		return function() { f.apply(self, arguments); };
 	}
-
 	function isFunction(func)
 	{
 		return typeof func === 'function';
