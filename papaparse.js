@@ -377,7 +377,7 @@ License: MIT
 				_escapedQuote = _config.escapeChar + _quoteChar;
 			}
 
-			if (_config.escapeFormulae instanceof RegExp  ) {
+			if (_config.escapeFormulae instanceof RegExp) {
 				_escapeFormulae = _config.escapeFormulae;
 			} else if (typeof _config.escapeFormulae === 'boolean' && _config.escapeFormulae) {
 				_escapeFormulae =  /^[=+\-@\t\r].*$/;
