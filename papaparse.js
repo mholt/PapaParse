@@ -186,7 +186,13 @@ License: MIT
 	}
 
 
-
+	// Strip character from UTF-8 BOM encoded files that cause issue parsing the file
+	function stripBom(string) {
+		if (string.charCodeAt(0) === 0xfeff) {
+			return string.slice(1);
+		}
+		return string;
+	}
 
 	function CsvToJson(_input, _config)
 	{
@@ -249,14 +255,6 @@ License: MIT
 			streamer = new FileStreamer(_config);
 
 		return streamer.stream(_input);
-
-		// Strip character from UTF-8 BOM encoded files that cause issue parsing the file
-		function stripBom(string) {
-			if (string.charCodeAt(0) === 0xfeff) {
-				return string.slice(1);
-			}
-			return string;
-		}
 	}
 
 
@@ -513,6 +511,7 @@ License: MIT
 			// First chunk pre-processing
 			if (this.isFirstChunk && isFunction(this._config.beforeFirstChunk))
 			{
+				chunk = stripBom(chunk);
 				var modifiedChunk = this._config.beforeFirstChunk(chunk);
 				if (modifiedChunk !== undefined)
 					chunk = modifiedChunk;
