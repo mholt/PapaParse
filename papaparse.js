@@ -509,12 +509,14 @@ License: MIT
 		this.parseChunk = function(chunk, isFakeChunk)
 		{
 			// First chunk pre-processing
-			if (this.isFirstChunk && isFunction(this._config.beforeFirstChunk))
+			if (this.isFirstChunk)
 			{
 				chunk = stripBom(chunk);
-				var modifiedChunk = this._config.beforeFirstChunk(chunk);
-				if (modifiedChunk !== undefined)
-					chunk = modifiedChunk;
+				if (isFunction(this._config.beforeFirstChunk)) {
+					var modifiedChunk = this._config.beforeFirstChunk(chunk);
+					if (modifiedChunk !== undefined)
+						chunk = modifiedChunk;
+				}
 			}
 			this.isFirstChunk = false;
 			this._halted = false;
