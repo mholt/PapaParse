@@ -201,6 +201,10 @@ License: MIT
 
 		_config.transform = isFunction(_config.transform) ? _config.transform : false;
 
+		if (!isFunction(_config.complete)) {
+			_config.promise = true;
+		}
+
 		if (_config.worker && Papa.WORKERS_SUPPORTED)
 		{
 			var w = newWorker();
@@ -222,6 +226,12 @@ License: MIT
 				workerId: w.id
 			});
 
+			if (_config.promise) {
+				return new Promise((resolve, reject) => {
+					_config.complete = resolve;
+					_config.error = reject;
+				});
+			}
 			return;
 		}
 

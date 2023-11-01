@@ -299,4 +299,22 @@ describe('PapaParse', function() {
 			}
 		});
 	});
+
+	it('returns Promise', async function() {
+		var result = await Papa.parse(utf8BomSampleRawCsv, {
+			header: true,
+		});
+		assert.deepEqual(result.data[0], { A: 'X', B: 'Y', C: 'Z' });
+	});
+
+	it('returns empty', function(done) {
+		var result = Papa.parse(utf8BomSampleRawCsv, {
+			header: true,
+			complete: function(parsedCsv) {
+				assert.deepEqual(parsedCsv.data[0], { A: 'X', B: 'Y', C: 'Z' });
+				done();
+			}
+		});
+		assert.equal(result, null);
+	});
 });
