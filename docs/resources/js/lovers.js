@@ -27,6 +27,12 @@
 
 var peopleLovePapa = [
 	{
+		link: "https://www.oneschema.co/",
+		name: "OneSchema",
+		description: "The best CSV/spreadsheet importer for SaaS",
+		quote: "OneSchema's core offering would not be possible without PapaParse."
+	},	
+	{
 		link: "http://doctempleapp.com",
 		name: "DocTemple",
 		description: "helps you effortlessly populate .docx documents with .csv data using scalable templating solution.",
