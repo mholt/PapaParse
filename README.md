@@ -23,19 +23,21 @@ Install
 
 papaparse is available on [npm](https://www.npmjs.com/package/papaparse). It
 can be installed with the following command:
-
-    npm install papaparse
+```shell
+npm install papaparse
+```
 
 If you don't want to use npm, [papaparse.min.js](https://unpkg.com/papaparse@latest/papaparse.min.js) can be downloaded to your project source.
 
 Usage
 -----
+```js
+import Papa from 'papaparse';
 
-    import Papa from 'papaparse';
-
-    Papa.parse(file, config);
+Papa.parse(file, config);
     
-    const csv = Papa.unparse(data[, config]);
+const csv = Papa.unparse(data[, config]);
+```
 
 Homepage & Demo
 ----------------
