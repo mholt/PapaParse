@@ -24,7 +24,7 @@
 		"multi-threaded",
 		"jquery-plugin"
 	],
-	"homepage": "http://papaparse.com",
+	"homepage": "https://www.papaparse.com/",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/mholt/PapaParse.git"
