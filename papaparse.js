@@ -513,8 +513,13 @@ License: MIT
 			// First chunk pre-processing
 			const skipFirstNLines = parseInt(this._config.skipFirstNLines) || 0;
 			if (this.isFirstChunk && skipFirstNLines > 0) {
-				const splitChunk = chunk.split('\n');
-				chunk = [...splitChunk.slice(skipFirstNLines)].join('\n');
+				let _newline = this._config.newline;
+				if (!_newline) {
+					const quoteChar = this._config.quoteChar || '"';
+					_newline = this._handle.guessLineEndings(chunk, quoteChar);
+				}
+				const splitChunk = chunk.split(_newline);
+				chunk = [...splitChunk.slice(skipFirstNLines)].join(_newline);
 			}
 			if (this.isFirstChunk && isFunction(this._config.beforeFirstChunk))
 			{
@@ -1082,7 +1087,7 @@ License: MIT
 		{
 			var quoteChar = _config.quoteChar || '"';
 			if (!_config.newline)
-				_config.newline = guessLineEndings(input, quoteChar);
+				_config.newline = this.guessLineEndings(input, quoteChar);
 
 			_delimiterError = false;
 			if (!_config.delimiter)
@@ -1154,6 +1159,32 @@ License: MIT
 			if (isFunction(_config.complete))
 				_config.complete(_results);
 			_input = '';
+		};
+
+		this.guessLineEndings = function(input, quoteChar)
+		{
+			input = input.substring(0, 1024 * 1024);	// max length 1 MB
+			// Replace all the text inside quotes
+			var re = new RegExp(escapeRegExp(quoteChar) + '([^]*?)' + escapeRegExp(quoteChar), 'gm');
+			input = input.replace(re, '');
+
+			var r = input.split('\r');
+
+			var n = input.split('\n');
+
+			var nAppearsFirst = (n.length > 1 && n[0].length < r[0].length);
+
+			if (r.length === 1 || nAppearsFirst)
+				return '\n';
+
+			var numWithN = 0;
+			for (var i = 0; i < r.length; i++)
+			{
+				if (r[i][0] === '\n')
+					numWithN++;
+			}
+
+			return numWithN >= r.length / 2 ? '\r\n' : '\r';
 		};
 
 		function testEmptyLine(s) {
@@ -1360,32 +1391,6 @@ License: MIT
 				successful: !!bestDelim,
 				bestDelimiter: bestDelim
 			};
-		}
-
-		function guessLineEndings(input, quoteChar)
-		{
-			input = input.substring(0, 1024 * 1024);	// max length 1 MB
-			// Replace all the text inside quotes
-			var re = new RegExp(escapeRegExp(quoteChar) + '([^]*?)' + escapeRegExp(quoteChar), 'gm');
-			input = input.replace(re, '');
-
-			var r = input.split('\r');
-
-			var n = input.split('\n');
-
-			var nAppearsFirst = (n.length > 1 && n[0].length < r[0].length);
-
-			if (r.length === 1 || nAppearsFirst)
-				return '\n';
-
-			var numWithN = 0;
-			for (var i = 0; i < r.length; i++)
-			{
-				if (r[i][0] === '\n')
-					numWithN++;
-			}
-
-			return numWithN >= r.length / 2 ? '\r\n' : '\r';
 		}
 
 		function addError(type, code, msg, row)

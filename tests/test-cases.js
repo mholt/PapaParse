@@ -1610,6 +1610,15 @@ var PARSE_TESTS = [
 			data: [['a','b','c','d'],['1','2','3','4'],['4','5','6','7']],
 			errors: []
 		}
+	},
+	{
+		description: "Skip first 2 lines , with custom newline character",
+		input: 'skip-this\rskip-this\r1,2,3,4',
+		config: { header: false, skipFirstNLines: 2, newline: '\r' },
+		expected: {
+			data: [['1','2','3','4']],
+			errors: []
+		}
 	}
 ];
 
