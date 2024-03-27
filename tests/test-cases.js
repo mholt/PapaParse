@@ -1585,11 +1585,11 @@ var PARSE_TESTS = [
 		}
 	},
 	{
-		description: "Skip First N number of lines , with header and 3 rows",
-		input: 'a,b,c,d\n1,2,3,4\n4,5,6,7',
+		description: "Skip First N number of lines , with header and 2 rows",
+		input: 'to-be-ignored\na,b,c,d\n1,2,3,4',
 		config: { header: true, skipFirstNLines: 1 },
 		expected: {
-			data: [{a: '4', b: '5', c: '6', d: '7'}],
+			data: [{a: '1', b: '2', c: '3', d: '4'}],
 			errors: []
 		}
 	},
@@ -1608,6 +1608,15 @@ var PARSE_TESTS = [
 		config: { header: false, skipFirstNLines: -2 },
 		expected: {
 			data: [['a','b','c','d'],['1','2','3','4'],['4','5','6','7']],
+			errors: []
+		}
+	},
+	{
+		description: "Skip first 2 lines , with custom newline character",
+		input: 'skip-this\rskip-this\r1,2,3,4',
+		config: { header: false, skipFirstNLines: 2, newline: '\r' },
+		expected: {
+			data: [['1','2','3','4']],
 			errors: []
 		}
 	}
