@@ -120,5 +120,11 @@ var peopleLovePapa = [
 		name: "Retool",
 		description: "A remarkably fast way to build internal tools.",
 		quote: "Papa makes it easy for our users to customize CSV parsing to match their business logic."
+	},
+	{
+		link: "https://www.hellodata.ai/",
+		name: "HelloData",
+		description: "Automatic rent surveys with real-time data on over 25M multifamily units nationwide, direct from property websites.",
+		quote: "Papa Parse makes bulk data imports a breeze! It's helped us easily onboard our largest customers. It's robust and a true game-changer."
 	}
 ];
