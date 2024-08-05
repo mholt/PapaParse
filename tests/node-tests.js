@@ -164,6 +164,97 @@ describe('PapaParse', function() {
 		});
 	});
 
+	it('piped streaming CSV should receive full result object when config.streamIncludeMetaAndErrors is truthy', function(done) {
+		var data = [];
+		var readStream = fs.createReadStream(__dirname + '/long-sample.csv', 'utf8');
+		var csvStream = readStream.pipe(Papa.parse(Papa.NODE_STREAM_INPUT, {streamIncludeMetaAndErrors: true}));
+		csvStream.on('data', function(item) {
+			data.push(item);
+		});
+		csvStream.on('end', function() {
+			assert.deepEqual(data[0], {
+				data: [
+					'Grant',
+					'Dyer',
+					'Donec.elementum@orciluctuset.example',
+					'2013-11-23T02:30:31-08:00',
+					'2014-05-31T01:06:56-07:00',
+					'Magna Ut Associates',
+					'ljenkins'
+				],
+				errors: [],
+				meta: {
+					aborted: false,
+					cursor: 129,
+					delimiter: ',',
+					linebreak: '\n',
+					renamedHeaders: null,
+					truncated: false
+				}
+			});
+			assert.deepEqual(data[7], {
+				data: [
+					'Talon',
+					'Salinas',
+					'posuere.vulputate.lacus@Donecsollicitudin.example',
+					'2015-01-31T09:19:02-08:00',
+					'2014-12-17T04:59:18-08:00',
+					'Aliquam Iaculis Incorporate',
+					'Phasellus@Quisquetincidunt.example'
+				],
+				errors: [],
+				meta: {
+					aborted: false,
+					cursor: 1209,
+					delimiter: ',',
+					linebreak: '\n',
+					renamedHeaders: null,
+					truncated: false
+				}
+			});
+			done();
+		});
+	});
+
+	it('piped streaming CSV should receive row errors when config.streamIncludeMetaAndErrors is truthy', function(done) {
+		var data = [];
+		var readStream = fs.createReadStream(__dirname + '/verylong-sample.csv', 'utf8');
+		var csvStream = readStream.pipe(Papa.parse(Papa.NODE_STREAM_INPUT, {
+			fastMode: true,
+			header: true,
+			streamIncludeMetaAndErrors: true
+		}));
+		csvStream.on('data', function(item) {
+			data.push(item);
+		});
+		csvStream.on('end', function() {
+			assert.deepEqual(data[498], {
+				data: { placeholder: 'Lorem ipsum dolor sit', 'meaning of life': '42' },
+				errors: [
+					{
+						code: "TooFewFields",
+						message: "Too few fields: expected 3 fields but parsed 2",
+						row: 498,
+						type: "FieldMismatch"
+					}
+				],
+				meta: {
+					delimiter: ',',
+					linebreak: '\n',
+					aborted: false,
+					truncated: false,
+					cursor: 17712,
+					renamedHeaders: null,
+					fields: [
+						'placeholder',
+						'meaning of life',
+						'TLD'
+					]
+				}
+			});
+			done();
+		});
+	});
 
 	it('piped streaming CSV should be correctly parsed when header is true', function(done) {
 		var data = [];
