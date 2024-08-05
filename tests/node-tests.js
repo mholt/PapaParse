@@ -164,6 +164,46 @@ describe('PapaParse', function() {
 		});
 	});
 
+	it('Checks cursor when file is large and has duplicate headers', function(done) {
+		this.timeout(30000);
+		var stepped = 0;
+		var startsWithEtiamOrLorem = true;
+		Papa.parse(fs.createReadStream(__dirname + '/verylong-sample.csv'), {
+			header: true,
+			transformHeader: function(headerName) {
+				return headerName === 'meaning of life' ? 'placeholder' : headerName;
+			},
+			step: function(results, parser) {
+				stepped++;
+				if (results)
+				{
+					if (stepped > 1) {
+						const startsWithEtiam = results.data && results.data.placeholder && results.data.placeholder.startsWith("Etiam");
+						const startsWithLorem = results.data && results.data.placeholder && results.data.placeholder.startsWith("Lorem");
+						startsWithEtiamOrLorem = startsWithEtiamOrLorem && (startsWithEtiam || startsWithLorem);
+					}
+				}
+			},
+			complete: function() {
+				assert(startsWithEtiamOrLorem);
+				done();
+			}
+		});
+	});
+
+	it('Handles quote at EOF when headers are modified', function(done) {
+		var data = [];
+		Papa.parse('field1,field1,field3\na,b,c\nd,e,"f"', {
+			header: true,
+			step: function(results) {
+				data.push(results.data);
+			},
+			complete: function() {
+				assert.deepEqual(data, [{ field1: 'a', field1_1: 'b', field3: 'c' },{ field1: 'd', field1_1: 'e', field3: 'f' }]);
+				done();
+			}
+		});
+	});
 
 	it('piped streaming CSV should be correctly parsed when header is true', function(done) {
 		var data = [];

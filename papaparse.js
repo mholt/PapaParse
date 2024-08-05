@@ -1475,7 +1475,7 @@ License: MIT
 
 			// Establish starting state
 			cursor = 0;
-			var data = [], errors = [], row = [], lastCursor = 0;
+			var data = [], errors = [], row = [], lastCursor = 0, inputExpansion = 0;
 
 			if (!input)
 				return returnable();
@@ -1520,7 +1520,17 @@ License: MIT
 				if (duplicateHeaders) {
 					var editedInput = input.split(newline);
 					editedInput[0] = Array.from(headerMap).join(delim);
+					// If we change the size of the input due to duplicate headers
+					// or header renaming from transformHeader, then we need to
+					// record the difference so that we can adjust the cursor accordingly
+					// in `meta.cursor` value of the `parse` result.
+					// This is because the consumers of this method (e.g. ChunkStreamer)
+					// use the resulting `cursor` value to know how much of the input was
+					// consumed by the parser and are not aware of the parser implementation
+					// details for handling duplicate headers.
+					inputExpansion = editedInput[0].length - firstLine.length;
 					input = editedInput.join(newline);
+					inputLen = input.length;
 				}
 			}
 			if (fastMode || (fastMode !== false && input.indexOf(quoteChar) === -1))
@@ -1529,12 +1539,7 @@ License: MIT
 				for (var i = 0; i < rows.length; i++)
 				{
 					row = rows[i];
-					// use firstline as row length may be changed due to duplicated headers
-					if (i === 0 && firstLine !== undefined) {
-						cursor += firstLine.length;
-					}else{
-						cursor += row.length;
-					}
+					cursor += row.length;
 					if (i !== rows.length - 1)
 						cursor += newline.length;
 					else if (ignoreLastRow)
@@ -1797,7 +1802,7 @@ License: MIT
 						linebreak: newline,
 						aborted: aborted,
 						truncated: !!stopped,
-						cursor: lastCursor + (baseIndex || 0),
+						cursor: lastCursor + (baseIndex || 0) - inputExpansion,
 						renamedHeaders: renamedHeaders
 					}
 				};
