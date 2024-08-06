@@ -618,10 +618,10 @@ var CORE_PARSER_TESTS = [
 		input: 'c,c,c,c_1\n1,2,3,4',
 		config: { header: true },
 		expected: {
-			data: [['c', 'c_1', 'c_2', 'c_1_0'], ['1', '2', '3', '4']],
+			data: [['c', 'c_2', 'c_3', 'c_1'], ['1', '2', '3', '4']],
 			errors: [],
 			meta: {
-				renamedHeaders: {c_1: 'c', c_2: 'c'},
+				renamedHeaders: {c_2: 'c', c_3: 'c'},
 				cursor: 17
 			}
 		}
