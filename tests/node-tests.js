@@ -5,6 +5,7 @@ var Papa = require("../papaparse.js");
 var fs = require('fs');
 var assert = require('assert');
 var longSampleRawCsv = fs.readFileSync(__dirname + '/long-sample.csv', 'utf8');
+var poisonedSampleRawCsv = fs.readFileSync(__dirname + '/poisoned-sample.csv', 'utf8');
 var utf8BomSampleRawCsv = fs.readFileSync(__dirname + '/utf-8-bom-sample.csv', 'utf8');
 
 function assertLongSampleParsedCorrectly(parsedCsv) {
@@ -295,6 +296,16 @@ describe('PapaParse', function() {
 			header: true,
 			complete: function(parsedCsv) {
 				assert.deepEqual(parsedCsv.data[0], { A: 'X', B: 'Y', C: 'Z' });
+				done();
+			}
+		});
+	});
+
+	it('handles poisoned headers', function(done) {
+		Papa.parse(poisonedSampleRawCsv, {
+			header: true,
+			complete: function(parsedCsv) {
+				assert.deepEqual(parsedCsv.data[0], { ['__proto__']: 'X', toString: 'Y', valueOf: 'Z', __proto___1: 'A' });
 				done();
 			}
 		});
