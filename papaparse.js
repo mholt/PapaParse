@@ -1480,61 +1480,14 @@ License: MIT
 			if (!input)
 				return returnable();
 
-			// Rename headers if there are duplicates
-			var firstLine;
-			if (config.header && !baseIndex)
-			{
-				firstLine = input.split(newline)[0];
-				var headers = firstLine.split(delim);
-				var separator = '_';
-				var headerMap = new Set();
-				var headerCount = {};
-				var duplicateHeaders = false;
-
-				// Using old-style 'for' loop to avoid prototype pollution that would be picked up with 'var j in headers'
-				for (var j = 0; j < headers.length; j++) {
-					var header = headers[j];
-					if (isFunction(config.transformHeader))
-						header = config.transformHeader(header, j);
-					var headerName = header;
-
-					var count = headerCount[header] || 0;
-					if (count > 0) {
-						duplicateHeaders = true;
-						headerName = header + separator + count;
-						// Initialise the variable if it hasn't been.
-						if (renamedHeaders === null) {
-							renamedHeaders = {};
-						}
-					}
-					headerCount[header] = count + 1;
-					// In case it already exists, we add more separators
-					while (headerMap.has(headerName)) {
-						headerName = headerName + separator + count;
-					}
-					headerMap.add(headerName);
-					if (count > 0) {
-						renamedHeaders[headerName] = header;
-					}
-				}
-				if (duplicateHeaders) {
-					var editedInput = input.split(newline);
-					editedInput[0] = Array.from(headerMap).join(delim);
-					input = editedInput.join(newline);
-				}
-			}
 			if (fastMode || (fastMode !== false && input.indexOf(quoteChar) === -1))
 			{
 				var rows = input.split(newline);
 				for (var i = 0; i < rows.length; i++)
 				{
 					row = rows[i];
-					// use firstline as row length may be changed due to duplicated headers
-					if (i === 0 && firstLine !== undefined) {
-						cursor += firstLine.length;
-					}else{
-						cursor += row.length;
-					}
+					cursor += row.length;
+
 					if (i !== rows.length - 1)
 						cursor += newline.length;
 					else if (ignoreLastRow)
@@ -1729,7 +1682,6 @@ License: MIT
 				break;
 			}
 
-
 			return finish();
 
 
@@ -1789,6 +1741,47 @@ License: MIT
 			/** Returns an object with the results, errors, and meta. */
 			function returnable(stopped)
 			{
+				if (config.header && !baseIndex && data.length)
+				{
+					const result = data[0];
+					const headerCount = {}; // To track the count of each base header
+					const usedHeaders = new Set(result); // To track used headers and avoid duplicates
+					let duplicateHeaders = false;
+
+					for (let i = 0; i < result.length; i++) {
+						let header = result[i];
+						if (isFunction(config.transformHeader))
+							header = config.transformHeader(header, i);
+
+						if (!headerCount[header]) {
+							headerCount[header] = 1;
+							result[i] = header;
+						} else {
+							let newHeader;
+							let suffixCount = headerCount[header];
+
+							// Find a unique new header
+							do {
+								newHeader = `${header}_${suffixCount}`;
+								suffixCount++;
+							} while (usedHeaders.has(newHeader));
+
+							usedHeaders.add(newHeader); // Mark this new Header as used
+							result[i] = newHeader;
+							headerCount[header]++;
+							duplicateHeaders = true;
+							if (renamedHeaders === null) {
+								renamedHeaders = {};
+							}
+							renamedHeaders[newHeader] = header;
+						}
+
+						usedHeaders.add(header); // Ensure the original header is marked as used
+					}
+					if (duplicateHeaders) {
+						console.warn('Duplicate headers found and renamed.');
+					}
+				}
 				return {
 					data: data,
 					errors: errors,
