@@ -2741,6 +2741,30 @@ var CUSTOM_TESTS = [
 			});
 		}
 	},
+	{
+		description: "Result is properly passed to complete callback with chunk option",
+		expected: {
+			data: [["H1", "H2", "H3"], ["d1", "d2", "d3"], ["d4", "d5", "d6"]],
+			errors: [],
+			meta: {
+				aborted: false,
+				cursor: 26,
+				delimiter: ",",
+				linebreak: "\n",
+				renamedHeaders: null,
+				truncated: false,
+			}
+		},
+		run: function(callback) {
+			Papa.parse('H1,H2,H3\nd1,d2,d3\nd4,d5,d6', {
+				worker: true,
+				chunk: function() {},
+				complete: function(results) {
+					callback(results);
+				}
+			});
+		}
+	},
 ];
 
 describe('Custom Tests', function() {
