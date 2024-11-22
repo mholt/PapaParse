@@ -568,8 +568,8 @@ License: MIT
 					this._halted = true;
 					return;
 				}
+				this._completeResults = results;
 				results = undefined;
-				this._completeResults = undefined;
 			}
 
 			if (!this._config.step && !this._config.chunk) {
