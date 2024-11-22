@@ -1881,10 +1881,9 @@ License: MIT
 
 	function completeWorker(workerId, results, file) {
 		var worker = workers[workerId];
-		if (isFunction(worker.userComplete)) {
+		if (isFunction(worker.userComplete))
 			worker.userComplete(results, file);
-			worker.terminate();
-		}
+		worker.terminate();
 		delete workers[workerId];
 	}
 
