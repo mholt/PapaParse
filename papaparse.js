@@ -511,15 +511,15 @@ License: MIT
 		this.parseChunk = function(chunk, isFakeChunk)
 		{
 			// First chunk pre-processing
-			const skipFirstNLines = parseInt(this._config.skipFirstNLines) || 0;
+			var skipFirstNLines = parseInt(this._config.skipFirstNLines) || 0;
 			if (this.isFirstChunk && skipFirstNLines > 0) {
-				let _newline = this._config.newline;
+				var _newline = this._config.newline;
 				if (!_newline) {
-					const quoteChar = this._config.quoteChar || '"';
+					var quoteChar = this._config.quoteChar || '"';
 					_newline = this._handle.guessLineEndings(chunk, quoteChar);
 				}
-				const splitChunk = chunk.split(_newline);
-				chunk = [...splitChunk.slice(skipFirstNLines)].join(_newline);
+				var splitChunk = chunk.split(_newline);
+				chunk = splitChunk.slice(skipFirstNLines).join(_newline);
 			}
 			if (this.isFirstChunk && isFunction(this._config.beforeFirstChunk))
 			{
@@ -1743,13 +1743,13 @@ License: MIT
 			{
 				if (config.header && !baseIndex && data.length)
 				{
-					const result = data[0];
-					const headerCount = {}; // To track the count of each base header
-					const usedHeaders = new Set(result); // To track used headers and avoid duplicates
-					let duplicateHeaders = false;
+					var result = data[0];
+					var headerCount = {}; // To track the count of each base header
+					var usedHeaders = new Set(result); // To track used headers and avoid duplicates
+					var duplicateHeaders = false;
 
-					for (let i = 0; i < result.length; i++) {
-						let header = result[i];
+					for (var i = 0; i < result.length; i++) {
+						var header = result[i];
 						if (isFunction(config.transformHeader))
 							header = config.transformHeader(header, i);
 
@@ -1757,12 +1757,12 @@ License: MIT
 							headerCount[header] = 1;
 							result[i] = header;
 						} else {
-							let newHeader;
-							let suffixCount = headerCount[header];
+							var newHeader;
+							var suffixCount = headerCount[header];
 
 							// Find a unique new header
 							do {
-								newHeader = `${header}_${suffixCount}`;
+								newHeader = header + '_' + suffixCount;
 								suffixCount++;
 							} while (usedHeaders.has(newHeader));
 
