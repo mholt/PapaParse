@@ -601,6 +601,19 @@ var CORE_PARSER_TESTS = [
 		}
 	},
 	{
+		description: "Simple duplicated header names (allowDuplicateHeaders=true)",
+		input: 'A,A,A,A\n1,2,3,4',
+		config: { header: true, allowDuplicateHeaders: true },
+		expected: {
+			data: [['A', 'A', 'A', 'A'], ['1', '2', '3', '4']],
+			errors: [],
+			meta: {
+				renamedHeaders: null,
+				cursor: 15
+			}
+		}
+	},
+	{
 		description: "Duplicated header names with headerTransform",
 		input: 'A,A,A,A\n1,2,3,4',
 		config: { header: true, transformHeader: function(header) { return header.toLowerCase(); } },

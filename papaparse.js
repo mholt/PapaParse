@@ -1741,7 +1741,7 @@ License: MIT
 			/** Returns an object with the results, errors, and meta. */
 			function returnable(stopped)
 			{
-				if (config.header && !baseIndex && data.length)
+				if (config.header && !config.allowDuplicateHeaders && !baseIndex && data.length)
 				{
 					var result = data[0];
 					var headerCount = {}; // To track the count of each base header
