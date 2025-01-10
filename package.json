@@ -49,6 +49,7 @@
 	},
 	"scripts": {
 		"lint": "eslint --no-ignore papaparse.js Gruntfile.js .eslintrc.js 'tests/**/*.js'",
+		"build": "grunt build",
 		"test-browser": "node tests/test.js",
 		"test-mocha-headless-chrome": "node tests/test.js --mocha-headless-chrome",
 		"test-node": "mocha tests/node-tests.js tests/test-cases.js",
