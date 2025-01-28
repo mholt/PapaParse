@@ -2339,6 +2339,22 @@ var CUSTOM_TESTS = [
 		}
 	},
 	{
+		description: "Data is correctly parsed with steps when there are empty values",
+		expected: [{A: 'a', B: 'b', C: 'c', D: 'd'}, {A: 'a', B: '', C: '', D: ''}],
+		run: function(callback) {
+			var data = [];
+			Papa.parse('A,B,C,D\na,b,c,d\na,,,', {
+				header: true,
+				step: function(results) {
+					data.push(results.data);
+				},
+				complete: function() {
+					callback(data);
+				}
+			});
+		}
+	},
+	{
 		description: "Step is called with the contents of the row",
 		expected: ['A', 'b', 'c'],
 		run: function(callback) {

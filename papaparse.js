@@ -1426,6 +1426,7 @@ License: MIT
 		var fastMode = config.fastMode;
 		var quoteChar;
 		var renamedHeaders = null;
+		var headerParsed = false;
 
 		if (config.quoteChar === undefined || config.quoteChar === null) {
 			quoteChar = '"';
@@ -1741,7 +1742,7 @@ License: MIT
 			/** Returns an object with the results, errors, and meta. */
 			function returnable(stopped)
 			{
-				if (config.header && !baseIndex && data.length)
+				if (config.header && !baseIndex && data.length && !headerParsed)
 				{
 					const result = data[0];
 					const headerCount = {}; // To track the count of each base header
@@ -1781,6 +1782,7 @@ License: MIT
 					if (duplicateHeaders) {
 						console.warn('Duplicate headers found and renamed.');
 					}
+					headerParsed = true;
 				}
 				return {
 					data: data,
