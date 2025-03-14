@@ -185,8 +185,14 @@ License: MIT
 		global.onmessage = workerThreadReceivedMessage;
 	}
 
-
-
+	// Strip character from UTF-8 BOM encoded files that cause issue parsing the file
+	function stripBom(string) {
+		console.log(`checking ${string}`);
+		if (string.charCodeAt(0) === 0xfeff) {
+			return string.slice(1);
+		}
+		return string;
+	}
 
 	function CsvToJson(_input, _config)
 	{
@@ -249,14 +255,6 @@ License: MIT
 			streamer = new FileStreamer(_config);
 
 		return streamer.stream(_input);
-
-		// Strip character from UTF-8 BOM encoded files that cause issue parsing the file
-		function stripBom(string) {
-			if (string.charCodeAt(0) === 0xfeff) {
-				return string.slice(1);
-			}
-			return string;
-		}
 	}
 
 
@@ -1234,6 +1232,7 @@ License: MIT
 
 			function addHeader(header, i)
 			{
+				header = stripBom(header);
 				if (isFunction(_config.transformHeader))
 					header = _config.transformHeader(header, i);
 
@@ -1750,7 +1749,7 @@ License: MIT
 					let duplicateHeaders = false;
 
 					for (let i = 0; i < result.length; i++) {
-						let header = result[i];
+						let header = stripBom(result[i]);
 						if (isFunction(config.transformHeader))
 							header = config.transformHeader(header, i);
 

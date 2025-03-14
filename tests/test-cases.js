@@ -1540,6 +1540,24 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "UTF-8 BOM encoded input is stripped from invisible BOM character",
+		input: '\ufeffA,B\nX,Y',
+		config: {},
+		expected: {
+			data: [['A', 'B'], ['X', 'Y']],
+			errors: [],
+		}
+	},
+	{
+		description: "UTF-8 BOM encoded input with header produces column key stripped from invisible BOM character",
+		input: '\ufeffA,B\nX,Y',
+		config: { header: true },
+		expected: {
+			data: [{A: 'X', B: 'Y'}],
+			errors: [],
+		}
+	},
+	{
 		description: "Parsing with skipEmptyLines set to 'greedy'",
 		notes: "Must parse correctly without lines with no content",
 		input: 'a,b\n\n,\nc,d\n , \n""," "\n	,	\n,,,,\n',
@@ -1688,6 +1706,18 @@ var PARSE_ASYNC_TESTS = [
 		},
 		expected: {
 			data: [['A','B','C'],['X','Y','Z']],
+			errors: []
+		}
+	},
+	{
+		description: "Simple file with BOM encoding and header",
+		disabled: !FILES_ENABLED,
+		input: FILES_ENABLED ? new File(["\ufeffA,B\nX,Y"], "sample.csv") : false,
+		config: {
+			header: true,
+		},
+		expected: {
+			data: [{'\ufeffA': 'X', B: 'Y'}],
 			errors: []
 		}
 	},
