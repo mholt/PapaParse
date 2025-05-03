@@ -1516,6 +1516,7 @@ License: MIT
 
 			var nextDelim = input.indexOf(delim, cursor);
 			var nextNewline = input.indexOf(newline, cursor);
+			// Pre-compile the regex for escaped quotes for performance
 			var quoteCharRegex = new RegExp(escapeRegExp(escapeChar) + escapeRegExp(quoteChar), 'g');
 			var quoteSearch = input.indexOf(quoteChar, cursor);
 
@@ -1584,7 +1585,8 @@ License: MIT
 						var spacesBetweenQuoteAndDelimiter = extraSpaces(checkUpTo);
 
 						// Closing quote followed by delimiter or 'unnecessary spaces + delimiter'
-						if (input.substr(quoteSearch + 1 + spacesBetweenQuoteAndDelimiter, delimLen) === delim)
+						// Use startsWith for potentially better performance and readability
+						if (input.startsWith(delim, quoteSearch + 1 + spacesBetweenQuoteAndDelimiter))
 						{
 							row.push(input.substring(cursor, quoteSearch).replace(quoteCharRegex, quoteChar));
 							cursor = quoteSearch + 1 + spacesBetweenQuoteAndDelimiter + delimLen;
@@ -1602,7 +1604,8 @@ License: MIT
 						var spacesBetweenQuoteAndNewLine = extraSpaces(nextNewline);
 
 						// Closing quote followed by newline or 'unnecessary spaces + newLine'
-						if (input.substring(quoteSearch + 1 + spacesBetweenQuoteAndNewLine, quoteSearch + 1 + spacesBetweenQuoteAndNewLine + newlineLen) === newline)
+						// Use startsWith for potentially better performance and readability
+						if (input.startsWith(newline, quoteSearch + 1 + spacesBetweenQuoteAndNewLine))
 						{
 							row.push(input.substring(cursor, quoteSearch).replace(quoteCharRegex, quoteChar));
 							saveRow(quoteSearch + 1 + spacesBetweenQuoteAndNewLine + newlineLen);
@@ -1693,17 +1696,37 @@ License: MIT
 			}
 
 			/**
-             * checks if there are extra spaces after closing quote and given index without any text
-             * if Yes, returns the number of spaces
-             */
+			 * Checks if there are insignificant whitespace characters after a closing quote and before
+			 * the next delimiter or newline. If so, returns the number of such characters.
+			 * This function has been optimized to avoid creating substrings for performance.
+			 */
 			function extraSpaces(index) {
+				// If index is -1, delimiter/newline wasn't found after the quote.
+				if (index === -1) {
+					return 0;
+				}
+
+				var start = quoteSearch + 1;
+				// Ensure start is not past the end of the input or the index
+				// Also check inputLen which is defined in the outer scope
+				if (start >= inputLen || start >= index) {
+					return 0;
+				}
+
 				var spaceLength = 0;
-				if (index !== -1) {
-					var textBetweenClosingQuoteAndIndex = input.substring(quoteSearch + 1, index);
-					if (textBetweenClosingQuoteAndIndex && textBetweenClosingQuoteAndIndex.trim() === '') {
-						spaceLength = textBetweenClosingQuoteAndIndex.length;
+				for (var i = start; i < index; i++) {
+					var charCode = input.charCodeAt(i);
+					// Check for space (32) or tab (9)
+					// This aims to match the common behavior implicitly handled by the previous .trim() check
+					if (charCode === 32 || charCode === 9) {
+						spaceLength++;
+					} else {
+						// Found a non-whitespace character. The original .trim() would result
+						// in a non-empty string. Return 0 as per original logic.
+						return 0;
 					}
 				}
+				// If the loop completes, all characters between start and index were checked whitespace.
 				return spaceLength;
 			}
 
