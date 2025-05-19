@@ -626,6 +626,19 @@ var CORE_PARSER_TESTS = [
 			}
 		}
 	},
+	{
+		description: "Duplicate header names with __proto__ field",
+		input: '__proto__,__proto__,__proto__\n1,2,3',
+		config: { header: true },
+		expected: {
+			data: [['__proto__', '__proto___1', '__proto___2'], ['1', '2', '3']],
+			errors: [],
+			meta: {
+				renamedHeaders: {__proto___1: '__proto__', __proto___2: '__proto__'},
+				cursor: 35
+			}
+		}
+	},
 ];
 
 describe('Core Parser Tests', function() {
