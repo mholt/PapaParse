@@ -126,5 +126,11 @@ var peopleLovePapa = [
 		name: "HelloData",
 		description: "Automatic rent surveys with real-time data on over 25M multifamily units nationwide, direct from property websites.",
 		quote: "Papa Parse makes bulk data imports a breeze! It's helped us easily onboard our largest customers. It's robust and a true game-changer."
+	},
+	{
+		link: "https://chartbrew.com",
+		name: "Chartbrew",
+		description: "Chartbrew allows you to connect all your databases and APIs to create beautiful live charts and visualize your data in custom dashboards.",
+		quote: "Nothing beats Papa Parse when it comes to loading huge CSV files in the browser. Chartbrew loves using Papa Parse to visualize data from CSV files <3" 
 	}
 ];
