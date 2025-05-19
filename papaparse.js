@@ -1745,7 +1745,7 @@ License: MIT
 				if (config.header && !baseIndex && data.length && !headerParsed)
 				{
 					const result = data[0];
-					const headerCount = {}; // To track the count of each base header
+					const headerCount = Object.create(null); // To track the count of each base header
 					const usedHeaders = new Set(result); // To track used headers and avoid duplicates
 					let duplicateHeaders = false;
 
