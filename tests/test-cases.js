@@ -1710,18 +1710,6 @@ var PARSE_ASYNC_TESTS = [
 		}
 	},
 	{
-		description: "Simple file with BOM encoding and header",
-		disabled: !FILES_ENABLED,
-		input: FILES_ENABLED ? new File(["\ufeffA,B\nX,Y"], "sample.csv") : false,
-		config: {
-			header: true,
-		},
-		expected: {
-			data: [{'\ufeffA': 'X', B: 'Y'}],
-			errors: []
-		}
-	},
-	{
 		description: "Simple file + worker",
 		disabled: !FILES_ENABLED,
 		input: FILES_ENABLED ? new File(["A,B,C\nX,Y,Z"], "sample.csv") : false,

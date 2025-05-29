@@ -187,7 +187,6 @@ License: MIT
 
 	// Strip character from UTF-8 BOM encoded files that cause issue parsing the file
 	function stripBom(string) {
-		console.log(`checking ${string}`);
 		if (string.charCodeAt(0) === 0xfeff) {
 			return string.slice(1);
 		}
