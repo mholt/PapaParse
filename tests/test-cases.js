@@ -13,6 +13,8 @@ var UNIT_SEP = String.fromCharCode(31);
 var FILES_ENABLED = false;
 try {
 	new File([""], ""); // eslint-disable-line no-new
+	// Required since Node20 as it ads a FileGlobal but not a FileReaderSync
+	new FileReaderSync(); // eslint-disable-line no-new
 	FILES_ENABLED = true;
 } catch (e) {} // safari, ie
 
@@ -2817,7 +2819,7 @@ describe('Custom Tests', function() {
 		const blob = new Blob([
 			`
 				importScripts('${papaParseScriptPath}');
-				
+
 				self.addEventListener("message", function(event) {
 					if (event.data === "ExecuteParse") {
 						// Perform our synchronous parse, as requested
