@@ -35,6 +35,7 @@
 	},
 	"license": "MIT",
 	"main": "papaparse.js",
+	"module": "papaparse.mjs",
 	"browser": "papaparse.min.js",
 	"devDependencies": {
 		"chai": "^4.2.0",
