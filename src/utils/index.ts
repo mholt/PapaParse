@@ -1,6 +1,6 @@
 /**
  * Utility Functions
- * 
+ *
  * Helper functions extracted from the legacy PapaParse implementation.
  * These maintain exact behavior for compatibility.
  */
@@ -10,7 +10,7 @@
  * Legacy implementation preserved exactly
  */
 export function copy(obj: any): any {
-  if (typeof obj !== 'object' || obj === null) {
+  if (typeof obj !== "object" || obj === null) {
     return obj;
   }
   const cpy = Array.isArray(obj) ? [] : {};
@@ -25,9 +25,9 @@ export function copy(obj: any): any {
  * Legacy implementation preserved exactly
  */
 export function bindFunction<T extends Function>(f: T, self: any): T {
-  return (function() { 
-    f.apply(self, arguments); 
-  } as any) as T;
+  return (() => {
+    f.apply(self, arguments);
+  }) as any as T;
 }
 
 /**
@@ -35,7 +35,7 @@ export function bindFunction<T extends Function>(f: T, self: any): T {
  * Legacy implementation preserved exactly
  */
 export function isFunction(func: any): func is Function {
-  return typeof func === 'function';
+  return typeof func === "function";
 }
 
 /**
@@ -54,7 +54,7 @@ export function stripBom(string: string): string {
  * Legacy implementation preserved exactly
  */
 export function escapeRegExp(string: string): string {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
 }
 
 /**
@@ -62,7 +62,7 @@ export function escapeRegExp(string: string): string {
  * Utility function for type safety
  */
 export function isString(value: any): value is string {
-  return typeof value === 'string';
+  return typeof value === "string";
 }
 
 /**
@@ -70,7 +70,7 @@ export function isString(value: any): value is string {
  * Utility function for type safety
  */
 export function isNumber(value: any): value is number {
-  return typeof value === 'number';
+  return typeof value === "number";
 }
 
 /**
@@ -78,7 +78,7 @@ export function isNumber(value: any): value is number {
  * Utility function for type safety
  */
 export function isBoolean(value: any): value is boolean {
-  return typeof value === 'boolean';
+  return typeof value === "boolean";
 }
 
 /**
@@ -86,7 +86,7 @@ export function isBoolean(value: any): value is boolean {
  * Utility function for type safety
  */
 export function isObject(value: any): value is Record<string, any> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 /**
@@ -103,7 +103,7 @@ export function isArray(value: any): value is any[] {
  */
 export function toString(value: any): string {
   if (value === null || value === undefined) {
-    return '';
+    return "";
   }
   return String(value);
 }
@@ -120,8 +120,11 @@ export function isEmptyLine(line: string): boolean {
  * Checks if a line is a comment based on comment character
  * Utility function for comment detection
  */
-export function isCommentLine(line: string, commentChar: string | false): boolean {
-  if (!commentChar || typeof commentChar !== 'string') {
+export function isCommentLine(
+  line: string,
+  commentChar: string | false,
+): boolean {
+  if (!commentChar || typeof commentChar !== "string") {
     return false;
   }
   return line.trimStart().startsWith(commentChar);
@@ -141,17 +144,17 @@ export function getStringLength(str: string): number {
  * Factory function for standardized error creation
  */
 export function createError(
-  type: string, 
-  code: string, 
-  message: string, 
-  row?: number, 
-  index?: number
+  type: string,
+  code: string,
+  message: string,
+  row?: number,
+  index?: number,
 ): any {
   return {
     type,
     code,
     message,
     row,
-    index
+    index,
   };
 }

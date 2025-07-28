@@ -1,16 +1,16 @@
 /**
  * Performance Benchmark Harness
- * 
+ *
  * Micro-benchmark harness for rows/second testing to ensure performance
  * parity between legacy and modern implementations.
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from "fs";
+import * as path from "path";
 
 // Interface for benchmark results
 export interface BenchmarkResult {
-  implementation: 'legacy' | 'modern';
+  implementation: "legacy" | "modern";
   testName: string;
   rowsPerSecond: number;
   totalRows: number;
@@ -50,24 +50,24 @@ export class PerformanceBenchmark {
    */
   generateLargeTestData(rows: number, columns: number): TestData {
     const headers = Array.from({ length: columns }, (_, i) => `column_${i}`);
-    const csvLines = [headers.join(',')];
-    
+    const csvLines = [headers.join(",")];
+
     for (let i = 0; i < rows; i++) {
       const row = Array.from({ length: columns }, (_, j) => {
         // Mix of data types to test dynamic typing
         if (j % 4 === 0) return `"string_value_${i}_${j}"`;
         if (j % 4 === 1) return String(Math.random() * 1000);
-        if (j % 4 === 2) return Math.random() > 0.5 ? 'true' : 'false';
+        if (j % 4 === 2) return Math.random() > 0.5 ? "true" : "false";
         return String(i * j);
       });
-      csvLines.push(row.join(','));
+      csvLines.push(row.join(","));
     }
 
     return {
       name: `large_${rows}x${columns}`,
-      csvContent: csvLines.join('\n'),
+      csvContent: csvLines.join("\n"),
       expectedRows: rows,
-      description: `Large dataset with ${rows} rows and ${columns} columns`
+      description: `Large dataset with ${rows} rows and ${columns} columns`,
     };
   }
 
@@ -76,30 +76,33 @@ export class PerformanceBenchmark {
    */
   generateProblematicTestData(): TestData {
     const problematicRows = [
-      'header1,header2,header3',
+      "header1,header2,header3",
       '"quoted,with,commas","normal","escaped""quote"',
       'line\nbreak,normal,"quoted\nline\nbreak"',
       '123.456,true,"formula:=SUM(A1:A2)"',
       '"",,empty middle',
-      'unicode,émojis,🚀🎉',
-      'very long field,normal,' + '"' + 'x'.repeat(10000) + '"'
+      "unicode,émojis,🚀🎉",
+      "very long field,normal," + '"' + "x".repeat(10000) + '"',
     ];
 
     return {
-      name: 'problematic_content',
-      csvContent: problematicRows.join('\n'),
+      name: "problematic_content",
+      csvContent: problematicRows.join("\n"),
       expectedRows: 6,
-      description: 'CSV with quotes, line breaks, unicode, and edge cases'
+      description: "CSV with quotes, line breaks, unicode, and edge cases",
     };
   }
 
   /**
    * Run benchmark against legacy implementation
    */
-  async benchmarkLegacy(testData: TestData, parser: any): Promise<BenchmarkResult> {
+  async benchmarkLegacy(
+    testData: TestData,
+    parser: any,
+  ): Promise<BenchmarkResult> {
     const memBefore = process.memoryUsage();
     let memPeak = memBefore;
-    
+
     // Monitor memory usage during parsing
     const memoryMonitor = setInterval(() => {
       const current = process.memoryUsage();
@@ -120,7 +123,7 @@ export class PerformanceBenchmark {
         },
         error: () => {
           errorCount++;
-        }
+        },
       });
 
       const endTime = Date.now();
@@ -128,10 +131,12 @@ export class PerformanceBenchmark {
       const memAfter = process.memoryUsage();
 
       const totalTime = endTime - startTime;
-      const rowsPerSecond = Math.round((testData.expectedRows / totalTime) * 1000);
+      const rowsPerSecond = Math.round(
+        (testData.expectedRows / totalTime) * 1000,
+      );
 
       return {
-        implementation: 'legacy',
+        implementation: "legacy",
         testName: testData.name,
         rowsPerSecond,
         totalRows: testData.expectedRows,
@@ -139,9 +144,9 @@ export class PerformanceBenchmark {
         memoryUsage: {
           before: memBefore,
           after: memAfter,
-          peak: memPeak
+          peak: memPeak,
         },
-        errors: errorCount
+        errors: errorCount,
       };
     } catch (error) {
       clearInterval(memoryMonitor);
@@ -152,11 +157,14 @@ export class PerformanceBenchmark {
   /**
    * Run benchmark against modern implementation
    */
-  async benchmarkModern(testData: TestData, parser: any): Promise<BenchmarkResult> {
+  async benchmarkModern(
+    testData: TestData,
+    parser: any,
+  ): Promise<BenchmarkResult> {
     // Similar to benchmarkLegacy but for modern implementation
     const memBefore = process.memoryUsage();
     let memPeak = memBefore;
-    
+
     const memoryMonitor = setInterval(() => {
       const current = process.memoryUsage();
       if (current.heapUsed > memPeak.heapUsed) {
@@ -176,7 +184,7 @@ export class PerformanceBenchmark {
         },
         error: () => {
           errorCount++;
-        }
+        },
       });
 
       const endTime = Date.now();
@@ -184,10 +192,12 @@ export class PerformanceBenchmark {
       const memAfter = process.memoryUsage();
 
       const totalTime = endTime - startTime;
-      const rowsPerSecond = Math.round((testData.expectedRows / totalTime) * 1000);
+      const rowsPerSecond = Math.round(
+        (testData.expectedRows / totalTime) * 1000,
+      );
 
       return {
-        implementation: 'modern',
+        implementation: "modern",
         testName: testData.name,
         rowsPerSecond,
         totalRows: testData.expectedRows,
@@ -195,9 +205,9 @@ export class PerformanceBenchmark {
         memoryUsage: {
           before: memBefore,
           after: memAfter,
-          peak: memPeak
+          peak: memPeak,
         },
-        errors: errorCount
+        errors: errorCount,
       };
     } catch (error) {
       clearInterval(memoryMonitor);
@@ -208,25 +218,31 @@ export class PerformanceBenchmark {
   /**
    * Compare benchmark results and detect regressions
    */
-  compareResults(legacyResult: BenchmarkResult, modernResult: BenchmarkResult): {
+  compareResults(
+    legacyResult: BenchmarkResult,
+    modernResult: BenchmarkResult,
+  ): {
     passed: boolean;
     performanceRatio: number;
     memoryRatio: number;
     details: string;
   } {
-    const performanceRatio = modernResult.rowsPerSecond / legacyResult.rowsPerSecond;
-    const memoryRatio = modernResult.memoryUsage.peak.heapUsed / legacyResult.memoryUsage.peak.heapUsed;
-    
+    const performanceRatio =
+      modernResult.rowsPerSecond / legacyResult.rowsPerSecond;
+    const memoryRatio =
+      modernResult.memoryUsage.peak.heapUsed /
+      legacyResult.memoryUsage.peak.heapUsed;
+
     const PERFORMANCE_THRESHOLD = 0.95; // Modern should be within 5% of legacy
-    const MEMORY_THRESHOLD = 1.10; // Modern should use no more than 10% additional memory
-    
+    const MEMORY_THRESHOLD = 1.1; // Modern should use no more than 10% additional memory
+
     const performancePassed = performanceRatio >= PERFORMANCE_THRESHOLD;
     const memoryPassed = memoryRatio <= MEMORY_THRESHOLD;
     const passed = performancePassed && memoryPassed;
 
     let details = `Performance: ${(performanceRatio * 100).toFixed(1)}% of legacy speed`;
     details += `\nMemory: ${(memoryRatio * 100).toFixed(1)}% of legacy memory usage`;
-    
+
     if (!performancePassed) {
       details += `\n❌ Performance regression detected: ${((1 - performanceRatio) * 100).toFixed(1)}% slower`;
     }
@@ -234,21 +250,24 @@ export class PerformanceBenchmark {
       details += `\n❌ Memory regression detected: ${((memoryRatio - 1) * 100).toFixed(1)}% more memory`;
     }
     if (passed) {
-      details += '\n✅ All benchmarks passed';
+      details += "\n✅ All benchmarks passed";
     }
 
     return {
       passed,
       performanceRatio,
       memoryRatio,
-      details
+      details,
     };
   }
 
   /**
    * Run full benchmark suite
    */
-  async runBenchmarkSuite(legacyParser: any, modernParser: any): Promise<{
+  async runBenchmarkSuite(
+    legacyParser: any,
+    modernParser: any,
+  ): Promise<{
     results: BenchmarkResult[];
     summary: {
       passed: boolean;
@@ -300,8 +319,8 @@ export class PerformanceBenchmark {
         passedTests,
         failedTests: totalTests - passedTests,
         avgPerformanceRatio,
-        avgMemoryRatio
-      }
+        avgMemoryRatio,
+      },
     };
   }
 
@@ -309,7 +328,7 @@ export class PerformanceBenchmark {
    * Export benchmark results to JSON
    */
   exportResults(results: BenchmarkResult[], filename: string): void {
-    const outputPath = path.join(process.cwd(), 'benchmark-results', filename);
+    const outputPath = path.join(process.cwd(), "benchmark-results", filename);
     fs.mkdirSync(path.dirname(outputPath), { recursive: true });
     fs.writeFileSync(outputPath, JSON.stringify(results, null, 2));
     console.log(`Benchmark results exported to: ${outputPath}`);
@@ -318,31 +337,33 @@ export class PerformanceBenchmark {
 
 // CLI runner for CI/CD integration
 export async function runCIBenchmark(): Promise<void> {
-  console.log('🚀 Starting PapaParse Performance Benchmark...');
-  
+  console.log("🚀 Starting PapaParse Performance Benchmark...");
+
   const benchmark = new PerformanceBenchmark();
-  
+
   // Import both implementations
-  const legacyPapa = require('../../legacy/papaparse.js');
+  const legacyPapa = require("../../legacy/papaparse.js");
   // const modernPapa = require('../../dist/index.js'); // Modern implementation when ready
-  
+
   try {
     // For now, just validate the benchmark infrastructure
-    console.log('✅ Benchmark infrastructure is ready');
-    console.log('⏳ Modern implementation not yet available - skipping comparison');
-    
+    console.log("✅ Benchmark infrastructure is ready");
+    console.log(
+      "⏳ Modern implementation not yet available - skipping comparison",
+    );
+
     // When modern implementation is ready:
     // const { results, summary } = await benchmark.runBenchmarkSuite(legacyPapa, modernPapa);
     // benchmark.exportResults(results, `benchmark-${Date.now()}.json`);
-    
+
     // if (!summary.passed) {
     //   console.error('❌ Performance benchmarks failed');
     //   process.exit(1);
     // }
-    
-    console.log('✅ Performance benchmarks passed');
+
+    console.log("✅ Performance benchmarks passed");
   } catch (error) {
-    console.error('❌ Benchmark failed:', error);
+    console.error("❌ Benchmark failed:", error);
     process.exit(1);
   }
 }

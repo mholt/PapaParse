@@ -1,6 +1,6 @@
 /**
  * Legacy PapaParse Type Definitions
- * 
+ *
  * These types preserve the exact public API contract from the legacy implementation.
  * They maintain compatibility while providing TypeScript support.
  * Based on @types/papaparse but extended for exact legacy compatibility.
@@ -9,16 +9,35 @@
 /// <reference types="node" />
 
 // Import Node types for compatibility
-import { Duplex } from 'stream';
+import type { Duplex } from "stream";
 
 // Error object structure - expanded for modern implementation
 export interface PapaParseError {
   /** A generalization of the error */
-  type: "Quotes" | "Delimiter" | "FieldMismatch" | "Network" | "File" | "Worker" | "Config" | "Parse";
+  type:
+    | "Quotes"
+    | "Delimiter"
+    | "FieldMismatch"
+    | "Network"
+    | "File"
+    | "Worker"
+    | "Config"
+    | "Parse";
   /** Standardized error code */
-  code: "MissingQuotes" | "UndetectableDelimiter" | "TooFewFields" | "TooManyFields" | "InvalidQuotes" | 
-        "InvalidDelimiter" | "NetworkError" | "DownloadError" | "FileSizeError" | "FileReadError" | 
-        "WorkerError" | "ConfigError" | "ParseError";
+  code:
+    | "MissingQuotes"
+    | "UndetectableDelimiter"
+    | "TooFewFields"
+    | "TooManyFields"
+    | "InvalidQuotes"
+    | "InvalidDelimiter"
+    | "NetworkError"
+    | "DownloadError"
+    | "FileSizeError"
+    | "FileReadError"
+    | "WorkerError"
+    | "ConfigError"
+    | "ParseError";
   /** Human-readable details */
   message: string;
   /** Row index of parsed data where error is */
@@ -71,7 +90,11 @@ export interface PapaParseStepResult<T = any> {
 
 // Parser instance for step/chunk callbacks
 export interface PapaParseParser {
-  parse(input: string, baseIndex?: number, ignoreLastRow?: boolean): PapaParseResult;
+  parse(
+    input: string,
+    baseIndex?: number,
+    ignoreLastRow?: boolean,
+  ): PapaParseResult;
   pause(): void;
   resume(): void;
   abort(): void;
@@ -103,7 +126,10 @@ export interface PapaParseConfig<T = any> {
   /** If true, the first row will be interpreted as field names. */
   header?: boolean;
   /** If true, numeric and boolean data will be converted to their type. */
-  dynamicTyping?: boolean | { [key: string]: boolean; [key: number]: boolean } | ((field: string | number) => boolean);
+  dynamicTyping?:
+    | boolean
+    | { [key: string]: boolean; [key: number]: boolean }
+    | ((field: string | number) => boolean);
   /** Whether or not to use a worker thread. */
   worker?: boolean;
   /** Whether the string passed is actually a URL from which to download a file. */
@@ -111,7 +137,7 @@ export interface PapaParseConfig<T = any> {
   /** A boolean value passed directly into XMLHttpRequest's "withCredentials" property. */
   withCredentials?: boolean;
   /** If true, lines that are completely empty will be skipped. */
-  skipEmptyLines?: boolean | 'greedy';
+  skipEmptyLines?: boolean | "greedy";
   /** Fast mode speeds up parsing significantly for large inputs. */
   fastMode?: boolean;
 
@@ -147,7 +173,12 @@ export interface PapaParseConfig<T = any> {
   /** Object that describes the headers for downloading files. */
   downloadRequestHeaders?: { [key: string]: string };
   /** Use POST request on the URL. The value passed will be set as the body. */
-  downloadRequestBody?: Blob | ArrayBuffer | FormData | URLSearchParams | string;
+  downloadRequestBody?:
+    | Blob
+    | ArrayBuffer
+    | FormData
+    | URLSearchParams
+    | string;
 
   // Internal properties (exposed for compatibility but not in public docs)
   dynamicTypingFunction?: (field: string | number) => boolean;
@@ -168,7 +199,7 @@ export interface PapaUnparseConfig {
   /** The character used to determine newline sequence. */
   newline?: string;
   /** If true, lines that are completely empty will be skipped. */
-  skipEmptyLines?: boolean | 'greedy';
+  skipEmptyLines?: boolean | "greedy";
   /** Manually specify the keys (columns) you expect in the objects. */
   columns?: string[];
   /** If true, field values that begin with =, +, -, or @ will be prepended with ' to defend against injection attacks. */
@@ -189,12 +220,24 @@ export declare const NODE_STREAM_INPUT: unique symbol;
 // Main Papa object interface (for compatibility)
 export interface PapaObject {
   // Core parsing functions
-  parse<T = any>(input: string, config?: PapaParseConfig<T> & { download?: false; worker?: false }): PapaParseResult<T>;
-  parse<T = any>(input: string, config: PapaParseConfig<T> & { worker: true }): void;
-  parse<T = any>(input: string, config: PapaParseConfig<T> & { download: true }): void;
+  parse<T = any>(
+    input: string,
+    config?: PapaParseConfig<T> & { download?: false; worker?: false },
+  ): PapaParseResult<T>;
+  parse<T = any>(
+    input: string,
+    config: PapaParseConfig<T> & { worker: true },
+  ): void;
+  parse<T = any>(
+    input: string,
+    config: PapaParseConfig<T> & { download: true },
+  ): void;
   parse<T = any>(input: LocalFile, config: PapaParseConfig<T>): void;
   parse(stream: typeof NODE_STREAM_INPUT, config?: PapaParseConfig): Duplex;
-  unparse<T = any>(data: PapaUnparseData<T>, config?: PapaUnparseConfig): string;
+  unparse<T = any>(
+    data: PapaUnparseData<T>,
+    config?: PapaUnparseConfig,
+  ): string;
 
   // Read-only constants
   readonly RECORD_SEP: "\x1E";
@@ -204,7 +247,7 @@ export interface PapaObject {
   readonly NODE_STREAM_INPUT: typeof NODE_STREAM_INPUT;
 
   // Configurable properties (runtime-mutable for legacy compatibility)
-  LocalChunkSize: number;  // mutable!
+  LocalChunkSize: number; // mutable!
   RemoteChunkSize: number; // mutable!
   DefaultDelimiter: string;
 
@@ -219,7 +262,9 @@ export interface PapaObject {
 }
 
 // Stricter internal types for development (not exported to public API)
-export interface StrictParseConfig<T extends string | number | symbol = string> {
+export interface StrictParseConfig<
+  T extends string | number | symbol = string,
+> {
   delimiter: string;
   newline: string;
   quoteChar: string;
@@ -237,7 +282,7 @@ export interface StrictParseConfig<T extends string | number | symbol = string> 
   download: boolean;
   downloadRequestHeaders: { [key: string]: string };
   downloadRequestBody: string;
-  skipEmptyLines: boolean | 'greedy';
+  skipEmptyLines: boolean | "greedy";
   chunk: false | ((results: PapaParseResult, parser: PapaParseParser) => void);
   fastMode: boolean;
   beforeFirstChunk: false | ((chunk: string) => string);
