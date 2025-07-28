@@ -11,18 +11,22 @@
 // Import Node types for compatibility
 import { Duplex } from 'stream';
 
-// Error object structure - matching @types/papaparse
+// Error object structure - expanded for modern implementation
 export interface PapaParseError {
   /** A generalization of the error */
-  type: "Quotes" | "Delimiter" | "FieldMismatch";
+  type: "Quotes" | "Delimiter" | "FieldMismatch" | "Network" | "File" | "Worker" | "Config" | "Parse";
   /** Standardized error code */
-  code: "MissingQuotes" | "UndetectableDelimiter" | "TooFewFields" | "TooManyFields" | "InvalidQuotes";
+  code: "MissingQuotes" | "UndetectableDelimiter" | "TooFewFields" | "TooManyFields" | "InvalidQuotes" | 
+        "InvalidDelimiter" | "NetworkError" | "DownloadError" | "FileSizeError" | "FileReadError" | 
+        "WorkerError" | "ConfigError" | "ParseError";
   /** Human-readable details */
   message: string;
   /** Row index of parsed data where error is */
-  row?: number;
+  row: number;
   /** Index within the row where error is */
-  index?: number;
+  index: number;
+  /** Additional error details */
+  details?: any;
 }
 
 // Meta information structure
@@ -41,6 +45,8 @@ export interface PapaParseMeta {
   cursor: number;
   /** Whether parsing is paused */
   paused?: boolean;
+  /** Map of renamed headers (newName -> originalName) */
+  renamedHeaders?: { [newHeader: string]: string } | null;
 }
 
 // Result structure for parsed data

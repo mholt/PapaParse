@@ -18,11 +18,10 @@ ALWAYS UPDATE V6_REFACTOR.md with any progress you've made.
 - **Build**: Grunt uglifies legacy → `papaparse.min.js`
 - **No dependencies**: Library remains completely standalone
 
-## Code Style (from .eslintrc.js)
-- **Indentation**: Tabs only (`"indent": ["error", "tab"]`)
-- **Semicolons**: Required (`"semi": "error"`)
-- **Naming**: camelCase for variables, no property enforcement (`"camelcase": ["error", {"properties": "never"}]`)
-- **Spacing**: No space before function parens (`"space-before-function-paren": ["error", "never"]`)
-- **Line endings**: Unix style (`"linebreak-style": ["error", "unix"]`)
-- **Quotes**: No enforcement (flexible)
-- **Variables**: `var` allowed, `prefer-const` for new code
+## Code Style (from biome.json)
+- **Indentation**: Spaces only (2 spaces)
+- **Quotes**: Double quotes preferred (`"quoteStyle": "double"`)
+- **Linting**: Biome with recommended rules enabled
+- **Formatting**: Uses Biome formatter
+- **Scope**: Currently only applied to `src/**/*.ts` files
+- **Format**: Run `bun run format` to check, `bun run format:fix` to auto-fix

@@ -66,7 +66,9 @@
     "ci:snapshots:validate": "bun run src/ci/index.ts validate-snapshots",
     "ci:api-test": "bun run src/ci/index.ts api-test",
     "ci:all": "bun run src/ci/index.ts all",
-    "refactor:test": "npm run ci:foundation"
+    "refactor:test": "npm run ci:foundation",
+    "format": "biome check src",
+    "format:fix": "biome check --write src"
   },
   "private": true
 }
