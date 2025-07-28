@@ -8,7 +8,7 @@
 
 import type { PapaParseConfig, PapaParseResult } from "../types";
 import { isFunction, stripBom } from "../utils";
-import { newWorker } from "../workers/host";
+import { newWorker, workersSupported, sendWorkToWorker } from "../workers/host";
 import {
   StringStreamer,
   FileStreamer,
@@ -29,12 +29,6 @@ declare const NODE_STREAM_INPUT: unique symbol;
  * This matches the legacy PAPA_BROWSER_CONTEXT detection
  */
 declare const PAPA_BROWSER_CONTEXT: boolean | undefined;
-
-/**
- * Global detection for Web Worker support
- * This matches the legacy Papa.WORKERS_SUPPORTED
- */
-declare const WORKERS_SUPPORTED: boolean;
 
 /**
  * Node.js readable stream detection interface
@@ -78,32 +72,35 @@ export function CsvToJson<T = any>(
     : false;
 
   // Worker handling - matches legacy lines 209-231
-  if (_config.worker && WORKERS_SUPPORTED) {
+  if (_config.worker && workersSupported()) {
     const w = newWorker();
 
-    // Store user callbacks on worker instance
-    (w as any).userStep = _config.step;
-    (w as any).userChunk = _config.chunk;
-    (w as any).userComplete = _config.complete;
-    (w as any).userError = _config.error;
+    // Check if worker creation was successful
+    if (!w) {
+      // Fall back to synchronous parsing if worker creation failed
+      delete (_config as any).worker;
+    } else {
+      // Store user callbacks on worker instance (with type casting for worker compatibility)
+      w.userStep = _config.step as any;
+      w.userChunk = _config.chunk as any;
+      w.userComplete = _config.complete as any;
+      w.userError = _config.error as any;
 
-    // Convert callback functions to boolean flags for worker message
-    (_config as any).step = isFunction(_config.step);
-    (_config as any).chunk = isFunction(_config.chunk);
-    (_config as any).complete = isFunction(_config.complete);
-    (_config as any).error = isFunction(_config.error);
+      // Convert callback functions to boolean flags for worker message
+      const workerConfig = { ..._config };
+      (workerConfig as any).step = isFunction(_config.step);
+      (workerConfig as any).chunk = isFunction(_config.chunk);
+      (workerConfig as any).complete = isFunction(_config.complete);
+      (workerConfig as any).error = isFunction(_config.error);
 
-    // Prevent infinite loop by removing worker flag
-    delete (_config as any).worker;
+      // Prevent infinite loop by removing worker flag
+      delete (workerConfig as any).worker;
 
-    // Send work to worker thread
-    w.postMessage({
-      input: input,
-      config: _config,
-      workerId: (w as any).id,
-    });
+      // Send work to worker thread
+      sendWorkToWorker(w, input, workerConfig);
 
-    return; // Void return for worker case
+      return; // Void return for worker case
+    }
   }
 
   // Streamer selection and input type detection
