@@ -120,17 +120,12 @@ export class Lexer {
       const row = rows[i];
       const rowLen = row.length;
 
-      // Skip comment lines
+      // Skip comment lines entirely
       if (
         this.comments &&
         row.substring(0, this.commentsLen) === this.comments
       ) {
-        tokens.push({
-          type: TokenType.COMMENT,
-          value: row,
-          position,
-          length: rowLen,
-        });
+        // Skip comment lines completely - don't emit any tokens
       } else {
         // Split row into fields
         const fields = row.split(this.delimiter);
@@ -242,23 +237,10 @@ export class Lexer {
         continue;
       }
 
-      // Handle comment lines
+      // Handle comment lines - skip them entirely
       if (this.comments && this.isCommentStart(state.cursor)) {
         const result = this.processComment(state, nextNewline);
-        tokens.push({
-          type: TokenType.COMMENT,
-          value: result.comment,
-          position: state.fieldStart,
-          length: result.comment.length,
-        });
-        if (result.foundNewline) {
-          tokens.push({
-            type: TokenType.NEWLINE,
-            value: this.newline,
-            position: state.cursor - this.newlineLen,
-            length: this.newlineLen,
-          });
-        }
+        // Skip comments completely - don't emit any tokens
         nextDelim = this.input.indexOf(this.delimiter, state.cursor);
         nextNewline = this.input.indexOf(this.newline, state.cursor);
         continue;
@@ -362,6 +344,13 @@ export class Lexer {
 
       // Check for escaped quote
       if (this.isEscapedQuote(state.quoteSearch)) {
+        // Skip escaped quote by incrementing position
+        if (this.quoteChar === this.escapeChar) {
+          // For "", skip the second quote
+          state.quoteSearch++;
+        }
+        // Let the normal end-of-loop increment handle the rest
+        state.quoteSearch++;
         continue;
       }
 

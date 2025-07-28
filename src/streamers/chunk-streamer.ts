@@ -59,7 +59,8 @@ export class ChunkStreamer {
     // Initialize handle on first chunk (matching legacy behavior)
     if (!this._handle) {
       const configCopy = { ...this._config };
-      configCopy.chunkSize = parseInt(String(configCopy.chunkSize)) || undefined;
+      configCopy.chunkSize =
+        parseInt(String(configCopy.chunkSize)) || undefined;
       if (!this._config.step && !this._config.chunk) {
         configCopy.chunkSize = undefined; // Disable chunking if not streaming
       }

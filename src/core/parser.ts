@@ -48,7 +48,7 @@ export class Parser implements PapaParseParser {
   private lexer: Lexer;
   private state: ParserState;
 
-  constructor(config: PapaParseConfig) {
+  constructor(config: PapaParseConfig = {}) {
     this.config = config;
     this.lexer = new Lexer(createLexerConfig(config));
     this.state = this.createInitialState();
@@ -178,11 +178,6 @@ export class Parser implements PapaParseParser {
           ) {
             return;
           }
-          break;
-
-        case TokenType.COMMENT:
-          // Comments are already filtered by lexer, but we track position
-          this.state.lastCursor = token.position + token.length;
           break;
 
         case TokenType.EOF:
