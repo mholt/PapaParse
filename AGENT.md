@@ -2,6 +2,7 @@
 
 ALWAYS REFERENCE V6_REFACTOR.md before beginning refactor work.
 ALWAYS UPDATE V6_REFACTOR.md with any progress you've made.
+ALWAYS RUN `bun run format:fix` after your work
 
 ## Commands
 - **Test**: `bun test` (all), `bun run test-node` (node only), `bun run test-mocha-headless-chrome` (headless browser)
