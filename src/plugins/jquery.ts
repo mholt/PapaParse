@@ -68,24 +68,27 @@ export function createJQueryPlugin($: any, Papa?: PapaObject): void {
     const queue: FileQueueItem[] = [];
 
     // Iterate through selected elements and build file queue
-    this.each(function (idx: number) {
-      const $this = $(this);
+    this.each(function (this: any, idx: number) {
+      const element = this as any;
+      const $this = $(element);
       const supported =
         $this.prop("tagName").toUpperCase() === "INPUT" &&
         $this.attr("type")?.toLowerCase() === "file" &&
         typeof FileReader !== "undefined";
 
-      if (!supported || !this.files || this.files.length === 0) {
+      if (!supported || !element.files || element.files.length === 0) {
         return true; // continue to next input element
       }
 
-      for (let i = 0; i < this.files.length; i++) {
+      for (let i = 0; i < element.files.length; i++) {
         queue.push({
-          file: this.files[i],
-          inputElem: this,
+          file: element.files[i],
+          inputElem: element,
           instanceConfig: $.extend({}, config),
         });
       }
+
+      return true; // Always return true to continue iteration
     });
 
     parseNextFile(); // begin parsing

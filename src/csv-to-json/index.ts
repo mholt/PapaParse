@@ -18,11 +18,7 @@ import {
 } from "../streamers";
 import { CONSTANTS } from "../constants";
 
-/**
- * Type for Papa.NODE_STREAM_INPUT symbol
- * This matches the legacy behavior exactly
- */
-declare const NODE_STREAM_INPUT: unique symbol;
+import { NODE_STREAM_INPUT } from "../constants";
 
 /**
  * Global detection for browser vs Node.js context

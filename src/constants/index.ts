@@ -5,8 +5,8 @@
  * These values can be modified by users and will affect subsequent parsing operations.
  */
 
-// Special symbol for Node.js streaming
-export const NODE_STREAM_INPUT = Symbol("NODE_STREAM_INPUT");
+// Special constant for Node.js streaming (matching legacy value)
+export const NODE_STREAM_INPUT = 1;
 
 // Runtime-mutable constants (exact legacy values and behavior)
 const PAPA_CONSTANTS = {
@@ -16,14 +16,17 @@ const PAPA_CONSTANTS = {
   UNIT_SEP: String.fromCharCode(31),
   /** Byte Order Mark */
   BYTE_ORDER_MARK: "\ufeff",
-  /** Characters that are not allowed as delimiters */
-  BAD_DELIMITERS: ["\r", "\n", '"'], // Note: BYTE_ORDER_MARK is added dynamically in legacy
   /** The size in bytes of each file chunk for local files. Default 10 MB. MUTABLE! */
   LocalChunkSize: 1024 * 1024 * 10,
   /** Same as LocalChunkSize, but for downloading files from remote locations. Default 5 MB. MUTABLE! */
   RemoteChunkSize: 1024 * 1024 * 5,
   /** The delimiter used when it is left unspecified and cannot be detected automatically. */
   DefaultDelimiter: ",",
+
+  // BAD_DELIMITERS computed property to include BOM (matching legacy line 68)
+  get BAD_DELIMITERS() {
+    return ["\r", "\n", '"', this.BYTE_ORDER_MARK];
+  },
 };
 
 // Computed/derived constants

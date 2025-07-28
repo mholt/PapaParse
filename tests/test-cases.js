@@ -2,7 +2,9 @@ var chai;
 var Papa;
 if (typeof module !== 'undefined' && module.exports) {
 	chai = require('chai');
-	Papa = require('../legacy/papaparse.js');
+	// Allow environment variable to override Papa entry point for testing new implementation
+	var papaEntryPoint = process.env.PAPA_ENTRY_POINT || '../legacy/papaparse.js';
+	Papa = require(papaEntryPoint);
 }
 
 var assert = chai.assert;

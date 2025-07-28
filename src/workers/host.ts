@@ -75,7 +75,8 @@ function getWorkerBlob(): string {
     
     // Import and setup worker entry point
     // This is a placeholder - will be replaced with actual bundled code
-    importScripts('${new URL("../worker-entry.js", import.meta.url)}');
+    // Note: import.meta.url would be used in ES modules, but for CommonJS compatibility we use a relative path
+    importScripts('./worker-entry.js');
   `;
 
   const blob = new Blob([workerCode], { type: "text/javascript" });
@@ -134,7 +135,13 @@ function mainThreadReceivedMessage(e: MessageEvent): void {
       completeWorker(msg.workerId, {
         data: [],
         errors: [],
-        meta: { aborted: true },
+        meta: {
+          aborted: true,
+          delimiter: "",
+          linebreak: "",
+          truncated: false,
+          cursor: 0,
+        },
       });
     };
 

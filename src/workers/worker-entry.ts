@@ -9,7 +9,7 @@
  */
 
 // Worker environment setup
-declare const self: DedicatedWorkerGlobalScope;
+declare const self: any;
 declare let Papa: any;
 
 // Global Papa object for worker context
@@ -26,13 +26,13 @@ async function initializePapa() {
 
   // Import the main Papa parse function
   // In a real build, this would be bundled together
-  const { csvToJson } = await import("../csv-to-json");
-  const { jsonToCsv } = await import("../json-to-csv");
+  const { CsvToJson } = await import("../csv-to-json");
+  const { JsonToCsv } = await import("../json-to-csv");
 
   // Create Papa object for worker
   PapaWorker = {
-    parse: csvToJson,
-    unparse: jsonToCsv,
+    parse: CsvToJson,
+    unparse: JsonToCsv,
     WORKER_ID: undefined as number | undefined,
   };
 
