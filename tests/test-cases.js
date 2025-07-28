@@ -2,7 +2,7 @@ var chai;
 var Papa;
 if (typeof module !== 'undefined' && module.exports) {
 	chai = require('chai');
-	Papa = require('../papaparse.js');
+	Papa = require('../legacy/papaparse.js');
 }
 
 var assert = chai.assert;
@@ -2813,7 +2813,7 @@ describe('Custom Tests', function() {
 (typeof window !== "undefined" ? describe : describe.skip)("Browser Tests", () => {
 	it("When parsing synchronously inside a web-worker not owned by PapaParse we should not invoke postMessage", async() => {
 		// Arrange
-		const papaParseScriptPath = new URL("../papaparse.js", window.document.baseURI).href;
+		const papaParseScriptPath = new URL("../legacy/papaparse.js", window.document.baseURI).href;
 
 		// Define our custom web-worker that loads PapaParse and executes a synchronous parse
 		const blob = new Blob([

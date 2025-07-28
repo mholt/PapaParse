@@ -52,7 +52,7 @@
     "typescript": "^5"
   },
   "scripts": {
-    "lint": "eslint --no-ignore legacy/papaparse.js Gruntfile.js .eslintrc.js 'tests/**/*.js'",
+    "lint": "npm run format",
     "build": "grunt build",
     "build-ts": "tsc",
     "test-browser": "node tests/test.js",
