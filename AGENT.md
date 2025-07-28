@@ -5,12 +5,15 @@
 - **Lint**: `npm run lint` 
 - **Build**: `npm run build` or `grunt build` (creates minified version)
 - **Development server**: `node tests/test.js` (for browser testing)
+- **Modern Development**: Uses bun for modern TypeScript development
 
 ## Architecture
-- **Main file**: `papaparse.js` - Single-file CSV parser library supporting both browser and Node.js
+**REFACTOR IN PROGRESS**: Moving from legacy single-file to modern TypeScript structure
+- **Legacy**: `legacy/papaparse.js` - Original single-file CSV parser (still main entry point)
+- **Modern**: `src/index.ts` - New TypeScript implementation (work in progress)
 - **Tests**: Uses Mocha + Chai. Core tests in `tests/test-cases.js`, Node streaming tests in `tests/node-tests.js`
-- **Build**: Grunt uglifies `papaparse.js` → `papaparse.min.js`
-- **No dependencies**: Library is completely standalone
+- **Build**: Grunt uglifies legacy → `papaparse.min.js`
+- **No dependencies**: Library remains completely standalone
 
 ## Code Style (from .eslintrc.js)
 - **Indentation**: Tabs only (`"indent": ["error", "tab"]`)

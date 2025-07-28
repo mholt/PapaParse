@@ -1,58 +1,62 @@
 {
-	"name": "papaparse",
-	"version": "6.0.0-alpha.1",
-	"description": "Fast and powerful CSV parser for the browser that supports web workers and streaming large files. Converts CSV to JSON and JSON to CSV.",
-	"keywords": [
-		"csv",
-		"parser",
-		"parse",
-		"parsing",
-		"delimited",
-		"text",
-		"data",
-		"auto-detect",
-		"comma",
-		"tab",
-		"pipe",
-		"file",
-		"filereader",
-		"stream",
-		"worker",
-		"workers",
-		"thread",
-		"threading",
-		"multi-threaded",
-		"jquery-plugin"
-	],
-	"homepage": "https://www.papaparse.com/",
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/mholt/PapaParse.git"
-	},
-	"author": {
-		"name": "Matthew Holt",
-		"url": "https://twitter.com/mholt6"
-	},
-	"license": "MIT",
-	"main": "legacy/papaparse.js",
-	"browser": "legacy/papaparse.min.js",
-	"devDependencies": {
-		"chai": "^4.2.0",
-		"connect": "^3.3.3",
-		"eslint": "^4.19.1",
-		"grunt": "^1.5.2",
-		"grunt-contrib-uglify": "^5.2.0",
-		"mocha": "^5.2.0",
-		"mocha-headless-chrome": "^4.0.0",
-		"open": "7.0.0",
-		"serve-static": "^1.7.1"
-	},
-	"scripts": {
-		"lint": "eslint --no-ignore legacy/papaparse.js Gruntfile.js .eslintrc.js 'tests/**/*.js'",
-		"build": "grunt build",
-		"test-browser": "node tests/test.js",
-		"test-mocha-headless-chrome": "node tests/test.js --mocha-headless-chrome",
-		"test-node": "mocha tests/node-tests.js tests/test-cases.js",
-		"test": "npm run lint && npm run test-node && npm run test-mocha-headless-chrome"
-	}
+  "name": "papaparse",
+  "version": "6.0.0-alpha.1",
+  "description": "Fast and powerful CSV parser for the browser that supports web workers and streaming large files. Converts CSV to JSON and JSON to CSV.",
+  "keywords": [
+    "csv",
+    "parser",
+    "parse",
+    "parsing",
+    "delimited",
+    "text",
+    "data",
+    "auto-detect",
+    "comma",
+    "tab",
+    "pipe",
+    "file",
+    "filereader",
+    "stream",
+    "worker",
+    "workers",
+    "thread",
+    "threading",
+    "multi-threaded",
+    "jquery-plugin"
+  ],
+  "homepage": "https://www.papaparse.com/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mholt/PapaParse.git"
+  },
+  "author": {
+    "name": "Matthew Holt",
+    "url": "https://twitter.com/mholt6"
+  },
+  "license": "MIT",
+  "main": "legacy/papaparse.js",
+  "browser": "legacy/papaparse.min.js",
+  "devDependencies": {
+    "@biomejs/biome": "2.1.2",
+    "@types/bun": "latest",
+    "chai": "^4.2.0",
+    "connect": "^3.3.3",
+    "eslint": "^4.19.1",
+    "grunt": "^1.5.2",
+    "grunt-contrib-uglify": "^5.2.0",
+    "mocha": "^5.2.0",
+    "mocha-headless-chrome": "^4.0.0",
+    "open": "7.0.0",
+    "serve-static": "^1.7.1",
+    "typescript": "^5"
+  },
+  "scripts": {
+    "lint": "eslint --no-ignore legacy/papaparse.js Gruntfile.js .eslintrc.js 'tests/**/*.js'",
+    "build": "grunt build",
+    "test-browser": "node tests/test.js",
+    "test-mocha-headless-chrome": "node tests/test.js --mocha-headless-chrome",
+    "test-node": "mocha tests/node-tests.js tests/test-cases.js",
+    "test": "npm run lint && npm run test-node && npm run test-mocha-headless-chrome"
+  },
+  "private": true
 }
