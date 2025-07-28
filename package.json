@@ -1,6 +1,6 @@
 {
 	"name": "papaparse",
-	"version": "5.5.3",
+	"version": "6.0.0-alpha.1",
 	"description": "Fast and powerful CSV parser for the browser that supports web workers and streaming large files. Converts CSV to JSON and JSON to CSV.",
 	"keywords": [
 		"csv",
@@ -34,8 +34,8 @@
 		"url": "https://twitter.com/mholt6"
 	},
 	"license": "MIT",
-	"main": "papaparse.js",
-	"browser": "papaparse.min.js",
+	"main": "legacy/papaparse.js",
+	"browser": "legacy/papaparse.min.js",
 	"devDependencies": {
 		"chai": "^4.2.0",
 		"connect": "^3.3.3",
@@ -48,7 +48,7 @@
 		"serve-static": "^1.7.1"
 	},
 	"scripts": {
-		"lint": "eslint --no-ignore papaparse.js Gruntfile.js .eslintrc.js 'tests/**/*.js'",
+		"lint": "eslint --no-ignore legacy/papaparse.js Gruntfile.js .eslintrc.js 'tests/**/*.js'",
 		"build": "grunt build",
 		"test-browser": "node tests/test.js",
 		"test-mocha-headless-chrome": "node tests/test.js --mocha-headless-chrome",
