@@ -2,13 +2,13 @@
 
 ## 🚀 Implementation Progress
 
-**Current Status: Phase 4 Complete ✅**
+**Current Status: Phase 5 Complete ✅**
 
 - ✅ **Phase 1: Foundation & Performance Infrastructure** (100% Complete)
 - ✅ **Phase 2: Core Parsing Engine** (100% Complete)
 - ✅ **Phase 3: Heuristics & Algorithms** (100% Complete)
 - ✅ **Phase 4: Streaming Infrastructure** (100% Complete)
-- ⏳ **Phase 5: Core Functions** (Planned)
+- ✅ **Phase 5: Core Functions** (100% Complete)
 - ⏳ **Phase 6: Workers & Concurrency** (Planned)
 - ⏳ **Phase 7: Plugin System** (Planned)
 - ⏳ **Phase 8: Public API & Compatibility** (Planned)
@@ -50,11 +50,20 @@
 - ✅ Complete TypeScript implementation with proper inheritance
 - ✅ Foundation tests passing: `bun run ci:foundation`
 
-### Next Steps (Phase 5)
-Ready to begin Core Functions implementation:
-- CSV to JSON main function with input type detection
-- JSON to CSV main function with configuration and serialization
-- Worker coordination and streamer selection logic
+### Recent Achievements (Phase 5)
+- ✅ CSV to JSON main function (`src/csv-to-json/index.ts`) with exact legacy behavior
+- ✅ Input type detection and routing for strings, files, streams, and Node.js duplex
+- ✅ Worker coordination placeholder with future Phase 6 implementation path
+- ✅ JSON to CSV main function (`src/json-to-csv/index.ts`) with full serialization logic
+- ✅ Configuration unpacking and validation matching legacy behavior
+- ✅ Quote handling, formula escape prevention, and delimiter validation
+- ✅ Complete TypeScript implementation with legacy API compatibility
+
+### Next Steps (Phase 6)
+Ready to begin Workers & Concurrency implementation:
+- Worker host orchestration for main thread coordination
+- Worker entry point for standalone worker bundle  
+- Message passing and lifecycle management
 
 ## Overview
 This document outlines the migration plan from the legacy single-file format (`legacy/papaparse.js`) to a modern, modular TypeScript architecture while maintaining 100% API compatibility and ensuring all tests pass.
@@ -353,15 +362,15 @@ export function escapeRegExp(string: string): string // line 1409
 - [x] **Streamers** - Test memory efficiency and backpressure
 - [x] **Streamers** - Verify chunking behavior matches legacy
 
-### Core Functions
-- [ ] **CSV to JSON** (`src/csv-to-json/index.ts`) - Main CsvToJson function (lines 196-257)
-- [ ] **CSV to JSON** - Input type detection and routing
-- [ ] **CSV to JSON** - Worker coordination
-- [ ] **CSV to JSON** - Streamer selection logic
-- [ ] **JSON to CSV** (`src/json-to-csv/index.ts`) - Main JsonToCsv function (lines 264-484)
-- [ ] **JSON to CSV** - Configuration unpacking
-- [ ] **JSON to CSV** - Serialization logic with quote handling
-- [ ] **JSON to CSV** - Formula escape prevention
+### Core Functions ✅ COMPLETED
+- [x] **CSV to JSON** (`src/csv-to-json/index.ts`) - Main CsvToJson function (lines 196-257)
+- [x] **CSV to JSON** - Input type detection and routing
+- [x] **CSV to JSON** - Worker coordination (placeholder for Phase 6)
+- [x] **CSV to JSON** - Streamer selection logic
+- [x] **JSON to CSV** (`src/json-to-csv/index.ts`) - Main JsonToCsv function (lines 264-484)
+- [x] **JSON to CSV** - Configuration unpacking
+- [x] **JSON to CSV** - Serialization logic with quote handling
+- [x] **JSON to CSV** - Formula escape prevention
 
 ### Workers & Advanced Features
 - [ ] **Worker Host** (`src/workers/host.ts`) - Main thread orchestration
