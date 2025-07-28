@@ -55,7 +55,18 @@ export class ChunkStreamer {
    * Parse a chunk of data and coordinate with the parser handle.
    * Handles first chunk preprocessing, partial line management, and result coordination.
    */
-  parseChunk(chunk: string, isFakeChunk?: boolean): void {
+  parseChunk(chunk: string, isFakeChunk?: boolean): any {
+    // Initialize handle on first chunk (matching legacy behavior)
+    if (!this._handle) {
+      const configCopy = { ...this._config };
+      configCopy.chunkSize = parseInt(String(configCopy.chunkSize)) || undefined;
+      if (!this._config.step && !this._config.chunk) {
+        configCopy.chunkSize = undefined; // Disable chunking if not streaming
+      }
+      this._handle = new ParserHandle(configCopy);
+      this._handle.streamer = this;
+    }
+
     // First chunk pre-processing for line skipping
     const skipFirstNLines =
       parseInt(String(this._config.skipFirstNLines || 0)) || 0;
@@ -131,6 +142,8 @@ export class ChunkStreamer {
     if (finishedIncludingPreview) {
       this.finish();
     }
+
+    return results;
   }
 
   /**
