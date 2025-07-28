@@ -1,0 +1,39 @@
+{
+  "name": "quoted_fields",
+  "input": {
+    "csvContent": "name,message\n\"John Doe\",\"Hello, world!\"\n\"Jane Smith\",\"Say \"\"hello\"\"\"",
+    "config": {
+      "header": true,
+      "dynamicTyping": false,
+      "transform": false
+    }
+  },
+  "output": {
+    "data": [
+      {
+        "name": "John Doe",
+        "message": "Hello, world!"
+      },
+      {
+        "name": "Jane Smith",
+        "message": "Say \"hello\""
+      }
+    ],
+    "errors": [],
+    "meta": {
+      "delimiter": ",",
+      "linebreak": "\n",
+      "aborted": false,
+      "truncated": false,
+      "cursor": 68,
+      "renamedHeaders": null,
+      "fields": [
+        "name",
+        "message"
+      ]
+    }
+  },
+  "checksum": "0423b324abe92cf93c11d33acb1bac7b7cfb1bce204b383b323aaa274bea2851",
+  "timestamp": "2025-07-28T22:09:11.064Z",
+  "version": "1.0.0"
+}

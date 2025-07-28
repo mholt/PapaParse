@@ -1,0 +1,42 @@
+{
+  "name": "unicode_content",
+  "input": {
+    "csvContent": "name,emoji,description\nJohn,🚀,\"Space enthusiast\"\nJane,🎨,\"Artistic soul\"",
+    "config": {
+      "header": true,
+      "dynamicTyping": false,
+      "transform": false
+    }
+  },
+  "output": {
+    "data": [
+      {
+        "name": "John",
+        "emoji": "🚀",
+        "description": "Space enthusiast"
+      },
+      {
+        "name": "Jane",
+        "emoji": "🎨",
+        "description": "Artistic soul"
+      }
+    ],
+    "errors": [],
+    "meta": {
+      "delimiter": ",",
+      "linebreak": "\n",
+      "aborted": false,
+      "truncated": false,
+      "cursor": 73,
+      "renamedHeaders": null,
+      "fields": [
+        "name",
+        "emoji",
+        "description"
+      ]
+    }
+  },
+  "checksum": "0423b324abe92cf93c11d33acb1bac7b7cfb1bce204b383b323aaa274bea2851",
+  "timestamp": "2025-07-28T22:09:11.066Z",
+  "version": "1.0.0"
+}

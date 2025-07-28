@@ -1,0 +1,40 @@
+{
+  "name": "skip_empty_lines",
+  "input": {
+    "csvContent": "name,age\n\nJohn,30\n\n\nJane,25\n",
+    "config": {
+      "header": true,
+      "skipEmptyLines": true,
+      "dynamicTyping": false,
+      "transform": false
+    }
+  },
+  "output": {
+    "data": [
+      {
+        "name": "John",
+        "age": "30"
+      },
+      {
+        "name": "Jane",
+        "age": "25"
+      }
+    ],
+    "errors": [],
+    "meta": {
+      "delimiter": ",",
+      "linebreak": "\n",
+      "aborted": false,
+      "truncated": false,
+      "cursor": 28,
+      "renamedHeaders": null,
+      "fields": [
+        "name",
+        "age"
+      ]
+    }
+  },
+  "checksum": "0423b324abe92cf93c11d33acb1bac7b7cfb1bce204b383b323aaa274bea2851",
+  "timestamp": "2025-07-28T22:09:11.066Z",
+  "version": "1.0.0"
+}

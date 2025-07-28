@@ -1,0 +1,45 @@
+{
+  "name": "dynamic_typing",
+  "input": {
+    "csvContent": "name,age,active,score\nJohn,30,true,95.5\nJane,25,false,87.2",
+    "config": {
+      "header": true,
+      "dynamicTyping": true,
+      "transform": false
+    }
+  },
+  "output": {
+    "data": [
+      {
+        "name": "John",
+        "age": 30,
+        "active": true,
+        "score": 95.5
+      },
+      {
+        "name": "Jane",
+        "age": 25,
+        "active": false,
+        "score": 87.2
+      }
+    ],
+    "errors": [],
+    "meta": {
+      "delimiter": ",",
+      "linebreak": "\n",
+      "aborted": false,
+      "truncated": false,
+      "cursor": 58,
+      "renamedHeaders": null,
+      "fields": [
+        "name",
+        "age",
+        "active",
+        "score"
+      ]
+    }
+  },
+  "checksum": "0423b324abe92cf93c11d33acb1bac7b7cfb1bce204b383b323aaa274bea2851",
+  "timestamp": "2025-07-28T22:09:11.064Z",
+  "version": "1.0.0"
+}

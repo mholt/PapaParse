@@ -1,0 +1,40 @@
+{
+  "name": "comments",
+  "input": {
+    "csvContent": "# This is a comment\nname,age\n# Another comment\nJohn,30\nJane,25",
+    "config": {
+      "header": true,
+      "comments": "#",
+      "dynamicTyping": false,
+      "transform": false
+    }
+  },
+  "output": {
+    "data": [
+      {
+        "name": "John",
+        "age": "30"
+      },
+      {
+        "name": "Jane",
+        "age": "25"
+      }
+    ],
+    "errors": [],
+    "meta": {
+      "delimiter": ",",
+      "linebreak": "\n",
+      "aborted": false,
+      "truncated": false,
+      "cursor": 62,
+      "renamedHeaders": null,
+      "fields": [
+        "name",
+        "age"
+      ]
+    }
+  },
+  "checksum": "0423b324abe92cf93c11d33acb1bac7b7cfb1bce204b383b323aaa274bea2851",
+  "timestamp": "2025-07-28T22:09:11.065Z",
+  "version": "1.0.0"
+}

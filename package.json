@@ -39,6 +39,7 @@
   "devDependencies": {
     "@biomejs/biome": "2.1.2",
     "@types/bun": "latest",
+    "@types/papaparse": "^5.3.16",
     "chai": "^4.2.0",
     "connect": "^3.3.3",
     "eslint": "^4.19.1",
@@ -53,10 +54,19 @@
   "scripts": {
     "lint": "eslint --no-ignore legacy/papaparse.js Gruntfile.js .eslintrc.js 'tests/**/*.js'",
     "build": "grunt build",
+    "build-ts": "tsc",
     "test-browser": "node tests/test.js",
     "test-mocha-headless-chrome": "node tests/test.js --mocha-headless-chrome",
     "test-node": "mocha tests/node-tests.js tests/test-cases.js",
-    "test": "npm run lint && npm run test-node && npm run test-mocha-headless-chrome"
+    "test": "npm run lint && npm run test-node && npm run test-mocha-headless-chrome",
+    "ci": "bun run src/ci/index.ts",
+    "ci:foundation": "bun run src/ci/index.ts foundation",
+    "ci:benchmark": "bun run src/ci/index.ts benchmark",
+    "ci:snapshots:generate": "bun run src/ci/index.ts generate-snapshots",
+    "ci:snapshots:validate": "bun run src/ci/index.ts validate-snapshots",
+    "ci:api-test": "bun run src/ci/index.ts api-test",
+    "ci:all": "bun run src/ci/index.ts all",
+    "refactor:test": "npm run ci:foundation"
   },
   "private": true
 }

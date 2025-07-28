@@ -1,10 +1,13 @@
 # PapaParse Agent Guide
 
+ALWAYS REFERENCE V6_REFACTOR.md before beginning refactor work.
+ALWAYS UPDATE V6_REFACTOR.md with any progress you've made.
+
 ## Commands
-- **Test**: `npm test` (all), `npm run test-node` (node only), `npm run test-mocha-headless-chrome` (headless browser)
-- **Lint**: `npm run lint` 
-- **Build**: `npm run build` or `grunt build` (creates minified version)
-- **Development server**: `node tests/test.js` (for browser testing)
+- **Test**: `bun test` (all), `bun run test-node` (node only), `bun run test-mocha-headless-chrome` (headless browser)
+- **Lint**: `bun run lint`
+- **Build**: `bun run build` or `grunt build` (creates minified version)
+- **Development server**: `bun tests/test.js` (for browser testing)
 - **Modern Development**: Uses bun for modern TypeScript development
 
 ## Architecture

@@ -1,0 +1,39 @@
+{
+  "name": "line_breaks_in_quotes",
+  "input": {
+    "csvContent": "name,description\nProduct A,\"Line 1\nLine 2\nLine 3\"\nProduct B,Simple",
+    "config": {
+      "header": true,
+      "dynamicTyping": false,
+      "transform": false
+    }
+  },
+  "output": {
+    "data": [
+      {
+        "name": "Product A",
+        "description": "Line 1\nLine 2\nLine 3"
+      },
+      {
+        "name": "Product B",
+        "description": "Simple"
+      }
+    ],
+    "errors": [],
+    "meta": {
+      "delimiter": ",",
+      "linebreak": "\n",
+      "aborted": false,
+      "truncated": false,
+      "cursor": 66,
+      "renamedHeaders": null,
+      "fields": [
+        "name",
+        "description"
+      ]
+    }
+  },
+  "checksum": "0423b324abe92cf93c11d33acb1bac7b7cfb1bce204b383b323aaa274bea2851",
+  "timestamp": "2025-07-28T22:09:11.065Z",
+  "version": "1.0.0"
+}
