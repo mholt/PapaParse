@@ -157,7 +157,11 @@ export class Parser implements PapaParseParser {
   /**
    * Process token stream into structured data
    */
-  private processTokens(tokens: Token[], ignoreLastRow: boolean, terminatedByComment = false): void {
+  private processTokens(
+    tokens: Token[],
+    ignoreLastRow: boolean,
+    terminatedByComment = false,
+  ): void {
     for (let i = 0; i < tokens.length && !this.state.aborted; i++) {
       const token = tokens[i];
       const prevToken = i > 0 ? tokens[i - 1] : null;
@@ -176,7 +180,7 @@ export class Parser implements PapaParseParser {
           if (prevToken && prevToken.type === TokenType.DELIMITER) {
             this.processField("");
           }
-          
+
           this.endCurrentRow(token.position + token.length);
 
           // Check preview limit
@@ -193,23 +197,34 @@ export class Parser implements PapaParseParser {
           if (prevToken && prevToken.type === TokenType.DELIMITER) {
             this.processField("");
           }
-          
+
           // If EOF comes after a newline, add an empty row
           // This handles cases like "a\n" where the trailing newline should create an empty row
           // But NOT if terminated by comment (e.g. "a\n# Comment")
-          if (prevToken && prevToken.type === TokenType.NEWLINE && !ignoreLastRow && !terminatedByComment) {
+          if (
+            prevToken &&
+            prevToken.type === TokenType.NEWLINE &&
+            !ignoreLastRow &&
+            !terminatedByComment
+          ) {
             // Only add empty row if we're not already in an empty row
             if (this.state.currentRow.length === 0) {
               this.processField("");
             }
           }
-          
+
           // If this is the only token (e.g., comment with newline at start), create empty row
           // But NOT if terminated by comment going to EOF (no trailing newline)
-          if (!prevToken && this.state.currentRow.length === 0 && this.state.data.length === 0 && !ignoreLastRow && !terminatedByComment) {
+          if (
+            !prevToken &&
+            this.state.currentRow.length === 0 &&
+            this.state.data.length === 0 &&
+            !ignoreLastRow &&
+            !terminatedByComment
+          ) {
             this.processField("");
           }
-          
+
           // Handle final row if it exists and not ignoring last row
           if (this.state.currentRow.length > 0 && !ignoreLastRow) {
             this.endCurrentRow(token.position);
@@ -250,17 +265,21 @@ export class Parser implements PapaParseParser {
    */
   private endCurrentRow(cursorPosition: number): void {
     this.pushRow();
-    
+
     // Process headers after first row in header mode
-    if (this.config.header && !this.state.headerParsed && this.state.data.length === 1) {
+    if (
+      this.config.header &&
+      !this.state.headerParsed &&
+      this.state.data.length === 1
+    ) {
       this.processHeaders();
     }
-    
+
     // Field validation for header mode (after headers are processed)
     if (this.config.header && this.state.headerParsed) {
       this.validateFieldCount();
     }
-    
+
     this.state.currentRow = [];
     this.state.fieldCount = 0;
     this.state.lastCursor = cursorPosition;
@@ -284,18 +303,22 @@ export class Parser implements PapaParseParser {
    */
   private validateFieldCount(): void {
     if (!this.config.header || this.state.expectedFieldCount === 0) return;
-    
+
     // Get actual field count from current row (last row added)
     const actualFieldCount = this.state.currentRow.length;
     const expectedFieldCount = this.state.expectedFieldCount;
-    
+
     // Check for field count mismatch
     if (actualFieldCount !== expectedFieldCount) {
-      const errorCode = actualFieldCount < expectedFieldCount ? "TooFewFields" : "TooManyFields";
-      const errorMessage = actualFieldCount < expectedFieldCount 
-        ? `Too few fields: expected ${expectedFieldCount} fields but parsed ${actualFieldCount}`
-        : `Too many fields: expected ${expectedFieldCount} fields but parsed ${actualFieldCount}`;
-      
+      const errorCode =
+        actualFieldCount < expectedFieldCount
+          ? "TooFewFields"
+          : "TooManyFields";
+      const errorMessage =
+        actualFieldCount < expectedFieldCount
+          ? `Too few fields: expected ${expectedFieldCount} fields but parsed ${actualFieldCount}`
+          : `Too many fields: expected ${expectedFieldCount} fields but parsed ${actualFieldCount}`;
+
       this.state.errors.push({
         type: "FieldMismatch",
         code: errorCode,
