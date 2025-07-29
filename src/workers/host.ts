@@ -70,9 +70,9 @@ function getWorkerBlob(): string {
       if (typeof global !== 'undefined') { return global; }
       return {};
     })();
-    
+
     global.IS_PAPA_WORKER = true;
-    
+
     // Import and setup worker entry point
     // This is a placeholder - will be replaced with actual bundled code
     // Note: import.meta.url would be used in ES modules, but for CommonJS compatibility we use a relative path
