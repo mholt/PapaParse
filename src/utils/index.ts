@@ -98,17 +98,6 @@ export function isArray(value: any): value is any[] {
 }
 
 /**
- * Safely converts a value to string
- * Handles null, undefined, and other edge cases
- */
-export function toString(value: any): string {
-  if (value === null || value === undefined) {
-    return "";
-  }
-  return String(value);
-}
-
-/**
  * Checks if a string is empty or only whitespace
  * Utility function for empty line detection
  */

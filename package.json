@@ -64,7 +64,7 @@
     "typescript": "^5"
   },
   "scripts": {
-    "lint": "npm run format",
+    "lint": "npm run check",
     "build": "grunt --gruntfile legacy/Gruntfile.js build",
     "build-ts": "tsc",
     "build:tsup": "tsup",
@@ -86,8 +86,8 @@
     "ci:api-test": "bun run src/ci/index.ts api-test",
     "ci:all": "bun run src/ci/index.ts all",
     "refactor:test": "npm run ci:foundation",
-    "format": "biome format src",
-    "format:fix": "biome format --write src"
+    "check": "biome check --diagnostic-level=error src",
+    "check:fix": "biome check --diagnostic-level=error --write src "
   },
   "private": true
 }

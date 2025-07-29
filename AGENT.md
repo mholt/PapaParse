@@ -30,8 +30,8 @@ ALWAYS RUN `bun run format:fix` after your work
 
 ### Code Quality
 - **Lint**: `bun run lint`
-- **Format Check**: `bun run format`
-- **Format Fix**: `bun run format:fix`
+- **Format Check**: `bun run check`
+- **Format Fix**: `bun run check:fix`
 
 ### CI/Testing Infrastructure
 - **Foundation Tests**: `bun run ci:foundation` ✅ PASSING
@@ -79,12 +79,12 @@ ALWAYS RUN `bun run format:fix` after your work
 - **Linting**: Biome with recommended rules enabled
 - **Formatting**: Uses Biome formatter
 - **Scope**: Applied to `src/**/*.ts` files
-- **Format**: Run `bun run format` to check, `bun run format:fix` to auto-fix
+- **Format**: Run `bun run check` to check, `bun run check:fix` to auto-fix
 
 ## Development Workflow
 1. Check V6_REFACTOR.md for current status and remaining tasks
 2. Make changes in `src/` directory (TypeScript)
 3. Run `bun run build:tsup:watch` for development
 4. Test with `bun run test:v6`
-5. Format code with `bun run format:fix`
+5. Format code with `bun run check:fix`
 6. Update V6_REFACTOR.md with progress
