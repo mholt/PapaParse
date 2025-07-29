@@ -60,7 +60,6 @@ export interface LexerConfig {
  * Based on legacy PapaParse Parser lines 1414-1683
  */
 export class Lexer {
-  private config: LexerConfig;
   private input = "";
   private inputLen = 0;
   private delimLen = 0;
@@ -206,7 +205,7 @@ export class Lexer {
 
     let nextDelim = this.input.indexOf(this.delimiter, state.cursor);
     let nextNewline = this.input.indexOf(this.newline, state.cursor);
-    let quoteSearch = this.input.indexOf(this.quoteChar, state.cursor);
+    let _quoteSearch = this.input.indexOf(this.quoteChar, state.cursor);
 
     // Main parsing loop - mirrors legacy lines 1521-1682
     while (state.cursor < this.inputLen) {
@@ -243,7 +242,7 @@ export class Lexer {
         }
         nextDelim = this.input.indexOf(this.delimiter, state.cursor);
         nextNewline = this.input.indexOf(this.newline, state.cursor);
-        quoteSearch = this.input.indexOf(this.quoteChar, state.cursor);
+        _quoteSearch = this.input.indexOf(this.quoteChar, state.cursor);
         continue;
       }
 
@@ -498,25 +497,6 @@ export class Lexer {
       state.cursor = nextNewline + this.newlineLen;
       return { endsAtEOF: false };
     }
-  }
-
-  /**
-   * Process a comment line
-   * Legacy reference: lines 1642-1650
-   */
-  private processComment(state: LexerState, nextNewline: number): { comment: string; foundNewline: boolean } {
-    state.fieldStart = state.cursor;
-
-    if (nextNewline === -1) {
-      // Comment goes to EOF
-      const comment = this.input.substring(state.cursor);
-      state.cursor = this.inputLen;
-      return { comment, foundNewline: false };
-    }
-
-    const comment = this.input.substring(state.cursor, nextNewline);
-    state.cursor = nextNewline + this.newlineLen;
-    return { comment, foundNewline: true };
   }
 
   /**

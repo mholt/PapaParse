@@ -7,8 +7,8 @@
  * Based on legacy implementation: lines 832-923
  */
 
-import { ChunkStreamer, ChunkStreamerConfig } from "./chunk-streamer";
 import { bindFunction } from "../utils";
+import { ChunkStreamer, type ChunkStreamerConfig } from "./chunk-streamer";
 
 export interface ReadableStreamStreamerConfig extends ChunkStreamerConfig {
   encoding?: string;
@@ -33,7 +33,6 @@ export class ReadableStreamStreamer extends ChunkStreamer {
   private _streamData: (chunk: any) => void;
   private _streamEnd: () => void;
   private _streamError: (error: Error) => void;
-  private _streamCleanUp: () => void;
 
   constructor(config: ReadableStreamStreamerConfig = {}) {
     super(config);

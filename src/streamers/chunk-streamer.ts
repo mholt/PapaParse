@@ -7,8 +7,8 @@
  * Based on legacy implementation: lines 487-563
  */
 
-import { PapaParseConfig, PapaParseResult, PapaParseError } from "../types";
 import { ParserHandle } from "../core/parser-handle";
+import type { PapaParseConfig, PapaParseError, PapaParseResult } from "../types";
 import { isFunction } from "../utils";
 
 export interface ChunkStreamerConfig extends PapaParseConfig {
@@ -111,7 +111,7 @@ export class ChunkStreamer {
       this._baseIndex = lastIndex;
     }
 
-    if (results && results.data) {
+    if (results?.data) {
       this._rowCount += results.data.length;
     }
 
@@ -223,7 +223,7 @@ export class ChunkStreamer {
    * Abstract method for starting the streaming process.
    * Must be implemented by concrete streamer classes.
    */
-  stream(input?: any): any {
+  stream(_input?: any): any {
     throw new Error("stream() method must be implemented by concrete streamer classes");
   }
 

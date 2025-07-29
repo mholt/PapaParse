@@ -11,8 +11,8 @@
  */
 
 import type { PapaObject } from "../public/papa";
-import { isFunction } from "../utils";
 import type { PapaParseConfig, PapaParseResult } from "../types";
+import { isFunction } from "../utils";
 
 // jQuery type definitions for TypeScript compatibility
 interface JQuery {
@@ -63,7 +63,7 @@ export function createJQueryPlugin($: any, Papa?: PapaObject): void {
     const queue: FileQueueItem[] = [];
 
     // Iterate through selected elements and build file queue
-    this.each(function (this: any, idx: number) {
+    this.each(function (this: any, _idx: number) {
       const element = this as any;
       const $this = $(element);
       const supported =
@@ -92,7 +92,7 @@ export function createJQueryPlugin($: any, Papa?: PapaObject): void {
     function parseNextFile(): void {
       if (queue.length === 0) {
         if (isFunction(options.complete)) {
-          options.complete!();
+          options.complete?.();
         }
         return;
       }
@@ -100,7 +100,7 @@ export function createJQueryPlugin($: any, Papa?: PapaObject): void {
       const f = queue[0];
 
       if (isFunction(options.before)) {
-        const returned = options.before!(f.file, f.inputElem);
+        const returned = options.before?.(f.file, f.inputElem);
 
         if (typeof returned === "object") {
           if (returned.action === "abort") {
@@ -120,9 +120,9 @@ export function createJQueryPlugin($: any, Papa?: PapaObject): void {
 
       // Wrap up the user's complete callback, if any, so that ours also gets executed
       const userCompleteFunc = f.instanceConfig.complete;
-      f.instanceConfig.complete = function (results: PapaParseResult) {
+      f.instanceConfig.complete = (results: PapaParseResult) => {
         if (isFunction(userCompleteFunc)) {
-          userCompleteFunc!(results);
+          userCompleteFunc?.(results);
         }
         fileComplete();
       };
@@ -137,7 +137,7 @@ export function createJQueryPlugin($: any, Papa?: PapaObject): void {
 
     function error(name: string, file: File, elem: Element, reason?: string): void {
       if (isFunction(options.error)) {
-        options.error!({ name }, file, elem, reason);
+        options.error?.({ name }, file, elem, reason);
       }
     }
 

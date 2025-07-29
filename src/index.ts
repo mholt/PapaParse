@@ -8,59 +8,51 @@
  * Phase 8: PUBLIC API & COMPATIBILITY - COMPLETE ✅
  */
 
-// Main Papa object export
-export { Papa as default } from "./public/papa";
-
 // Re-export all public APIs for modular usage (selective to avoid conflicts)
 export {
+  BAD_DELIMITERS_WITH_BOM,
   CONSTANTS,
   DEFAULT_CONFIG,
   DEFAULT_DELIMITERS_TO_GUESS,
   ERROR_CODES,
   ERROR_TYPES,
-  BAD_DELIMITERS_WITH_BOM,
   NODE_STREAM_INPUT,
 } from "./constants";
-export * from "./types";
-export * from "./utils";
-
+export { Parser } from "./core/parser";
+export { ParserHandle } from "./core/parser-handle";
+export {
+  parseDynamic,
+  shouldApplyDynamicTyping,
+  transformField,
+} from "./heuristics/dynamic-typing";
+// Heuristics and algorithms
+export { guessDelimiter } from "./heuristics/guess-delimiter";
+export { guessLineEndings } from "./heuristics/line-endings";
 // Core parsing functionality
 export { CsvToJson } from "./methods/csv-to-json";
 export { JsonToCsv } from "./methods/json-to-csv";
-export { Parser } from "./core/parser";
-export { ParserHandle } from "./core/parser-handle";
-
+// Plugin system
+export { autoRegisterJQueryPlugin, initializePlugins } from "./plugins";
+export type { PapaObject } from "./public/papa";
+// Main Papa object export
+// Papa object construction
+export { createPapaObject, Papa as default } from "./public/papa";
 // Streaming infrastructure
 export { ChunkStreamer } from "./streamers/chunk-streamer";
-export { StringStreamer } from "./streamers/string-streamer";
+export { DuplexStreamStreamer } from "./streamers/duplex-stream-streamer";
 export { FileStreamer } from "./streamers/file-streamer";
 export { NetworkStreamer } from "./streamers/network-streamer";
 export { ReadableStreamStreamer } from "./streamers/readable-stream-streamer";
-export { DuplexStreamStreamer } from "./streamers/duplex-stream-streamer";
-
-// Heuristics and algorithms
-export { guessDelimiter } from "./heuristics/guess-delimiter";
-export {
-  shouldApplyDynamicTyping,
-  parseDynamic,
-  transformField,
-} from "./heuristics/dynamic-typing";
-export { guessLineEndings } from "./heuristics/line-endings";
-
+export { StringStreamer } from "./streamers/string-streamer";
+export * from "./types";
+export * from "./utils";
 // Workers
 export {
   newWorker,
-  workersSupported,
   sendWorkToWorker,
   terminateAllWorkers,
+  workersSupported,
 } from "./workers/host";
-
-// Plugin system
-export { initializePlugins, autoRegisterJQueryPlugin } from "./plugins";
-
-// Papa object construction
-export { createPapaObject } from "./public/papa";
-export type { PapaObject } from "./public/papa";
 
 /**
  * Development Status:

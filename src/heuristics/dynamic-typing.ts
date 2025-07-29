@@ -1,4 +1,4 @@
-import { FLOAT, MIN_FLOAT, MAX_FLOAT, ISO_DATE } from "../constants";
+import { FLOAT, ISO_DATE, MAX_FLOAT, MIN_FLOAT } from "../constants";
 
 export interface DynamicTypingConfig {
   dynamicTyping?: boolean | { [key: string]: boolean } | ((field: string | number) => boolean);

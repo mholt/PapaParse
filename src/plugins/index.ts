@@ -4,9 +4,9 @@
  */
 
 export {
+  autoRegisterJQueryPlugin,
   default as jqueryPlugin,
   registerJQueryPlugin,
-  autoRegisterJQueryPlugin,
 } from "./jquery";
 
 // Plugin registry for extensibility

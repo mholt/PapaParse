@@ -6,19 +6,17 @@
  * Based on legacy lines 196-257.
  */
 
-import type { PapaParseConfig, PapaParseResult } from "../types";
-import { isFunction, stripBom } from "../utils";
-import { newWorker, workersSupported, sendWorkToWorker } from "../workers/host";
+import { NODE_STREAM_INPUT } from "../constants";
 import {
-  StringStreamer,
+  DuplexStreamStreamer,
   FileStreamer,
   NetworkStreamer,
   ReadableStreamStreamer,
-  DuplexStreamStreamer,
+  StringStreamer,
 } from "../streamers";
-import { CONSTANTS } from "../constants";
-
-import { NODE_STREAM_INPUT } from "../constants";
+import type { PapaParseConfig, PapaParseResult } from "../types";
+import { isFunction, stripBom } from "../utils";
+import { newWorker, sendWorkToWorker, workersSupported } from "../workers/host";
 
 /**
  * Global detection for browser vs Node.js context
@@ -46,7 +44,7 @@ interface NodeReadableStream {
  * @param config - Parse configuration options
  * @returns Parse result, void (for workers/async), or stream (for Node.js duplex)
  */
-export function CsvToJson<T = any>(input: any, config?: PapaParseConfig<T>): PapaParseResult<T> | void | any {
+export function CsvToJson<T = any>(input: any, config?: PapaParseConfig<T>): PapaParseResult<T> | undefined | any {
   // Default empty config to match legacy behavior
   const _config = config || {};
 

@@ -7,7 +7,7 @@
  * Based on legacy implementation: lines 801-830
  */
 
-import { ChunkStreamer, ChunkStreamerConfig } from "./chunk-streamer";
+import { ChunkStreamer, type ChunkStreamerConfig } from "./chunk-streamer";
 
 export class StringStreamer extends ChunkStreamer {
   private remaining = "";

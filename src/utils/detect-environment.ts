@@ -3,7 +3,7 @@
  */
 export function detectEnvironment() {
   // Global object detection (matching legacy/papaparse.js lines 35-46)
-  const global = (function () {
+  const global = (() => {
     if (typeof self !== "undefined") {
       return self;
     }

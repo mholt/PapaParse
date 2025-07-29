@@ -84,7 +84,7 @@ export const DEFAULT_CONFIG = {
 // Export mutable constants for legacy compatibility
 export { PAPA_CONSTANTS as CONSTANTS };
 // Constants for dynamic typing (from legacy lines 1031-1034)
-export const MAX_FLOAT = Math.pow(2, 53);
+export const MAX_FLOAT = 2 ** 53;
 export const MIN_FLOAT = -MAX_FLOAT;
 export const FLOAT = /^\s*-?(\d+\.?|\.\d+|\d+\.\d+)([eE][-+]?\d+)?\s*$/;
 export const ISO_DATE =

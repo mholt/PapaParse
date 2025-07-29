@@ -7,9 +7,9 @@
  * Based on legacy implementation: lines 734-798
  */
 
-import { ChunkStreamer, ChunkStreamerConfig } from "./chunk-streamer";
-import { bindFunction } from "../utils";
 import { CONSTANTS } from "../constants";
+import { bindFunction } from "../utils";
+import { ChunkStreamer, type ChunkStreamerConfig } from "./chunk-streamer";
 
 export interface FileStreamerConfig extends ChunkStreamerConfig {
   encoding?: string;

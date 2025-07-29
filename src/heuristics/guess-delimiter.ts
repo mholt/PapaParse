@@ -1,6 +1,6 @@
-import { PapaParseConfig } from "../types/index.js";
 import { CONSTANTS } from "../constants/index.js";
 import { Parser } from "../core/parser.js";
+import type { PapaParseConfig } from "../types/index.js";
 
 export interface DelimiterGuessResult {
   successful: boolean;
@@ -68,7 +68,6 @@ export function guessDelimiter(input: string, options: DelimiterGuessOptions = {
 
       if (typeof fieldCountPrevRow === "undefined") {
         fieldCountPrevRow = fieldCount;
-        continue;
       } else if (fieldCount > 0) {
         delta += Math.abs(fieldCount - fieldCountPrevRow);
         fieldCountPrevRow = fieldCount;

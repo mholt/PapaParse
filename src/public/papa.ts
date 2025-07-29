@@ -3,21 +3,20 @@
  * Static property bag pattern preservation with legacy compatibility
  */
 
-import { CsvToJson } from "../methods/csv-to-json";
-import { JsonToCsv } from "../methods/json-to-csv";
 import { CONSTANTS } from "../constants";
-import { initializePlugins, autoRegisterJQueryPlugin } from "../plugins";
-import type { PapaParseConfig, PapaParseResult, PapaParseParser } from "../types";
-
 // Legacy classes exposed for testing (maintaining exact API)
 import { Parser } from "../core/parser";
 import { ParserHandle } from "../core/parser-handle";
+import { CsvToJson } from "../methods/csv-to-json";
+import { JsonToCsv } from "../methods/json-to-csv";
+import { autoRegisterJQueryPlugin, initializePlugins } from "../plugins";
 import { ChunkStreamer } from "../streamers/chunk-streamer";
-import { StringStreamer } from "../streamers/string-streamer";
+import { DuplexStreamStreamer } from "../streamers/duplex-stream-streamer";
 import { FileStreamer } from "../streamers/file-streamer";
 import { NetworkStreamer } from "../streamers/network-streamer";
 import { ReadableStreamStreamer } from "../streamers/readable-stream-streamer";
-import { DuplexStreamStreamer } from "../streamers/duplex-stream-streamer";
+import { StringStreamer } from "../streamers/string-streamer";
+import type { PapaParseConfig, PapaParseParser, PapaParseResult } from "../types";
 import { detectEnvironment } from "../utils/detect-environment";
 
 /**

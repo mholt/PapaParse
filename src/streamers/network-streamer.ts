@@ -7,9 +7,9 @@
  * Based on legacy implementation: lines 617-731
  */
 
-import { ChunkStreamer, ChunkStreamerConfig } from "./chunk-streamer";
-import { bindFunction } from "../utils";
 import { CONSTANTS } from "../constants";
+import { bindFunction } from "../utils";
+import { ChunkStreamer, type ChunkStreamerConfig } from "./chunk-streamer";
 
 export interface NetworkStreamerConfig extends ChunkStreamerConfig {
   withCredentials?: boolean;

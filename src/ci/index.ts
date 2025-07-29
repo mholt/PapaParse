@@ -105,7 +105,7 @@ async function main() {
  * Test TypeScript compilation
  */
 async function testTypeScriptCompilation(): Promise<void> {
-  const { spawn } = require("child_process");
+  const { spawn } = require("node:child_process");
 
   return new Promise((resolve, reject) => {
     const tsc = spawn("npx", ["tsc", "--noEmit"], {

@@ -7,7 +7,7 @@
  * Legacy reference: lines 1821-1920, 49-58
  */
 
-import type { PapaParseConfig, PapaParseResult, PapaParseError } from "../types";
+import type { PapaParseConfig, PapaParseError, PapaParseResult } from "../types";
 
 /**
  * Internal worker message types for communication
@@ -125,7 +125,7 @@ function mainThreadReceivedMessage(e: MessageEvent): void {
     if (worker.userError) {
       worker.userError(msg.error);
     }
-  } else if (msg.results && msg.results.data) {
+  } else if (msg.results?.data) {
     const abort = () => {
       aborted = true;
       completeWorker(msg.workerId, {

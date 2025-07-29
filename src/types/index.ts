@@ -9,7 +9,7 @@
 /// <reference types="node" />
 
 // Import Node types for compatibility
-import type { Duplex } from "stream";
+import type { Duplex } from "node:stream";
 
 // Error object structure - expanded for modern implementation
 export interface PapaParseError {
@@ -152,7 +152,7 @@ export interface PapaParseConfig<T = any> {
   /** A function to apply on each header. */
   transformHeader?: (header: string, index: number) => string;
   /** A function to execute before parsing the first chunk. */
-  beforeFirstChunk?: (chunk: string) => string | void;
+  beforeFirstChunk?: (chunk: string) => string | undefined;
 
   // Download-specific properties
   /** Object that describes the headers for downloading files. */

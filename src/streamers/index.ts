@@ -11,19 +11,19 @@
  */
 
 export { ChunkStreamer, type ChunkStreamerConfig } from "./chunk-streamer";
-export { StringStreamer } from "./string-streamer";
+export {
+  DuplexStreamStreamer,
+  type DuplexStreamStreamerConfig,
+  type NodeDuplex,
+} from "./duplex-stream-streamer";
 export { FileStreamer, type FileStreamerConfig } from "./file-streamer";
 export {
   NetworkStreamer,
   type NetworkStreamerConfig,
 } from "./network-streamer";
 export {
+  type NodeReadableStream,
   ReadableStreamStreamer,
   type ReadableStreamStreamerConfig,
-  type NodeReadableStream,
 } from "./readable-stream-streamer";
-export {
-  DuplexStreamStreamer,
-  type DuplexStreamStreamerConfig,
-  type NodeDuplex,
-} from "./duplex-stream-streamer";
+export { StringStreamer } from "./string-streamer";

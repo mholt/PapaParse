@@ -1,7 +1,7 @@
+import { parseDynamic } from "../heuristics/dynamic-typing.js";
 import type { PapaParseConfig, PapaParseError, PapaParseParser, PapaParseResult } from "../types/index.js";
 import { isFunction, stripBom } from "../utils/index.js";
 import { createLexerConfig, Lexer, type Token, TokenType } from "./lexer.js";
-import { parseDynamic } from "../heuristics/dynamic-typing.js";
 
 /**
  * Parser state for row assembly and processing
@@ -378,71 +378,6 @@ export class Parser implements PapaParseParser {
   }
 
   /**
-   * Convert row array to object using headers
-   * Legacy reference: lines 1290-1309
-   */
-  private convertRowToObject(rowSource: any[]): any {
-    // Headers should be the first row in data
-    if (this.state.data.length === 0) {
-      return rowSource;
-    }
-
-    const headers = this.state.data[0] as string[];
-    const row: any = {};
-
-    for (let j = 0; j < rowSource.length; j++) {
-      const field = j >= headers.length ? "__parsed_extra" : headers[j];
-      let value = rowSource[j];
-
-      // Apply transform function with field name
-      if (isFunction(this.config.transform)) {
-        value = this.config.transform(value, field);
-      }
-
-      // Apply dynamic typing based on field name for header mode
-      if (this.config.dynamicTyping) {
-        value = this.applyDynamicTypingByField(value, field, j);
-      }
-
-      if (field === "__parsed_extra") {
-        row[field] = row[field] || [];
-        row[field].push(value);
-      } else {
-        row[field] = value;
-      }
-    }
-
-    return row;
-  }
-
-  /**
-   * Validate field count against expected count (for header mode)
-   */
-  private validateFieldCount(): void {
-    if (!this.config.header || this.state.expectedFieldCount === 0) return;
-
-    // Get actual field count from current row (last row added)
-    const actualFieldCount = this.state.currentRow.length;
-    const expectedFieldCount = this.state.expectedFieldCount;
-
-    // Check for field count mismatch
-    if (actualFieldCount !== expectedFieldCount) {
-      const errorCode = actualFieldCount < expectedFieldCount ? "TooFewFields" : "TooManyFields";
-      const errorMessage =
-        actualFieldCount < expectedFieldCount
-          ? `Too few fields: expected ${expectedFieldCount} fields but parsed ${actualFieldCount}`
-          : `Too many fields: expected ${expectedFieldCount} fields but parsed ${actualFieldCount}`;
-
-      this.state.errors.push({
-        type: "FieldMismatch",
-        code: errorCode,
-        message: errorMessage,
-        row: this.state.headerParsed ? this.state.data.length - 2 : this.state.rowCount - 1, // 0-based data row index
-      });
-    }
-  }
-
-  /**
    * Execute user's step function
    * Legacy reference: lines 1800-1805
    */
@@ -512,94 +447,6 @@ export class Parser implements PapaParseParser {
 
     this.state.headerParsed = true;
     this.state.expectedFieldCount = result.length;
-  }
-
-  /**
-   * Apply dynamic typing to field value
-   * Legacy reference: lines 1253-1277 (extracted to heuristics in Phase 3)
-   */
-  private applyDynamicTyping(value: any, fieldIndex: number): any {
-    // For now, basic implementation - will be enhanced in Phase 3
-    if (typeof value !== "string") return value;
-
-    // Check if dynamic typing is disabled for this field
-    if (typeof this.config.dynamicTyping === "object") {
-      if (typeof this.config.dynamicTyping[fieldIndex] === "boolean") {
-        return this.config.dynamicTyping[fieldIndex] ? this.parseValue(value) : value;
-      }
-    } else if (typeof this.config.dynamicTyping === "function") {
-      return this.config.dynamicTyping(fieldIndex) ? this.parseValue(value) : value;
-    } else if (this.config.dynamicTyping === true) {
-      return this.parseValue(value);
-    }
-
-    return value;
-  }
-
-  /**
-   * Apply dynamic typing to field value by field name (for header mode)
-   * Legacy reference: lines 1253-1277 (extracted to heuristics in Phase 3)
-   */
-  private applyDynamicTypingByField(value: any, fieldName: string, fieldIndex: number): any {
-    if (typeof value !== "string") return value;
-
-    // Check if dynamic typing is configured for this field
-    if (typeof this.config.dynamicTyping === "object") {
-      // Check by field name first
-      if (typeof this.config.dynamicTyping[fieldName] === "boolean") {
-        return this.config.dynamicTyping[fieldName] ? this.parseValue(value) : value;
-      }
-      // Fall back to field index
-      if (typeof this.config.dynamicTyping[fieldIndex] === "boolean") {
-        return this.config.dynamicTyping[fieldIndex] ? this.parseValue(value) : value;
-      }
-    } else if (typeof this.config.dynamicTyping === "function") {
-      return this.config.dynamicTyping(fieldName) ? this.parseValue(value) : value;
-    } else if (this.config.dynamicTyping === true) {
-      return this.parseValue(value);
-    }
-
-    return value;
-  }
-
-  /**
-   * Parse string value to appropriate type
-   * Basic implementation - will be enhanced in Phase 3 heuristics
-   */
-  private parseValue(value: string): any {
-    // Empty string handling - convert to null when empty
-    if (value === "") return null;
-    if (value.trim() === "") return value;
-
-    // Boolean values (case insensitive)
-    const lowerValue = value.toLowerCase();
-    if (lowerValue === "true") return true;
-    if (lowerValue === "false") return false;
-
-    // Null values
-    if (lowerValue === "null") return null;
-
-    // Number values - check for safe integer range
-    if (/^-?\d+$/.test(value)) {
-      const num = parseInt(value, 10);
-      // Check if number exceeds safe integer range
-      if (num > Number.MAX_SAFE_INTEGER || num < Number.MIN_SAFE_INTEGER) {
-        return value; // Keep as string for precision
-      }
-      return num;
-    }
-    if (/^-?\d*\.?\d+([eE][+-]?\d+)?$/.test(value)) {
-      return parseFloat(value);
-    }
-
-    // ISO date format (basic check)
-    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(value)) {
-      const date = new Date(value);
-      if (!isNaN(date.getTime())) return date;
-    }
-
-    // Return original string if no type match
-    return value;
   }
 
   /**

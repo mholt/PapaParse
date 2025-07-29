@@ -1,8 +1,8 @@
 import { CONSTANTS } from "../constants/index.js";
-import type { PapaParseConfig, PapaParseError, PapaParseParser, PapaParseResult } from "../types/index.js";
+import { guessDelimiter as actualGuessDelimiter } from "../heuristics/guess-delimiter.js";
+import type { PapaParseConfig, PapaParseParser, PapaParseResult } from "../types/index.js";
 import { copy, escapeRegExp, isFunction } from "../utils/index.js";
 import { Parser } from "./parser.js";
-import { guessDelimiter as actualGuessDelimiter } from "../heuristics/guess-delimiter.js";
 
 /**
  * Parser Handle state for coordination and control
@@ -199,7 +199,7 @@ export class ParserHandle implements PapaParseParser {
     input = input.substring(0, 1024 * 1024);
 
     // Remove quoted content to avoid false detection
-    const re = new RegExp(escapeRegExp(quoteChar) + "([^]*?)" + escapeRegExp(quoteChar), "gm");
+    const re = new RegExp(`${escapeRegExp(quoteChar)}([^]*?)${escapeRegExp(quoteChar)}`, "gm");
     input = input.replace(re, "");
 
     const r = input.split("\r");

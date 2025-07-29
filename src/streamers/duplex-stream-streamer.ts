@@ -7,8 +7,8 @@
  * Based on legacy implementation: lines 926-1024
  */
 
-import { ChunkStreamer, ChunkStreamerConfig } from "./chunk-streamer";
 import { bindFunction, copy, isFunction } from "../utils";
+import { ChunkStreamer, type ChunkStreamerConfig } from "./chunk-streamer";
 
 // Type declarations for Node.js streams
 declare const require: any;
@@ -33,25 +33,25 @@ export class DuplexStreamStreamer extends ChunkStreamer {
     if (typeof require === "undefined") {
       throw new Error("DuplexStreamStreamer is only available in Node.js environment");
     }
-    const { Duplex } = require("stream");
+    const { Duplex } = require("node:stream");
 
     const config = copy(_config);
 
     // The legacy implementation sets up these callbacks before calling the parent constructor
     // We need to defer the binding until after super() is called
-    const originalStep = config.step;
-    const originalComplete = config.complete;
+    const _originalStep = config.step;
+    const _originalComplete = config.complete;
 
     // Set up the actual callbacks that will be used
     let duplexInstance: DuplexStreamStreamer | null = null;
 
-    config.step = function (results: any, parser?: any) {
+    config.step = (results: any, parser?: any) => {
       if (duplexInstance) {
         duplexInstance._onCsvData(results, parser);
       }
     };
 
-    config.complete = function (results?: any) {
+    config.complete = (_results?: any) => {
       if (duplexInstance) {
         duplexInstance._onCsvComplete();
       }
@@ -70,17 +70,17 @@ export class DuplexStreamStreamer extends ChunkStreamer {
       write: bindFunction(this._onWrite, this),
     });
 
-    this.duplexStream!.once("finish", bindFunction(this._onWriteComplete, this));
+    this.duplexStream?.once("finish", bindFunction(this._onWriteComplete, this));
   }
 
   /**
    * Handle CSV data results by pushing to the readable side.
    */
-  private _onCsvData = (results: any, parser?: any): void => {
+  private _onCsvData = (results: any, _parser?: any): void => {
     const data = results.data;
 
     // In legacy, this is called for each row when step is configured
-    if (!this.duplexStream!.push(data) && !this._handle.paused()) {
+    if (!this.duplexStream?.push(data) && !this._handle.paused()) {
       // The writable consumer buffer has filled up,
       // so we need to pause until more items can be processed
       this._handle.pause();
@@ -92,7 +92,7 @@ export class DuplexStreamStreamer extends ChunkStreamer {
    */
   private _onCsvComplete = (): void => {
     // Node will finish the read stream when null is pushed
-    this.duplexStream!.push(null);
+    this.duplexStream?.push(null);
   };
 
   /**
@@ -104,7 +104,7 @@ export class DuplexStreamStreamer extends ChunkStreamer {
     }
 
     if (this.parseCallbackQueue.length) {
-      this.parseCallbackQueue.shift()!();
+      this.parseCallbackQueue.shift()?.();
     } else {
       this.parseOnWrite = true;
     }
@@ -149,7 +149,7 @@ export class DuplexStreamStreamer extends ChunkStreamer {
   /**
    * Handle writes to the writable side.
    */
-  private _onWrite = (chunk: any, encoding: string, callback: () => void): void => {
+  private _onWrite = (chunk: any, _encoding: string, callback: () => void): void => {
     this._addToParseQueue(chunk, callback);
   };
 
@@ -173,7 +173,7 @@ export class DuplexStreamStreamer extends ChunkStreamer {
    * Override stream method - not used for duplex streams.
    * The duplex stream is created in the constructor.
    */
-  stream(input?: any): any {
+  stream(_input?: any): any {
     // For DuplexStreamStreamer, the stream is created in constructor
     // and accessed via getStream() method
     return this.duplexStream;

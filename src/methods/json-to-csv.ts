@@ -7,9 +7,9 @@
  * Based on legacy lines 264-484.
  */
 
+import { CONSTANTS } from "../constants";
 import type { PapaUnparseConfig, PapaUnparseData } from "../types";
 import { escapeRegExp } from "../utils";
-import { CONSTANTS } from "../constants";
 
 /**
  * Main JSON to CSV serialization function
@@ -69,7 +69,7 @@ export function JsonToCsv<T = any>(input: PapaUnparseData<T>, config?: PapaUnpar
     if (Array.isArray(inputObj.data)) {
       // Determine fields from various sources
       if (!inputObj.fields) {
-        inputObj.fields = (inputObj.meta && inputObj.meta.fields) || _columns;
+        inputObj.fields = inputObj.meta?.fields || _columns;
       }
 
       if (!inputObj.fields) {
@@ -104,7 +104,7 @@ export function JsonToCsv<T = any>(input: PapaUnparseData<T>, config?: PapaUnpar
     // Delimiter validation - must not contain bad delimiters
     if (
       typeof config.delimiter === "string" &&
-      !CONSTANTS.BAD_DELIMITERS.some((badDelim) => config.delimiter!.indexOf(badDelim) !== -1)
+      !CONSTANTS.BAD_DELIMITERS.some((badDelim) => config.delimiter?.indexOf(badDelim) !== -1)
     ) {
       _delimiter = config.delimiter;
     }
@@ -176,11 +176,11 @@ export function JsonToCsv<T = any>(input: PapaUnparseData<T>, config?: PapaUnpar
 
     // Write header row if present and enabled
     if (hasHeader && _writeHeader) {
-      for (let i = 0; i < fields!.length; i++) {
+      for (let i = 0; i < fields?.length; i++) {
         if (i > 0) {
           csv += _delimiter;
         }
-        csv += safe(fields![i], i);
+        csv += safe(fields?.[i], i);
       }
       if (data.length > 0) {
         csv += _newline;
@@ -189,7 +189,7 @@ export function JsonToCsv<T = any>(input: PapaUnparseData<T>, config?: PapaUnpar
 
     // Write data rows
     for (let row = 0; row < data.length; row++) {
-      const maxCol = hasHeader ? fields!.length : data[row].length;
+      const maxCol = hasHeader ? fields?.length : data[row].length;
 
       let emptyLine = false;
       const nullLine = hasHeader ? Object.keys(data[row]).length === 0 : data[row].length === 0;
@@ -206,7 +206,7 @@ export function JsonToCsv<T = any>(input: PapaUnparseData<T>, config?: PapaUnpar
       if (skipEmptyLines === "greedy" && hasHeader) {
         const line = [];
         for (let c = 0; c < maxCol; c++) {
-          const cx = dataKeyedByField ? fields![c] : c;
+          const cx = dataKeyedByField ? fields?.[c] : c;
           line.push((data[row] as any)[cx]);
         }
         emptyLine = line.join("").trim() === "";
@@ -218,7 +218,7 @@ export function JsonToCsv<T = any>(input: PapaUnparseData<T>, config?: PapaUnpar
           if (col > 0 && !nullLine) {
             csv += _delimiter;
           }
-          const colIdx = hasHeader && dataKeyedByField ? fields![col] : col;
+          const colIdx = hasHeader && dataKeyedByField ? fields?.[col] : col;
           csv += safe((data[row] as any)[colIdx], col);
         }
         // Add newline if not last row and conditions are met
@@ -249,7 +249,7 @@ export function JsonToCsv<T = any>(input: PapaUnparseData<T>, config?: PapaUnpar
 
     // Formula escape prevention
     if (_escapeFormulae && typeof str === "string" && _escapeFormulae instanceof RegExp && _escapeFormulae.test(str)) {
-      str = "'" + str;
+      str = `'${str}`;
       needsQuotes = true;
     }
 

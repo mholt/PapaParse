@@ -13,7 +13,7 @@ export function guessLineEndings(input: string, quoteChar: string = '"'): string
   const analysisInput = input.substring(0, 1024 * 1024);
 
   // Replace all text inside quotes to ignore line endings within quoted fields
-  const quotedTextRegex = new RegExp(escapeRegExp(quoteChar) + "([^]*?)" + escapeRegExp(quoteChar), "gm");
+  const quotedTextRegex = new RegExp(`${escapeRegExp(quoteChar)}([^]*?)${escapeRegExp(quoteChar)}`, "gm");
   const inputWithoutQuotes = analysisInput.replace(quotedTextRegex, "");
 
   // Split on different line ending types

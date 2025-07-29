@@ -5,8 +5,8 @@
  * Tests singleton reference consistency and other API compatibility requirements.
  */
 
-import * as fs from "fs";
-import * as path from "path";
+import * as fs from "node:fs";
+import * as path from "node:path";
 
 // Interface for API surface information
 export interface APIProperty {
@@ -66,7 +66,7 @@ export class APIReflectionTester {
       } else if (typeof value === "symbol") {
         value = value.toString();
         type = "symbol";
-      } else if (value instanceof Array) {
+      } else if (Array.isArray(value)) {
         type = "object"; // TypeScript typeof for arrays is 'object'
         // For arrays, capture length and first few elements for verification
         value = {

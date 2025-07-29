@@ -5,8 +5,8 @@
  * parity between legacy and modern implementations.
  */
 
-import * as fs from "fs";
-import * as path from "path";
+import * as fs from "node:fs";
+import * as path from "node:path";
 
 // Interface for benchmark results
 export interface BenchmarkResult {
@@ -36,7 +36,6 @@ export interface TestData {
  */
 export class PerformanceBenchmark {
   private testData: TestData[] = [];
-  private results: BenchmarkResult[] = [];
 
   /**
    * Add test data to the benchmark suite
@@ -85,7 +84,7 @@ export class PerformanceBenchmark {
       '123.456,true,"formula:=SUM(A1:A2)"',
       '"",,empty middle',
       "unicode,émojis,🚀🎉",
-      "very long field,normal," + '"' + "x".repeat(10000) + '"',
+      `very long field,normal,"${"x".repeat(10000)}"`,
     ];
 
     return {
@@ -116,10 +115,10 @@ export class PerformanceBenchmark {
 
     return new Promise((resolve, reject) => {
       try {
-        const result = parser.parse(testData.csvContent, {
+        const _result = parser.parse(testData.csvContent, {
           header: false,
           dynamicTyping: true,
-          complete: (results: any) => {
+          complete: (_results: any) => {
             const endTime = Date.now();
             clearInterval(memoryMonitor);
             const memAfter = process.memoryUsage();
@@ -172,10 +171,10 @@ export class PerformanceBenchmark {
 
     return new Promise((resolve, reject) => {
       try {
-        const result = parser.parse(testData.csvContent, {
+        const _result = parser.parse(testData.csvContent, {
           header: false,
           dynamicTyping: true,
-          complete: (results: any) => {
+          complete: (_results: any) => {
             const endTime = Date.now();
             clearInterval(memoryMonitor);
             const memAfter = process.memoryUsage();
