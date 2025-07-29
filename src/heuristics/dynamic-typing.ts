@@ -1,11 +1,4 @@
-import { PapaParseConfig } from "../types/index.js";
-
-// Constants for dynamic typing (from legacy lines 1031-1034)
-const MAX_FLOAT = Math.pow(2, 53);
-const MIN_FLOAT = -MAX_FLOAT;
-const FLOAT = /^\s*-?(\d+\.?|\.\d+|\d+\.\d+)([eE][-+]?\d+)?\s*$/;
-const ISO_DATE =
-  /^((\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z)))$/;
+import { FLOAT, MIN_FLOAT, MAX_FLOAT, ISO_DATE } from "../constants";
 
 export interface DynamicTypingConfig {
   dynamicTyping?:

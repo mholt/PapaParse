@@ -49,6 +49,7 @@
   "devDependencies": {
     "@biomejs/biome": "2.1.2",
     "@types/bun": "latest",
+    "@types/node": "^24.1.0",
     "@types/papaparse": "^5.3.16",
     "chai": "^4.2.0",
     "connect": "^3.3.3",

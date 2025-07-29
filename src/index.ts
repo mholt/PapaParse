@@ -25,8 +25,8 @@ export * from "./types";
 export * from "./utils";
 
 // Core parsing functionality
-export { CsvToJson } from "./csv-to-json";
-export { JsonToCsv } from "./json-to-csv";
+export { CsvToJson } from "./methods/csv-to-json";
+export { JsonToCsv } from "./methods/json-to-csv";
 export { Parser } from "./core/parser";
 export { ParserHandle } from "./core/parser-handle";
 

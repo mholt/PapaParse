@@ -3,8 +3,8 @@
  * Static property bag pattern preservation with legacy compatibility
  */
 
-import { CsvToJson } from "../csv-to-json";
-import { JsonToCsv } from "../json-to-csv";
+import { CsvToJson } from "../methods/csv-to-json";
+import { JsonToCsv } from "../methods/json-to-csv";
 import { CONSTANTS } from "../constants";
 import { initializePlugins, autoRegisterJQueryPlugin } from "../plugins";
 import type {
@@ -22,6 +22,7 @@ import { FileStreamer } from "../streamers/file-streamer";
 import { NetworkStreamer } from "../streamers/network-streamer";
 import { ReadableStreamStreamer } from "../streamers/readable-stream-streamer";
 import { DuplexStreamStreamer } from "../streamers/duplex-stream-streamer";
+import { detectEnvironment } from "../utils/detect-environment";
 
 /**
  * Papa object interface matching legacy API exactly
@@ -57,31 +58,6 @@ export interface PapaObject {
   NetworkStreamer: typeof NetworkStreamer;
   ReadableStreamStreamer: typeof ReadableStreamStreamer;
   DuplexStreamStreamer?: typeof DuplexStreamStreamer; // Conditional for browser context
-}
-
-/**
- * Environment detection matching legacy behavior
- */
-function detectEnvironment() {
-  // Global object detection (matching legacy/papaparse.js lines 35-46)
-  const global = (function () {
-    if (typeof self !== "undefined") {
-      return self;
-    }
-    if (typeof window !== "undefined") {
-      return window;
-    }
-    if (typeof globalThis !== "undefined") {
-      return globalThis;
-    }
-    // When running tests none of the above have been defined
-    return {};
-  })() as any;
-
-  const IS_WORKER = !global.document && !!global.postMessage;
-  const WORKERS_SUPPORTED = !IS_WORKER && !!global.Worker;
-
-  return { global, IS_WORKER, WORKERS_SUPPORTED };
 }
 
 /**

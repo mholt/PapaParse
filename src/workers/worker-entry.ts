@@ -26,8 +26,8 @@ async function initializePapa() {
 
   // Import the main Papa parse function
   // In a real build, this would be bundled together
-  const { CsvToJson } = await import("../csv-to-json");
-  const { JsonToCsv } = await import("../json-to-csv");
+  const { CsvToJson } = await import("../methods/csv-to-json");
+  const { JsonToCsv } = await import("../methods/json-to-csv");
 
   // Create Papa object for worker
   PapaWorker = {
