@@ -26,12 +26,7 @@ interface JQuery {
 interface JQueryParseOptions {
   config?: PapaParseConfig;
   before?: (file: File, inputElem: Element) => any;
-  error?: (
-    error: { name: string },
-    file: File,
-    inputElem: Element,
-    reason?: string,
-  ) => void;
+  error?: (error: { name: string }, file: File, inputElem: Element, reason?: string) => void;
   complete?: () => void;
 }
 
@@ -133,22 +128,14 @@ export function createJQueryPlugin($: any, Papa?: PapaObject): void {
       };
 
       // Use provided Papa instance or look for global Papa
-      const PapaInstance =
-        Papa || (typeof window !== "undefined" && (window as any).Papa);
+      const PapaInstance = Papa || (typeof window !== "undefined" && (window as any).Papa);
       if (!PapaInstance) {
-        throw new Error(
-          "Papa object not available. Ensure PapaParse is loaded.",
-        );
+        throw new Error("Papa object not available. Ensure PapaParse is loaded.");
       }
       PapaInstance.parse(f.file, f.instanceConfig);
     }
 
-    function error(
-      name: string,
-      file: File,
-      elem: Element,
-      reason?: string,
-    ): void {
+    function error(name: string, file: File, elem: Element, reason?: string): void {
       if (isFunction(options.error)) {
         options.error!({ name }, file, elem, reason);
       }

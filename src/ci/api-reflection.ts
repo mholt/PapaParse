@@ -29,12 +29,7 @@ export interface APISurface {
 export interface APIComparison {
   passed: boolean;
   differences: {
-    category:
-      | "missing"
-      | "extra"
-      | "type_mismatch"
-      | "value_mismatch"
-      | "descriptor_mismatch";
+    category: "missing" | "extra" | "type_mismatch" | "value_mismatch" | "descriptor_mismatch";
     property: string;
     expected: any;
     actual: any;
@@ -167,9 +162,7 @@ export class APIReflectionTester {
     }
 
     // Compare property details for common keys
-    const expectedPropsMap = new Map(
-      expected.properties.map((p) => [p.name, p]),
-    );
+    const expectedPropsMap = new Map(expected.properties.map((p) => [p.name, p]));
     const actualPropsMap = new Map(actual.properties.map((p) => [p.name, p]));
 
     for (const key of expectedKeys) {
@@ -189,10 +182,7 @@ export class APIReflectionTester {
 
         // Compare values (for non-functions)
         if (!expectedProp.isFunction && !actualProp.isFunction) {
-          if (
-            JSON.stringify(expectedProp.value) !==
-            JSON.stringify(actualProp.value)
-          ) {
+          if (JSON.stringify(expectedProp.value) !== JSON.stringify(actualProp.value)) {
             differences.push({
               category: "value_mismatch",
               property: key,
@@ -259,8 +249,7 @@ export class APIReflectionTester {
       const recordSepEqual = papa1.RECORD_SEP === papa2.RECORD_SEP;
       const unitSepEqual = papa1.UNIT_SEP === papa2.UNIT_SEP;
 
-      const passed =
-        parseRefEqual && papaRefEqual && recordSepEqual && unitSepEqual;
+      const passed = parseRefEqual && papaRefEqual && recordSepEqual && unitSepEqual;
 
       let details = "";
       if (!parseRefEqual) details += "parse function reference mismatch; ";
@@ -292,8 +281,7 @@ export class APIReflectionTester {
       details: string;
     }>;
   } {
-    const results: Array<{ test: string; passed: boolean; details: string }> =
-      [];
+    const results: Array<{ test: string; passed: boolean; details: string }> = [];
 
     // Test: Papa.parse('', {dynamicTyping: true}).data returns [[""]]
     try {
@@ -379,9 +367,7 @@ export class APIReflectionTester {
         results.push({
           test: `internal_class_${className.toLowerCase()}`,
           passed,
-          details: passed
-            ? `${className} is exposed as expected`
-            : `${className} is not exposed or not a function`,
+          details: passed ? `${className} is exposed as expected` : `${className} is not exposed or not a function`,
         });
       } catch (error) {
         results.push({
@@ -423,9 +409,7 @@ export class APIReflectionTester {
       comparison = this.compareAPISurfaces(expectedSurface, currentSurface);
       console.log(`API Surface Comparison: ${comparison.summary}`);
     } else {
-      console.log(
-        "No existing API surface snapshot found - saving current as baseline",
-      );
+      console.log("No existing API surface snapshot found - saving current as baseline");
       this.saveAPISurface(currentSurface);
     }
 
@@ -437,14 +421,9 @@ export class APIReflectionTester {
 
     // Test edge cases
     const edgeCaseTests = this.testEdgeCases(papa);
-    console.log(
-      `Edge Case Tests: ${edgeCaseTests.passed ? "PASSED" : "FAILED"}`,
-    );
+    console.log(`Edge Case Tests: ${edgeCaseTests.passed ? "PASSED" : "FAILED"}`);
 
-    const passed =
-      (!comparison || comparison.passed) &&
-      singletonTest.passed &&
-      edgeCaseTests.passed;
+    const passed = (!comparison || comparison.passed) && singletonTest.passed && edgeCaseTests.passed;
 
     let summary = `API Test ${passed ? "PASSED" : "FAILED"}`;
     if (comparison && !comparison.passed) {
@@ -481,9 +460,7 @@ export async function runAPIReflectionTest(): Promise<void> {
     const legacyResult = tester.runCompleteAPITest(legacyPapa, "legacy");
 
     if (!legacyResult.passed) {
-      console.warn(
-        "⚠️ Legacy implementation failed some tests (this may indicate test issues)",
-      );
+      console.warn("⚠️ Legacy implementation failed some tests (this may indicate test issues)");
     }
 
     // When modern implementation is ready:

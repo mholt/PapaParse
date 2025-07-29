@@ -87,14 +87,10 @@ export class Lexer {
 
     this.delimLen = this.delimiter.length;
     this.newlineLen = this.newline.length;
-    this.commentsLen =
-      typeof this.comments === "string" ? this.comments.length : 0;
+    this.commentsLen = typeof this.comments === "string" ? this.comments.length : 0;
 
     // Pre-compile regex for quote escape handling
-    this.quoteCharRegex = new RegExp(
-      escapeRegExp(this.escapeChar) + escapeRegExp(this.quoteChar),
-      "g",
-    );
+    this.quoteCharRegex = new RegExp(escapeRegExp(this.escapeChar) + escapeRegExp(this.quoteChar), "g");
   }
 
   /**
@@ -124,10 +120,7 @@ export class Lexer {
       const rowLen = row.length;
 
       // Skip comment lines entirely
-      if (
-        this.comments &&
-        row.substring(0, this.commentsLen) === this.comments
-      ) {
+      if (this.comments && row.substring(0, this.commentsLen) === this.comments) {
         // Skip comment lines completely - don't emit any tokens
       } else {
         // If we've already emitted tokens, add newline before this row
@@ -256,11 +249,7 @@ export class Lexer {
 
       // Handle comment lines - skip them entirely
       // Legacy condition: comments && row.length === 0
-      if (
-        this.comments &&
-        state.atStartOfRow &&
-        this.isCommentStart(state.cursor)
-      ) {
+      if (this.comments && state.atStartOfRow && this.isCommentStart(state.cursor)) {
         const commentResult = this.skipComment(state, nextNewline);
         if (commentResult.endsAtEOF) {
           // Comment goes to EOF - stop processing immediately (legacy line 1645)
@@ -353,10 +342,7 @@ export class Lexer {
 
     // Find closing quote with escape handling
     while (true) {
-      state.quoteSearch = this.input.indexOf(
-        this.quoteChar,
-        state.quoteSearch + 1,
-      );
+      state.quoteSearch = this.input.indexOf(this.quoteChar, state.quoteSearch + 1);
 
       // No closing quote found
       if (state.quoteSearch === -1) {
@@ -411,28 +397,15 @@ export class Lexer {
         nextNewline = this.input.indexOf(this.newline, state.quoteSearch + 1);
       }
 
-      const checkUpTo =
-        nextNewline === -1 ? nextDelim : Math.min(nextDelim, nextNewline);
-      const spacesBetweenQuoteAndDelimiter = this.extraSpaces(
-        state.quoteSearch,
-        checkUpTo,
-      );
+      const checkUpTo = nextNewline === -1 ? nextDelim : Math.min(nextDelim, nextNewline);
+      const spacesBetweenQuoteAndDelimiter = this.extraSpaces(state.quoteSearch, checkUpTo);
 
       // Check for delimiter after quote
-      if (
-        this.input.substr(
-          state.quoteSearch + 1 + spacesBetweenQuoteAndDelimiter,
-          this.delimLen,
-        ) === this.delimiter
-      ) {
+      if (this.input.substr(state.quoteSearch + 1 + spacesBetweenQuoteAndDelimiter, this.delimLen) === this.delimiter) {
         const field = this.input
           .substring(state.cursor, state.quoteSearch)
           .replace(this.quoteCharRegex, this.quoteChar);
-        state.cursor =
-          state.quoteSearch +
-          1 +
-          spacesBetweenQuoteAndDelimiter +
-          this.delimLen;
+        state.cursor = state.quoteSearch + 1 + spacesBetweenQuoteAndDelimiter + this.delimLen;
         return {
           field,
           foundDelimiter: true,
@@ -441,29 +414,19 @@ export class Lexer {
         };
       }
 
-      const spacesBetweenQuoteAndNewLine = this.extraSpaces(
-        state.quoteSearch,
-        nextNewline,
-      );
+      const spacesBetweenQuoteAndNewLine = this.extraSpaces(state.quoteSearch, nextNewline);
 
       // Check for newline after quote
       if (
         this.input.substring(
           state.quoteSearch + 1 + spacesBetweenQuoteAndNewLine,
-          state.quoteSearch +
-            1 +
-            spacesBetweenQuoteAndNewLine +
-            this.newlineLen,
+          state.quoteSearch + 1 + spacesBetweenQuoteAndNewLine + this.newlineLen,
         ) === this.newline
       ) {
         const field = this.input
           .substring(state.cursor, state.quoteSearch)
           .replace(this.quoteCharRegex, this.quoteChar);
-        state.cursor =
-          state.quoteSearch +
-          1 +
-          spacesBetweenQuoteAndNewLine +
-          this.newlineLen;
+        state.cursor = state.quoteSearch + 1 + spacesBetweenQuoteAndNewLine + this.newlineLen;
         return {
           field,
           foundDelimiter: false,
@@ -525,10 +488,7 @@ export class Lexer {
    * Skip a comment line, consuming it and its trailing newline
    * Legacy reference: lines 1642-1650
    */
-  private skipComment(
-    state: LexerState,
-    nextNewline: number,
-  ): { endsAtEOF: boolean } {
+  private skipComment(state: LexerState, nextNewline: number): { endsAtEOF: boolean } {
     if (nextNewline === -1) {
       // Comment goes to EOF (legacy line 1644-1645)
       state.cursor = this.inputLen;
@@ -544,10 +504,7 @@ export class Lexer {
    * Process a comment line
    * Legacy reference: lines 1642-1650
    */
-  private processComment(
-    state: LexerState,
-    nextNewline: number,
-  ): { comment: string; foundNewline: boolean } {
+  private processComment(state: LexerState, nextNewline: number): { comment: string; foundNewline: boolean } {
     state.fieldStart = state.cursor;
 
     if (nextNewline === -1) {
@@ -567,10 +524,7 @@ export class Lexer {
    */
   private isCommentStart(position: number): boolean {
     if (!this.comments || this.commentsLen === 0) return false;
-    return (
-      this.input.substring(position, position + this.commentsLen) ===
-      this.comments
-    );
+    return this.input.substring(position, position + this.commentsLen) === this.comments;
   }
 
   /**
@@ -608,10 +562,7 @@ export class Lexer {
 export function createLexerConfig(config: PapaParseConfig): LexerConfig {
   // Process delimiter
   let delimiter = config.delimiter || CONSTANTS.DefaultDelimiter;
-  if (
-    typeof delimiter !== "string" ||
-    CONSTANTS.BAD_DELIMITERS.indexOf(delimiter) > -1
-  ) {
+  if (typeof delimiter !== "string" || CONSTANTS.BAD_DELIMITERS.indexOf(delimiter) > -1) {
     delimiter = CONSTANTS.DefaultDelimiter;
   }
 
@@ -633,10 +584,7 @@ export function createLexerConfig(config: PapaParseConfig): LexerConfig {
     throw new Error("Comment character same as delimiter");
   } else if (config.comments === (true as any)) {
     comments = "#";
-  } else if (
-    typeof config.comments === "string" &&
-    CONSTANTS.BAD_DELIMITERS.indexOf(config.comments) === -1
-  ) {
+  } else if (typeof config.comments === "string" && CONSTANTS.BAD_DELIMITERS.indexOf(config.comments) === -1) {
     comments = config.comments;
   }
 

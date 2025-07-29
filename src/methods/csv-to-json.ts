@@ -46,10 +46,7 @@ interface NodeReadableStream {
  * @param config - Parse configuration options
  * @returns Parse result, void (for workers/async), or stream (for Node.js duplex)
  */
-export function CsvToJson<T = any>(
-  input: any,
-  config?: PapaParseConfig<T>,
-): PapaParseResult<T> | void | any {
+export function CsvToJson<T = any>(input: any, config?: PapaParseConfig<T>): PapaParseResult<T> | void | any {
   // Default empty config to match legacy behavior
   const _config = config || {};
 
@@ -63,9 +60,7 @@ export function CsvToJson<T = any>(
   (_config as any).dynamicTyping = dynamicTyping;
 
   // Handle transform function exactly like legacy
-  (_config as any).transform = isFunction(_config.transform)
-    ? _config.transform
-    : false;
+  (_config as any).transform = isFunction(_config.transform) ? _config.transform : false;
 
   // Worker handling - matches legacy lines 209-231
   if (_config.worker && workersSupported()) {
@@ -103,10 +98,7 @@ export function CsvToJson<T = any>(
   let streamer = null;
 
   // Node.js duplex stream case - matches legacy lines 234-240
-  if (
-    input === (NODE_STREAM_INPUT as any) &&
-    typeof PAPA_BROWSER_CONTEXT === "undefined"
-  ) {
+  if (input === (NODE_STREAM_INPUT as any) && typeof PAPA_BROWSER_CONTEXT === "undefined") {
     // Create a Node.js Duplex stream for use with .pipe
     streamer = new DuplexStreamStreamer(_config as any);
     return streamer.getStream();
@@ -131,10 +123,7 @@ export function CsvToJson<T = any>(
     return streamer.stream(input);
   }
   // File or object case - matches legacy lines 253-254
-  else if (
-    (typeof File !== "undefined" && input instanceof File) ||
-    input instanceof Object
-  ) {
+  else if ((typeof File !== "undefined" && input instanceof File) || input instanceof Object) {
     // Safari compatibility - see legacy comment about issue #106
     streamer = new FileStreamer(_config as any);
     return streamer.stream(input);

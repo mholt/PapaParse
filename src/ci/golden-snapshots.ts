@@ -93,13 +93,7 @@ export class GoldenSnapshots {
   /**
    * Create a snapshot from parser output
    */
-  createSnapshot(
-    name: string,
-    csvContent: string,
-    config: any,
-    parseResult: any,
-    version: string = "1.0.0",
-  ): Snapshot {
+  createSnapshot(name: string, csvContent: string, config: any, parseResult: any, version: string = "1.0.0"): Snapshot {
     const snapshot: Snapshot = {
       name,
       input: {
@@ -154,9 +148,7 @@ export class GoldenSnapshots {
     if (!snapshot) {
       return {
         passed: false,
-        differences: [
-          { path: "snapshot", expected: "exists", actual: "not found" },
-        ],
+        differences: [{ path: "snapshot", expected: "exists", actual: "not found" }],
         summary: `Snapshot '${name}' not found`,
       };
     }
@@ -176,11 +168,7 @@ export class GoldenSnapshots {
   /**
    * Deep comparison of two objects
    */
-  private deepCompare(
-    path: string,
-    expected: any,
-    actual: any,
-  ): Array<{ path: string; expected: any; actual: any }> {
+  private deepCompare(path: string, expected: any, actual: any): Array<{ path: string; expected: any; actual: any }> {
     const differences: Array<{ path: string; expected: any; actual: any }> = [];
 
     if (typeof expected !== typeof actual) {
@@ -213,9 +201,7 @@ export class GoldenSnapshots {
         const minLength = Math.min(expected.length, actual.length);
         for (let i = 0; i < minLength; i++) {
           const itemPath = path ? `${path}[${i}]` : `[${i}]`;
-          differences.push(
-            ...this.deepCompare(itemPath, expected[i], actual[i]),
-          );
+          differences.push(...this.deepCompare(itemPath, expected[i], actual[i]));
         }
       } else {
         const expectedKeys = Object.keys(expected).sort();
@@ -246,9 +232,7 @@ export class GoldenSnapshots {
         for (const key of expectedKeys) {
           if (key in actual) {
             const keyPath = path ? `${path}.${key}` : key;
-            differences.push(
-              ...this.deepCompare(keyPath, expected[key], actual[key]),
-            );
+            differences.push(...this.deepCompare(keyPath, expected[key], actual[key]));
           }
         }
       }
@@ -273,14 +257,12 @@ export class GoldenSnapshots {
       },
       {
         name: "dynamic_typing",
-        csvContent:
-          "name,age,active,score\nJohn,30,true,95.5\nJane,25,false,87.2",
+        csvContent: "name,age,active,score\nJohn,30,true,95.5\nJane,25,false,87.2",
         config: { header: true, dynamicTyping: true },
       },
       {
         name: "quoted_fields",
-        csvContent:
-          'name,message\n"John Doe","Hello, world!"\n"Jane Smith","Say ""hello"""',
+        csvContent: 'name,message\n"John Doe","Hello, world!"\n"Jane Smith","Say ""hello"""',
         config: { header: true },
       },
       {
@@ -290,14 +272,12 @@ export class GoldenSnapshots {
       },
       {
         name: "line_breaks_in_quotes",
-        csvContent:
-          'name,description\nProduct A,"Line 1\nLine 2\nLine 3"\nProduct B,Simple',
+        csvContent: 'name,description\nProduct A,"Line 1\nLine 2\nLine 3"\nProduct B,Simple',
         config: { header: true },
       },
       {
         name: "comments",
-        csvContent:
-          "# This is a comment\nname,age\n# Another comment\nJohn,30\nJane,25",
+        csvContent: "# This is a comment\nname,age\n# Another comment\nJohn,30\nJane,25",
         config: { header: true, comments: "#" },
       },
       {
@@ -312,8 +292,7 @@ export class GoldenSnapshots {
       },
       {
         name: "unicode_content",
-        csvContent:
-          'name,emoji,description\nJohn,🚀,"Space enthusiast"\nJane,🎨,"Artistic soul"',
+        csvContent: 'name,emoji,description\nJohn,🚀,"Space enthusiast"\nJane,🎨,"Artistic soul"',
         config: { header: true },
       },
       {
@@ -326,12 +305,7 @@ export class GoldenSnapshots {
     for (const testCase of testCases) {
       try {
         const result = legacyParser.parse(testCase.csvContent, testCase.config);
-        this.createSnapshot(
-          testCase.name,
-          testCase.csvContent,
-          testCase.config,
-          result,
-        );
+        this.createSnapshot(testCase.name, testCase.csvContent, testCase.config, result);
         console.log(`✅ Created snapshot: ${testCase.name}`);
       } catch (error) {
         console.error(`❌ Failed to create snapshot ${testCase.name}:`, error);
@@ -360,10 +334,7 @@ export class GoldenSnapshots {
 
     for (const [name, snapshot] of this.snapshots) {
       try {
-        const parseResult = parser.parse(
-          snapshot.input.csvContent,
-          snapshot.input.config,
-        );
+        const parseResult = parser.parse(snapshot.input.csvContent, snapshot.input.config);
         const comparison = this.compareWithSnapshot(name, parseResult);
         results.set(name, comparison);
 
@@ -379,9 +350,7 @@ export class GoldenSnapshots {
             );
           }
           if (comparison.differences.length > 3) {
-            console.log(
-              `   ... and ${comparison.differences.length - 3} more differences`,
-            );
+            console.log(`   ... and ${comparison.differences.length - 3} more differences`);
           }
         }
       } catch (error) {

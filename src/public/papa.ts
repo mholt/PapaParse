@@ -7,11 +7,7 @@ import { CsvToJson } from "../methods/csv-to-json";
 import { JsonToCsv } from "../methods/json-to-csv";
 import { CONSTANTS } from "../constants";
 import { initializePlugins, autoRegisterJQueryPlugin } from "../plugins";
-import type {
-  PapaParseConfig,
-  PapaParseResult,
-  PapaParseParser,
-} from "../types";
+import type { PapaParseConfig, PapaParseResult, PapaParseParser } from "../types";
 
 // Legacy classes exposed for testing (maintaining exact API)
 import { Parser } from "../core/parser";
@@ -29,10 +25,7 @@ import { detectEnvironment } from "../utils/detect-environment";
  */
 export interface PapaObject {
   // Main API functions
-  parse(
-    input: string | File | any,
-    config?: PapaParseConfig,
-  ): PapaParseResult | PapaParseParser;
+  parse(input: string | File | any, config?: PapaParseConfig): PapaParseResult | PapaParseParser;
   unparse(data: any, config?: any): string;
 
   // Constants (runtime-mutable for legacy compatibility)

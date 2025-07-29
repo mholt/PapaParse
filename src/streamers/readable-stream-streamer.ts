@@ -108,11 +108,7 @@ export class ReadableStreamStreamer extends ChunkStreamer {
     try {
       // Convert chunk to string using configured encoding
       const stringChunk =
-        typeof chunk === "string"
-          ? chunk
-          : chunk.toString(
-              (this._config as ReadableStreamStreamerConfig).encoding,
-            );
+        typeof chunk === "string" ? chunk : chunk.toString((this._config as ReadableStreamStreamerConfig).encoding);
 
       this.queue.push(stringChunk);
 

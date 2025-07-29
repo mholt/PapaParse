@@ -48,11 +48,7 @@ export class PerformanceBenchmark {
   /**
    * Generate large test data for stress testing
    */
-  generateLargeTestData(
-    rows: number,
-    columns: number,
-    withQuotes: boolean = false,
-  ): TestData {
+  generateLargeTestData(rows: number, columns: number, withQuotes: boolean = false): TestData {
     const headers = Array.from({ length: columns }, (_, i) => `column_${i}`);
     const csvLines = [headers.join(",")];
 
@@ -60,9 +56,7 @@ export class PerformanceBenchmark {
       const row = Array.from({ length: columns }, (_, j) => {
         // Mix of data types to test dynamic typing
         if (j % 4 === 0) {
-          return withQuotes
-            ? `"string_value_${i}_${j}"`
-            : `string_value_${i}_${j}`;
+          return withQuotes ? `"string_value_${i}_${j}"` : `string_value_${i}_${j}`;
         }
         if (j % 4 === 1) return String(Math.random() * 1000);
         if (j % 4 === 2) return Math.random() > 0.5 ? "true" : "false";
@@ -105,10 +99,7 @@ export class PerformanceBenchmark {
   /**
    * Run benchmark against legacy implementation
    */
-  async benchmarkLegacy(
-    testData: TestData,
-    parser: any,
-  ): Promise<BenchmarkResult> {
+  async benchmarkLegacy(testData: TestData, parser: any): Promise<BenchmarkResult> {
     const memBefore = process.memoryUsage();
     let memPeak = memBefore;
 
@@ -134,9 +125,7 @@ export class PerformanceBenchmark {
             const memAfter = process.memoryUsage();
 
             const totalTime = endTime - startTime;
-            const rowsPerSecond = Math.round(
-              (testData.expectedRows / totalTime) * 1000,
-            );
+            const rowsPerSecond = Math.round((testData.expectedRows / totalTime) * 1000);
 
             resolve({
               implementation: "legacy",
@@ -167,10 +156,7 @@ export class PerformanceBenchmark {
   /**
    * Run benchmark against modern implementation
    */
-  async benchmarkModern(
-    testData: TestData,
-    parser: any,
-  ): Promise<BenchmarkResult> {
+  async benchmarkModern(testData: TestData, parser: any): Promise<BenchmarkResult> {
     const memBefore = process.memoryUsage();
     let memPeak = memBefore;
 
@@ -195,9 +181,7 @@ export class PerformanceBenchmark {
             const memAfter = process.memoryUsage();
 
             const totalTime = endTime - startTime;
-            const rowsPerSecond = Math.round(
-              (testData.expectedRows / totalTime) * 1000,
-            );
+            const rowsPerSecond = Math.round((testData.expectedRows / totalTime) * 1000);
 
             resolve({
               implementation: "modern",
@@ -237,11 +221,8 @@ export class PerformanceBenchmark {
     memoryRatio: number;
     details: string;
   } {
-    const performanceRatio =
-      modernResult.rowsPerSecond / legacyResult.rowsPerSecond;
-    const memoryRatio =
-      modernResult.memoryUsage.peak.heapUsed /
-      legacyResult.memoryUsage.peak.heapUsed;
+    const performanceRatio = modernResult.rowsPerSecond / legacyResult.rowsPerSecond;
+    const memoryRatio = modernResult.memoryUsage.peak.heapUsed / legacyResult.memoryUsage.peak.heapUsed;
 
     const PERFORMANCE_THRESHOLD = 0.95; // Modern should be within 5% of legacy
     const MEMORY_THRESHOLD = 1.1; // Modern should use no more than 10% additional memory
@@ -358,15 +339,10 @@ export async function runCIBenchmark(): Promise<void> {
     const modernPapaModule = require("../../dist/papaparse.js");
     const modernPapa = modernPapaModule.default || modernPapaModule;
 
-    console.log(
-      "📊 Running performance comparison between legacy and V6 implementations...",
-    );
+    console.log("📊 Running performance comparison between legacy and V6 implementations...");
 
     // Run the benchmark suite
-    const { results, summary } = await benchmark.runBenchmarkSuite(
-      legacyPapa,
-      modernPapa,
-    );
+    const { results, summary } = await benchmark.runBenchmarkSuite(legacyPapa, modernPapa);
 
     // Export results for analysis
     benchmark.exportResults(results, `benchmark-${Date.now()}.json`);
@@ -376,17 +352,11 @@ export async function runCIBenchmark(): Promise<void> {
     console.log(`  Total Tests: ${summary.totalTests}`);
     console.log(`  Passed: ${summary.passedTests}`);
     console.log(`  Failed: ${summary.failedTests}`);
-    console.log(
-      `  Average Performance Ratio: ${(summary.avgPerformanceRatio * 100).toFixed(1)}%`,
-    );
-    console.log(
-      `  Average Memory Ratio: ${(summary.avgMemoryRatio * 100).toFixed(1)}%`,
-    );
+    console.log(`  Average Performance Ratio: ${(summary.avgPerformanceRatio * 100).toFixed(1)}%`);
+    console.log(`  Average Memory Ratio: ${(summary.avgMemoryRatio * 100).toFixed(1)}%`);
 
     if (!summary.passed) {
-      console.error(
-        "❌ Performance benchmarks failed - some tests did not meet thresholds",
-      );
+      console.error("❌ Performance benchmarks failed - some tests did not meet thresholds");
       process.exit(1);
     }
 

@@ -1,10 +1,5 @@
 import { CONSTANTS } from "../constants/index.js";
-import type {
-  PapaParseConfig,
-  PapaParseError,
-  PapaParseParser,
-  PapaParseResult,
-} from "../types/index.js";
+import type { PapaParseConfig, PapaParseError, PapaParseParser, PapaParseResult } from "../types/index.js";
 import { copy, escapeRegExp, isFunction } from "../utils/index.js";
 import { Parser } from "./parser.js";
 import { guessDelimiter as actualGuessDelimiter } from "../heuristics/guess-delimiter.js";
@@ -43,8 +38,7 @@ export class ParserHandle implements PapaParseParser {
   // Constants for float validation (legacy reference: lines 1031-1034)
   private static readonly MAX_FLOAT = 2 ** 53;
   private static readonly MIN_FLOAT = -ParserHandle.MAX_FLOAT;
-  private static readonly FLOAT =
-    /^\s*-?(\d+\.?|\.\d+|\d+\.\d+)([eE][-+]?\d+)?\s*$/;
+  private static readonly FLOAT = /^\s*-?(\d+\.?|\.\d+|\d+\.\d+)([eE][-+]?\d+)?\s*$/;
   private static readonly ISO_DATE =
     /^((\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z)))$/;
 
@@ -94,11 +88,7 @@ export class ParserHandle implements PapaParseParser {
     // Create parser and parse input
     this.state.input = input;
     this.state.parser = new Parser(parserConfig);
-    this.state.results = this.state.parser.parse(
-      input,
-      baseIndex,
-      ignoreLastRow,
-    );
+    this.state.results = this.state.parser.parse(input, baseIndex, ignoreLastRow);
 
     this.processResults();
 
@@ -209,10 +199,7 @@ export class ParserHandle implements PapaParseParser {
     input = input.substring(0, 1024 * 1024);
 
     // Remove quoted content to avoid false detection
-    const re = new RegExp(
-      escapeRegExp(quoteChar) + "([^]*?)" + escapeRegExp(quoteChar),
-      "gm",
-    );
+    const re = new RegExp(escapeRegExp(quoteChar) + "([^]*?)" + escapeRegExp(quoteChar), "gm");
     input = input.replace(re, "");
 
     const r = input.split("\r");
@@ -308,10 +295,7 @@ export class ParserHandle implements PapaParseParser {
         }
 
         this.state.stepCounter += results.data.length;
-        if (
-          this.config.preview &&
-          this.state.stepCounter > this.config.preview
-        ) {
+        if (this.config.preview && this.state.stepCounter > this.config.preview) {
           this.state.parser?.abort();
         } else {
           // Extract single row for step callback
@@ -341,9 +325,7 @@ export class ParserHandle implements PapaParseParser {
 
     // Process headers if needed
     if (this.needsHeaderRow() && this.state.results.data.length > 0) {
-      this.state.fields = this.state.results.data[0].map((field: any) =>
-        String(field),
-      );
+      this.state.fields = this.state.results.data[0].map((field: any) => String(field));
       this.removeRow(0);
     }
 
@@ -355,14 +337,9 @@ export class ParserHandle implements PapaParseParser {
     // Apply transforms and dynamic typing
     // Skip general processing if we have headers and will do field-specific processing later
     const hasHeadersWithFieldSpecificTyping =
-      this.config.header &&
-      this.state.fields.length > 0 &&
-      typeof this.config.dynamicTyping === "object";
+      this.config.header && this.state.fields.length > 0 && typeof this.config.dynamicTyping === "object";
 
-    if (
-      (this.config.transform || this.config.dynamicTyping) &&
-      !hasHeadersWithFieldSpecificTyping
-    ) {
+    if ((this.config.transform || this.config.dynamicTyping) && !hasHeadersWithFieldSpecificTyping) {
       this.applyDynamicTyping();
     }
 
@@ -430,18 +407,11 @@ export class ParserHandle implements PapaParseParser {
   /**
    * Apply dynamic typing to field value by field name (for header mode)
    */
-  private applyDynamicTypingToFieldByName(
-    value: any,
-    fieldName: string,
-    fieldIndex: number,
-  ): any {
+  private applyDynamicTypingToFieldByName(value: any, fieldName: string, fieldIndex: number): any {
     if (typeof value !== "string") return value;
 
     // Try field name first, then fall back to field index
-    if (
-      this.shouldApplyDynamicTyping(fieldName) ||
-      this.shouldApplyDynamicTyping(fieldIndex)
-    ) {
+    if (this.shouldApplyDynamicTyping(fieldName) || this.shouldApplyDynamicTyping(fieldIndex)) {
       return this.parseTypedValue(value);
     }
 
@@ -469,10 +439,7 @@ export class ParserHandle implements PapaParseParser {
   private shouldApplyDynamicTyping(field: string | number): boolean {
     // Cache function values to avoid calling it for each row
     const config = this.config as any;
-    if (
-      config.dynamicTypingFunction &&
-      config.dynamicTyping[field] === undefined
-    ) {
+    if (config.dynamicTypingFunction && config.dynamicTyping[field] === undefined) {
       config.dynamicTyping[field] = config.dynamicTypingFunction(field);
     }
 
@@ -530,10 +497,7 @@ export class ParserHandle implements PapaParseParser {
   private testFloat(value: string): boolean {
     if (ParserHandle.FLOAT.test(value)) {
       const floatValue = parseFloat(value);
-      if (
-        floatValue > ParserHandle.MIN_FLOAT &&
-        floatValue < ParserHandle.MAX_FLOAT
-      ) {
+      if (floatValue > ParserHandle.MIN_FLOAT && floatValue < ParserHandle.MAX_FLOAT) {
         return true;
       }
     }
@@ -550,10 +514,7 @@ export class ParserHandle implements PapaParseParser {
 
       // Process all fields in the row
       for (let j = 0; j < row.length; j++) {
-        const field =
-          j >= this.state.fields.length
-            ? "__parsed_extra"
-            : this.state.fields[j];
+        const field = j >= this.state.fields.length ? "__parsed_extra" : this.state.fields[j];
         let value = row[j];
 
         // Apply transform function with field name
@@ -576,10 +537,7 @@ export class ParserHandle implements PapaParseParser {
 
       // Check for field count mismatch and add error
       if (row.length !== this.state.fields.length) {
-        const errorCode =
-          row.length < this.state.fields.length
-            ? "TooFewFields"
-            : "TooManyFields";
+        const errorCode = row.length < this.state.fields.length ? "TooFewFields" : "TooManyFields";
         const errorMessage =
           row.length < this.state.fields.length
             ? `Too few fields: expected ${this.state.fields.length} fields but parsed ${row.length}`

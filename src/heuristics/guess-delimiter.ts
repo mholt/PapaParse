@@ -17,13 +17,8 @@ export interface DelimiterGuessOptions {
 /**
  * Test if a row is empty based on skipEmptyLines configuration
  */
-function testEmptyLine(
-  row: string[],
-  skipEmptyLines: boolean | "greedy",
-): boolean {
-  return skipEmptyLines === "greedy"
-    ? row.join("").trim() === ""
-    : row.length === 1 && row[0].length === 0;
+function testEmptyLine(row: string[], skipEmptyLines: boolean | "greedy"): boolean {
+  return skipEmptyLines === "greedy" ? row.join("").trim() === "" : row.length === 1 && row[0].length === 0;
 }
 
 /**
@@ -32,22 +27,12 @@ function testEmptyLine(
  *
  * Based on legacy implementation lines 1340-1392
  */
-export function guessDelimiter(
-  input: string,
-  options: DelimiterGuessOptions = {},
-): DelimiterGuessResult {
+export function guessDelimiter(input: string, options: DelimiterGuessOptions = {}): DelimiterGuessResult {
   const {
     newline,
     skipEmptyLines = false,
     comments = false as false | string,
-    delimitersToGuess = [
-      ",",
-      "\t",
-      "|",
-      ";",
-      CONSTANTS.RECORD_SEP,
-      CONSTANTS.UNIT_SEP,
-    ],
+    delimitersToGuess = [",", "\t", "|", ";", CONSTANTS.RECORD_SEP, CONSTANTS.UNIT_SEP],
   } = options;
 
   let bestDelim: string | undefined;

@@ -45,10 +45,7 @@ export class FileStreamer extends ChunkStreamer {
     this._input = file;
 
     // Get the appropriate slice method (browser compatibility)
-    this.slice =
-      (file as any).slice ||
-      (file as any).webkitSlice ||
-      (file as any).mozSlice;
+    this.slice = (file as any).slice || (file as any).webkitSlice || (file as any).mozSlice;
 
     if (this.usingAsyncReader) {
       // Preferred method of reading files, even in workers
@@ -67,10 +64,7 @@ export class FileStreamer extends ChunkStreamer {
    * Process the next chunk if conditions are met.
    */
   protected _nextChunk(): void {
-    if (
-      !this._finished &&
-      (!this._config.preview || this._rowCount < this._config.preview)
-    ) {
+    if (!this._finished && (!this._config.preview || this._rowCount < this._config.preview)) {
       this._readChunk();
     }
   }
@@ -104,8 +98,7 @@ export class FileStreamer extends ChunkStreamer {
     this._start += this._config.chunkSize || 0;
 
     // Check if we've reached the end of the file
-    this._finished =
-      !this._config.chunkSize || this._start >= (this._input as File).size;
+    this._finished = !this._config.chunkSize || this._start >= (this._input as File).size;
 
     this.parseChunk(event.target.result);
   }

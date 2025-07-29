@@ -1,9 +1,4 @@
-import type {
-  PapaParseConfig,
-  PapaParseError,
-  PapaParseParser,
-  PapaParseResult,
-} from "../types/index.js";
+import type { PapaParseConfig, PapaParseError, PapaParseParser, PapaParseResult } from "../types/index.js";
 import { isFunction, stripBom } from "../utils/index.js";
 import { createLexerConfig, Lexer, type Token, TokenType } from "./lexer.js";
 import { parseDynamic } from "../heuristics/dynamic-typing.js";
@@ -60,16 +55,10 @@ export class Parser implements PapaParseParser {
    * Fast mode parsing - bypasses lexer for performance
    * Mirrors legacy lines 1482-1513 exactly
    */
-  private parseFastMode(
-    input: string,
-    baseIndex: number,
-    ignoreLastRow: boolean,
-  ): PapaParseResult {
-    const newline =
-      (this.config.newline as string) || this.guessLineEndings(input) || "\r\n";
+  private parseFastMode(input: string, baseIndex: number, ignoreLastRow: boolean): PapaParseResult {
+    const newline = (this.config.newline as string) || this.guessLineEndings(input) || "\r\n";
     const delimiter = (this.config.delimiter as string) || ",";
-    const comments =
-      typeof this.config.comments === "string" ? this.config.comments : false;
+    const comments = typeof this.config.comments === "string" ? this.config.comments : false;
     const commentsLen = comments ? comments.length : 0;
 
     const rows = input.split(newline);
@@ -96,20 +85,13 @@ export class Parser implements PapaParseParser {
           let value = field;
 
           // Apply transform if provided
-          if (
-            this.config.transform &&
-            typeof this.config.transform === "function"
-          ) {
+          if (this.config.transform && typeof this.config.transform === "function") {
             value = this.config.transform(value, index);
           }
 
           // Apply dynamic typing
           if (this.config.dynamicTyping) {
-            value = parseDynamic(
-              value,
-              String(index),
-              this.config.dynamicTyping as any,
-            );
+            value = parseDynamic(value, String(index), this.config.dynamicTyping as any);
           }
 
           return value;
@@ -131,10 +113,7 @@ export class Parser implements PapaParseParser {
   /**
    * Build result for fast mode parsing
    */
-  private buildFastModeResult(
-    data: any[][],
-    baseIndex: number,
-  ): PapaParseResult {
+  private buildFastModeResult(data: any[][], baseIndex: number): PapaParseResult {
     const newline = (this.config.newline as string) || "\r\n";
     const delimiter = (this.config.delimiter as string) || ",";
     // Apply header logic if needed
@@ -211,8 +190,7 @@ export class Parser implements PapaParseParser {
     // Fast mode bypass - mirror legacy behavior exactly (lines 1482-1513)
     const canUseFastMode =
       this.config.fastMode === true ||
-      (this.config.fastMode !== false &&
-        input.indexOf(this.config.quoteChar || '"') === -1);
+      (this.config.fastMode !== false && input.indexOf(this.config.quoteChar || '"') === -1);
 
     if (canUseFastMode && !this.config.step && !this.config.chunk) {
       return this.parseFastMode(input, baseIndex, ignoreLastRow);
@@ -226,12 +204,7 @@ export class Parser implements PapaParseParser {
     this.processTokens(tokens, ignoreLastRow, terminatedByComment);
 
     // Process headers if needed
-    if (
-      this.config.header &&
-      !baseIndex &&
-      this.state.data.length &&
-      !this.state.headerParsed
-    ) {
+    if (this.config.header && !baseIndex && this.state.data.length && !this.state.headerParsed) {
       this.processHeaders();
     }
 
@@ -303,11 +276,7 @@ export class Parser implements PapaParseParser {
   /**
    * Process token stream into structured data
    */
-  private processTokens(
-    tokens: Token[],
-    ignoreLastRow: boolean,
-    terminatedByComment = false,
-  ): void {
+  private processTokens(tokens: Token[], ignoreLastRow: boolean, terminatedByComment = false): void {
     for (let i = 0; i < tokens.length && !this.state.aborted; i++) {
       const token = tokens[i];
       const prevToken = i > 0 ? tokens[i - 1] : null;
@@ -330,10 +299,7 @@ export class Parser implements PapaParseParser {
           this.endCurrentRow(token.position + token.length);
 
           // Check preview limit
-          if (
-            this.config.preview &&
-            this.state.data.length >= this.config.preview
-          ) {
+          if (this.config.preview && this.state.data.length >= this.config.preview) {
             return;
           }
           break;
@@ -347,12 +313,7 @@ export class Parser implements PapaParseParser {
           // If EOF comes after a newline, add an empty row
           // This handles cases like "a\n" where the trailing newline should create an empty row
           // But NOT if terminated by comment (e.g. "a\n# Comment")
-          if (
-            prevToken &&
-            prevToken.type === TokenType.NEWLINE &&
-            !ignoreLastRow &&
-            !terminatedByComment
-          ) {
+          if (prevToken && prevToken.type === TokenType.NEWLINE && !ignoreLastRow && !terminatedByComment) {
             // Only add empty row if we're not already in an empty row
             if (this.state.currentRow.length === 0) {
               this.processField("");
@@ -466,10 +427,7 @@ export class Parser implements PapaParseParser {
 
     // Check for field count mismatch
     if (actualFieldCount !== expectedFieldCount) {
-      const errorCode =
-        actualFieldCount < expectedFieldCount
-          ? "TooFewFields"
-          : "TooManyFields";
+      const errorCode = actualFieldCount < expectedFieldCount ? "TooFewFields" : "TooManyFields";
       const errorMessage =
         actualFieldCount < expectedFieldCount
           ? `Too few fields: expected ${expectedFieldCount} fields but parsed ${actualFieldCount}`
@@ -479,9 +437,7 @@ export class Parser implements PapaParseParser {
         type: "FieldMismatch",
         code: errorCode,
         message: errorMessage,
-        row: this.state.headerParsed
-          ? this.state.data.length - 2
-          : this.state.rowCount - 1, // 0-based data row index
+        row: this.state.headerParsed ? this.state.data.length - 2 : this.state.rowCount - 1, // 0-based data row index
       });
     }
   }
@@ -569,14 +525,10 @@ export class Parser implements PapaParseParser {
     // Check if dynamic typing is disabled for this field
     if (typeof this.config.dynamicTyping === "object") {
       if (typeof this.config.dynamicTyping[fieldIndex] === "boolean") {
-        return this.config.dynamicTyping[fieldIndex]
-          ? this.parseValue(value)
-          : value;
+        return this.config.dynamicTyping[fieldIndex] ? this.parseValue(value) : value;
       }
     } else if (typeof this.config.dynamicTyping === "function") {
-      return this.config.dynamicTyping(fieldIndex)
-        ? this.parseValue(value)
-        : value;
+      return this.config.dynamicTyping(fieldIndex) ? this.parseValue(value) : value;
     } else if (this.config.dynamicTyping === true) {
       return this.parseValue(value);
     }
@@ -588,31 +540,21 @@ export class Parser implements PapaParseParser {
    * Apply dynamic typing to field value by field name (for header mode)
    * Legacy reference: lines 1253-1277 (extracted to heuristics in Phase 3)
    */
-  private applyDynamicTypingByField(
-    value: any,
-    fieldName: string,
-    fieldIndex: number,
-  ): any {
+  private applyDynamicTypingByField(value: any, fieldName: string, fieldIndex: number): any {
     if (typeof value !== "string") return value;
 
     // Check if dynamic typing is configured for this field
     if (typeof this.config.dynamicTyping === "object") {
       // Check by field name first
       if (typeof this.config.dynamicTyping[fieldName] === "boolean") {
-        return this.config.dynamicTyping[fieldName]
-          ? this.parseValue(value)
-          : value;
+        return this.config.dynamicTyping[fieldName] ? this.parseValue(value) : value;
       }
       // Fall back to field index
       if (typeof this.config.dynamicTyping[fieldIndex] === "boolean") {
-        return this.config.dynamicTyping[fieldIndex]
-          ? this.parseValue(value)
-          : value;
+        return this.config.dynamicTyping[fieldIndex] ? this.parseValue(value) : value;
       }
     } else if (typeof this.config.dynamicTyping === "function") {
-      return this.config.dynamicTyping(fieldName)
-        ? this.parseValue(value)
-        : value;
+      return this.config.dynamicTyping(fieldName) ? this.parseValue(value) : value;
     } else if (this.config.dynamicTyping === true) {
       return this.parseValue(value);
     }
@@ -665,8 +607,7 @@ export class Parser implements PapaParseParser {
    * Legacy reference: lines 1741-1797
    */
   private buildResult(baseIndex: number): PapaParseResult {
-    const delimiter =
-      typeof this.config.delimiter === "string" ? this.config.delimiter : ",";
+    const delimiter = typeof this.config.delimiter === "string" ? this.config.delimiter : ",";
 
     return {
       data: this.state.data,
@@ -675,9 +616,7 @@ export class Parser implements PapaParseParser {
         delimiter,
         linebreak: this.config.newline || "\n",
         aborted: this.state.aborted,
-        truncated: this.config.preview
-          ? this.state.data.length >= this.config.preview
-          : false,
+        truncated: this.config.preview ? this.state.data.length >= this.config.preview : false,
         cursor: this.state.lastCursor + baseIndex,
         renamedHeaders: this.state.renamedHeaders,
       },

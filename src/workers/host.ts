@@ -7,11 +7,7 @@
  * Legacy reference: lines 1821-1920, 49-58
  */
 
-import type {
-  PapaParseConfig,
-  PapaParseResult,
-  PapaParseError,
-} from "../types";
+import type { PapaParseConfig, PapaParseResult, PapaParseError } from "../types";
 
 /**
  * Internal worker message types for communication
@@ -224,11 +220,7 @@ export function workersSupported(): boolean {
  * Sends work to a worker
  * Used by main parsing functions when worker: true
  */
-export function sendWorkToWorker(
-  worker: WorkerInstance,
-  input: string | File | object,
-  config: PapaParseConfig,
-): void {
+export function sendWorkToWorker(worker: WorkerInstance, input: string | File | object, config: PapaParseConfig): void {
   const message: WorkerMessage = {
     workerId: worker.id,
     input,

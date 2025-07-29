@@ -65,8 +65,7 @@ export class ChunkStreamer {
    */
   parseChunk(chunk: string, isFakeChunk?: boolean): any {
     // First chunk pre-processing for line skipping
-    const skipFirstNLines =
-      parseInt(String(this._config.skipFirstNLines || 0)) || 0;
+    const skipFirstNLines = parseInt(String(this._config.skipFirstNLines || 0)) || 0;
     if (this.isFirstChunk && skipFirstNLines > 0) {
       let _newline = this._config.newline;
       if (!_newline) {
@@ -98,11 +97,7 @@ export class ChunkStreamer {
       (this._handle as any).state.rowCounter = this._rowCount;
     }
 
-    let results = this._handle.parse(
-      aggregate,
-      this._baseIndex,
-      !this._finished,
-    );
+    let results = this._handle.parse(aggregate, this._baseIndex, !this._finished);
 
     if (this._handle.paused() || this._handle.aborted()) {
       this._halted = true;
@@ -120,9 +115,7 @@ export class ChunkStreamer {
       this._rowCount += results.data.length;
     }
 
-    const finishedIncludingPreview =
-      this._finished ||
-      (this._config.preview && this._rowCount >= this._config.preview);
+    const finishedIncludingPreview = this._finished || (this._config.preview && this._rowCount >= this._config.preview);
 
     // Worker coordination
     if (typeof IS_PAPA_WORKER !== "undefined" && IS_PAPA_WORKER) {
@@ -145,12 +138,8 @@ export class ChunkStreamer {
 
     // Accumulate results when not using step or chunk callbacks
     if (!this._config.step && !this._config.chunk) {
-      this._completeResults.data = this._completeResults.data.concat(
-        results.data,
-      );
-      this._completeResults.errors = this._completeResults.errors.concat(
-        results.errors,
-      );
+      this._completeResults.data = this._completeResults.data.concat(results.data);
+      this._completeResults.errors = this._completeResults.errors.concat(results.errors);
       this._completeResults.meta = results.meta;
     }
 
@@ -165,10 +154,7 @@ export class ChunkStreamer {
     }
 
     // Continue streaming unless we are finished or currently paused (legacy lines 583-585)
-    if (
-      !finishedIncludingPreview &&
-      (!results || !(results.meta as any).paused)
-    ) {
+    if (!finishedIncludingPreview && (!results || !(results.meta as any).paused)) {
       this._nextChunk();
     }
 
@@ -238,9 +224,7 @@ export class ChunkStreamer {
    * Must be implemented by concrete streamer classes.
    */
   stream(input?: any): any {
-    throw new Error(
-      "stream() method must be implemented by concrete streamer classes",
-    );
+    throw new Error("stream() method must be implemented by concrete streamer classes");
   }
 
   /**
@@ -277,11 +261,7 @@ export class ChunkStreamer {
   protected _sendError(error: Error | PapaParseError): void {
     if (isFunction(this._config.error)) {
       this._config.error(error);
-    } else if (
-      typeof IS_PAPA_WORKER !== "undefined" &&
-      IS_PAPA_WORKER &&
-      this._config.error
-    ) {
+    } else if (typeof IS_PAPA_WORKER !== "undefined" && IS_PAPA_WORKER && this._config.error) {
       if (typeof global !== "undefined" && global.postMessage) {
         global.postMessage({
           workerId: Papa.WORKER_ID,

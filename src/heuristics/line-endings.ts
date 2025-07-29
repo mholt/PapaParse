@@ -8,18 +8,12 @@ import { escapeRegExp } from "../utils/index.js";
  * @param quoteChar - The quote character to ignore when inside quotes (default: '"')
  * @returns The detected line ending ('\n', '\r', or '\r\n')
  */
-export function guessLineEndings(
-  input: string,
-  quoteChar: string = '"',
-): string {
+export function guessLineEndings(input: string, quoteChar: string = '"'): string {
   // Limit analysis to first 1MB for performance
   const analysisInput = input.substring(0, 1024 * 1024);
 
   // Replace all text inside quotes to ignore line endings within quoted fields
-  const quotedTextRegex = new RegExp(
-    escapeRegExp(quoteChar) + "([^]*?)" + escapeRegExp(quoteChar),
-    "gm",
-  );
+  const quotedTextRegex = new RegExp(escapeRegExp(quoteChar) + "([^]*?)" + escapeRegExp(quoteChar), "gm");
   const inputWithoutQuotes = analysisInput.replace(quotedTextRegex, "");
 
   // Split on different line ending types
@@ -27,8 +21,7 @@ export function guessLineEndings(
   const lfSplit = inputWithoutQuotes.split("\n");
 
   // Check if \n appears before \r in the text
-  const lfAppearsFirst =
-    lfSplit.length > 1 && lfSplit[0].length < crSplit[0].length;
+  const lfAppearsFirst = lfSplit.length > 1 && lfSplit[0].length < crSplit[0].length;
 
   // If no \r found, or \n appears first, use \n
   if (crSplit.length === 1 || lfAppearsFirst) {

@@ -14,15 +14,7 @@ import type { Duplex } from "stream";
 // Error object structure - expanded for modern implementation
 export interface PapaParseError {
   /** A generalization of the error */
-  type:
-    | "Quotes"
-    | "Delimiter"
-    | "FieldMismatch"
-    | "Network"
-    | "File"
-    | "Worker"
-    | "Config"
-    | "Parse";
+  type: "Quotes" | "Delimiter" | "FieldMismatch" | "Network" | "File" | "Worker" | "Config" | "Parse";
   /** Standardized error code */
   code:
     | "MissingQuotes"
@@ -90,11 +82,7 @@ export interface PapaParseStepResult<T = any> {
 
 // Parser instance for step/chunk callbacks
 export interface PapaParseParser {
-  parse(
-    input: string,
-    baseIndex?: number,
-    ignoreLastRow?: boolean,
-  ): PapaParseResult;
+  parse(input: string, baseIndex?: number, ignoreLastRow?: boolean): PapaParseResult;
   pause(): void;
   resume(): void;
   abort(): void;
@@ -126,10 +114,7 @@ export interface PapaParseConfig<T = any> {
   /** If true, the first row will be interpreted as field names. */
   header?: boolean;
   /** If true, numeric and boolean data will be converted to their type. */
-  dynamicTyping?:
-    | boolean
-    | { [key: string]: boolean; [key: number]: boolean }
-    | ((field: string | number) => boolean);
+  dynamicTyping?: boolean | { [key: string]: boolean; [key: number]: boolean } | ((field: string | number) => boolean);
   /** Whether or not to use a worker thread. */
   worker?: boolean;
   /** Whether the string passed is actually a URL from which to download a file. */
@@ -173,12 +158,7 @@ export interface PapaParseConfig<T = any> {
   /** Object that describes the headers for downloading files. */
   downloadRequestHeaders?: { [key: string]: string };
   /** Use POST request on the URL. The value passed will be set as the body. */
-  downloadRequestBody?:
-    | Blob
-    | ArrayBuffer
-    | FormData
-    | URLSearchParams
-    | string;
+  downloadRequestBody?: Blob | ArrayBuffer | FormData | URLSearchParams | string;
 
   // Internal properties (exposed for compatibility but not in public docs)
   dynamicTypingFunction?: (field: string | number) => boolean;
@@ -220,24 +200,12 @@ export declare const NODE_STREAM_INPUT: unique symbol;
 // Main Papa object interface (for compatibility)
 export interface PapaObject {
   // Core parsing functions
-  parse<T = any>(
-    input: string,
-    config?: PapaParseConfig<T> & { download?: false; worker?: false },
-  ): PapaParseResult<T>;
-  parse<T = any>(
-    input: string,
-    config: PapaParseConfig<T> & { worker: true },
-  ): void;
-  parse<T = any>(
-    input: string,
-    config: PapaParseConfig<T> & { download: true },
-  ): void;
+  parse<T = any>(input: string, config?: PapaParseConfig<T> & { download?: false; worker?: false }): PapaParseResult<T>;
+  parse<T = any>(input: string, config: PapaParseConfig<T> & { worker: true }): void;
+  parse<T = any>(input: string, config: PapaParseConfig<T> & { download: true }): void;
   parse<T = any>(input: LocalFile, config: PapaParseConfig<T>): void;
   parse(stream: typeof NODE_STREAM_INPUT, config?: PapaParseConfig): Duplex;
-  unparse<T = any>(
-    data: PapaUnparseData<T>,
-    config?: PapaUnparseConfig,
-  ): string;
+  unparse<T = any>(data: PapaUnparseData<T>, config?: PapaUnparseConfig): string;
 
   // Read-only constants
   readonly RECORD_SEP: "\x1E";
@@ -262,9 +230,7 @@ export interface PapaObject {
 }
 
 // Stricter internal types for development (not exported to public API)
-export interface StrictParseConfig<
-  T extends string | number | symbol = string,
-> {
+export interface StrictParseConfig<T extends string | number | symbol = string> {
   delimiter: string;
   newline: string;
   quoteChar: string;

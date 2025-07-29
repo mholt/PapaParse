@@ -22,15 +22,9 @@ import { CONSTANTS } from "../constants";
  * @param config - Serialization configuration options
  * @returns CSV string representation of the input data
  */
-export function JsonToCsv<T = any>(
-  input: PapaUnparseData<T>,
-  config?: PapaUnparseConfig,
-): string {
+export function JsonToCsv<T = any>(input: PapaUnparseData<T>, config?: PapaUnparseConfig): string {
   // Internal configuration variables - default values from legacy
-  let _quotes:
-    | boolean
-    | boolean[]
-    | ((value: any, columnIndex: number) => boolean) = false;
+  let _quotes: boolean | boolean[] | ((value: any, columnIndex: number) => boolean) = false;
   let _writeHeader = true;
   let _delimiter = ",";
   let _newline = "\r\n";
@@ -59,15 +53,8 @@ export function JsonToCsv<T = any>(
       return serialize(null, processedInput as any[][], _skipEmptyLines);
     }
     // Array of objects
-    else if (
-      typeof processedInput[0] === "object" &&
-      processedInput[0] !== null
-    ) {
-      return serialize(
-        _columns || Object.keys(processedInput[0]),
-        processedInput as any[],
-        _skipEmptyLines,
-      );
+    else if (typeof processedInput[0] === "object" && processedInput[0] !== null) {
+      return serialize(_columns || Object.keys(processedInput[0]), processedInput as any[], _skipEmptyLines);
     }
   }
   // Object with data property
@@ -94,19 +81,12 @@ export function JsonToCsv<T = any>(
       }
 
       // Handle simple array input like [1,2,3] or ['asdf']
-      if (
-        !Array.isArray(inputObj.data[0]) &&
-        typeof inputObj.data[0] !== "object"
-      ) {
+      if (!Array.isArray(inputObj.data[0]) && typeof inputObj.data[0] !== "object") {
         inputObj.data = [inputObj.data];
       }
     }
 
-    return serialize(
-      inputObj.fields || [],
-      inputObj.data || [],
-      _skipEmptyLines,
-    );
+    return serialize(inputObj.fields || [], inputObj.data || [], _skipEmptyLines);
   }
 
   // Default case - should not reach here with valid input
@@ -124,27 +104,18 @@ export function JsonToCsv<T = any>(
     // Delimiter validation - must not contain bad delimiters
     if (
       typeof config.delimiter === "string" &&
-      !CONSTANTS.BAD_DELIMITERS.some(
-        (badDelim) => config.delimiter!.indexOf(badDelim) !== -1,
-      )
+      !CONSTANTS.BAD_DELIMITERS.some((badDelim) => config.delimiter!.indexOf(badDelim) !== -1)
     ) {
       _delimiter = config.delimiter;
     }
 
     // Quotes configuration
-    if (
-      typeof config.quotes === "boolean" ||
-      typeof config.quotes === "function" ||
-      Array.isArray(config.quotes)
-    ) {
+    if (typeof config.quotes === "boolean" || typeof config.quotes === "function" || Array.isArray(config.quotes)) {
       _quotes = config.quotes;
     }
 
     // Skip empty lines configuration
-    if (
-      typeof config.skipEmptyLines === "boolean" ||
-      typeof config.skipEmptyLines === "string"
-    ) {
+    if (typeof config.skipEmptyLines === "boolean" || typeof config.skipEmptyLines === "string") {
       _skipEmptyLines = config.skipEmptyLines;
     }
 
@@ -179,10 +150,7 @@ export function JsonToCsv<T = any>(
     // Formula escape configuration
     if (config.escapeFormulae instanceof RegExp) {
       _escapeFormulae = config.escapeFormulae;
-    } else if (
-      typeof config.escapeFormulae === "boolean" &&
-      config.escapeFormulae
-    ) {
+    } else if (typeof config.escapeFormulae === "boolean" && config.escapeFormulae) {
       _escapeFormulae = /^[=+\-@\t\r].*$/;
     }
   }
@@ -191,11 +159,7 @@ export function JsonToCsv<T = any>(
    * The main serialization function that converts data to CSV string
    * Matches legacy serialize function exactly (lines 385-445)
    */
-  function serialize(
-    fields: string[] | null,
-    data: any[][],
-    skipEmptyLines: boolean | "greedy",
-  ): string {
+  function serialize(fields: string[] | null, data: any[][], skipEmptyLines: boolean | "greedy"): string {
     let csv = "";
 
     // Parse fields if string
@@ -228,9 +192,7 @@ export function JsonToCsv<T = any>(
       const maxCol = hasHeader ? fields!.length : data[row].length;
 
       let emptyLine = false;
-      const nullLine = hasHeader
-        ? Object.keys(data[row]).length === 0
-        : data[row].length === 0;
+      const nullLine = hasHeader ? Object.keys(data[row]).length === 0 : data[row].length === 0;
 
       // Empty line detection for non-header mode
       if (skipEmptyLines && !hasHeader) {
@@ -260,10 +222,7 @@ export function JsonToCsv<T = any>(
           csv += safe((data[row] as any)[colIdx], col);
         }
         // Add newline if not last row and conditions are met
-        if (
-          row < data.length - 1 &&
-          (!skipEmptyLines || (maxCol > 0 && !nullLine))
-        ) {
+        if (row < data.length - 1 && (!skipEmptyLines || (maxCol > 0 && !nullLine))) {
           csv += _newline;
         }
       }
@@ -289,20 +248,13 @@ export function JsonToCsv<T = any>(
     let needsQuotes = false;
 
     // Formula escape prevention
-    if (
-      _escapeFormulae &&
-      typeof str === "string" &&
-      _escapeFormulae instanceof RegExp &&
-      _escapeFormulae.test(str)
-    ) {
+    if (_escapeFormulae && typeof str === "string" && _escapeFormulae instanceof RegExp && _escapeFormulae.test(str)) {
       str = "'" + str;
       needsQuotes = true;
     }
 
     // Escape existing quote characters
-    const escapedQuoteStr = str
-      .toString()
-      .replace(quoteCharRegex, _escapedQuote);
+    const escapedQuoteStr = str.toString().replace(quoteCharRegex, _escapedQuote);
 
     // Determine if quotes are needed
     needsQuotes =
@@ -315,9 +267,7 @@ export function JsonToCsv<T = any>(
       escapedQuoteStr.charAt(0) === " " ||
       escapedQuoteStr.charAt(escapedQuoteStr.length - 1) === " ";
 
-    return needsQuotes
-      ? _quoteChar + escapedQuoteStr + _quoteChar
-      : escapedQuoteStr;
+    return needsQuotes ? _quoteChar + escapedQuoteStr + _quoteChar : escapedQuoteStr;
   }
 
   /**

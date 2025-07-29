@@ -78,16 +78,13 @@ export class NetworkStreamer extends ChunkStreamer {
     }
 
     // Configure request method based on whether we have a request body
-    const method = (this._config as NetworkStreamerConfig).downloadRequestBody
-      ? "POST"
-      : "GET";
+    const method = (this._config as NetworkStreamerConfig).downloadRequestBody ? "POST" : "GET";
     const isAsync = typeof IS_WORKER === "undefined" || !IS_WORKER;
 
     this.xhr.open(method, this._input as string, isAsync);
 
     // Set custom headers if specified
-    const headers = (this._config as NetworkStreamerConfig)
-      .downloadRequestHeaders;
+    const headers = (this._config as NetworkStreamerConfig).downloadRequestHeaders;
     if (headers) {
       for (const headerName in headers) {
         this.xhr.setRequestHeader(headerName, headers[headerName]);
@@ -101,19 +98,14 @@ export class NetworkStreamer extends ChunkStreamer {
     }
 
     try {
-      const requestBody = (this._config as NetworkStreamerConfig)
-        .downloadRequestBody;
+      const requestBody = (this._config as NetworkStreamerConfig).downloadRequestBody;
       this.xhr.send(requestBody);
     } catch (err: any) {
       this._chunkError(err.message);
     }
 
     // Handle worker-specific error case
-    if (
-      typeof IS_WORKER !== "undefined" &&
-      IS_WORKER &&
-      this.xhr.status === 0
-    ) {
+    if (typeof IS_WORKER !== "undefined" && IS_WORKER && this.xhr.status === 0) {
       this._chunkError();
     }
   }
@@ -133,8 +125,7 @@ export class NetworkStreamer extends ChunkStreamer {
 
     // Use chunkSize as it may be different from response length due to characters with more than 1 byte
     this._start += this._config.chunkSize || this.xhr.responseText.length;
-    this._finished =
-      !this._config.chunkSize || this._start >= this.getFileSize(this.xhr);
+    this._finished = !this._config.chunkSize || this._start >= this.getFileSize(this.xhr);
 
     this.parseChunk(this.xhr.responseText);
   }
@@ -143,9 +134,7 @@ export class NetworkStreamer extends ChunkStreamer {
    * Handle network or HTTP errors.
    */
   private _chunkError(errorMessage?: string): void {
-    const errorText = this.xhr
-      ? this.xhr.statusText
-      : errorMessage || "Network error";
+    const errorText = this.xhr ? this.xhr.statusText : errorMessage || "Network error";
     this._sendError(new Error(errorText));
   }
 

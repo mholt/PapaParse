@@ -10,10 +10,7 @@
  */
 
 import { runAPIReflectionTest } from "./api-reflection";
-import {
-  runSnapshotGeneration,
-  runSnapshotValidation,
-} from "./golden-snapshots";
+import { runSnapshotGeneration, runSnapshotValidation } from "./golden-snapshots";
 import { runCIBenchmark } from "./performance-benchmark";
 
 // Command line interface
@@ -90,21 +87,15 @@ async function main() {
       console.log("");
       console.log("Commands:");
       console.log("  benchmark           - Run performance benchmarks");
-      console.log(
-        "  generate-snapshots  - Generate golden snapshots from legacy",
-      );
-      console.log(
-        "  validate-snapshots  - Validate current implementation against snapshots",
-      );
+      console.log("  generate-snapshots  - Generate golden snapshots from legacy");
+      console.log("  validate-snapshots  - Validate current implementation against snapshots");
       console.log("  api-test           - Run API surface reflection tests");
       console.log("  all                - Run complete CI test suite");
       console.log("  foundation         - Test foundation infrastructure only");
       console.log("");
       console.log("Examples:");
       console.log("  bun run ci foundation        # Test basic infrastructure");
-      console.log(
-        "  bun run ci generate-snapshots # Create baseline snapshots",
-      );
+      console.log("  bun run ci generate-snapshots # Create baseline snapshots");
       console.log("  bun run ci all              # Full CI suite");
       process.exit(1);
   }
@@ -141,15 +132,7 @@ async function testTypeScriptCompilation(): Promise<void> {
  * Test utility functions
  */
 async function testUtilityFunctions(): Promise<void> {
-  const {
-    copy,
-    isFunction,
-    stripBom,
-    escapeRegExp,
-    isString,
-    isNumber,
-    isArray,
-  } = await import("../utils");
+  const { copy, isFunction, stripBom, escapeRegExp, isString, isNumber, isArray } = await import("../utils");
 
   // Test copy function
   const testObj = { a: 1, b: { c: 2 } };
@@ -187,9 +170,7 @@ async function testUtilityFunctions(): Promise<void> {
  * Test constants
  */
 async function testConstants(): Promise<void> {
-  const { CONSTANTS, DEFAULT_DELIMITERS_TO_GUESS, ERROR_TYPES } = await import(
-    "../constants"
-  );
+  const { CONSTANTS, DEFAULT_DELIMITERS_TO_GUESS, ERROR_TYPES } = await import("../constants");
 
   // Test constants exist and have expected values
   if (CONSTANTS.RECORD_SEP !== String.fromCharCode(30)) {
@@ -213,18 +194,12 @@ async function testConstants(): Promise<void> {
   CONSTANTS.LocalChunkSize = originalSize; // Restore
 
   // Test default delimiters array
-  if (
-    !Array.isArray(DEFAULT_DELIMITERS_TO_GUESS) ||
-    !DEFAULT_DELIMITERS_TO_GUESS.includes(",")
-  ) {
+  if (!Array.isArray(DEFAULT_DELIMITERS_TO_GUESS) || !DEFAULT_DELIMITERS_TO_GUESS.includes(",")) {
     throw new Error("DEFAULT_DELIMITERS_TO_GUESS incorrect");
   }
 
   // Test error types
-  if (
-    ERROR_TYPES.Quotes !== "Quotes" ||
-    ERROR_TYPES.Delimiter !== "Delimiter"
-  ) {
+  if (ERROR_TYPES.Quotes !== "Quotes" || ERROR_TYPES.Delimiter !== "Delimiter") {
     throw new Error("ERROR_TYPES constants incorrect");
   }
 

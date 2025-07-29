@@ -120,10 +120,7 @@ export function isEmptyLine(line: string): boolean {
  * Checks if a line is a comment based on comment character
  * Utility function for comment detection
  */
-export function isCommentLine(
-  line: string,
-  commentChar: string | false,
-): boolean {
+export function isCommentLine(line: string, commentChar: string | false): boolean {
   if (!commentChar || typeof commentChar !== "string") {
     return false;
   }
@@ -143,13 +140,7 @@ export function getStringLength(str: string): number {
  * Creates an error with consistent format
  * Factory function for standardized error creation
  */
-export function createError(
-  type: string,
-  code: string,
-  message: string,
-  row?: number,
-  index?: number,
-): any {
+export function createError(type: string, code: string, message: string, row?: number, index?: number): any {
   return {
     type,
     code,

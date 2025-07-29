@@ -31,9 +31,7 @@ export class DuplexStreamStreamer extends ChunkStreamer {
   constructor(_config: DuplexStreamStreamerConfig) {
     // Get Node.js Duplex stream class
     if (typeof require === "undefined") {
-      throw new Error(
-        "DuplexStreamStreamer is only available in Node.js environment",
-      );
+      throw new Error("DuplexStreamStreamer is only available in Node.js environment");
     }
     const { Duplex } = require("stream");
 
@@ -72,10 +70,7 @@ export class DuplexStreamStreamer extends ChunkStreamer {
       write: bindFunction(this._onWrite, this),
     });
 
-    this.duplexStream!.once(
-      "finish",
-      bindFunction(this._onWriteComplete, this),
-    );
+    this.duplexStream!.once("finish", bindFunction(this._onWriteComplete, this));
   }
 
   /**
@@ -124,10 +119,7 @@ export class DuplexStreamStreamer extends ChunkStreamer {
     // items have been added without their callback being invoked.
     this.parseCallbackQueue.push(
       bindFunction(() => {
-        const stringChunk =
-          typeof chunk === "string"
-            ? chunk
-            : chunk.toString(this._config.encoding);
+        const stringChunk = typeof chunk === "string" ? chunk : chunk.toString(this._config.encoding);
 
         this.parseChunk(stringChunk);
 
@@ -157,11 +149,7 @@ export class DuplexStreamStreamer extends ChunkStreamer {
   /**
    * Handle writes to the writable side.
    */
-  private _onWrite = (
-    chunk: any,
-    encoding: string,
-    callback: () => void,
-  ): void => {
+  private _onWrite = (chunk: any, encoding: string, callback: () => void): void => {
     this._addToParseQueue(chunk, callback);
   };
 

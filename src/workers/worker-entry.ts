@@ -77,10 +77,7 @@ async function workerThreadReceivedMessage(e: MessageEvent): Promise<void> {
       });
     }
     // Handle File or Object input
-    else if (
-      (typeof File !== "undefined" && msg.input instanceof File) ||
-      msg.input instanceof Object
-    ) {
+    else if ((typeof File !== "undefined" && msg.input instanceof File) || msg.input instanceof Object) {
       results = Papa.parse(msg.input, msg.config);
 
       if (results) {
@@ -98,8 +95,7 @@ async function workerThreadReceivedMessage(e: MessageEvent): Promise<void> {
       error: {
         type: "WorkerError",
         code: "WORKER_PARSE_ERROR",
-        message:
-          error instanceof Error ? error.message : "Unknown worker error",
+        message: error instanceof Error ? error.message : "Unknown worker error",
         details: error,
       },
       finished: true,

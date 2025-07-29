@@ -35,14 +35,7 @@ export const BAD_DELIMITERS_WITH_BOM = (): string[] => {
 };
 
 // Default delimiters to guess when auto-detecting
-export const DEFAULT_DELIMITERS_TO_GUESS = [
-  ",",
-  "\t",
-  "|",
-  ";",
-  PAPA_CONSTANTS.RECORD_SEP,
-  PAPA_CONSTANTS.UNIT_SEP,
-];
+export const DEFAULT_DELIMITERS_TO_GUESS = [",", "\t", "|", ";", PAPA_CONSTANTS.RECORD_SEP, PAPA_CONSTANTS.UNIT_SEP];
 
 // Error types and codes for consistency
 export const ERROR_TYPES = {
@@ -91,7 +84,8 @@ export const DEFAULT_CONFIG = {
 // Export mutable constants for legacy compatibility
 export { PAPA_CONSTANTS as CONSTANTS };
 // Constants for dynamic typing (from legacy lines 1031-1034)
-  export const MAX_FLOAT = Math.pow(2, 53);
-  export const MIN_FLOAT = -MAX_FLOAT;
-  export const FLOAT = /^\s*-?(\d+\.?|\.\d+|\d+\.\d+)([eE][-+]?\d+)?\s*$/;
-  export const ISO_DATE = /^((\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z)))$/;
+export const MAX_FLOAT = Math.pow(2, 53);
+export const MIN_FLOAT = -MAX_FLOAT;
+export const FLOAT = /^\s*-?(\d+\.?|\.\d+|\d+\.\d+)([eE][-+]?\d+)?\s*$/;
+export const ISO_DATE =
+  /^((\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z)))$/;

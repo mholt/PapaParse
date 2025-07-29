@@ -68,34 +68,20 @@ export class ErrorFactory {
    * Create a missing quotes error
    */
   static createMissingQuotesError(row: number, index: number): PapaParseError {
-    return ErrorFactory.createQuoteError(
-      "MissingQuotes",
-      "Quoted field unterminated",
-      row,
-      index,
-    );
+    return ErrorFactory.createQuoteError("MissingQuotes", "Quoted field unterminated", row, index);
   }
 
   /**
    * Create an invalid quotes error
    */
   static createInvalidQuotesError(row: number, index: number): PapaParseError {
-    return ErrorFactory.createQuoteError(
-      "InvalidQuotes",
-      "Trailing quote on quoted field is malformed",
-      row,
-      index,
-    );
+    return ErrorFactory.createQuoteError("InvalidQuotes", "Trailing quote on quoted field is malformed", row, index);
   }
 
   /**
    * Create a delimiter error
    */
-  static createDelimiterError(
-    message: string,
-    row?: number,
-    index?: number,
-  ): PapaParseError {
+  static createDelimiterError(message: string, row?: number, index?: number): PapaParseError {
     return {
       type: "Delimiter",
       code: "InvalidDelimiter",
@@ -136,11 +122,7 @@ export class ErrorFactory {
   /**
    * Create a file error
    */
-  static createFileError(
-    code: "FileSizeError" | "FileReadError",
-    message: string,
-    details?: any,
-  ): PapaParseError {
+  static createFileError(code: "FileSizeError" | "FileReadError", message: string, details?: any): PapaParseError {
     return {
       type: "File",
       code,
@@ -200,12 +182,7 @@ export class ErrorFactory {
   /**
    * Create a generic parse error
    */
-  static createParseError(
-    message: string,
-    row?: number,
-    index?: number,
-    details?: any,
-  ): PapaParseError {
+  static createParseError(message: string, row?: number, index?: number, details?: any): PapaParseError {
     return {
       type: "Parse",
       code: "ParseError",

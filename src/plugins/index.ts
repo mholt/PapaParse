@@ -19,10 +19,7 @@ const pluginInitializers = new Map<string, PluginInitializer>();
  * Register a plugin with the Papa object
  * Allows for dynamic plugin loading and initialization
  */
-export function registerPlugin(
-  name: string,
-  initializer: PluginInitializer,
-): void {
+export function registerPlugin(name: string, initializer: PluginInitializer): void {
   if (registeredPlugins.has(name)) {
     console.warn(`Plugin '${name}' is already registered`);
     return;

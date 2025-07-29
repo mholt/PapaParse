@@ -1,10 +1,7 @@
 import { FLOAT, MIN_FLOAT, MAX_FLOAT, ISO_DATE } from "../constants";
 
 export interface DynamicTypingConfig {
-  dynamicTyping?:
-    | boolean
-    | { [key: string]: boolean }
-    | ((field: string | number) => boolean);
+  dynamicTyping?: boolean | { [key: string]: boolean } | ((field: string | number) => boolean);
   dynamicTypingFunction?: (field: string | number) => boolean;
   [key: string]: any;
 }
@@ -27,10 +24,7 @@ function testFloat(value: string): boolean {
  * Check if dynamic typing should be applied to a field
  * Based on legacy implementation lines 1253-1259
  */
-export function shouldApplyDynamicTyping(
-  field: string | number,
-  config: DynamicTypingConfig,
-): boolean {
+export function shouldApplyDynamicTyping(field: string | number, config: DynamicTypingConfig): boolean {
   // Cache function values to avoid calling it for each row
   if (
     config.dynamicTypingFunction &&
@@ -55,11 +49,7 @@ export function shouldApplyDynamicTyping(
  * Parse a field value with dynamic typing
  * Based on legacy implementation lines 1261-1277
  */
-export function parseDynamic(
-  field: string | number,
-  value: string,
-  config: DynamicTypingConfig,
-): any {
+export function parseDynamic(field: string | number, value: string, config: DynamicTypingConfig): any {
   if (shouldApplyDynamicTyping(field, config)) {
     if (value === "true" || value === "TRUE") {
       return true;
