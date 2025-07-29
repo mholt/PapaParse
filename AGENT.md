@@ -8,7 +8,7 @@
 
 ALWAYS REFERENCE V6_REFACTOR.md for detailed implementation status and remaining tasks.
 ALWAYS UPDATE V6_REFACTOR.md with any progress you've made.
-ALWAYS RUN `bun run format:fix` after your work
+ALWAYS RUN `bun run check:fix` after your work
 
 ## Commands
 
