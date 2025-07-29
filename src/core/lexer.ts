@@ -32,6 +32,8 @@ interface LexerState {
   quoteSearch: number;
   fieldStart: number;
   errors: PapaParseError[];
+  terminatedByComment: boolean;
+  atStartOfRow: boolean;
 }
 
 /**
@@ -184,7 +186,7 @@ export class Lexer {
    * Tokenize input with full quote state machine support
    * Legacy reference: lines 1520-1683
    */
-  tokenize(): { tokens: Token[]; errors: PapaParseError[] } {
+  tokenize(): { tokens: Token[]; errors: PapaParseError[]; terminatedByComment?: boolean } {
     if (this.canUseFastMode()) {
       return { tokens: this.tokenizeFast(), errors: [] };
     }
@@ -196,6 +198,8 @@ export class Lexer {
       quoteSearch: 0,
       fieldStart: 0,
       errors: [],
+      terminatedByComment: false,
+      atStartOfRow: true,
     };
 
     let nextDelim = this.input.indexOf(this.delimiter, state.cursor);
@@ -207,14 +211,13 @@ export class Lexer {
       // Handle quoted fields
       if (this.input[state.cursor] === this.quoteChar) {
         const result = this.processQuotedField(state, nextDelim, nextNewline);
-        if (result.field !== null) {
-          tokens.push({
-            type: TokenType.FIELD,
-            value: result.field,
-            position: state.fieldStart,
-            length: state.cursor - state.fieldStart,
-          });
-        }
+        tokens.push({
+          type: TokenType.FIELD,
+          value: result.field,
+          position: state.fieldStart,
+          length: state.cursor - state.fieldStart,
+        });
+        state.atStartOfRow = false;
         if (result.foundDelimiter) {
           tokens.push({
             type: TokenType.DELIMITER,
@@ -230,6 +233,11 @@ export class Lexer {
             position: state.cursor - this.newlineLen,
             length: this.newlineLen,
           });
+          state.atStartOfRow = true;
+        }
+        // If we hit EOF during quote processing, stop parsing
+        if (result.hitEOF) {
+          break;
         }
         nextDelim = this.input.indexOf(this.delimiter, state.cursor);
         nextNewline = this.input.indexOf(this.newline, state.cursor);
@@ -238,9 +246,16 @@ export class Lexer {
       }
 
       // Handle comment lines - skip them entirely
-      if (this.comments && this.isCommentStart(state.cursor)) {
-        const result = this.processComment(state, nextNewline);
-        // Skip comments completely - don't emit any tokens
+      // Legacy condition: comments && row.length === 0
+      if (this.comments && state.atStartOfRow && this.isCommentStart(state.cursor)) {
+        const commentResult = this.skipComment(state, nextNewline);
+        if (commentResult.endsAtEOF) {
+          // Comment goes to EOF - stop processing immediately (legacy line 1645)
+          state.terminatedByComment = true;
+          break;
+        }
+        // After skipping comment, we're still at start of row (comment consumed newline)
+        state.atStartOfRow = true;
         nextDelim = this.input.indexOf(this.delimiter, state.cursor);
         nextNewline = this.input.indexOf(this.newline, state.cursor);
         continue;
@@ -254,6 +269,7 @@ export class Lexer {
         position: state.fieldStart,
         length: result.field.length,
       });
+      state.atStartOfRow = false;
 
       if (result.foundDelimiter) {
         tokens.push({
@@ -272,6 +288,7 @@ export class Lexer {
           position: state.cursor - this.newlineLen,
           length: this.newlineLen,
         });
+        state.atStartOfRow = true;
         nextNewline = this.input.indexOf(this.newline, state.cursor);
       }
 
@@ -287,7 +304,7 @@ export class Lexer {
       length: 0,
     });
 
-    return { tokens, errors: state.errors };
+    return { tokens, errors: state.errors, terminatedByComment: state.terminatedByComment };
   }
 
   /**
@@ -309,7 +326,7 @@ export class Lexer {
     state: LexerState,
     nextDelim: number,
     nextNewline: number,
-  ): { field: string | null; foundDelimiter: boolean; foundNewline: boolean } {
+  ): { field: string; foundDelimiter: boolean; foundNewline: boolean; hitEOF: boolean } {
     state.fieldStart = state.cursor;
     state.quoteSearch = state.cursor;
     state.cursor++; // Skip opening quote
@@ -330,7 +347,10 @@ export class Lexer {
           row: 0, // Will be filled by parser
           index: state.cursor,
         });
-        return { field: null, foundDelimiter: false, foundNewline: false };
+        // Consume everything from cursor to end of input as field value
+        const field = this.input.substring(state.cursor);
+        state.cursor = this.inputLen;
+        return { field, foundDelimiter: false, foundNewline: false, hitEOF: true };
       }
 
       // Closing quote at EOF
@@ -339,7 +359,7 @@ export class Lexer {
           .substring(state.cursor, state.quoteSearch)
           .replace(this.quoteCharRegex, this.quoteChar);
         state.cursor = this.inputLen;
-        return { field: value, foundDelimiter: false, foundNewline: false };
+        return { field: value, foundDelimiter: false, foundNewline: false, hitEOF: true };
       }
 
       // Check for escaped quote
@@ -381,7 +401,7 @@ export class Lexer {
           1 +
           spacesBetweenQuoteAndDelimiter +
           this.delimLen;
-        return { field, foundDelimiter: true, foundNewline: false };
+        return { field, foundDelimiter: true, foundNewline: false, hitEOF: false };
       }
 
       const spacesBetweenQuoteAndNewLine = this.extraSpaces(
@@ -407,7 +427,7 @@ export class Lexer {
           1 +
           spacesBetweenQuoteAndNewLine +
           this.newlineLen;
-        return { field, foundDelimiter: false, foundNewline: true };
+        return { field, foundDelimiter: false, foundNewline: true, hitEOF: false };
       }
 
       // Invalid quote placement
@@ -457,6 +477,22 @@ export class Lexer {
     const field = this.input.substring(state.cursor);
     state.cursor = this.inputLen;
     return { field, foundDelimiter: false, foundNewline: false, atEOF: true };
+  }
+
+  /**
+   * Skip a comment line, consuming it and its trailing newline
+   * Legacy reference: lines 1642-1650
+   */
+  private skipComment(state: LexerState, nextNewline: number): { endsAtEOF: boolean } {
+    if (nextNewline === -1) {
+      // Comment goes to EOF (legacy line 1644-1645)
+      state.cursor = this.inputLen;
+      return { endsAtEOF: true };
+    } else {
+      // Move cursor past the newline (consume both comment and newline)
+      state.cursor = nextNewline + this.newlineLen;
+      return { endsAtEOF: false };
+    }
   }
 
   /**

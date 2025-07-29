@@ -73,11 +73,11 @@ export class Parser implements PapaParseParser {
     }
 
     // Tokenize input
-    const { tokens, errors } = this.lexer.tokenize();
+    const { tokens, errors, terminatedByComment } = this.lexer.tokenize();
     this.state.errors.push(...errors);
 
     // Process tokens into rows
-    this.processTokens(tokens, ignoreLastRow);
+    this.processTokens(tokens, ignoreLastRow, terminatedByComment);
 
     // Process headers if needed
     if (
@@ -157,9 +157,10 @@ export class Parser implements PapaParseParser {
   /**
    * Process token stream into structured data
    */
-  private processTokens(tokens: Token[], ignoreLastRow: boolean): void {
+  private processTokens(tokens: Token[], ignoreLastRow: boolean, terminatedByComment = false): void {
     for (let i = 0; i < tokens.length && !this.state.aborted; i++) {
       const token = tokens[i];
+      const prevToken = i > 0 ? tokens[i - 1] : null;
 
       switch (token.type) {
         case TokenType.FIELD:
@@ -171,6 +172,11 @@ export class Parser implements PapaParseParser {
           break;
 
         case TokenType.NEWLINE:
+          // If newline comes after a delimiter, add an empty field first
+          if (prevToken && prevToken.type === TokenType.DELIMITER) {
+            this.processField("");
+          }
+          
           this.endCurrentRow(token.position + token.length);
 
           // Check preview limit
@@ -183,6 +189,27 @@ export class Parser implements PapaParseParser {
           break;
 
         case TokenType.EOF:
+          // If EOF comes after a delimiter, add an empty field first
+          if (prevToken && prevToken.type === TokenType.DELIMITER) {
+            this.processField("");
+          }
+          
+          // If EOF comes after a newline, add an empty row
+          // This handles cases like "a\n" where the trailing newline should create an empty row
+          // But NOT if terminated by comment (e.g. "a\n# Comment")
+          if (prevToken && prevToken.type === TokenType.NEWLINE && !ignoreLastRow && !terminatedByComment) {
+            // Only add empty row if we're not already in an empty row
+            if (this.state.currentRow.length === 0) {
+              this.processField("");
+            }
+          }
+          
+          // If this is the only token (e.g., comment with newline at start), create empty row
+          // But NOT if terminated by comment going to EOF (no trailing newline)
+          if (!prevToken && this.state.currentRow.length === 0 && this.state.data.length === 0 && !ignoreLastRow && !terminatedByComment) {
+            this.processField("");
+          }
+          
           // Handle final row if it exists and not ignoring last row
           if (this.state.currentRow.length > 0 && !ignoreLastRow) {
             this.endCurrentRow(token.position);
