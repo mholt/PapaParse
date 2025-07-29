@@ -43,7 +43,7 @@ export class GoldenSnapshots {
   private snapshotDir: string;
   private snapshots: Map<string, Snapshot> = new Map();
 
-  constructor(snapshotDir: string = "src/ci/snapshots") {
+  constructor(snapshotDir: string = "tests/snapshots") {
     this.snapshotDir = path.resolve(snapshotDir);
     this.ensureSnapshotDir();
     this.loadExistingSnapshots();
