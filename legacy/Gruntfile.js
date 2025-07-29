@@ -14,7 +14,7 @@ module.exports = function(grunt) {
 			},
 			min: {
 				files: {
-					'legacy/papaparse.min.js': ['legacy/papaparse.js']
+					'papaparse.min.js': ['papaparse.js']
 				},
 			},
 		},

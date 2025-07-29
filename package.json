@@ -64,7 +64,7 @@
   },
   "scripts": {
     "lint": "npm run format",
-    "build": "grunt build",
+    "build": "grunt --gruntfile legacy/Gruntfile.js build",
     "build-ts": "tsc",
     "build:tsup": "tsup",
     "build:tsup:watch": "tsup --watch",
