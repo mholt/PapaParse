@@ -22,7 +22,6 @@ export interface Snapshot {
     meta: any;
   };
   checksum: string;
-  timestamp: string;
   version: string;
 }
 
@@ -106,7 +105,6 @@ export class GoldenSnapshots {
         meta: parseResult.meta,
       },
       checksum: this.generateChecksum(parseResult),
-      timestamp: new Date().toISOString(),
       version,
     };
 

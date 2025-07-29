@@ -76,7 +76,6 @@ export class Lexer {
   private fastMode: boolean | undefined;
 
   constructor(config: LexerConfig) {
-    this.config = config;
     this.delimiter = config.delimiter;
     this.newline = config.newline;
     this.quoteChar = config.quoteChar;

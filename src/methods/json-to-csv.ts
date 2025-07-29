@@ -176,7 +176,7 @@ export function JsonToCsv<T = any>(input: PapaUnparseData<T>, config?: PapaUnpar
 
     // Write header row if present and enabled
     if (hasHeader && _writeHeader) {
-      for (let i = 0; i < fields?.length; i++) {
+      for (let i = 0; i < fields!.length; i++) {
         if (i > 0) {
           csv += _delimiter;
         }
@@ -205,24 +205,24 @@ export function JsonToCsv<T = any>(input: PapaUnparseData<T>, config?: PapaUnpar
       // Empty line detection for header mode (greedy)
       if (skipEmptyLines === "greedy" && hasHeader) {
         const line = [];
-        for (let c = 0; c < maxCol; c++) {
+        for (let c = 0; c < maxCol!; c++) {
           const cx = dataKeyedByField ? fields?.[c] : c;
-          line.push((data[row] as any)[cx]);
+          line.push((data[row] as any)[cx!]);
         }
         emptyLine = line.join("").trim() === "";
       }
 
       // Write row if not empty
       if (!emptyLine) {
-        for (let col = 0; col < maxCol; col++) {
+        for (let col = 0; col < maxCol!; col++) {
           if (col > 0 && !nullLine) {
             csv += _delimiter;
           }
           const colIdx = hasHeader && dataKeyedByField ? fields?.[col] : col;
-          csv += safe((data[row] as any)[colIdx], col);
+          csv += safe((data[row] as any)[colIdx!], col);
         }
         // Add newline if not last row and conditions are met
-        if (row < data.length - 1 && (!skipEmptyLines || (maxCol > 0 && !nullLine))) {
+        if (row < data.length - 1 && (!skipEmptyLines || (maxCol! > 0 && !nullLine))) {
           csv += _newline;
         }
       }

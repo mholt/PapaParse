@@ -33,6 +33,7 @@ export class ReadableStreamStreamer extends ChunkStreamer {
   private _streamData: (chunk: any) => void;
   private _streamEnd: () => void;
   private _streamError: (error: Error) => void;
+  private _streamCleanUp: () => void;
 
   constructor(config: ReadableStreamStreamerConfig = {}) {
     super(config);
