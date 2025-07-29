@@ -93,6 +93,11 @@ export class ChunkStreamer {
     const aggregate = this._partialLine + chunk;
     this._partialLine = "";
 
+    // Pass current row count to parser handle for error row offset
+    if ((this._handle as any).state) {
+      (this._handle as any).state.rowCounter = this._rowCount;
+    }
+
     let results = this._handle.parse(
       aggregate,
       this._baseIndex,
