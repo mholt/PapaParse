@@ -34,8 +34,18 @@
     "url": "https://twitter.com/mholt6"
   },
   "license": "MIT",
-  "main": "legacy/papaparse.js",
-  "browser": "legacy/papaparse.min.js",
+  "main": "./dist/papaparse.js",
+  "module": "./dist/papaparse.mjs",
+  "browser": "./dist/papaparse.browser.iife.js",
+  "types": "./dist/papaparse.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/papaparse.d.ts",
+      "browser": "./dist/papaparse.browser.iife.js",
+      "import": "./dist/papaparse.mjs",
+      "require": "./dist/papaparse.js"
+    }
+  },
   "devDependencies": {
     "@biomejs/biome": "2.1.2",
     "@types/bun": "latest",
@@ -49,17 +59,20 @@
     "mocha-headless-chrome": "^4.0.0",
     "open": "7.0.0",
     "serve-static": "^1.7.1",
+    "tsup": "^8.5.0",
     "typescript": "^5"
   },
   "scripts": {
     "lint": "npm run format",
     "build": "grunt build",
     "build-ts": "tsc",
-    "build-browser:v6": "bun build src/browser-entry.ts --outdir=dist --outfile=papaparse-v6.js --minify && mv dist/browser-entry.js dist/papaparse-v6.js",
+    "build:tsup": "tsup",
+    "build:tsup:watch": "tsup --watch",
+    "build:tsup:minified": "tsup --minify",
     "test-browser": "node tests/test.js",
-    "test-browser:v6": "PAPA_ENTRY_POINT=../dist/papaparse-v6.js node tests/test-v6.js",
+    "test-browser:v6": "PAPA_ENTRY_POINT=../dist/papaparse.browser.iife.js node tests/test-v6.js",
     "test-mocha-headless-chrome": "node tests/test.js --mocha-headless-chrome",
-    "test-mocha-headless-chrome:v6": "PAPA_ENTRY_POINT=../dist/papaparse-v6.js node tests/test-v6.js --mocha-headless-chrome",
+    "test-mocha-headless-chrome:v6": "PAPA_ENTRY_POINT=../dist/papaparse.browser.iife.js node tests/test-v6.js --mocha-headless-chrome",
     "test-node": "mocha tests/node-tests.js tests/test-cases.js",
     "test-node:v6": "PAPA_ENTRY_POINT=../dist/cjs-entry.js mocha --reporter spec tests/node-tests.js tests/test-cases.js --exit",
     "test": "npm run lint && npm run test-node && npm run test-mocha-headless-chrome",
