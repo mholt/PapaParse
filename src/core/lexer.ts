@@ -360,8 +360,6 @@ export class Lexer {
         state.quoteSearch + 1,
       );
 
-
-
       // No closing quote found
       if (state.quoteSearch === -1) {
         state.errors.push({

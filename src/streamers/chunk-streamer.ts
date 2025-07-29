@@ -161,6 +161,14 @@ export class ChunkStreamer {
       this.finish();
     }
 
+    // Continue streaming unless we are finished or currently paused (legacy lines 583-585)
+    if (
+      !finishedIncludingPreview &&
+      (!results || !(results.meta as any).paused)
+    ) {
+      this._nextChunk();
+    }
+
     return results;
   }
 

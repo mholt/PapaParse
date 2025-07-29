@@ -160,6 +160,7 @@ export class ParserHandle implements PapaParseParser {
   resume(): void {
     if (this.streamer?._halted) {
       this.state.paused = false;
+      this.streamer._halted = false; // Explicitly clear halted state
       this.streamer.parseChunk(this.state.input, true);
     } else {
       // Wait for streaming to halt before resuming
@@ -353,11 +354,15 @@ export class ParserHandle implements PapaParseParser {
 
     // Apply transforms and dynamic typing
     // Skip general processing if we have headers and will do field-specific processing later
-    const hasHeadersWithFieldSpecificTyping = this.config.header && 
-      this.state.fields.length > 0 && 
+    const hasHeadersWithFieldSpecificTyping =
+      this.config.header &&
+      this.state.fields.length > 0 &&
       typeof this.config.dynamicTyping === "object";
-      
-    if ((this.config.transform || this.config.dynamicTyping) && !hasHeadersWithFieldSpecificTyping) {
+
+    if (
+      (this.config.transform || this.config.dynamicTyping) &&
+      !hasHeadersWithFieldSpecificTyping
+    ) {
       this.applyDynamicTyping();
     }
 
@@ -406,17 +411,17 @@ export class ParserHandle implements PapaParseParser {
       const row = this.state.results.data[i];
       for (let j = 0; j < row.length; j++) {
         let value = row[j];
-        
+
         // Apply transform function first
         if (this.config.transform) {
           value = this.config.transform(value, j);
         }
-        
+
         // Then apply dynamic typing
         if (this.config.dynamicTyping) {
           value = this.applyDynamicTypingToField(value, j);
         }
-        
+
         row[j] = value;
       }
     }
@@ -425,11 +430,18 @@ export class ParserHandle implements PapaParseParser {
   /**
    * Apply dynamic typing to field value by field name (for header mode)
    */
-  private applyDynamicTypingToFieldByName(value: any, fieldName: string, fieldIndex: number): any {
+  private applyDynamicTypingToFieldByName(
+    value: any,
+    fieldName: string,
+    fieldIndex: number,
+  ): any {
     if (typeof value !== "string") return value;
 
     // Try field name first, then fall back to field index
-    if (this.shouldApplyDynamicTyping(fieldName) || this.shouldApplyDynamicTyping(fieldIndex)) {
+    if (
+      this.shouldApplyDynamicTyping(fieldName) ||
+      this.shouldApplyDynamicTyping(fieldIndex)
+    ) {
       return this.parseTypedValue(value);
     }
 
@@ -457,10 +469,13 @@ export class ParserHandle implements PapaParseParser {
   private shouldApplyDynamicTyping(field: string | number): boolean {
     // Cache function values to avoid calling it for each row
     const config = this.config as any;
-    if (config.dynamicTypingFunction && config.dynamicTyping[field] === undefined) {
+    if (
+      config.dynamicTypingFunction &&
+      config.dynamicTyping[field] === undefined
+    ) {
       config.dynamicTyping[field] = config.dynamicTypingFunction(field);
     }
-    
+
     // Check if field is explicitly configured
     if (typeof this.config.dynamicTyping === "object") {
       return this.config.dynamicTyping[field] === true;
@@ -535,7 +550,10 @@ export class ParserHandle implements PapaParseParser {
 
       // Process all fields in the row
       for (let j = 0; j < row.length; j++) {
-        const field = j >= this.state.fields.length ? '__parsed_extra' : this.state.fields[j];
+        const field =
+          j >= this.state.fields.length
+            ? "__parsed_extra"
+            : this.state.fields[j];
         let value = row[j];
 
         // Apply transform function with field name
@@ -548,7 +566,7 @@ export class ParserHandle implements PapaParseParser {
           value = this.applyDynamicTypingToFieldByName(value, field, j);
         }
 
-        if (field === '__parsed_extra') {
+        if (field === "__parsed_extra") {
           obj[field] = obj[field] || [];
           obj[field].push(value);
         } else {
@@ -558,10 +576,14 @@ export class ParserHandle implements PapaParseParser {
 
       // Check for field count mismatch and add error
       if (row.length !== this.state.fields.length) {
-        const errorCode = row.length < this.state.fields.length ? "TooFewFields" : "TooManyFields";
-        const errorMessage = row.length < this.state.fields.length
-          ? `Too few fields: expected ${this.state.fields.length} fields but parsed ${row.length}`
-          : `Too many fields: expected ${this.state.fields.length} fields but parsed ${row.length}`;
+        const errorCode =
+          row.length < this.state.fields.length
+            ? "TooFewFields"
+            : "TooManyFields";
+        const errorMessage =
+          row.length < this.state.fields.length
+            ? `Too few fields: expected ${this.state.fields.length} fields but parsed ${row.length}`
+            : `Too many fields: expected ${this.state.fields.length} fields but parsed ${row.length}`;
 
         this.state.results.errors.push({
           type: "FieldMismatch",

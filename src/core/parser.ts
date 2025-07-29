@@ -279,32 +279,32 @@ export class Parser implements PapaParseParser {
     if (this.state.data.length === 0) {
       return rowSource;
     }
-    
+
     const headers = this.state.data[0] as string[];
     const row: any = {};
-    
+
     for (let j = 0; j < rowSource.length; j++) {
-      const field = j >= headers.length ? '__parsed_extra' : headers[j];
+      const field = j >= headers.length ? "__parsed_extra" : headers[j];
       let value = rowSource[j];
-      
+
       // Apply transform function with field name
       if (isFunction(this.config.transform)) {
         value = this.config.transform(value, field);
       }
-      
+
       // Apply dynamic typing based on field name for header mode
       if (this.config.dynamicTyping) {
         value = this.applyDynamicTypingByField(value, field, j);
       }
-      
-      if (field === '__parsed_extra') {
+
+      if (field === "__parsed_extra") {
         row[field] = row[field] || [];
         row[field].push(value);
       } else {
         row[field] = value;
       }
     }
-    
+
     return row;
   }
 
@@ -333,7 +333,9 @@ export class Parser implements PapaParseParser {
         type: "FieldMismatch",
         code: errorCode,
         message: errorMessage,
-        row: this.state.headerParsed ? this.state.data.length - 2 : this.state.rowCount - 1, // 0-based data row index
+        row: this.state.headerParsed
+          ? this.state.data.length - 2
+          : this.state.rowCount - 1, // 0-based data row index
       });
     }
   }
@@ -440,7 +442,11 @@ export class Parser implements PapaParseParser {
    * Apply dynamic typing to field value by field name (for header mode)
    * Legacy reference: lines 1253-1277 (extracted to heuristics in Phase 3)
    */
-  private applyDynamicTypingByField(value: any, fieldName: string, fieldIndex: number): any {
+  private applyDynamicTypingByField(
+    value: any,
+    fieldName: string,
+    fieldIndex: number,
+  ): any {
     if (typeof value !== "string") return value;
 
     // Check if dynamic typing is configured for this field

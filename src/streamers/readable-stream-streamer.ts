@@ -95,7 +95,8 @@ export class ReadableStreamStreamer extends ChunkStreamer {
     this._checkIsFinished();
 
     if (this.queue.length > 0) {
-      this.parseChunk(this.queue.shift()!);
+      const chunk = this.queue.shift()!;
+      this.parseChunk(chunk);
     } else {
       this.parseOnData = true;
     }
@@ -118,8 +119,10 @@ export class ReadableStreamStreamer extends ChunkStreamer {
 
       if (this.parseOnData) {
         this.parseOnData = false;
-        this._checkIsFinished();
         this.parseChunk(this.queue.shift()!);
+      } else if (this.streamHasEnded && stringChunk === "") {
+        // Special case: ensure we process the final empty chunk that signals end
+        this._nextChunk();
       }
     } catch (error) {
       this.handleStreamError(error as Error);
@@ -187,16 +190,34 @@ export class ReadableStreamStreamer extends ChunkStreamer {
   }
 
   /**
-   * Override the base class method to handle queue processing.
+   * Override parseChunk to properly control the flow when called from _nextChunk.
+   * We need to prevent the base class from calling _nextChunk() again.
    */
-  parseChunk(chunk: string, isFakeChunk?: boolean): void {
-    // Call parent parseChunk
-    super.parseChunk(chunk, isFakeChunk);
+  parseChunk(chunk: string, isFakeChunk?: boolean): any {
+    // Call the base class implementation but prevent its auto-_nextChunk call
+    // by temporarily modifying the parent class behavior.
+    const originalNextChunk = this._nextChunk;
+    let skipAutoNext = false;
 
-    // Continue processing queue if not halted
-    if (!this._halted && !this._finished) {
-      this._nextChunk();
+    // If we're not waiting for data, this call came from our _nextChunk
+    if (!this.parseOnData) {
+      skipAutoNext = true;
+      // Temporarily override _nextChunk to prevent the base class from calling it
+      this._nextChunk = () => {
+        // Restore the original and call it ourselves
+        this._nextChunk = originalNextChunk;
+        this._nextChunk();
+      };
     }
+
+    const results = super.parseChunk(chunk, isFakeChunk);
+
+    // Restore the original _nextChunk if we modified it
+    if (skipAutoNext) {
+      this._nextChunk = originalNextChunk;
+    }
+
+    return results;
   }
 
   /**

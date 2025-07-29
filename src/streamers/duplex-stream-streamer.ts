@@ -119,6 +119,9 @@ export class DuplexStreamStreamer extends ChunkStreamer {
     if (this.parseOnWrite) {
       this.parseOnWrite = false;
       this._nextChunk();
+    } else if (this.writeStreamHasFinished && chunk === "") {
+      // Special case: ensure we process the final empty chunk that signals end
+      this._nextChunk();
     }
   }
 
