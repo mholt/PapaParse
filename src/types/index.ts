@@ -188,8 +188,8 @@ export interface PapaUnparseConfig {
 
 // Unparse data input types
 export interface PapaUnparseObject<T> {
-  fields: string[];
-  data: T[];
+  fields: string | string[];
+  data: string | T[];
 }
 
 export type PapaUnparseData<T = any> = T[][] | T[] | PapaUnparseObject<T>;
