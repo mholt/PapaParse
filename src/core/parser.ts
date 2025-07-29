@@ -235,28 +235,11 @@ export class Parser implements PapaParseParser {
   }
 
   /**
-   * Process a field value with optional transformation
+   * Process a field value - transformations and typing handled by parser-handle
    */
   private processField(value: string): void {
-    let processedValue: any = value;
-
-    // Apply transformations
-    if (isFunction(this.config.transform)) {
-      processedValue = this.config.transform(
-        processedValue,
-        this.state.fieldCount,
-      );
-    }
-
-    // Apply dynamic typing
-    if (this.config.dynamicTyping) {
-      processedValue = this.applyDynamicTyping(
-        processedValue,
-        this.state.fieldCount,
-      );
-    }
-
-    this.state.currentRow.push(processedValue);
+    // Raw values only - transformations and typing handled by parser-handle
+    this.state.currentRow.push(value);
     this.state.fieldCount++;
   }
 
@@ -266,19 +249,7 @@ export class Parser implements PapaParseParser {
   private endCurrentRow(cursorPosition: number): void {
     this.pushRow();
 
-    // Process headers after first row in header mode
-    if (
-      this.config.header &&
-      !this.state.headerParsed &&
-      this.state.data.length === 1
-    ) {
-      this.processHeaders();
-    }
-
-    // Field validation for header mode (after headers are processed)
-    if (this.config.header && this.state.headerParsed) {
-      this.validateFieldCount();
-    }
+    // Field validation and object conversion is now handled by parser-handle
 
     this.state.currentRow = [];
     this.state.fieldCount = 0;
@@ -294,8 +265,47 @@ export class Parser implements PapaParseParser {
    * Add current row to data
    */
   private pushRow(): void {
+    // Always push as array first
     this.state.data.push([...this.state.currentRow]);
     this.state.rowCount++;
+  }
+
+  /**
+   * Convert row array to object using headers
+   * Legacy reference: lines 1290-1309
+   */
+  private convertRowToObject(rowSource: any[]): any {
+    // Headers should be the first row in data
+    if (this.state.data.length === 0) {
+      return rowSource;
+    }
+    
+    const headers = this.state.data[0] as string[];
+    const row: any = {};
+    
+    for (let j = 0; j < rowSource.length; j++) {
+      const field = j >= headers.length ? '__parsed_extra' : headers[j];
+      let value = rowSource[j];
+      
+      // Apply transform function with field name
+      if (isFunction(this.config.transform)) {
+        value = this.config.transform(value, field);
+      }
+      
+      // Apply dynamic typing based on field name for header mode
+      if (this.config.dynamicTyping) {
+        value = this.applyDynamicTypingByField(value, field, j);
+      }
+      
+      if (field === '__parsed_extra') {
+        row[field] = row[field] || [];
+        row[field].push(value);
+      } else {
+        row[field] = value;
+      }
+    }
+    
+    return row;
   }
 
   /**
@@ -323,7 +333,7 @@ export class Parser implements PapaParseParser {
         type: "FieldMismatch",
         code: errorCode,
         message: errorMessage,
-        row: this.state.rowCount - 2, // 0-based data row index (exclude header)
+        row: this.state.headerParsed ? this.state.data.length - 2 : this.state.rowCount - 1, // 0-based data row index
       });
     }
   }
@@ -427,24 +437,62 @@ export class Parser implements PapaParseParser {
   }
 
   /**
+   * Apply dynamic typing to field value by field name (for header mode)
+   * Legacy reference: lines 1253-1277 (extracted to heuristics in Phase 3)
+   */
+  private applyDynamicTypingByField(value: any, fieldName: string, fieldIndex: number): any {
+    if (typeof value !== "string") return value;
+
+    // Check if dynamic typing is configured for this field
+    if (typeof this.config.dynamicTyping === "object") {
+      // Check by field name first
+      if (typeof this.config.dynamicTyping[fieldName] === "boolean") {
+        return this.config.dynamicTyping[fieldName]
+          ? this.parseValue(value)
+          : value;
+      }
+      // Fall back to field index
+      if (typeof this.config.dynamicTyping[fieldIndex] === "boolean") {
+        return this.config.dynamicTyping[fieldIndex]
+          ? this.parseValue(value)
+          : value;
+      }
+    } else if (typeof this.config.dynamicTyping === "function") {
+      return this.config.dynamicTyping(fieldName)
+        ? this.parseValue(value)
+        : value;
+    } else if (this.config.dynamicTyping === true) {
+      return this.parseValue(value);
+    }
+
+    return value;
+  }
+
+  /**
    * Parse string value to appropriate type
    * Basic implementation - will be enhanced in Phase 3 heuristics
    */
   private parseValue(value: string): any {
-    // Empty string handling
-    if (value === "") return "";
+    // Empty string handling - convert to null when empty
+    if (value === "") return null;
     if (value.trim() === "") return value;
 
-    // Boolean values
-    if (value === "true") return true;
-    if (value === "false") return false;
+    // Boolean values (case insensitive)
+    const lowerValue = value.toLowerCase();
+    if (lowerValue === "true") return true;
+    if (lowerValue === "false") return false;
 
     // Null values
-    if (value === "null" || value === "NULL") return null;
+    if (lowerValue === "null") return null;
 
-    // Number values
+    // Number values - check for safe integer range
     if (/^-?\d+$/.test(value)) {
-      return parseInt(value, 10);
+      const num = parseInt(value, 10);
+      // Check if number exceeds safe integer range
+      if (num > Number.MAX_SAFE_INTEGER || num < Number.MIN_SAFE_INTEGER) {
+        return value; // Keep as string for precision
+      }
+      return num;
     }
     if (/^-?\d*\.?\d+([eE][+-]?\d+)?$/.test(value)) {
       return parseFloat(value);

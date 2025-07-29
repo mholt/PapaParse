@@ -274,6 +274,13 @@ export class ParserHandle implements PapaParseParser {
     if (processed.header === undefined) processed.header = false;
     if (processed.dynamicTyping === undefined) processed.dynamicTyping = false;
 
+    // Handle function-based dynamic typing (legacy reference: lines 199-205)
+    if (isFunction(processed.dynamicTyping)) {
+      (processed as any).dynamicTypingFunction = processed.dynamicTyping;
+      // Will be filled on first field access
+      processed.dynamicTyping = {};
+    }
+
     return processed;
   }
 
@@ -345,7 +352,12 @@ export class ParserHandle implements PapaParseParser {
     }
 
     // Apply dynamic typing
-    if (this.config.dynamicTyping) {
+    // Skip general dynamic typing if we have headers and will do field-specific typing later
+    const hasHeadersWithFieldSpecificTyping = this.config.header && 
+      this.state.fields.length > 0 && 
+      typeof this.config.dynamicTyping === "object";
+      
+    if (this.config.dynamicTyping && !hasHeadersWithFieldSpecificTyping) {
       this.applyDynamicTyping();
     }
 
@@ -399,32 +411,54 @@ export class ParserHandle implements PapaParseParser {
   }
 
   /**
+   * Apply dynamic typing to field value by field name (for header mode)
+   */
+  private applyDynamicTypingToFieldByName(value: any, fieldName: string, fieldIndex: number): any {
+    if (typeof value !== "string") return value;
+
+    // Try field name first, then fall back to field index
+    if (this.shouldApplyDynamicTyping(fieldName) || this.shouldApplyDynamicTyping(fieldIndex)) {
+      return this.parseTypedValue(value);
+    }
+
+    return value;
+  }
+
+  /**
    * Apply dynamic typing to single field
    */
   private applyDynamicTypingToField(value: any, fieldIndex: number): any {
     if (typeof value !== "string") return value;
 
-    // Check configuration for this field
-    if (typeof this.config.dynamicTyping === "object") {
-      if (
-        typeof fieldIndex === "number" &&
-        this.config.dynamicTyping[fieldIndex] === false
-      ) {
-        return value;
-      }
-      if (
-        typeof fieldIndex === "string" &&
-        this.config.dynamicTyping[fieldIndex] === false
-      ) {
-        return value;
-      }
-    } else if (typeof this.config.dynamicTyping === "function") {
-      if (!this.config.dynamicTyping(fieldIndex)) {
-        return value;
-      }
+    // Check if we should apply dynamic typing to this field
+    if (this.shouldApplyDynamicTyping(fieldIndex)) {
+      return this.parseTypedValue(value);
     }
 
-    return this.parseTypedValue(value);
+    return value;
+  }
+
+  /**
+   * Determine if dynamic typing should be applied to a field
+   * Legacy reference: lines 1254-1258
+   */
+  private shouldApplyDynamicTyping(field: string | number): boolean {
+    // Cache function values to avoid calling it for each row
+    const config = this.config as any;
+    if (config.dynamicTypingFunction && config.dynamicTyping[field] === undefined) {
+      config.dynamicTyping[field] = config.dynamicTypingFunction(field);
+    }
+    
+    // Check if field is explicitly configured
+    if (typeof this.config.dynamicTyping === "object") {
+      return this.config.dynamicTyping[field] === true;
+    } else if (typeof this.config.dynamicTyping === "function") {
+      return this.config.dynamicTyping(field) === true;
+    } else if (this.config.dynamicTyping === true) {
+      return true;
+    }
+
+    return false;
   }
 
   /**
@@ -432,18 +466,23 @@ export class ParserHandle implements PapaParseParser {
    * Legacy reference: lines 1192-1277
    */
   private parseTypedValue(value: string): any {
-    // Handle empty and whitespace
-    if (value === "") return value;
+    // Empty string handling - convert to null when empty
+    if (value === "") return null;
     if (value.trim() === "") return value;
 
-    // Boolean values
-    if (value === "true") return true;
-    if (value === "false") return false;
+    // Boolean values (exact case matches only)
+    if (value === "true" || value === "TRUE") return true;
+    if (value === "false" || value === "FALSE") return false;
 
-    // Null values
-    if (value === "null" || value === "NULL") return null;
-
-    // Number values
+    // Number values - check for safe integer range
+    if (/^-?\d+$/.test(value)) {
+      const num = parseInt(value, 10);
+      // Check if number exceeds safe integer range
+      if (num > Number.MAX_SAFE_INTEGER || num < Number.MIN_SAFE_INTEGER) {
+        return value; // Keep as string for precision
+      }
+      return num;
+    }
     if (this.testFloat(value)) {
       return parseFloat(value);
     }
@@ -482,8 +521,42 @@ export class ParserHandle implements PapaParseParser {
       const row = this.state.results.data[i];
       const obj: any = {};
 
-      for (let j = 0; j < this.state.fields.length && j < row.length; j++) {
-        obj[this.state.fields[j]] = row[j];
+      // Process all fields in the row
+      for (let j = 0; j < row.length; j++) {
+        const field = j >= this.state.fields.length ? '__parsed_extra' : this.state.fields[j];
+        let value = row[j];
+
+        // Apply transform function with field name
+        if (this.config.transform) {
+          value = this.config.transform(value, field);
+        }
+
+        // Apply dynamic typing based on field name for header mode
+        if (this.config.dynamicTyping) {
+          value = this.applyDynamicTypingToFieldByName(value, field, j);
+        }
+
+        if (field === '__parsed_extra') {
+          obj[field] = obj[field] || [];
+          obj[field].push(value);
+        } else {
+          obj[field] = value;
+        }
+      }
+
+      // Check for field count mismatch and add error
+      if (row.length !== this.state.fields.length) {
+        const errorCode = row.length < this.state.fields.length ? "TooFewFields" : "TooManyFields";
+        const errorMessage = row.length < this.state.fields.length
+          ? `Too few fields: expected ${this.state.fields.length} fields but parsed ${row.length}`
+          : `Too many fields: expected ${this.state.fields.length} fields but parsed ${row.length}`;
+
+        this.state.results.errors.push({
+          type: "FieldMismatch",
+          code: errorCode,
+          message: errorMessage,
+          row: i, // 0-based data row index
+        });
       }
 
       this.state.results.data[i] = obj;
