@@ -20,7 +20,7 @@ declare const Papa: any;
 declare const global: any;
 
 export class ChunkStreamer {
-  protected _handle: ParserHandle | null = null;
+  protected _handle: ParserHandle;
   protected _finished = false;
   protected _completed = false;
   protected _halted = false;
@@ -48,7 +48,15 @@ export class ChunkStreamer {
   };
 
   constructor(config: ChunkStreamerConfig) {
-    this._config = { ...config };
+    // Deep-copy the config so we can edit it
+    const configCopy = { ...config };
+    configCopy.chunkSize = parseInt(String(configCopy.chunkSize)) || undefined;
+    if (!config.step && !config.chunk) {
+      configCopy.chunkSize = undefined; // disable Range header if not streaming; bad values break IIS - see issue #196
+    }
+    this._handle = new ParserHandle(configCopy);
+    this._handle.streamer = this;
+    this._config = configCopy; // persist the copy to the caller
   }
 
   /**
@@ -56,24 +64,12 @@ export class ChunkStreamer {
    * Handles first chunk preprocessing, partial line management, and result coordination.
    */
   parseChunk(chunk: string, isFakeChunk?: boolean): any {
-    // Initialize handle on first chunk (matching legacy behavior)
-    if (!this._handle) {
-      const configCopy = { ...this._config };
-      configCopy.chunkSize =
-        parseInt(String(configCopy.chunkSize)) || undefined;
-      if (!this._config.step && !this._config.chunk) {
-        configCopy.chunkSize = undefined; // Disable chunking if not streaming
-      }
-      this._handle = new ParserHandle(configCopy);
-      this._handle.streamer = this;
-    }
-
     // First chunk pre-processing for line skipping
     const skipFirstNLines =
       parseInt(String(this._config.skipFirstNLines || 0)) || 0;
     if (this.isFirstChunk && skipFirstNLines > 0) {
       let _newline = this._config.newline;
-      if (!_newline && this._handle) {
+      if (!_newline) {
         const quoteChar = this._config.quoteChar || '"';
         const guessed = this._handle.guessLineEndings(chunk, quoteChar);
         _newline = guessed as "\r" | "\n" | "\r\n" | undefined;
@@ -97,14 +93,10 @@ export class ChunkStreamer {
     const aggregate = this._partialLine + chunk;
     this._partialLine = "";
 
-    if (!this._handle) {
-      throw new Error("Parser handle not initialized");
-    }
-
     let results = this._handle.parse(
       aggregate,
       this._baseIndex,
-      !this._finished,
+      !this._finished
     );
 
     if (this._handle.paused() || this._handle.aborted()) {
@@ -149,16 +141,22 @@ export class ChunkStreamer {
     // Accumulate results when not using step or chunk callbacks
     if (!this._config.step && !this._config.chunk) {
       this._completeResults.data = this._completeResults.data.concat(
-        results.data,
+        results.data
       );
       this._completeResults.errors = this._completeResults.errors.concat(
-        results.errors,
+        results.errors
       );
       this._completeResults.meta = results.meta;
     }
 
-    if (finishedIncludingPreview) {
-      this.finish();
+    if (
+      !this._completed &&
+      finishedIncludingPreview &&
+      isFunction(this._config.complete) &&
+      (!results || !results.meta.aborted)
+    ) {
+      this._config.complete(this._completeResults);
+      this._completed = true;
     }
 
     // Continue streaming unless we are finished or currently paused (legacy lines 583-585)
@@ -182,7 +180,7 @@ export class ChunkStreamer {
   /**
    * Get the current parser handle.
    */
-  getHandle(): ParserHandle | null {
+  getHandle(): ParserHandle {
     return this._handle;
   }
 
@@ -222,16 +220,12 @@ export class ChunkStreamer {
   }
 
   /**
-   * Mark the streaming as finished and trigger completion callbacks.
+   * Mark the streaming as finished.
+   * Note: In the current implementation, the complete callback is handled
+   * directly in parseChunk() to match legacy behavior.
    */
   protected finish(): void {
     this._finished = true;
-
-    if (this._handle && isFunction(this._config.complete)) {
-      this._config.complete(this._completeResults);
-    }
-
-    this._completed = true;
   }
 
   /**
@@ -240,7 +234,7 @@ export class ChunkStreamer {
    */
   stream(input?: any): any {
     throw new Error(
-      "stream() method must be implemented by concrete streamer classes",
+      "stream() method must be implemented by concrete streamer classes"
     );
   }
 
@@ -268,6 +262,28 @@ export class ChunkStreamer {
   abort(): void {
     if (this._handle) {
       this._handle.abort();
+    }
+  }
+
+  /**
+   * Send error through the configured error handler or to worker.
+   * Legacy implementation: lines 589-601
+   */
+  protected _sendError(error: Error | PapaParseError): void {
+    if (isFunction(this._config.error)) {
+      this._config.error(error);
+    } else if (
+      typeof IS_PAPA_WORKER !== "undefined" &&
+      IS_PAPA_WORKER &&
+      this._config.error
+    ) {
+      if (typeof global !== "undefined" && global.postMessage) {
+        global.postMessage({
+          workerId: Papa.WORKER_ID,
+          error: error,
+          finished: false,
+        });
+      }
     }
   }
 }

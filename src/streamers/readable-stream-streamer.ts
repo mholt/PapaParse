@@ -94,9 +94,8 @@ export class ReadableStreamStreamer extends ChunkStreamer {
   protected _nextChunk(): void {
     this._checkIsFinished();
 
-    if (this.queue.length > 0) {
-      const chunk = this.queue.shift()!;
-      this.parseChunk(chunk);
+    if (this.queue.length) {
+      this.parseChunk(this.queue.shift()!);
     } else {
       this.parseOnData = true;
     }
@@ -112,17 +111,15 @@ export class ReadableStreamStreamer extends ChunkStreamer {
         typeof chunk === "string"
           ? chunk
           : chunk.toString(
-              (this._config as ReadableStreamStreamerConfig).encoding,
+              (this._config as ReadableStreamStreamerConfig).encoding
             );
 
       this.queue.push(stringChunk);
 
       if (this.parseOnData) {
         this.parseOnData = false;
+        this._checkIsFinished();
         this.parseChunk(this.queue.shift()!);
-      } else if (this.streamHasEnded && stringChunk === "") {
-        // Special case: ensure we process the final empty chunk that signals end
-        this._nextChunk();
       }
     } catch (error) {
       this.handleStreamError(error as Error);
@@ -158,80 +155,4 @@ export class ReadableStreamStreamer extends ChunkStreamer {
       stream.removeListener("error", this._streamError);
     }
   };
-
-  /**
-   * Send error through the configured error handler.
-   */
-  private _sendError(error: Error): void {
-    if (typeof this._config.error === "function") {
-      this._config.error(error);
-    }
-  }
-
-  /**
-   * Get the number of chunks currently queued.
-   */
-  getQueueLength(): number {
-    return this.queue.length;
-  }
-
-  /**
-   * Check if the stream has ended.
-   */
-  hasStreamEnded(): boolean {
-    return this.streamHasEnded;
-  }
-
-  /**
-   * Check if currently parsing data (not waiting for more chunks).
-   */
-  isParsingData(): boolean {
-    return !this.parseOnData;
-  }
-
-  /**
-   * Override parseChunk to properly control the flow when called from _nextChunk.
-   * We need to prevent the base class from calling _nextChunk() again.
-   */
-  parseChunk(chunk: string, isFakeChunk?: boolean): any {
-    // Call the base class implementation but prevent its auto-_nextChunk call
-    // by temporarily modifying the parent class behavior.
-    const originalNextChunk = this._nextChunk;
-    let skipAutoNext = false;
-
-    // If we're not waiting for data, this call came from our _nextChunk
-    if (!this.parseOnData) {
-      skipAutoNext = true;
-      // Temporarily override _nextChunk to prevent the base class from calling it
-      this._nextChunk = () => {
-        // Restore the original and call it ourselves
-        this._nextChunk = originalNextChunk;
-        this._nextChunk();
-      };
-    }
-
-    const results = super.parseChunk(chunk, isFakeChunk);
-
-    // Restore the original _nextChunk if we modified it
-    if (skipAutoNext) {
-      this._nextChunk = originalNextChunk;
-    }
-
-    return results;
-  }
-
-  /**
-   * Get the underlying Node.js stream.
-   */
-  getStream(): NodeReadableStream | null {
-    return this._input as NodeReadableStream;
-  }
-
-  /**
-   * Override abort to clean up the stream.
-   */
-  abort(): void {
-    this.handleStreamCleanUp();
-    super.abort();
-  }
 }
