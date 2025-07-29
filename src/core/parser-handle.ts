@@ -97,7 +97,7 @@ export class ParserHandle implements PapaParseParser {
     this.state.results = this.state.parser.parse(
       input,
       baseIndex,
-      ignoreLastRow
+      ignoreLastRow,
     );
 
     this.processResults();
@@ -211,7 +211,7 @@ export class ParserHandle implements PapaParseParser {
     // Remove quoted content to avoid false detection
     const re = new RegExp(
       escapeRegExp(quoteChar) + "([^]*?)" + escapeRegExp(quoteChar),
-      "gm"
+      "gm",
     );
     input = input.replace(re, "");
 
@@ -342,7 +342,7 @@ export class ParserHandle implements PapaParseParser {
     // Process headers if needed
     if (this.needsHeaderRow() && this.state.results.data.length > 0) {
       this.state.fields = this.state.results.data[0].map((field: any) =>
-        String(field)
+        String(field),
       );
       this.removeRow(0);
     }
@@ -433,7 +433,7 @@ export class ParserHandle implements PapaParseParser {
   private applyDynamicTypingToFieldByName(
     value: any,
     fieldName: string,
-    fieldIndex: number
+    fieldIndex: number,
   ): any {
     if (typeof value !== "string") return value;
 

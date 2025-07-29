@@ -111,7 +111,7 @@ export class ReadableStreamStreamer extends ChunkStreamer {
         typeof chunk === "string"
           ? chunk
           : chunk.toString(
-              (this._config as ReadableStreamStreamerConfig).encoding
+              (this._config as ReadableStreamStreamerConfig).encoding,
             );
 
       this.queue.push(stringChunk);

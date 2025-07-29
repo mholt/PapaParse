@@ -5,7 +5,7 @@ import { ReadableStreamStreamer } from "./readable-stream-streamer";
 // Test 1: Mimics the exact pattern from node-tests.js
 async function testOnlyCompleteCallback() {
   console.log(
-    "Test 1: Testing with ONLY complete callback (like node-tests.js)...\n"
+    "Test 1: Testing with ONLY complete callback (like node-tests.js)...\n",
   );
 
   const csvPath = path.join(__dirname, "../../tests/long-sample.csv");
@@ -29,7 +29,7 @@ async function testOnlyCompleteCallback() {
 // Test 2: Simple test to verify ReadableStreamStreamer works with Node.js streams
 async function testReadableStreamStreamer() {
   console.log(
-    "Test 2: Testing ReadableStreamStreamer with basic complete callback..."
+    "Test 2: Testing ReadableStreamStreamer with basic complete callback...",
   );
 
   const csvPath = path.join(__dirname, "../../tests/sample.csv");
@@ -101,7 +101,7 @@ async function testStreamingWithChunks() {
         chunkCount++;
         rowCount += results.data.length;
         console.log(
-          `Chunk ${chunkCount}: ${results.data.length} rows (total: ${rowCount})`
+          `Chunk ${chunkCount}: ${results.data.length} rows (total: ${rowCount})`,
         );
 
         // Demonstrate pause/resume

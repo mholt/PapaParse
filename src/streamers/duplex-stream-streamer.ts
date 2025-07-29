@@ -32,7 +32,7 @@ export class DuplexStreamStreamer extends ChunkStreamer {
     // Get Node.js Duplex stream class
     if (typeof require === "undefined") {
       throw new Error(
-        "DuplexStreamStreamer is only available in Node.js environment"
+        "DuplexStreamStreamer is only available in Node.js environment",
       );
     }
     const { Duplex } = require("stream");
@@ -74,7 +74,7 @@ export class DuplexStreamStreamer extends ChunkStreamer {
 
     this.duplexStream!.once(
       "finish",
-      bindFunction(this._onWriteComplete, this)
+      bindFunction(this._onWriteComplete, this),
     );
   }
 
@@ -134,7 +134,7 @@ export class DuplexStreamStreamer extends ChunkStreamer {
         if (isFunction(callback)) {
           return callback();
         }
-      }, this)
+      }, this),
     );
 
     if (this.parseOnWrite) {
@@ -160,7 +160,7 @@ export class DuplexStreamStreamer extends ChunkStreamer {
   private _onWrite = (
     chunk: any,
     encoding: string,
-    callback: () => void
+    callback: () => void,
   ): void => {
     this._addToParseQueue(chunk, callback);
   };

@@ -101,7 +101,7 @@ export class ChunkStreamer {
     let results = this._handle.parse(
       aggregate,
       this._baseIndex,
-      !this._finished
+      !this._finished,
     );
 
     if (this._handle.paused() || this._handle.aborted()) {
@@ -146,10 +146,10 @@ export class ChunkStreamer {
     // Accumulate results when not using step or chunk callbacks
     if (!this._config.step && !this._config.chunk) {
       this._completeResults.data = this._completeResults.data.concat(
-        results.data
+        results.data,
       );
       this._completeResults.errors = this._completeResults.errors.concat(
-        results.errors
+        results.errors,
       );
       this._completeResults.meta = results.meta;
     }
@@ -239,7 +239,7 @@ export class ChunkStreamer {
    */
   stream(input?: any): any {
     throw new Error(
-      "stream() method must be implemented by concrete streamer classes"
+      "stream() method must be implemented by concrete streamer classes",
     );
   }
 
