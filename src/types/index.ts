@@ -41,9 +41,9 @@ export interface PapaParseError {
   /** Human-readable details */
   message: string;
   /** Row index of parsed data where error is */
-  row: number;
+  row?: number;
   /** Index within the row where error is */
-  index: number;
+  index?: number;
   /** Additional error details */
   details?: any;
 }

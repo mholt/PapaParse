@@ -25,8 +25,8 @@ export function copy(obj: any): any {
  * Legacy implementation preserved exactly
  */
 export function bindFunction<T extends Function>(f: T, self: any): T {
-  return (() => {
-    f.apply(self, arguments);
+  return ((...args: any[]) => {
+    return f.apply(self, args);
   }) as any as T;
 }
 

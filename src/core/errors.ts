@@ -284,7 +284,9 @@ export class ErrorCollector {
    */
   updateRowNumbers(offset: number): void {
     this.errors.forEach((error) => {
-      error.row += offset;
+      if (error.row !== undefined) {
+        error.row += offset;
+      }
     });
   }
 }

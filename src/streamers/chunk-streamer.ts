@@ -101,7 +101,7 @@ export class ChunkStreamer {
       throw new Error("Parser handle not initialized");
     }
 
-    const results = this._handle.parse(
+    let results = this._handle.parse(
       aggregate,
       this._baseIndex,
       !this._finished,
@@ -138,6 +138,23 @@ export class ChunkStreamer {
       }
     } else if (isFunction(this._config.chunk) && !isFakeChunk) {
       this._config.chunk(results, this._handle);
+      if (this._handle?.paused() || this._handle?.aborted()) {
+        this._halted = true;
+        return;
+      }
+      results = undefined as any;
+      this._completeResults = undefined as any;
+    }
+
+    // Accumulate results when not using step or chunk callbacks
+    if (!this._config.step && !this._config.chunk) {
+      this._completeResults.data = this._completeResults.data.concat(
+        results.data,
+      );
+      this._completeResults.errors = this._completeResults.errors.concat(
+        results.errors,
+      );
+      this._completeResults.meta = results.meta;
     }
 
     if (finishedIncludingPreview) {

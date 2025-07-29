@@ -17,6 +17,7 @@ interface ParserState {
   rowCount: number;
   fieldCount: number;
   headerParsed: boolean;
+  expectedFieldCount: number;
   renamedHeaders: { [newHeader: string]: string } | null;
   lastCursor: number;
   aborted: boolean;
@@ -146,6 +147,7 @@ export class Parser implements PapaParseParser {
       rowCount: 0,
       fieldCount: 0,
       headerParsed: false,
+      expectedFieldCount: 0,
       renamedHeaders: null,
       lastCursor: 0,
       aborted: false,
@@ -221,6 +223,17 @@ export class Parser implements PapaParseParser {
    */
   private endCurrentRow(cursorPosition: number): void {
     this.pushRow();
+    
+    // Process headers after first row in header mode
+    if (this.config.header && !this.state.headerParsed && this.state.data.length === 1) {
+      this.processHeaders();
+    }
+    
+    // Field validation for header mode (after headers are processed)
+    if (this.config.header && this.state.headerParsed) {
+      this.validateFieldCount();
+    }
+    
     this.state.currentRow = [];
     this.state.fieldCount = 0;
     this.state.lastCursor = cursorPosition;
@@ -237,6 +250,32 @@ export class Parser implements PapaParseParser {
   private pushRow(): void {
     this.state.data.push([...this.state.currentRow]);
     this.state.rowCount++;
+  }
+
+  /**
+   * Validate field count against expected count (for header mode)
+   */
+  private validateFieldCount(): void {
+    if (!this.config.header || this.state.expectedFieldCount === 0) return;
+    
+    // Get actual field count from current row (last row added)
+    const actualFieldCount = this.state.currentRow.length;
+    const expectedFieldCount = this.state.expectedFieldCount;
+    
+    // Check for field count mismatch
+    if (actualFieldCount !== expectedFieldCount) {
+      const errorCode = actualFieldCount < expectedFieldCount ? "TooFewFields" : "TooManyFields";
+      const errorMessage = actualFieldCount < expectedFieldCount 
+        ? `Too few fields: expected ${expectedFieldCount} fields but parsed ${actualFieldCount}`
+        : `Too many fields: expected ${expectedFieldCount} fields but parsed ${actualFieldCount}`;
+      
+      this.state.errors.push({
+        type: "FieldMismatch",
+        code: errorCode,
+        message: errorMessage,
+        row: this.state.rowCount - 2, // 0-based data row index (exclude header)
+      });
+    }
   }
 
   /**
@@ -308,6 +347,7 @@ export class Parser implements PapaParseParser {
     }
 
     this.state.headerParsed = true;
+    this.state.expectedFieldCount = result.length;
   }
 
   /**

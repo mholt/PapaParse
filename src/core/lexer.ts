@@ -344,12 +344,9 @@ export class Lexer {
 
       // Check for escaped quote
       if (this.isEscapedQuote(state.quoteSearch)) {
-        // Skip escaped quote by incrementing position
-        if (this.quoteChar === this.escapeChar) {
-          // For "", skip the second quote
-          state.quoteSearch++;
-        }
-        // Let the normal end-of-loop increment handle the rest
+        // Skip escaped quote - just increment once to skip the escape part
+        // For case "": skip to next position to continue search
+        // For case \": skip to next position to continue search  
         state.quoteSearch++;
         continue;
       }

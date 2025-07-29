@@ -7,6 +7,7 @@ import type {
 } from "../types/index.js";
 import { copy, escapeRegExp, isFunction } from "../utils/index.js";
 import { Parser } from "./parser.js";
+import { guessDelimiter as actualGuessDelimiter } from "../heuristics/guess-delimiter.js";
 
 /**
  * Parser Handle state for coordination and control
@@ -496,35 +497,27 @@ export class ParserHandle implements PapaParseParser {
     this.state.results.errors.push({
       type: "Delimiter",
       code: "UndetectableDelimiter",
-      message: "Unable to auto-detect delimiting character; defaulted to comma",
-      row: 0,
-      index: 0,
+      message: "Unable to auto-detect delimiting character; defaulted to ','",
     });
   }
 
   /**
    * Guess delimiter from input sample
-   * Placeholder for Phase 3 heuristics implementation
    */
   private guessDelimiter(input: string): {
     successful: boolean;
     bestDelimiter: string;
   } {
-    // Basic implementation - will be enhanced in Phase 3
-    const delimiters = this.config.delimitersToGuess || [
-      ",",
-      "\t",
-      "|",
-      ";",
-      CONSTANTS.RECORD_SEP,
-      CONSTANTS.UNIT_SEP,
-    ];
+    const result = actualGuessDelimiter(input, {
+      newline: this.config.newline,
+      skipEmptyLines: this.config.skipEmptyLines,
+      comments: this.config.comments,
+      delimitersToGuess: this.config.delimitersToGuess,
+    });
 
-    // For now, just return comma as default
-    // Real implementation will be in src/heuristics/guess-delimiter.ts
     return {
-      successful: true,
-      bestDelimiter: ",",
+      successful: result.successful,
+      bestDelimiter: result.bestDelimiter || ",",
     };
   }
 }
