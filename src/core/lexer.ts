@@ -654,6 +654,6 @@ export function createLexerConfig(config: PapaParseConfig): LexerConfig {
     quoteChar,
     escapeChar,
     comments,
-    fastMode: config.fastMode || false,
+    fastMode: config.fastMode,
   };
 }
