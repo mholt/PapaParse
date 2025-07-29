@@ -360,6 +360,8 @@ export class Lexer {
         state.quoteSearch + 1,
       );
 
+
+
       // No closing quote found
       if (state.quoteSearch === -1) {
         state.errors.push({
@@ -396,10 +398,12 @@ export class Lexer {
 
       // Check for escaped quote
       if (this.isEscapedQuote(state.quoteSearch)) {
-        // Skip escaped quote - just increment once to skip the escape part
-        // For case "": skip to next position to continue search
-        // For case \": skip to next position to continue search
-        state.quoteSearch++;
+        // Skip escaped quote - advance past the escape sequence
+        if (this.quoteChar === this.escapeChar) {
+          // For "" style escaping, skip both quotes
+          state.quoteSearch++;
+        }
+        // For \_ style escaping, just continue (no extra advance needed)
         continue;
       }
 

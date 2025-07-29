@@ -351,13 +351,13 @@ export class ParserHandle implements PapaParseParser {
       this.filterEmptyLines();
     }
 
-    // Apply dynamic typing
-    // Skip general dynamic typing if we have headers and will do field-specific typing later
+    // Apply transforms and dynamic typing
+    // Skip general processing if we have headers and will do field-specific processing later
     const hasHeadersWithFieldSpecificTyping = this.config.header && 
       this.state.fields.length > 0 && 
       typeof this.config.dynamicTyping === "object";
       
-    if (this.config.dynamicTyping && !hasHeadersWithFieldSpecificTyping) {
+    if ((this.config.transform || this.config.dynamicTyping) && !hasHeadersWithFieldSpecificTyping) {
       this.applyDynamicTyping();
     }
 
@@ -399,13 +399,25 @@ export class ParserHandle implements PapaParseParser {
   }
 
   /**
-   * Apply dynamic typing to all data
+   * Apply dynamic typing and transforms to all data
    */
   private applyDynamicTyping(): void {
     for (let i = 0; i < this.state.results.data.length; i++) {
       const row = this.state.results.data[i];
       for (let j = 0; j < row.length; j++) {
-        row[j] = this.applyDynamicTypingToField(row[j], j);
+        let value = row[j];
+        
+        // Apply transform function first
+        if (this.config.transform) {
+          value = this.config.transform(value, j);
+        }
+        
+        // Then apply dynamic typing
+        if (this.config.dynamicTyping) {
+          value = this.applyDynamicTypingToField(value, j);
+        }
+        
+        row[j] = value;
       }
     }
   }
