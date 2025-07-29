@@ -48,14 +48,22 @@ export class PerformanceBenchmark {
   /**
    * Generate large test data for stress testing
    */
-  generateLargeTestData(rows: number, columns: number): TestData {
+  generateLargeTestData(
+    rows: number,
+    columns: number,
+    withQuotes: boolean = false,
+  ): TestData {
     const headers = Array.from({ length: columns }, (_, i) => `column_${i}`);
     const csvLines = [headers.join(",")];
 
     for (let i = 0; i < rows; i++) {
       const row = Array.from({ length: columns }, (_, j) => {
         // Mix of data types to test dynamic typing
-        if (j % 4 === 0) return `"string_value_${i}_${j}"`;
+        if (j % 4 === 0) {
+          return withQuotes
+            ? `"string_value_${i}_${j}"`
+            : `string_value_${i}_${j}`;
+        }
         if (j % 4 === 1) return String(Math.random() * 1000);
         if (j % 4 === 2) return Math.random() > 0.5 ? "true" : "false";
         return String(i * j);
@@ -63,11 +71,12 @@ export class PerformanceBenchmark {
       csvLines.push(row.join(","));
     }
 
+    const suffix = withQuotes ? "_with_quotes" : "";
     return {
-      name: `large_${rows}x${columns}`,
+      name: `large_${rows}x${columns}${suffix}`,
       csvContent: csvLines.join("\n"),
       expectedRows: rows,
-      description: `Large dataset with ${rows} rows and ${columns} columns`,
+      description: `Large dataset with ${rows} rows and ${columns} columns${withQuotes ? " (with quotes)" : " (fast mode)"}`,
     };
   }
 
@@ -117,7 +126,7 @@ export class PerformanceBenchmark {
     return new Promise((resolve, reject) => {
       try {
         const result = parser.parse(testData.csvContent, {
-          header: true,
+          header: false,
           dynamicTyping: true,
           complete: (results: any) => {
             const endTime = Date.now();
@@ -178,7 +187,7 @@ export class PerformanceBenchmark {
     return new Promise((resolve, reject) => {
       try {
         const result = parser.parse(testData.csvContent, {
-          header: true,
+          header: false,
           dynamicTyping: true,
           complete: (results: any) => {
             const endTime = Date.now();
@@ -284,9 +293,10 @@ export class PerformanceBenchmark {
     let totalPerformanceRatio = 0;
     let totalMemoryRatio = 0;
 
-    // Add standard test datasets
-    this.addTestData(this.generateLargeTestData(10000, 10));
-    this.addTestData(this.generateLargeTestData(50000, 5));
+    // Add standard test datasets - test both fast mode and quote handling
+    this.addTestData(this.generateLargeTestData(10000, 10, false)); // Fast mode
+    this.addTestData(this.generateLargeTestData(50000, 5, false)); // Fast mode
+    this.addTestData(this.generateLargeTestData(10000, 10, true)); // With quotes
     this.addTestData(this.generateProblematicTestData());
 
     for (const testData of this.testData) {

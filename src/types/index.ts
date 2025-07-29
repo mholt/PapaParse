@@ -284,7 +284,7 @@ export interface StrictParseConfig<
   downloadRequestBody: string;
   skipEmptyLines: boolean | "greedy";
   chunk: false | ((results: PapaParseResult, parser: PapaParseParser) => void);
-  fastMode: boolean;
+  fastMode: boolean | undefined;
   beforeFirstChunk: false | ((chunk: string) => string);
   withCredentials: boolean;
   transformHeader: false | ((header: string, index: number) => string);

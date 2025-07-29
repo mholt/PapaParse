@@ -45,7 +45,7 @@ export interface LexerConfig {
   quoteChar: string;
   escapeChar: string;
   comments: string | false;
-  fastMode: boolean;
+  fastMode: boolean | undefined;
 }
 
 /**
@@ -74,7 +74,7 @@ export class Lexer {
   private quoteChar: string;
   private escapeChar: string;
   private comments: string | false;
-  private fastMode: boolean;
+  private fastMode: boolean | undefined;
 
   constructor(config: LexerConfig) {
     this.config = config;
@@ -329,10 +329,8 @@ export class Lexer {
    * Legacy reference: line 1482
    */
   private canUseFastMode(): boolean {
-    return (
-      this.fastMode ||
-      (this.fastMode !== false && this.input.indexOf(this.quoteChar) === -1)
-    );
+    const hasQuotes = this.input.indexOf(this.quoteChar) !== -1;
+    return this.fastMode || (this.fastMode !== false && !hasQuotes);
   }
 
   /**

@@ -79,7 +79,7 @@ export const DEFAULT_CONFIG = {
   downloadRequestBody: "",
   skipEmptyLines: false,
   chunk: false,
-  fastMode: false,
+  fastMode: undefined,
   beforeFirstChunk: false,
   withCredentials: false,
   transform: false,

@@ -6,6 +6,7 @@ import type {
 } from "../types/index.js";
 import { isFunction, stripBom } from "../utils/index.js";
 import { createLexerConfig, Lexer, type Token, TokenType } from "./lexer.js";
+import { parseDynamic } from "../heuristics/dynamic-typing.js";
 
 /**
  * Parser state for row assembly and processing
@@ -56,6 +57,141 @@ export class Parser implements PapaParseParser {
   }
 
   /**
+   * Fast mode parsing - bypasses lexer for performance
+   * Mirrors legacy lines 1482-1513 exactly
+   */
+  private parseFastMode(
+    input: string,
+    baseIndex: number,
+    ignoreLastRow: boolean,
+  ): PapaParseResult {
+    const newline =
+      (this.config.newline as string) || this.guessLineEndings(input) || "\r\n";
+    const delimiter = (this.config.delimiter as string) || ",";
+    const comments =
+      typeof this.config.comments === "string" ? this.config.comments : false;
+    const commentsLen = comments ? comments.length : 0;
+
+    const rows = input.split(newline);
+    const data: any[][] = [];
+
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+
+      if (i === rows.length - 1 && ignoreLastRow) {
+        break;
+      }
+
+      // Skip comment lines
+      if (comments && row.substring(0, commentsLen) === comments) {
+        continue;
+      }
+
+      // Split row by delimiter and add to data
+      let fields = row.split(delimiter);
+
+      // Apply dynamic typing and transforms
+      if (this.config.dynamicTyping || this.config.transform) {
+        fields = fields.map((field, index) => {
+          let value = field;
+
+          // Apply transform if provided
+          if (
+            this.config.transform &&
+            typeof this.config.transform === "function"
+          ) {
+            value = this.config.transform(value, index);
+          }
+
+          // Apply dynamic typing
+          if (this.config.dynamicTyping) {
+            value = parseDynamic(
+              value,
+              String(index),
+              this.config.dynamicTyping as any,
+            );
+          }
+
+          return value;
+        });
+      }
+
+      data.push(fields);
+
+      // Handle preview limit
+      if (this.config.preview && data.length >= this.config.preview) {
+        break;
+      }
+    }
+
+    // Apply header processing and transformations
+    return this.buildFastModeResult(data, baseIndex);
+  }
+
+  /**
+   * Build result for fast mode parsing
+   */
+  private buildFastModeResult(
+    data: any[][],
+    baseIndex: number,
+  ): PapaParseResult {
+    const newline = (this.config.newline as string) || "\r\n";
+    const delimiter = (this.config.delimiter as string) || ",";
+    // Apply header logic if needed
+    if (this.config.header && data.length > 0) {
+      const headers = data[0];
+      const rows = data.slice(1);
+
+      // Convert to objects
+      const objectData = rows.map((row) => {
+        const obj: any = {};
+        headers.forEach((header, index) => {
+          obj[header] = row[index] || "";
+        });
+        return obj;
+      });
+
+      return {
+        data: objectData,
+        errors: [],
+        meta: {
+          delimiter: delimiter,
+          linebreak: newline,
+          aborted: false,
+          truncated: false,
+          cursor: baseIndex + data.length,
+        },
+      };
+    }
+
+    return {
+      data,
+      errors: [],
+      meta: {
+        delimiter: delimiter,
+        linebreak: newline,
+        aborted: false,
+        truncated: false,
+        cursor: baseIndex + data.length,
+      },
+    };
+  }
+
+  /**
+   * Guess line endings from input
+   */
+  private guessLineEndings(input: string): string | null {
+    const crCount = (input.match(/\r/g) || []).length;
+    const lfCount = (input.match(/\n/g) || []).length;
+    const crlfCount = (input.match(/\r\n/g) || []).length;
+
+    if (crlfCount > 0) return "\r\n";
+    if (lfCount > crCount) return "\n";
+    if (crCount > 0) return "\r";
+    return null;
+  }
+
+  /**
    * Parse input string and return results
    * Legacy reference: lines 1461-1806
    */
@@ -70,6 +206,16 @@ export class Parser implements PapaParseParser {
 
     if (!input) {
       return this.buildResult(baseIndex);
+    }
+
+    // Fast mode bypass - mirror legacy behavior exactly (lines 1482-1513)
+    const canUseFastMode =
+      this.config.fastMode === true ||
+      (this.config.fastMode !== false &&
+        input.indexOf(this.config.quoteChar || '"') === -1);
+
+    if (canUseFastMode && !this.config.step && !this.config.chunk) {
+      return this.parseFastMode(input, baseIndex, ignoreLastRow);
     }
 
     // Tokenize input
