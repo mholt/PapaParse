@@ -114,44 +114,45 @@ export class PerformanceBenchmark {
     const startTime = Date.now();
     let errorCount = 0;
 
-    try {
-      const result = parser.parse(testData.csvContent, {
-        header: true,
-        dynamicTyping: true,
-        complete: (results: any) => {
-          // Results handling
-        },
-        error: () => {
-          errorCount++;
-        },
-      });
+    return new Promise((resolve, reject) => {
+      try {
+        const result = parser.parse(testData.csvContent, {
+          header: true,
+          dynamicTyping: true,
+          complete: (results: any) => {
+            const endTime = Date.now();
+            clearInterval(memoryMonitor);
+            const memAfter = process.memoryUsage();
 
-      const endTime = Date.now();
-      clearInterval(memoryMonitor);
-      const memAfter = process.memoryUsage();
+            const totalTime = endTime - startTime;
+            const rowsPerSecond = Math.round(
+              (testData.expectedRows / totalTime) * 1000,
+            );
 
-      const totalTime = endTime - startTime;
-      const rowsPerSecond = Math.round(
-        (testData.expectedRows / totalTime) * 1000,
-      );
-
-      return {
-        implementation: "legacy",
-        testName: testData.name,
-        rowsPerSecond,
-        totalRows: testData.expectedRows,
-        totalTime,
-        memoryUsage: {
-          before: memBefore,
-          after: memAfter,
-          peak: memPeak,
-        },
-        errors: errorCount,
-      };
-    } catch (error) {
-      clearInterval(memoryMonitor);
-      throw error;
-    }
+            resolve({
+              implementation: "legacy",
+              testName: testData.name,
+              rowsPerSecond,
+              totalRows: testData.expectedRows,
+              totalTime,
+              memoryUsage: {
+                before: memBefore,
+                after: memAfter,
+                peak: memPeak,
+              },
+              errors: errorCount,
+            });
+          },
+          error: (error: any) => {
+            errorCount++;
+            console.warn(`Legacy parsing error: ${error.message}`);
+          },
+        });
+      } catch (error) {
+        clearInterval(memoryMonitor);
+        reject(error);
+      }
+    });
   }
 
   /**
@@ -341,27 +342,33 @@ export async function runCIBenchmark(): Promise<void> {
 
   const benchmark = new PerformanceBenchmark();
 
-  // Import both implementations
-  const legacyPapa = require("../../legacy/papaparse.js");
-  // const modernPapa = require('../../dist/index.js'); // Modern implementation when ready
-
   try {
-    // For now, just validate the benchmark infrastructure
-    console.log("✅ Benchmark infrastructure is ready");
-    console.log(
-      "⏳ Modern implementation not yet available - skipping comparison",
-    );
+    // Import both implementations
+    const legacyPapa = require("../../legacy/papaparse.js");
+    const modernPapa = require("../../dist/papaparse.js");
 
-    // When modern implementation is ready:
-    // const { results, summary } = await benchmark.runBenchmarkSuite(legacyPapa, modernPapa);
-    // benchmark.exportResults(results, `benchmark-${Date.now()}.json`);
+    console.log("📊 Running performance comparison between legacy and V6 implementations...");
 
-    // if (!summary.passed) {
-    //   console.error('❌ Performance benchmarks failed');
-    //   process.exit(1);
-    // }
+    // Run the benchmark suite
+    const { results, summary } = await benchmark.runBenchmarkSuite(legacyPapa, modernPapa);
+    
+    // Export results for analysis
+    benchmark.exportResults(results, `benchmark-${Date.now()}.json`);
 
-    console.log("✅ Performance benchmarks passed");
+    // Print summary
+    console.log("\n📈 Performance Benchmark Results:");
+    console.log(`  Total Tests: ${summary.totalTests}`);
+    console.log(`  Passed: ${summary.passedTests}`);
+    console.log(`  Failed: ${summary.failedTests}`);
+    console.log(`  Average Performance Ratio: ${(summary.avgPerformanceRatio * 100).toFixed(1)}%`);
+    console.log(`  Average Memory Ratio: ${(summary.avgMemoryRatio * 100).toFixed(1)}%`);
+
+    if (!summary.passed) {
+      console.error("❌ Performance benchmarks failed - some tests did not meet thresholds");
+      process.exit(1);
+    }
+
+    console.log("✅ All performance benchmarks passed!");
   } catch (error) {
     console.error("❌ Benchmark failed:", error);
     process.exit(1);
