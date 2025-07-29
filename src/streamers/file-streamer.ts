@@ -118,18 +118,6 @@ export class FileStreamer extends ChunkStreamer {
   }
 
   /**
-   * Send error through the configured error handler or worker message.
-   */
-  private _sendError(error: any): void {
-    if (typeof this._config.error === "function") {
-      this._config.error(error);
-    } else {
-      // Worker error handling would go here
-      // This is handled in the base ChunkStreamer for worker coordination
-    }
-  }
-
-  /**
    * Get the current progress of file reading (0-1).
    */
   getProgress(): number {

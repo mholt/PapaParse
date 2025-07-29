@@ -150,16 +150,6 @@ export class NetworkStreamer extends ChunkStreamer {
   }
 
   /**
-   * Send error through the configured error handler.
-   */
-  private _sendError(error: Error): void {
-    if (typeof this._config.error === "function") {
-      this._config.error(error);
-    }
-    // Worker error handling is managed in the base ChunkStreamer
-  }
-
-  /**
    * Extract file size from Content-Range header.
    */
   private getFileSize(xhr: XMLHttpRequest): number {
