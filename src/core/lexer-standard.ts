@@ -1,6 +1,18 @@
-import { CONSTANTS } from "../constants/index.js";
-import type { PapaParseConfig, PapaParseError } from "../types/index.js";
+/**
+ * Standard CSV lexer with full quote state machine support
+ *
+ * Extracts tokens from CSV input string while handling:
+ * - Quote escape sequences
+ * - Field delimiters and line breaks
+ * - Comment lines
+ * - Fast mode optimization when no quotes present
+ *
+ * Based on legacy PapaParse Parser lines 1414-1683
+ */
+
+import type { ILexer, PapaParseError, Token } from "../types/index.js";
 import { escapeRegExp } from "../utils/index.js";
+import type { LexerConfig } from "./lexer-config.js";
 
 /**
  * Token types produced by the lexer
@@ -12,16 +24,6 @@ export const TokenType = {
   COMMENT: "comment",
   EOF: "eof",
 } as const;
-
-/**
- * Represents a lexical token with position information
- */
-export interface Token {
-  type: string;
-  value: string;
-  position: number;
-  length: number;
-}
 
 /**
  * Internal lexer state for quote processing
@@ -36,156 +38,6 @@ interface LexerState {
   atStartOfRow: boolean;
 }
 
-/**
- * Configuration for the lexer (processed from Papa config)
- */
-export interface LexerConfig {
-  delimiter: string;
-  newline: string;
-  quoteChar: string;
-  escapeChar: string;
-  comments: string | false;
-  fastMode: boolean | undefined;
-}
-
-/**
- * Base interface for all lexer implementations
- */
-export interface ILexer {
-  setInput(input: string): void;
-  canUseFastMode(): boolean;
-  tokenize(): {
-    tokens: Token[];
-    errors: PapaParseError[];
-    terminatedByComment?: boolean;
-  };
-}
-
-/**
- * Fast CSV lexer optimized for inputs without quotes
- *
- * Provides high-performance parsing by bypassing quote state machine
- * when quotes are not present in the input. Includes full data processing
- * pipeline with transformations and typing.
- *
- * Based on parser's fast mode (legacy lines 1482-1513)
- */
-export class FastLexer implements ILexer {
-  private input = "";
-  private config: PapaParseConfig;
-  private lexerConfig: LexerConfig;
-
-  constructor(config: PapaParseConfig, lexerConfig: LexerConfig) {
-    this.config = config;
-    this.lexerConfig = lexerConfig;
-  }
-
-  setInput(input: string): void {
-    this.input = input;
-  }
-
-  canUseFastMode(): boolean {
-    const hasQuotes = this.input.indexOf(this.lexerConfig.quoteChar) !== -1;
-    return this.lexerConfig.fastMode || (this.lexerConfig.fastMode !== false && !hasQuotes);
-  }
-
-  tokenize(): {
-    tokens: Token[];
-    errors: PapaParseError[];
-    terminatedByComment?: boolean;
-  } {
-    if (!this.canUseFastMode()) {
-      throw new Error("Fast mode not available - quotes detected in input");
-    }
-
-    // Fast mode tokenization - skip complex quote processing
-    const tokens: Token[] = [];
-    const newline = this.lexerConfig.newline;
-    const delimiter = this.lexerConfig.delimiter;
-    const comments = this.lexerConfig.comments;
-    const commentsLen = typeof comments === "string" ? comments.length : 0;
-
-    const rows = this.input.split(newline);
-    let position = 0;
-    let hasEmittedTokens = false;
-
-    for (let i = 0; i < rows.length; i++) {
-      const row = rows[i];
-      const rowLen = row.length;
-
-      // Skip comment lines entirely
-      if (comments && row.substring(0, commentsLen) === comments) {
-        // Skip comment lines completely - don't emit any tokens
-      } else {
-        // If we've already emitted tokens, add newline before this row
-        if (hasEmittedTokens) {
-          tokens.push({
-            type: TokenType.NEWLINE,
-            value: newline,
-            position: position - newline.length,
-            length: newline.length,
-          });
-        }
-
-        // Split row into fields
-        const fields = row.split(delimiter);
-        let fieldPos = position;
-
-        for (let j = 0; j < fields.length; j++) {
-          const field = fields[j];
-
-          tokens.push({
-            type: TokenType.FIELD,
-            value: field,
-            position: fieldPos,
-            length: field.length,
-          });
-
-          fieldPos += field.length;
-
-          // Add delimiter token (except for last field)
-          if (j < fields.length - 1) {
-            tokens.push({
-              type: TokenType.DELIMITER,
-              value: delimiter,
-              position: fieldPos,
-              length: delimiter.length,
-            });
-            fieldPos += delimiter.length;
-          }
-        }
-
-        hasEmittedTokens = true;
-      }
-
-      position += rowLen;
-      if (i < rows.length - 1) {
-        position += newline.length;
-      }
-    }
-
-    tokens.push({
-      type: TokenType.EOF,
-      value: "",
-      position,
-      length: 0,
-    });
-
-    return { tokens, errors: [] };
-  }
-}
-
-/**
- * Standard CSV lexer with full quote state machine support
- *
- * Extracts tokens from CSV input string while handling:
- * - Quote escape sequences
- * - Field delimiters and line breaks
- * - Comment lines
- * - Fast mode optimization when no quotes present
- *
- * Based on legacy PapaParse Parser lines 1414-1683
- */
 export class StandardLexer implements ILexer {
   private input = "";
   private inputLen = 0;
@@ -227,85 +79,6 @@ export class StandardLexer implements ILexer {
   }
 
   /**
-   * Tokenize entire input using fast mode when no quotes present
-   * Legacy reference: lines 1482-1513
-   */
-  tokenizeFast(): Token[] {
-    if (!this.canUseFastMode()) {
-      throw new Error("Fast mode not available - quotes detected in input");
-    }
-
-    const tokens: Token[] = [];
-    const rows = this.input.split(this.newline);
-    let position = 0;
-    let hasEmittedTokens = false;
-
-    for (let i = 0; i < rows.length; i++) {
-      const row = rows[i];
-      const rowLen = row.length;
-
-      // Skip comment lines entirely
-      if (this.comments && row.substring(0, this.commentsLen) === this.comments) {
-        // Skip comment lines completely - don't emit any tokens
-      } else {
-        // If we've already emitted tokens, add newline before this row
-        if (hasEmittedTokens) {
-          tokens.push({
-            type: TokenType.NEWLINE,
-            value: this.newline,
-            position: position - this.newlineLen,
-            length: this.newlineLen,
-          });
-        }
-
-        // Split row into fields
-        const fields = row.split(this.delimiter);
-        let fieldPos = position;
-
-        for (let j = 0; j < fields.length; j++) {
-          const field = fields[j];
-
-          tokens.push({
-            type: TokenType.FIELD,
-            value: field,
-            position: fieldPos,
-            length: field.length,
-          });
-
-          fieldPos += field.length;
-
-          // Add delimiter token (except for last field)
-          if (j < fields.length - 1) {
-            tokens.push({
-              type: TokenType.DELIMITER,
-              value: this.delimiter,
-              position: fieldPos,
-              length: this.delimLen,
-            });
-            fieldPos += this.delimLen;
-          }
-        }
-
-        hasEmittedTokens = true;
-      }
-
-      position += rowLen;
-      if (i < rows.length - 1) {
-        position += this.newlineLen;
-      }
-    }
-
-    tokens.push({
-      type: TokenType.EOF,
-      value: "",
-      position,
-      length: 0,
-    });
-
-    return tokens;
-  }
-
-  /**
    * Tokenize input with full quote state machine support
    * Legacy reference: lines 1520-1683
    */
@@ -314,10 +87,6 @@ export class StandardLexer implements ILexer {
     errors: PapaParseError[];
     terminatedByComment?: boolean;
   } {
-    if (this.canUseFastMode()) {
-      return { tokens: this.tokenizeFast(), errors: [] };
-    }
-
     const tokens: Token[] = [];
     const state: LexerState = {
       cursor: 0,
@@ -375,17 +144,17 @@ export class StandardLexer implements ILexer {
       // Handle comment lines - skip them entirely
       // Legacy condition: comments && row.length === 0
       if (this.comments && state.atStartOfRow && this.isCommentStart(state.cursor)) {
-        const commentResult = this.skipComment(state, nextNewline);
-        if (commentResult.endsAtEOF) {
-          // Comment goes to EOF - stop processing immediately (legacy line 1645)
+        const result = this.skipComment(state, nextNewline);
+        if (result.endsAtEOF) {
           state.terminatedByComment = true;
           break;
+        } else {
+          state.atStartOfRow = true;
+          nextDelim = this.input.indexOf(this.delimiter, state.cursor);
+          nextNewline = this.input.indexOf(this.newline, state.cursor);
+          _quoteSearch = this.input.indexOf(this.quoteChar, state.cursor);
+          continue;
         }
-        // After skipping comment, we're still at start of row (comment consumed newline)
-        state.atStartOfRow = true;
-        nextDelim = this.input.indexOf(this.delimiter, state.cursor);
-        nextNewline = this.input.indexOf(this.newline, state.cursor);
-        continue;
       }
 
       // Handle regular fields
@@ -405,9 +174,7 @@ export class StandardLexer implements ILexer {
           position: state.cursor - this.delimLen,
           length: this.delimLen,
         });
-        nextDelim = this.input.indexOf(this.delimiter, state.cursor);
       }
-
       if (result.foundNewline) {
         tokens.push({
           type: TokenType.NEWLINE,
@@ -416,12 +183,14 @@ export class StandardLexer implements ILexer {
           length: this.newlineLen,
         });
         state.atStartOfRow = true;
-        nextNewline = this.input.indexOf(this.newline, state.cursor);
       }
-
       if (result.atEOF) {
         break;
       }
+
+      nextDelim = this.input.indexOf(this.delimiter, state.cursor);
+      nextNewline = this.input.indexOf(this.newline, state.cursor);
+      _quoteSearch = this.input.indexOf(this.quoteChar, state.cursor);
     }
 
     tokens.push({
@@ -436,15 +205,6 @@ export class StandardLexer implements ILexer {
       errors: state.errors,
       terminatedByComment: state.terminatedByComment,
     };
-  }
-
-  /**
-   * Check if fast mode can be used (no quotes in input)
-   * Legacy reference: line 1482
-   */
-  canUseFastMode(): boolean {
-    const hasQuotes = this.input.indexOf(this.quoteChar) !== -1;
-    return this.fastMode || (this.fastMode !== false && !hasQuotes);
   }
 
   /**
@@ -661,68 +421,3 @@ export class StandardLexer implements ILexer {
     return 0;
   }
 }
-
-/**
- * Create appropriate lexer instance based on configuration
- */
-export function createLexer(config: PapaParseConfig): ILexer {
-  const lexerConfig = createLexerConfig(config);
-
-  // Check if we should use fast mode
-  if (config.fastMode === true || (config.fastMode !== false && !config.step && !config.chunk)) {
-    return new FastLexer(config, lexerConfig);
-  }
-
-  return new StandardLexer(lexerConfig);
-}
-
-/**
- * Create lexer configuration from Papa config
- */
-export function createLexerConfig(config: PapaParseConfig): LexerConfig {
-  // Process delimiter
-  let delimiter = config.delimiter || CONSTANTS.DefaultDelimiter;
-  if (typeof delimiter !== "string" || CONSTANTS.BAD_DELIMITERS.indexOf(delimiter) > -1) {
-    delimiter = CONSTANTS.DefaultDelimiter;
-  }
-
-  // Process quote char
-  let quoteChar = '"';
-  if (config.quoteChar !== undefined && config.quoteChar !== null) {
-    quoteChar = config.quoteChar;
-  }
-
-  // Process escape char
-  let escapeChar = quoteChar;
-  if (config.escapeChar !== undefined) {
-    escapeChar = config.escapeChar;
-  }
-
-  // Process comments
-  let comments: string | false = false;
-  if (config.comments === delimiter) {
-    throw new Error("Comment character same as delimiter");
-  } else if (config.comments === (true as any)) {
-    comments = "#";
-  } else if (typeof config.comments === "string" && CONSTANTS.BAD_DELIMITERS.indexOf(config.comments) === -1) {
-    comments = config.comments;
-  }
-
-  // Process newline
-  let newline = config.newline || "\n";
-  if (newline !== "\n" && newline !== "\r" && newline !== "\r\n") {
-    newline = "\n";
-  }
-
-  return {
-    delimiter,
-    newline,
-    quoteChar,
-    escapeChar,
-    comments,
-    fastMode: config.fastMode,
-  };
-}
-
-// Backward compatibility export
-export const Lexer = StandardLexer;

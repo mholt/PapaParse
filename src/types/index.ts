@@ -286,3 +286,20 @@ export interface StreamerConfig {
   complete?: (results: PapaParseResult) => void;
   error?: (error: PapaParseError | Error, file?: File) => void;
 }
+
+// Lexer interfaces
+export interface Token {
+  type: string;
+  value: string;
+  position: number;
+  length: number;
+}
+
+export interface ILexer {
+  setInput(input: string): void;
+  tokenize(): {
+    tokens: Token[];
+    errors: PapaParseError[];
+    terminatedByComment?: boolean;
+  };
+}

@@ -8,4 +8,4 @@
 import { Papa } from "./public/papa";
 
 // Export Papa directly for CommonJS (no default wrapper)
-export = Papa;
+export default Papa;

@@ -1,7 +1,15 @@
-import { parseDynamic } from "../heuristics/dynamic-typing.js";
-import type { PapaParseConfig, PapaParseError, PapaParseParser, PapaParseResult } from "../types/index.js";
+import type {
+  ILexer,
+  PapaParseConfig,
+  PapaParseError,
+  PapaParseParser,
+  PapaParseResult,
+  Token,
+} from "../types/index.js";
 import { isFunction, stripBom } from "../utils/index.js";
-import { createLexerConfig, Lexer, type Token, TokenType } from "./lexer.js";
+import { createLexerConfig } from "./lexer-config.js";
+import { FastLexer } from "./lexer-fast.js";
+import { StandardLexer, TokenType } from "./lexer-standard.js";
 
 /**
  * Parser state for row assembly and processing
@@ -20,16 +28,6 @@ interface ParserState {
 }
 
 /**
- * Result from parsing operation
- */
-interface ParseResult {
-  field?: string;
-  endOfRow?: boolean;
-  endOfFile?: boolean;
-  error?: PapaParseError;
-}
-
-/**
  * Core CSV parser that handles row assembly and header processing
  *
  * Takes tokens from lexer and assembles them into structured data:
@@ -42,132 +40,38 @@ interface ParseResult {
  */
 export class Parser implements PapaParseParser {
   private config: PapaParseConfig;
-  private lexer: Lexer;
+  private lexer: ILexer;
   private state: ParserState;
 
   constructor(config: PapaParseConfig = {}) {
     this.config = config;
-    this.lexer = new Lexer(createLexerConfig(config));
+    this.lexer = this.createLexer(config);
     this.state = this.createInitialState();
   }
 
   /**
-   * Fast mode parsing - bypasses lexer for performance
-   * Mirrors legacy lines 1482-1513 exactly
+   * Check if fast mode can be used for the given input
    */
-  private parseFastMode(input: string, baseIndex: number, ignoreLastRow: boolean): PapaParseResult {
-    const newline = (this.config.newline as string) || this.guessLineEndings(input) || "\r\n";
-    const delimiter = (this.config.delimiter as string) || ",";
-    const comments = typeof this.config.comments === "string" ? this.config.comments : false;
-    const commentsLen = comments ? comments.length : 0;
-
-    const rows = input.split(newline);
-    const data: any[][] = [];
-
-    for (let i = 0; i < rows.length; i++) {
-      const row = rows[i];
-
-      if (i === rows.length - 1 && ignoreLastRow) {
-        break;
-      }
-
-      // Skip comment lines
-      if (comments && row.substring(0, commentsLen) === comments) {
-        continue;
-      }
-
-      // Split row by delimiter and add to data
-      let fields = row.split(delimiter);
-
-      // Apply dynamic typing and transforms
-      if (this.config.dynamicTyping || this.config.transform) {
-        fields = fields.map((field, index) => {
-          let value = field;
-
-          // Apply transform if provided
-          if (this.config.transform && typeof this.config.transform === "function") {
-            value = this.config.transform(value, index);
-          }
-
-          // Apply dynamic typing
-          if (this.config.dynamicTyping) {
-            value = parseDynamic(value, String(index), this.config.dynamicTyping as any);
-          }
-
-          return value;
-        });
-      }
-
-      data.push(fields);
-
-      // Handle preview limit
-      if (this.config.preview && data.length >= this.config.preview) {
-        break;
-      }
-    }
-
-    // Apply header processing and transformations
-    return this.buildFastModeResult(data, baseIndex);
+  private canUseFastMode(input: string): boolean {
+    const lexerConfig = createLexerConfig(this.config);
+    const hasQuotes = input.indexOf(lexerConfig.quoteChar) !== -1;
+    return lexerConfig.fastMode || (lexerConfig.fastMode !== false && !hasQuotes);
   }
 
   /**
-   * Build result for fast mode parsing
+   * Create appropriate lexer instance based on configuration
    */
-  private buildFastModeResult(data: any[][], baseIndex: number): PapaParseResult {
-    const newline = (this.config.newline as string) || "\r\n";
-    const delimiter = (this.config.delimiter as string) || ",";
-    // Apply header logic if needed
-    if (this.config.header && data.length > 0) {
-      const headers = data[0];
-      const rows = data.slice(1);
+  private createLexer(config: PapaParseConfig): ILexer {
+    const lexerConfig = createLexerConfig(config);
 
-      // Convert to objects
-      const objectData = rows.map((row) => {
-        const obj: any = {};
-        headers.forEach((header, index) => {
-          obj[header] = row[index] || "";
-        });
-        return obj;
-      });
-
-      return {
-        data: objectData,
-        errors: [],
-        meta: {
-          delimiter: delimiter,
-          linebreak: newline,
-          aborted: false,
-          truncated: false,
-          cursor: baseIndex + data.length,
-        },
-      };
+    // Start with FastLexer when conditions favor fast mode
+    // We'll switch to StandardLexer during parse() if quotes are detected
+    if (config.fastMode === true || (config.fastMode !== false && !config.step && !config.chunk)) {
+      return new FastLexer(config, lexerConfig);
     }
 
-    return {
-      data,
-      errors: [],
-      meta: {
-        delimiter: delimiter,
-        linebreak: newline,
-        aborted: false,
-        truncated: false,
-        cursor: baseIndex + data.length,
-      },
-    };
-  }
-
-  /**
-   * Guess line endings from input
-   */
-  private guessLineEndings(input: string): string | null {
-    const crCount = (input.match(/\r/g) || []).length;
-    const lfCount = (input.match(/\n/g) || []).length;
-    const crlfCount = (input.match(/\r\n/g) || []).length;
-
-    if (crlfCount > 0) return "\r\n";
-    if (lfCount > crCount) return "\n";
-    if (crCount > 0) return "\r";
-    return null;
+    // Use StandardLexer for complex scenarios or when fast mode is disabled
+    return new StandardLexer(lexerConfig);
   }
 
   /**
@@ -187,13 +91,12 @@ export class Parser implements PapaParseParser {
       return this.buildResult(baseIndex);
     }
 
-    // Fast mode bypass - mirror legacy behavior exactly (lines 1482-1513)
-    const canUseFastMode =
-      this.config.fastMode === true ||
-      (this.config.fastMode !== false && input.indexOf(this.config.quoteChar || '"') === -1);
-
-    if (canUseFastMode && !this.config.step && !this.config.chunk) {
-      return this.parseFastMode(input, baseIndex, ignoreLastRow);
+    // Check if we need to switch from FastLexer to StandardLexer
+    if (!this.canUseFastMode(input)) {
+      // Switch to StandardLexer if FastLexer can't handle the input
+      const lexerConfig = createLexerConfig(this.config);
+      this.lexer = new StandardLexer(lexerConfig);
+      this.lexer.setInput(input);
     }
 
     // Tokenize input

@@ -4,6 +4,7 @@ export default defineConfig((options) => ({
   entry: {
     // ESM and CJS builds
     papaparse: "src/index.ts",
+    "cjs-entry": "src/cjs-entry.ts",
     // IIFE build for browser with global Papa variable
     "papaparse.browser": "src/browser-entry.ts",
   },
