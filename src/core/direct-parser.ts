@@ -52,27 +52,27 @@ export class DirectParser {
       return { data: [], errors: [], meta };
     }
 
-    // Split into rows - this is the main performance operation
-    const rows = input.split(newline);
-    const rowsLen = rows.length;
-    
-    // Pre-allocate arrays for better memory performance
-    const estimatedRows = preview ? Math.min(preview, rowsLen) : rowsLen;
+    // Process input incrementally for maximum performance on large datasets
+    const inputLen = input.length;
     const data: any[][] = [];
     const errors: PapaParseError[] = [];
-    
-    let processedRows = 0;
 
-    for (let i = 0; i < rowsLen; i++) {
-      if (this.aborted) {
-        meta.aborted = true;
-        break;
+    let processedRows = 0;
+    let startPos = 0;
+
+    // Stream through input without creating full rows array upfront
+    while (startPos < inputLen && !this.aborted) {
+      // Find next newline
+      let endPos = input.indexOf(newline, startPos);
+      if (endPos === -1) {
+        endPos = inputLen; // Last line without newline
       }
 
-      const row = rows[i];
+      const row = input.substring(startPos, endPos);
 
       // Skip comment lines
       if (comments && row.substring(0, commentsLen) === comments) {
+        startPos = endPos + newline.length;
         continue;
       }
 
@@ -80,8 +80,9 @@ export class DirectParser {
       const fields = row.split(delimiter);
       const fieldsLen = fields.length;
 
-      // Apply transforms and dynamic typing
+      // Apply transforms and dynamic typing - optimize for common cases
       if (transform || dynamicTyping) {
+        const isTypingFunction = typeof dynamicTyping === "function";
         for (let j = 0; j < fieldsLen; j++) {
           let value = fields[j];
 
@@ -90,9 +91,9 @@ export class DirectParser {
             value = transform(value, j);
           }
 
-          // Apply dynamic typing
+          // Apply dynamic typing (optimized)
           if (dynamicTyping) {
-            if (typeof dynamicTyping === "function") {
+            if (isTypingFunction) {
               if (dynamicTyping(j)) {
                 value = this.castValue(value);
               }
@@ -132,6 +133,9 @@ export class DirectParser {
         meta.truncated = true;
         break;
       }
+
+      // Move to next row
+      startPos = endPos + newline.length;
     }
 
     // Handle header row if configured
