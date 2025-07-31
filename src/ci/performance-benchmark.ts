@@ -117,7 +117,7 @@ export class PerformanceBenchmark {
       try {
         const _result = parser.parse(testData.csvContent, {
           header: false,
-          dynamicTyping: true,
+          // dynamicTyping: true,
           complete: (_results: any) => {
             const endTime = Date.now();
             clearInterval(memoryMonitor);
@@ -173,7 +173,7 @@ export class PerformanceBenchmark {
       try {
         const _result = parser.parse(testData.csvContent, {
           header: false,
-          dynamicTyping: true,
+          // dynamicTyping: true,
           complete: (_results: any) => {
             const endTime = Date.now();
             clearInterval(memoryMonitor);

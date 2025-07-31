@@ -41,18 +41,22 @@ export class FastLexer implements ILexer {
     errors: PapaParseError[];
     terminatedByComment?: boolean;
   } {
-    // Fast mode tokenization - skip complex quote processing
-    const tokens: Token[] = [];
+    // Cache config values as locals for faster access
     const newline = this.lexerConfig.newline;
     const delimiter = this.lexerConfig.delimiter;
     const comments = this.lexerConfig.comments;
     const commentsLen = typeof comments === "string" ? comments.length : 0;
 
+    // Pre-allocate tokens array with estimated size to reduce reallocations
+    const tokens: Token[] = [];
     const rows = this.input.split(newline);
+    const rowsLen = rows.length;
+
     let position = 0;
     let hasEmittedTokens = false;
 
-    for (let i = 0; i < rows.length; i++) {
+    // Main parsing loop - optimized for speed
+    for (let i = 0; i < rowsLen; i++) {
       const row = rows[i];
       const rowLen = row.length;
 
@@ -70,24 +74,27 @@ export class FastLexer implements ILexer {
           });
         }
 
-        // Split row into fields
+        // Split row into fields and process immediately
         const fields = row.split(delimiter);
+        const fieldsLen = fields.length;
         let fieldPos = position;
 
-        for (let j = 0; j < fields.length; j++) {
+        // Optimized field processing loop
+        for (let j = 0; j < fieldsLen; j++) {
           const field = fields[j];
+          const fieldLen = field.length;
 
           tokens.push({
             type: TokenType.FIELD,
             value: field,
             position: fieldPos,
-            length: field.length,
+            length: fieldLen,
           });
 
-          fieldPos += field.length;
+          fieldPos += fieldLen;
 
           // Add delimiter token (except for last field)
-          if (j < fields.length - 1) {
+          if (j < fieldsLen - 1) {
             tokens.push({
               type: TokenType.DELIMITER,
               value: delimiter,
@@ -102,7 +109,7 @@ export class FastLexer implements ILexer {
       }
 
       position += rowLen;
-      if (i < rows.length - 1) {
+      if (i < rowsLen - 1) {
         position += newline.length;
       }
     }

@@ -7,6 +7,7 @@ import type {
   Token,
 } from "../types/index.js";
 import { isFunction, stripBom } from "../utils/index.js";
+import { DirectParser } from "./direct-parser.js";
 import { createLexerConfig } from "./lexer-config.js";
 import { FastLexer } from "./lexer-fast.js";
 import { StandardLexer, TokenType } from "./lexer-standard.js";
@@ -59,6 +60,23 @@ export class Parser implements PapaParseParser {
   }
 
   /**
+   * Check if DirectParser can be used for maximum performance
+   */
+  private canUseDirectParser(input: string): boolean {
+    const lexerConfig = createLexerConfig(this.config);
+    const hasQuotes = input.indexOf(lexerConfig.quoteChar) !== -1;
+
+    // DirectParser requirements:
+    // - No quotes in input
+    // - No step callback (streaming)
+    // - No chunk callback (streaming)
+    // - Fast mode enabled or auto-detected
+    return (
+      !hasQuotes && !this.config.step && !this.config.chunk && (lexerConfig.fastMode || lexerConfig.fastMode !== false)
+    );
+  }
+
+  /**
    * Create appropriate lexer instance based on configuration
    */
   private createLexer(config: PapaParseConfig): ILexer {
@@ -85,11 +103,18 @@ export class Parser implements PapaParseParser {
 
     // Reset state for new parse
     this.state = this.createInitialState();
-    this.lexer.setInput(input);
 
     if (!input) {
       return this.buildResult(baseIndex);
     }
+
+    // Use DirectParser for maximum performance when possible
+    if (this.canUseDirectParser(input)) {
+      return this.parseWithDirectParser(input, baseIndex, ignoreLastRow);
+    }
+
+    // Set up lexer for tokenization-based parsing
+    this.lexer.setInput(input);
 
     // Check if we need to switch from FastLexer to StandardLexer
     if (!this.canUseFastMode(input)) {
@@ -112,6 +137,39 @@ export class Parser implements PapaParseParser {
     }
 
     return this.buildResult(baseIndex);
+  }
+
+  /**
+   * Parse using DirectParser for maximum performance
+   */
+  private parseWithDirectParser(input: string, baseIndex = 0, ignoreLastRow = false): PapaParseResult {
+    const lexerConfig = createLexerConfig(this.config);
+
+    const directParser = new DirectParser({
+      delimiter: lexerConfig.delimiter,
+      newline: lexerConfig.newline as any,
+      comments: lexerConfig.comments,
+      skipEmptyLines: this.config.skipEmptyLines,
+      header: this.config.header,
+      preview: this.config.preview,
+      transformHeader: this.config.transformHeader,
+      transform: this.config.transform,
+      dynamicTyping: this.config.dynamicTyping,
+    });
+
+    const result = directParser.parse(input);
+
+    // Convert to PapaParseResult format
+    return {
+      data: result.data,
+      errors: result.errors,
+      meta: {
+        ...result.meta,
+        aborted: false,
+        truncated: result.meta.truncated || false,
+        cursor: baseIndex + (result.meta.cursor || input.length),
+      },
+    };
   }
 
   /**
