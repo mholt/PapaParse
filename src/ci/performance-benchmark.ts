@@ -99,54 +99,61 @@ export class PerformanceBenchmark {
    * Run benchmark against legacy implementation
    */
   async benchmarkLegacy(testData: TestData, parser: any): Promise<BenchmarkResult> {
+    // Force garbage collection and wait for it to complete
+    if (global.gc) {
+      global.gc();
+      global.gc(); // Run twice to ensure full cleanup
+    }
+    
+    // Wait a bit for GC to settle
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
     const memBefore = process.memoryUsage();
     let memPeak = memBefore;
 
-    // Monitor memory usage during parsing
-    const memoryMonitor = setInterval(() => {
-      const current = process.memoryUsage();
-      if (current.heapUsed > memPeak.heapUsed) {
-        memPeak = current;
-      }
-    }, 10);
-
-    const startTime = Date.now();
-    let errorCount = 0;
-
     return new Promise((resolve, reject) => {
       try {
-        const _result = parser.parse(testData.csvContent, {
+        // Start timing just before parsing (no memory overhead)
+        const startTime = Date.now();
+        
+        // Monitor memory usage during parsing (minimal overhead)
+        const memoryMonitor = setInterval(() => {
+          const current = process.memoryUsage();
+          if (current.heapUsed > memPeak.heapUsed) {
+            memPeak = current;
+          }
+        }, 10);
+
+        // Use synchronous parsing for fair comparison
+        const results = parser.parse(testData.csvContent, {
           header: false,
           // dynamicTyping: true,
-          complete: (_results: any) => {
-            const endTime = Date.now();
-            clearInterval(memoryMonitor);
-            const memAfter = process.memoryUsage();
+        });
 
-            const totalTime = endTime - startTime;
-            const rowsPerSecond = Math.round((testData.expectedRows / totalTime) * 1000);
+        // Stop timing immediately after parsing
+        const endTime = Date.now();
+        clearInterval(memoryMonitor);
+        
+        // Memory measurement after timing is complete
+        const memAfter = process.memoryUsage();
 
-            resolve({
-              implementation: "legacy",
-              testName: testData.name,
-              rowsPerSecond,
-              totalRows: testData.expectedRows,
-              totalTime,
-              memoryUsage: {
-                before: memBefore,
-                after: memAfter,
-                peak: memPeak,
-              },
-              errors: errorCount,
-            });
+        const totalTime = endTime - startTime;
+        const rowsPerSecond = Math.round((testData.expectedRows / totalTime) * 1000);
+
+        resolve({
+          implementation: "legacy",
+          testName: testData.name,
+          rowsPerSecond,
+          totalRows: testData.expectedRows,
+          totalTime,
+          memoryUsage: {
+            before: memBefore,
+            after: memAfter,
+            peak: memPeak,
           },
-          error: (error: any) => {
-            errorCount++;
-            console.warn(`Legacy parsing error: ${error.message}`);
-          },
+          errors: results.errors.length,
         });
       } catch (error) {
-        clearInterval(memoryMonitor);
         reject(error);
       }
     });
@@ -156,53 +163,61 @@ export class PerformanceBenchmark {
    * Run benchmark against modern implementation
    */
   async benchmarkModern(testData: TestData, parser: any): Promise<BenchmarkResult> {
+    // Force garbage collection and wait for it to complete
+    if (global.gc) {
+      global.gc();
+      global.gc(); // Run twice to ensure full cleanup
+    }
+    
+    // Wait a bit for GC to settle
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
     const memBefore = process.memoryUsage();
     let memPeak = memBefore;
 
-    const memoryMonitor = setInterval(() => {
-      const current = process.memoryUsage();
-      if (current.heapUsed > memPeak.heapUsed) {
-        memPeak = current;
-      }
-    }, 10);
-
-    const startTime = Date.now();
-    let errorCount = 0;
-
     return new Promise((resolve, reject) => {
       try {
-        const _result = parser.parse(testData.csvContent, {
+        // Start timing just before parsing (no memory overhead)
+        const startTime = Date.now();
+        
+        // Monitor memory usage during parsing (minimal overhead)
+        const memoryMonitor = setInterval(() => {
+          const current = process.memoryUsage();
+          if (current.heapUsed > memPeak.heapUsed) {
+            memPeak = current;
+          }
+        }, 10);
+
+        // Use synchronous parsing for better DirectParser testing
+        const results = parser.parse(testData.csvContent, {
           header: false,
           // dynamicTyping: true,
-          complete: (_results: any) => {
-            const endTime = Date.now();
-            clearInterval(memoryMonitor);
-            const memAfter = process.memoryUsage();
+        });
 
-            const totalTime = endTime - startTime;
-            const rowsPerSecond = Math.round((testData.expectedRows / totalTime) * 1000);
+        // Stop timing immediately after parsing
+        const endTime = Date.now();
+        clearInterval(memoryMonitor);
+        
+        // Memory measurement after timing is complete
+        const memAfter = process.memoryUsage();
 
-            resolve({
-              implementation: "modern",
-              testName: testData.name,
-              rowsPerSecond,
-              totalRows: testData.expectedRows,
-              totalTime,
-              memoryUsage: {
-                before: memBefore,
-                after: memAfter,
-                peak: memPeak,
-              },
-              errors: errorCount,
-            });
+        const totalTime = endTime - startTime;
+        const rowsPerSecond = Math.round((testData.expectedRows / totalTime) * 1000);
+
+        resolve({
+          implementation: "modern",
+          testName: testData.name,
+          rowsPerSecond,
+          totalRows: testData.expectedRows,
+          totalTime,
+          memoryUsage: {
+            before: memBefore,
+            after: memAfter,
+            peak: memPeak,
           },
-          error: (error: any) => {
-            errorCount++;
-            console.warn(`Modern parsing error: ${error.message}`);
-          },
+          errors: results.errors.length,
         });
       } catch (error) {
-        clearInterval(memoryMonitor);
         reject(error);
       }
     });
@@ -292,7 +307,7 @@ export class PerformanceBenchmark {
 
     // Add standard test datasets - test both fast mode and quote handling
     this.addTestData(this.generateLargeTestData(10000, 10, false)); // Fast mode
-    this.addTestData(this.generateLargeTestData(50000, 5, false)); // Fast mode
+    this.addTestData(this.generateLargeTestData(100000, 5, false)); // Fast mode
     this.addTestData(this.generateLargeTestData(10000, 10, true)); // With quotes
     this.addTestData(this.generateProblematicTestData());
 

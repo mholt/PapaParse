@@ -19,7 +19,7 @@ import type { PapaParseConfig, PapaParseError, PapaParseResult } from "../types/
 export class DirectParser {
   private aborted = false;
 
-  constructor(private config: PapaParseConfig) {}
+  constructor(private config: PapaParseConfig) { }
 
   /**
    * Parse CSV directly to data arrays without tokenization
@@ -58,7 +58,6 @@ export class DirectParser {
     const errors: PapaParseError[] = [];
     const delimCode = delimiter.charCodeAt(0);
     const newLen = newline.length;
-    const isMultiCharDelimiter = delimiter.length > 1;
     const isTypingFunction = typeof dynamicTyping === "function";
 
     let processedRows = 0;
@@ -87,14 +86,10 @@ export class DirectParser {
       const fields: any[] = [];
       let fStart = rowStart;
 
-      if (isMultiCharDelimiter) {
-        // Handle multi-character delimiters
-        let searchPos = rowStart;
-        while (searchPos <= rowEnd) {
-          const delimIdx = input.indexOf(delimiter, searchPos);
-          const fEnd = delimIdx === -1 || delimIdx > rowEnd ? rowEnd : delimIdx;
-
-          let value = input.slice(fStart, fEnd); // zero-copy slice
+      // Optimized single-character delimiter path
+      for (let i = rowStart; i <= rowEnd; i++) {
+        if (i === rowEnd || input.charCodeAt(i) === delimCode) {
+          let value = input.slice(fStart, i); // zero-copy slice
 
           // Apply transforms and dynamic typing
           if (transform) {
@@ -111,34 +106,7 @@ export class DirectParser {
           }
 
           fields.push(value);
-
-          if (delimIdx === -1 || delimIdx > rowEnd) break;
-          fStart = delimIdx + delimiter.length;
-          searchPos = fStart;
-        }
-      } else {
-        // Optimized single-character delimiter path
-        for (let i = rowStart; i <= rowEnd; i++) {
-          if (i === rowEnd || input.charCodeAt(i) === delimCode) {
-            let value = input.slice(fStart, i); // zero-copy slice
-
-            // Apply transforms and dynamic typing
-            if (transform) {
-              value = transform(value, fields.length);
-            }
-            if (dynamicTyping) {
-              if (isTypingFunction) {
-                if (dynamicTyping(fields.length)) {
-                  value = this.castValue(value);
-                }
-              } else {
-                value = this.castValue(value);
-              }
-            }
-
-            fields.push(value);
-            fStart = i + 1;
-          }
+          fStart = i + 1;
         }
       }
 

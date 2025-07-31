@@ -115,7 +115,7 @@ export class Parser implements PapaParseParser {
 
     // Use DirectParser for maximum performance when possible
     if (this.canUseDirectParser(input)) {
-      // console.log("Using DirectParser for", input.length, "characters");
+      // console.log("🚀 Using DirectParser for", input.length, "characters");
       return this.parseWithDirectParser(input, baseIndex, ignoreLastRow);
     }
 
