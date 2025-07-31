@@ -70,9 +70,14 @@ export class Parser implements PapaParseParser {
     // - No quotes in input
     // - No step callback (streaming)
     // - No chunk callback (streaming)
+    // - No header processing (DirectParser only returns arrays, not objects)
     // - Fast mode enabled or auto-detected
     return (
-      !hasQuotes && !this.config.step && !this.config.chunk && (lexerConfig.fastMode || lexerConfig.fastMode !== false)
+      !hasQuotes &&
+      !this.config.step &&
+      !this.config.chunk &&
+      !this.config.header &&
+      (lexerConfig.fastMode || lexerConfig.fastMode !== false)
     );
   }
 
@@ -110,6 +115,7 @@ export class Parser implements PapaParseParser {
 
     // Use DirectParser for maximum performance when possible
     if (this.canUseDirectParser(input)) {
+      // console.log("Using DirectParser for", input.length, "characters");
       return this.parseWithDirectParser(input, baseIndex, ignoreLastRow);
     }
 

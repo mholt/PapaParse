@@ -45,62 +45,90 @@ export class DirectParser {
       linebreak: newline,
       aborted: false,
       truncated: false,
-      cursor: input.length,
+      cursor: 0,
     };
 
     if (!input) {
       return { data: [], errors: [], meta };
     }
 
-    // Optimized streaming approach for maximum performance
-    // Avoids creating large intermediate arrays while maintaining speed
-    const inputLen = input.length;
+    // Single-pass streaming with zero-copy slices (best of both worlds)
+    // Avoids both substring() copies and upfront split() overhead
     const data: any[][] = [];
     const errors: PapaParseError[] = [];
-    
+    const delimCode = delimiter.charCodeAt(0);
+    const newLen = newline.length;
+    const isMultiCharDelimiter = delimiter.length > 1;
+    const isTypingFunction = typeof dynamicTyping === "function";
+
     let processedRows = 0;
-    let startPos = 0;
+    let rowStart = 0;
 
-    // Stream through input without creating full rows array upfront
-    while (startPos < inputLen && !this.aborted) {
+    // Single linear scan with zero-copy field extraction
+    while (rowStart < input.length && !this.aborted) {
       // Find next newline efficiently
-      let endPos = input.indexOf(newline, startPos);
-      if (endPos === -1) {
-        endPos = inputLen; // Last line without newline
-      }
+      const nlIdx = input.indexOf(newline, rowStart);
+      const rowEnd = nlIdx === -1 ? input.length : nlIdx;
+      const rowLen = rowEnd - rowStart;
 
-      const row = input.substring(startPos, endPos);
-
-      // Skip comment lines
-      if (comments && row.substring(0, commentsLen) === comments) {
-        startPos = endPos + newline.length;
+      // Skip empty rows early
+      if (rowLen === 0) {
+        rowStart = rowEnd + newLen;
         continue;
       }
 
-      // Parse row into fields - optimized field processing
-      const fields = row.split(delimiter);
-      const fieldsLen = fields.length;
+      // Skip comment lines by checking directly on input string
+      if (comments && input.startsWith(comments, rowStart)) {
+        rowStart = rowEnd + newLen;
+        continue;
+      }
 
-      // Apply transforms and dynamic typing only if needed
-      if (transform || dynamicTyping) {
-        const isTypingFunction = typeof dynamicTyping === "function";
-        
-        // Optimize for the common case where these are disabled
-        if (!transform && !dynamicTyping) {
-          // Skip field processing entirely
-        } else {
-          for (let j = 0; j < fieldsLen; j++) {
-            let value = fields[j];
+      // Extract fields in-place using zero-copy slices
+      const fields: any[] = [];
+      let fStart = rowStart;
 
-            // Apply transform function
-            if (transform) {
-              value = transform(value, j);
+      if (isMultiCharDelimiter) {
+        // Handle multi-character delimiters
+        let searchPos = rowStart;
+        while (searchPos <= rowEnd) {
+          const delimIdx = input.indexOf(delimiter, searchPos);
+          const fEnd = delimIdx === -1 || delimIdx > rowEnd ? rowEnd : delimIdx;
+
+          let value = input.slice(fStart, fEnd); // zero-copy slice
+
+          // Apply transforms and dynamic typing
+          if (transform) {
+            value = transform(value, fields.length);
+          }
+          if (dynamicTyping) {
+            if (isTypingFunction) {
+              if (dynamicTyping(fields.length)) {
+                value = this.castValue(value);
+              }
+            } else {
+              value = this.castValue(value);
             }
+          }
 
-            // Apply dynamic typing (optimized)
+          fields.push(value);
+
+          if (delimIdx === -1 || delimIdx > rowEnd) break;
+          fStart = delimIdx + delimiter.length;
+          searchPos = fStart;
+        }
+      } else {
+        // Optimized single-character delimiter path
+        for (let i = rowStart; i <= rowEnd; i++) {
+          if (i === rowEnd || input.charCodeAt(i) === delimCode) {
+            let value = input.slice(fStart, i); // zero-copy slice
+
+            // Apply transforms and dynamic typing
+            if (transform) {
+              value = transform(value, fields.length);
+            }
             if (dynamicTyping) {
               if (isTypingFunction) {
-                if (dynamicTyping(j)) {
+                if (dynamicTyping(fields.length)) {
                   value = this.castValue(value);
                 }
               } else {
@@ -108,22 +136,28 @@ export class DirectParser {
               }
             }
 
-            fields[j] = value;
+            fields.push(value);
+            fStart = i + 1;
           }
         }
       }
 
-      // Skip empty lines if configured
-      if (skipEmptyLines) {
-        if (skipEmptyLines === "greedy") {
-          if (fields.join("").trim() === "") {
-            continue;
-          }
-        } else {
-          if (fieldsLen === 1 && fields[0].length === 0) {
-            continue;
+      // Skip empty lines if configured (optimized)
+      if (skipEmptyLines === "greedy") {
+        let isEmpty = true;
+        for (let k = 0; k < fields.length; k++) {
+          if (fields[k].trim() !== "") {
+            isEmpty = false;
+            break;
           }
         }
+        if (isEmpty) {
+          rowStart = rowEnd + newLen;
+          continue;
+        }
+      } else if (skipEmptyLines && fields.length === 1 && fields[0].length === 0) {
+        rowStart = rowEnd + newLen;
+        continue;
       }
 
       // Handle step callback
@@ -142,7 +176,7 @@ export class DirectParser {
       }
 
       // Move to next row
-      startPos = endPos + newline.length;
+      rowStart = rowEnd + newLen;
     }
 
     // Handle header row if configured
@@ -157,6 +191,9 @@ export class DirectParser {
         });
       }
     }
+
+    // Set final cursor position
+    meta.cursor = rowStart;
 
     return { data, errors, meta };
   }

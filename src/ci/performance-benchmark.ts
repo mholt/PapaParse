@@ -351,29 +351,31 @@ export class PerformanceBenchmark {
   /**
    * Render benchmark results as a formatted table
    */
-  renderResultsTable(comparisons: Array<{
-    testName: string;
-    legacyResult: BenchmarkResult;
-    modernResult: BenchmarkResult;
-    comparison: any;
-  }>): void {
+  renderResultsTable(
+    comparisons: Array<{
+      testName: string;
+      legacyResult: BenchmarkResult;
+      modernResult: BenchmarkResult;
+      comparison: any;
+    }>,
+  ): void {
     console.log("\n📊 Performance Benchmark Results Table:");
 
     // Table headers
     const headers = [
       "Test Name",
       "Legacy (rows/s)",
-      "Modern (rows/s)", 
+      "Modern (rows/s)",
       "Performance",
       "Legacy Memory",
       "Modern Memory",
       "Memory Ratio",
-      "Status"
+      "Status",
     ];
 
     // Prepare all table data first to calculate column widths
     const tableData: string[][] = [];
-    
+
     // Add header row
     tableData.push(headers);
 
@@ -381,7 +383,7 @@ export class PerformanceBenchmark {
     comparisons.forEach(({ testName, legacyResult, modernResult, comparison }) => {
       const legacyMemMB = (legacyResult.memoryUsage.peak.heapUsed / 1024 / 1024).toFixed(1);
       const modernMemMB = (modernResult.memoryUsage.peak.heapUsed / 1024 / 1024).toFixed(1);
-      
+
       // Handle special cases for performance ratio
       let performancePercent: string;
       let performanceIcon = "";
@@ -402,7 +404,7 @@ export class PerformanceBenchmark {
         }
         performancePercent = `${(ratio * 100).toFixed(1)}%`;
       }
-      
+
       // Memory ratio with direction indicator
       let memoryIcon = "";
       if (comparison.memoryRatio >= 1.1) {
@@ -413,14 +415,15 @@ export class PerformanceBenchmark {
         memoryIcon = "🟡"; // Yellow circle for similar memory usage
       }
       const memoryPercent = `${memoryIcon} ${(comparison.memoryRatio * 100).toFixed(1)}%`;
-      
+
       const status = comparison.passed ? "✅ PASS" : "❌ FAIL";
-      
+
       // Handle special cases for rows per second
-      const legacyRowsPerSec = legacyResult.rowsPerSecond === null || isNaN(legacyResult.rowsPerSecond) 
-        ? "N/A" 
-        : legacyResult.rowsPerSecond.toLocaleString();
-      
+      const legacyRowsPerSec =
+        legacyResult.rowsPerSecond === null || isNaN(legacyResult.rowsPerSecond)
+          ? "N/A"
+          : legacyResult.rowsPerSecond.toLocaleString();
+
       let modernRowsPerSec: string;
       if (modernResult.rowsPerSecond === null || isNaN(modernResult.rowsPerSecond)) {
         modernRowsPerSec = "⚪ N/A";
@@ -446,9 +449,9 @@ export class PerformanceBenchmark {
         modernRowsPerSec,
         `${performanceIcon} ${performancePercent}`,
         `${legacyMemMB} MB`,
-        `${modernMemMB} MB`, 
+        `${modernMemMB} MB`,
         memoryPercent,
-        status
+        status,
       ];
 
       tableData.push(row);
@@ -456,16 +459,14 @@ export class PerformanceBenchmark {
 
     // Calculate optimal column widths
     const colWidths = headers.map((_, colIndex) => {
-      const maxWidth = Math.max(
-        ...tableData.map(row => row[colIndex]?.length || 0)
-      );
+      const maxWidth = Math.max(...tableData.map((row) => row[colIndex]?.length || 0));
       // Add 2 chars padding, minimum 8 chars
       return Math.max(maxWidth + 2, 8);
     });
 
     // Calculate total table width
     const totalWidth = colWidths.reduce((sum, width) => sum + width, 0) + (colWidths.length - 1) * 3; // 3 for " | "
-    
+
     console.log("=".repeat(totalWidth));
 
     // Print header
