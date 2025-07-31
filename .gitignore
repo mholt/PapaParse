@@ -3,3 +3,5 @@ bower_components/
 node_modules/
 package-lock.json
 yarn.lock
+dist/
+benchmark-results/
