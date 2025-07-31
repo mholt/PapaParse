@@ -259,6 +259,17 @@ export class PerformanceBenchmark {
     modernParser: any,
   ): Promise<{
     results: BenchmarkResult[];
+    comparisons: Array<{
+      testName: string;
+      legacyResult: BenchmarkResult;
+      modernResult: BenchmarkResult;
+      comparison: {
+        passed: boolean;
+        performanceRatio: number;
+        memoryRatio: number;
+        details: string;
+      };
+    }>;
     summary: {
       passed: boolean;
       totalTests: number;
@@ -269,6 +280,12 @@ export class PerformanceBenchmark {
     };
   }> {
     const results: BenchmarkResult[] = [];
+    const comparisons: Array<{
+      testName: string;
+      legacyResult: BenchmarkResult;
+      modernResult: BenchmarkResult;
+      comparison: any;
+    }> = [];
     let passedTests = 0;
     let totalPerformanceRatio = 0;
     let totalMemoryRatio = 0;
@@ -288,14 +305,19 @@ export class PerformanceBenchmark {
       results.push(legacyResult, modernResult);
 
       const comparison = this.compareResults(legacyResult, modernResult);
+      comparisons.push({
+        testName: testData.name,
+        legacyResult,
+        modernResult,
+        comparison,
+      });
+
       if (comparison.passed) {
         passedTests++;
       }
 
       totalPerformanceRatio += comparison.performanceRatio;
       totalMemoryRatio += comparison.memoryRatio;
-
-      console.log(`${testData.name}: ${comparison.details}`);
     }
 
     const totalTests = this.testData.length;
@@ -304,6 +326,7 @@ export class PerformanceBenchmark {
 
     return {
       results,
+      comparisons,
       summary: {
         passed: passedTests === totalTests,
         totalTests,
@@ -324,6 +347,149 @@ export class PerformanceBenchmark {
     fs.writeFileSync(outputPath, JSON.stringify(results, null, 2));
     console.log(`Benchmark results exported to: ${outputPath}`);
   }
+
+  /**
+   * Render benchmark results as a formatted table
+   */
+  renderResultsTable(comparisons: Array<{
+    testName: string;
+    legacyResult: BenchmarkResult;
+    modernResult: BenchmarkResult;
+    comparison: any;
+  }>): void {
+    console.log("\n📊 Performance Benchmark Results Table:");
+
+    // Table headers
+    const headers = [
+      "Test Name",
+      "Legacy (rows/s)",
+      "Modern (rows/s)", 
+      "Performance",
+      "Legacy Memory",
+      "Modern Memory",
+      "Memory Ratio",
+      "Status"
+    ];
+
+    // Prepare all table data first to calculate column widths
+    const tableData: string[][] = [];
+    
+    // Add header row
+    tableData.push(headers);
+
+    // Process data rows
+    comparisons.forEach(({ testName, legacyResult, modernResult, comparison }) => {
+      const legacyMemMB = (legacyResult.memoryUsage.peak.heapUsed / 1024 / 1024).toFixed(1);
+      const modernMemMB = (modernResult.memoryUsage.peak.heapUsed / 1024 / 1024).toFixed(1);
+      
+      // Handle special cases for performance ratio
+      let performancePercent: string;
+      let performanceIcon = "";
+      if (isNaN(comparison.performanceRatio)) {
+        performancePercent = "N/A";
+        performanceIcon = "⚪";
+      } else if (!isFinite(comparison.performanceRatio)) {
+        performancePercent = "∞";
+        performanceIcon = "🚀";
+      } else {
+        const ratio = comparison.performanceRatio;
+        if (ratio >= 1.05) {
+          performanceIcon = "🟢"; // Green circle for performance improvement
+        } else if (ratio <= 0.95) {
+          performanceIcon = "🔴"; // Red circle for performance regression
+        } else {
+          performanceIcon = "🟡"; // Yellow circle for neutral/similar performance
+        }
+        performancePercent = `${(ratio * 100).toFixed(1)}%`;
+      }
+      
+      // Memory ratio with direction indicator
+      let memoryIcon = "";
+      if (comparison.memoryRatio >= 1.1) {
+        memoryIcon = "🔴"; // Red circle for increased memory usage (bad)
+      } else if (comparison.memoryRatio <= 0.9) {
+        memoryIcon = "🟢"; // Green circle for decreased memory usage (good)
+      } else {
+        memoryIcon = "🟡"; // Yellow circle for similar memory usage
+      }
+      const memoryPercent = `${memoryIcon} ${(comparison.memoryRatio * 100).toFixed(1)}%`;
+      
+      const status = comparison.passed ? "✅ PASS" : "❌ FAIL";
+      
+      // Handle special cases for rows per second
+      const legacyRowsPerSec = legacyResult.rowsPerSecond === null || isNaN(legacyResult.rowsPerSecond) 
+        ? "N/A" 
+        : legacyResult.rowsPerSecond.toLocaleString();
+      
+      let modernRowsPerSec: string;
+      if (modernResult.rowsPerSecond === null || isNaN(modernResult.rowsPerSecond)) {
+        modernRowsPerSec = "⚪ N/A";
+      } else {
+        // Add performance direction indicator to modern rows/sec
+        let rowsIcon = "";
+        if (legacyResult.rowsPerSecond && modernResult.rowsPerSecond) {
+          const ratio = modernResult.rowsPerSecond / legacyResult.rowsPerSecond;
+          if (ratio >= 1.05) {
+            rowsIcon = "🟢"; // Green circle for faster rows/sec
+          } else if (ratio <= 0.95) {
+            rowsIcon = "🔴"; // Red circle for slower rows/sec
+          } else {
+            rowsIcon = "🟡"; // Yellow circle for similar rows/sec
+          }
+        }
+        modernRowsPerSec = `${rowsIcon} ${modernResult.rowsPerSecond.toLocaleString()}`;
+      }
+
+      const row = [
+        testName,
+        legacyRowsPerSec,
+        modernRowsPerSec,
+        `${performanceIcon} ${performancePercent}`,
+        `${legacyMemMB} MB`,
+        `${modernMemMB} MB`, 
+        memoryPercent,
+        status
+      ];
+
+      tableData.push(row);
+    });
+
+    // Calculate optimal column widths
+    const colWidths = headers.map((_, colIndex) => {
+      const maxWidth = Math.max(
+        ...tableData.map(row => row[colIndex]?.length || 0)
+      );
+      // Add 2 chars padding, minimum 8 chars
+      return Math.max(maxWidth + 2, 8);
+    });
+
+    // Calculate total table width
+    const totalWidth = colWidths.reduce((sum, width) => sum + width, 0) + (colWidths.length - 1) * 3; // 3 for " | "
+    
+    console.log("=".repeat(totalWidth));
+
+    // Print header
+    let headerRow = "";
+    headers.forEach((header, i) => {
+      headerRow += header.padEnd(colWidths[i]);
+      if (i < headers.length - 1) headerRow += " | ";
+    });
+    console.log(headerRow);
+    console.log("-".repeat(totalWidth));
+
+    // Print data rows (skip header row in tableData)
+    for (let i = 1; i < tableData.length; i++) {
+      const row = tableData[i];
+      let dataRow = "";
+      row.forEach((cell, j) => {
+        dataRow += cell.padEnd(colWidths[j]);
+        if (j < row.length - 1) dataRow += " | ";
+      });
+      console.log(dataRow);
+    }
+
+    console.log("=".repeat(totalWidth));
+  }
 }
 
 // CLI runner for CI/CD integration
@@ -341,21 +507,37 @@ export async function runCIBenchmark(): Promise<void> {
     console.log("📊 Running performance comparison between legacy and V6 implementations...");
 
     // Run the benchmark suite
-    const { results, summary } = await benchmark.runBenchmarkSuite(legacyPapa, modernPapa);
+    const { results, comparisons, summary } = await benchmark.runBenchmarkSuite(legacyPapa, modernPapa);
+
+    // Render results table
+    benchmark.renderResultsTable(comparisons);
 
     // Export results for analysis
     benchmark.exportResults(results, `benchmark-${Date.now()}.json`);
 
     // Print summary
-    console.log("\n📈 Performance Benchmark Results:");
+    console.log("\n📈 Summary:");
     console.log(`  Total Tests: ${summary.totalTests}`);
     console.log(`  Passed: ${summary.passedTests}`);
     console.log(`  Failed: ${summary.failedTests}`);
-    console.log(`  Average Performance Ratio: ${(summary.avgPerformanceRatio * 100).toFixed(1)}%`);
-    console.log(`  Average Memory Ratio: ${(summary.avgMemoryRatio * 100).toFixed(1)}%`);
+    console.log(`  Average Performance: ${(summary.avgPerformanceRatio * 100).toFixed(1)}% of legacy`);
+    console.log(`  Average Memory Usage: ${(summary.avgMemoryRatio * 100).toFixed(1)}% of legacy`);
 
+    // Show detailed failure information
     if (!summary.passed) {
-      console.error("❌ Performance benchmarks failed - some tests did not meet thresholds");
+      console.log("\n❌ Failed Tests:");
+      comparisons.forEach(({ testName, comparison }) => {
+        if (!comparison.passed) {
+          console.log(`  ${testName}:`);
+          if (comparison.performanceRatio < 0.95) {
+            console.log(`    🐌 Performance: ${(comparison.performanceRatio * 100).toFixed(1)}% (need ≥95%)`);
+          }
+          if (comparison.memoryRatio > 1.1) {
+            console.log(`    🧠 Memory: ${(comparison.memoryRatio * 100).toFixed(1)}% (need ≤110%)`);
+          }
+        }
+      });
+      console.error("\n❌ Performance benchmarks failed - some tests did not meet thresholds");
       process.exit(1);
     }
 
