@@ -24,7 +24,7 @@ export default defineConfig((options) => ({
     }
   },
   outExtension({ format, options }) {
-    const ext = format === "iife" ? ".iife" : "";
+    const ext = format === "iife" ? ".iife" : format === "cjs" ? ".js" : ".mjs";
     const min = options.minify ? ".min" : "";
     return {
       js: `${ext}${min}.js`,
