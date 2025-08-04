@@ -65,15 +65,22 @@ export class Parser implements PapaParseParser {
   private canUseDirectParser(input: string): boolean {
     const lexerConfig = createLexerConfig(this.config);
     const hasQuotes = input.indexOf(lexerConfig.quoteChar) !== -1;
+    
+    // Get delimiter - handle function case
+    const delimiter = typeof this.config.delimiter === "function"
+      ? this.config.delimiter(input)
+      : this.config.delimiter || ",";
 
     // DirectParser requirements:
     // - No quotes in input
+    // - Single-character delimiter only
     // - No step callback (streaming)
     // - No chunk callback (streaming)
     // - No header processing (DirectParser only returns arrays, not objects)
     // - Fast mode enabled or auto-detected
     return (
       !hasQuotes &&
+      delimiter.length === 1 &&
       !this.config.step &&
       !this.config.chunk &&
       !this.config.header &&

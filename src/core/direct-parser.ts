@@ -17,22 +17,24 @@ import type { PapaParseConfig, PapaParseError, PapaParseResult } from "../types/
  * High-performance direct parser that mimics legacy fast mode
  */
 export class DirectParser {
-  private aborted = false;
+  private _aborted = false;
 
-  constructor(private config: PapaParseConfig) { }
+  constructor(private config: PapaParseConfig) {}
 
   /**
    * Parse CSV directly to data arrays without tokenization
    */
-  parse(input: string): PapaParseResult {
+  parseCSV(input: string): PapaParseResult {
     // Cache config values for performance
     const delimiter: string =
       typeof this.config.delimiter === "function"
         ? this.config.delimiter(input)
         : this.config.delimiter || CONSTANTS.DefaultDelimiter;
+
+
+
     const newline = this.config.newline || "\n";
     const comments = this.config.comments;
-    const commentsLen = (comments && comments.length) || 0;
     const skipEmptyLines = this.config.skipEmptyLines;
     const preview = this.config.preview;
     const step = this.config.step;
@@ -46,6 +48,7 @@ export class DirectParser {
       aborted: false,
       truncated: false,
       cursor: 0,
+      renamedHeaders: null,
     };
 
     if (!input) {
@@ -64,14 +67,14 @@ export class DirectParser {
     let rowStart = 0;
 
     // Single linear scan with zero-copy field extraction
-    while (rowStart < input.length && !this.aborted) {
+    while (rowStart < input.length && !this._aborted) {
       // Find next newline efficiently
       const nlIdx = input.indexOf(newline, rowStart);
       const rowEnd = nlIdx === -1 ? input.length : nlIdx;
       const rowLen = rowEnd - rowStart;
 
-      // Skip empty rows early
-      if (rowLen === 0) {
+      // Skip empty rows only if configured
+      if (rowLen === 0 && skipEmptyLines) {
         rowStart = rowEnd + newLen;
         continue;
       }
@@ -84,10 +87,16 @@ export class DirectParser {
 
       // Extract fields in-place using zero-copy slices
       const fields: any[] = [];
-      let fStart = rowStart;
+      
+      // Handle empty rows
+      if (rowLen === 0) {
+        // Empty row generates single empty field
+        fields.push("");
+      } else {
+        let fStart = rowStart;
 
-      // Optimized single-character delimiter path
-      for (let i = rowStart; i <= rowEnd; i++) {
+        // Optimized single-character delimiter path
+        for (let i = rowStart; i <= rowEnd; i++) {
         if (i === rowEnd || input.charCodeAt(i) === delimCode) {
           let value = input.slice(fStart, i); // zero-copy slice
 
@@ -100,6 +109,13 @@ export class DirectParser {
               if (dynamicTyping(fields.length)) {
                 value = this.castValue(value);
               }
+            } else if (typeof dynamicTyping === "object") {
+              // Handle object map: check by index or field name (if header processed)
+              const shouldType =
+                dynamicTyping[fields.length] || (meta.fields && dynamicTyping[meta.fields[fields.length]]);
+              if (shouldType) {
+                value = this.castValue(value);
+              }
             } else {
               value = this.castValue(value);
             }
@@ -109,12 +125,14 @@ export class DirectParser {
           fStart = i + 1;
         }
       }
+      }
 
       // Skip empty lines if configured (optimized)
       if (skipEmptyLines === "greedy") {
         let isEmpty = true;
         for (let k = 0; k < fields.length; k++) {
-          if (fields[k].trim() !== "") {
+          const fieldStr = String(fields[k]);
+          if (fieldStr.trim() !== "") {
             isEmpty = false;
             break;
           }
@@ -123,14 +141,17 @@ export class DirectParser {
           rowStart = rowEnd + newLen;
           continue;
         }
-      } else if (skipEmptyLines && fields.length === 1 && fields[0].length === 0) {
-        rowStart = rowEnd + newLen;
-        continue;
+      } else if (skipEmptyLines && fields.length === 1) {
+        const firstFieldStr = String(fields[0]);
+        if (firstFieldStr.length === 0) {
+          rowStart = rowEnd + newLen;
+          continue;
+        }
       }
 
       // Handle step callback
       if (step) {
-        throw new Error("Step callback is not supported in direct parser");
+        step({ data: fields, errors: [], meta: { ...meta, cursor: rowStart } }, this);
       } else {
         data.push(fields);
       }
@@ -196,13 +217,55 @@ export class DirectParser {
    * Abort parsing
    */
   abort(): void {
-    this.aborted = true;
+    this._aborted = true;
   }
 
   /**
    * Check if parser is aborted
    */
   isAborted(): boolean {
-    return this.aborted;
+    return this._aborted;
+  }
+
+  /**
+   * Check if parser is aborted (PapaParseParser interface)
+   */
+  aborted(): boolean {
+    return this._aborted;
+  }
+
+  /**
+   * Parse method for PapaParseParser interface
+   */
+  parse(input: string, baseIndex?: number, ignoreLastRow?: boolean): PapaParseResult {
+    return this.parseCSV(input);
+  }
+
+  /**
+   * Pause parsing (not supported in direct parser)
+   */
+  pause(): void {
+    // Direct parser processes synchronously, cannot pause
+  }
+
+  /**
+   * Resume parsing (not supported in direct parser)
+   */
+  resume(): void {
+    // Direct parser processes synchronously, cannot resume
+  }
+
+  /**
+   * Check if parser is paused
+   */
+  paused(): boolean {
+    return false; // Direct parser is never paused
+  }
+
+  /**
+   * Get current character index
+   */
+  getCharIndex(): number {
+    return 0; // Not applicable for direct parser
   }
 }

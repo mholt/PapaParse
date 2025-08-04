@@ -104,10 +104,10 @@ export class PerformanceBenchmark {
       global.gc();
       global.gc(); // Run twice to ensure full cleanup
     }
-    
+
     // Wait a bit for GC to settle
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
     const memBefore = process.memoryUsage();
     let memPeak = memBefore;
 
@@ -115,7 +115,7 @@ export class PerformanceBenchmark {
       try {
         // Start timing just before parsing (no memory overhead)
         const startTime = Date.now();
-        
+
         // Monitor memory usage during parsing (minimal overhead)
         const memoryMonitor = setInterval(() => {
           const current = process.memoryUsage();
@@ -133,7 +133,7 @@ export class PerformanceBenchmark {
         // Stop timing immediately after parsing
         const endTime = Date.now();
         clearInterval(memoryMonitor);
-        
+
         // Memory measurement after timing is complete
         const memAfter = process.memoryUsage();
 
@@ -168,10 +168,10 @@ export class PerformanceBenchmark {
       global.gc();
       global.gc(); // Run twice to ensure full cleanup
     }
-    
+
     // Wait a bit for GC to settle
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
     const memBefore = process.memoryUsage();
     let memPeak = memBefore;
 
@@ -179,7 +179,7 @@ export class PerformanceBenchmark {
       try {
         // Start timing just before parsing (no memory overhead)
         const startTime = Date.now();
-        
+
         // Monitor memory usage during parsing (minimal overhead)
         const memoryMonitor = setInterval(() => {
           const current = process.memoryUsage();
@@ -197,7 +197,7 @@ export class PerformanceBenchmark {
         // Stop timing immediately after parsing
         const endTime = Date.now();
         clearInterval(memoryMonitor);
-        
+
         // Memory measurement after timing is complete
         const memAfter = process.memoryUsage();
 
