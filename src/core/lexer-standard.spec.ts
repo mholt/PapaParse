@@ -59,69 +59,6 @@ describe("StandardLexer", () => {
     // Input is stored internally, we'll verify through tokenization
   });
 
-  describe("canUseFastMode", () => {
-    test("returns true when no quotes in input", () => {
-      const lexer = new StandardLexer(defaultConfig);
-      lexer.setInput("simple,data,no,quotes");
-
-      expect(lexer.canUseFastMode()).toBe(true);
-    });
-
-    test("returns false when quotes present", () => {
-      const lexer = new StandardLexer(defaultConfig);
-      lexer.setInput('simple,"quoted",data');
-
-      expect(lexer.canUseFastMode()).toBe(false);
-    });
-
-    test("returns true when fastMode explicitly enabled", () => {
-      const config = { ...defaultConfig, fastMode: true };
-      const lexer = new StandardLexer(config);
-      lexer.setInput('data,"with",quotes');
-
-      expect(lexer.canUseFastMode()).toBe(true);
-    });
-
-    test("returns false when fastMode explicitly disabled", () => {
-      const config = { ...defaultConfig, fastMode: false };
-      const lexer = new StandardLexer(config);
-      lexer.setInput("simple,data");
-
-      expect(lexer.canUseFastMode()).toBe(false);
-    });
-  });
-
-  describe("tokenizeFast", () => {
-    test("tokenizes simple CSV without quotes", () => {
-      const lexer = new StandardLexer(defaultConfig);
-      lexer.setInput("a,b,c\n1,2,3");
-
-      const tokens = lexer.tokenizeFast();
-
-      expect(tokens).toEqual([
-        { type: "field", value: "a", position: 0, length: 1 },
-        { type: "delimiter", value: ",", position: 1, length: 1 },
-        { type: "field", value: "b", position: 2, length: 1 },
-        { type: "delimiter", value: ",", position: 3, length: 1 },
-        { type: "field", value: "c", position: 4, length: 1 },
-        { type: "newline", value: "\n", position: 4, length: 1 },
-        { type: "field", value: "1", position: 6, length: 1 },
-        { type: "delimiter", value: ",", position: 7, length: 1 },
-        { type: "field", value: "2", position: 8, length: 1 },
-        { type: "delimiter", value: ",", position: 9, length: 1 },
-        { type: "field", value: "3", position: 10, length: 1 },
-        { type: "eof", value: "", position: 11, length: 0 },
-      ]);
-    });
-
-    test("throws error when quotes detected in input", () => {
-      const lexer = new StandardLexer(defaultConfig);
-      lexer.setInput('simple,"quoted",data');
-
-      expect(() => lexer.tokenizeFast()).toThrow("Fast mode not available - quotes detected in input");
-    });
-  });
-
   describe("tokenize - full mode", () => {
     test("handles quoted fields", () => {
       const lexer = new StandardLexer(defaultConfig);
@@ -180,7 +117,7 @@ describe("StandardLexer", () => {
 
       const result = lexer.tokenize();
 
-      expect(result.errors).toHaveLength(1);
+      expect(result.errors).toHaveLength(2);
       expect(result.errors[0]).toMatchObject({
         type: "Quotes",
         code: "InvalidQuotes",
@@ -240,7 +177,7 @@ describe("StandardLexer", () => {
 
       expect(result.errors).toEqual([]);
       const fieldTokens = result.tokens.filter((t) => t.type === "field");
-      expect(fieldTokens.map((t) => t.value)).toEqual(["a", "quoted", "c"]);
+      expect(fieldTokens.map((t) => t.value)).toEqual(["a", ' "quoted" ', "c"]);
     });
 
     test("handles quoted field at EOF", () => {

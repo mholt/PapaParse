@@ -47,13 +47,35 @@ export class FastLexer implements ILexer {
     const comments = this.lexerConfig.comments;
     const commentsLen = typeof comments === "string" ? comments.length : 0;
 
+    // Handle empty input specially
+    if (this.input === "") {
+      return {
+        tokens: [
+          {
+            type: TokenType.FIELD,
+            value: "",
+            position: 0,
+            length: 0,
+          },
+          {
+            type: TokenType.EOF,
+            value: "",
+            position: 0,
+            length: 0,
+          },
+        ],
+        errors: [],
+        terminatedByComment: false,
+      };
+    }
+
     // Pre-allocate tokens array with estimated size to reduce reallocations
     const tokens: Token[] = [];
     const rows = this.input.split(newline);
     const rowsLen = rows.length;
 
     let position = 0;
-    let hasEmittedTokens = false;
+    let terminatedByComment = false;
 
     // Main parsing loop - optimized for speed
     for (let i = 0; i < rowsLen; i++) {
@@ -63,17 +85,10 @@ export class FastLexer implements ILexer {
       // Skip comment lines entirely
       if (comments && row.substring(0, commentsLen) === comments) {
         // Skip comment lines completely - don't emit any tokens
-      } else {
-        // If we've already emitted tokens, add newline before this row
-        if (hasEmittedTokens) {
-          tokens.push({
-            type: TokenType.NEWLINE,
-            value: newline,
-            position: position - newline.length,
-            length: newline.length,
-          });
+        if (i === rowsLen - 1) {
+          terminatedByComment = true;
         }
-
+      } else {
         // Split row into fields and process immediately
         const fields = row.split(delimiter);
         const fieldsLen = fields.length;
@@ -105,7 +120,15 @@ export class FastLexer implements ILexer {
           }
         }
 
-        hasEmittedTokens = true;
+        // Add newline token (except for last row)
+        if (i < rowsLen - 1) {
+          tokens.push({
+            type: TokenType.NEWLINE,
+            value: newline,
+            position: position + rowLen,
+            length: newline.length,
+          });
+        }
       }
 
       position += rowLen;
@@ -121,6 +144,6 @@ export class FastLexer implements ILexer {
       length: 0,
     });
 
-    return { tokens, errors: [] };
+    return { tokens, errors: [], terminatedByComment };
   }
 }

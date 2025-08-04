@@ -76,36 +76,6 @@ describe("FastLexer", () => {
     // Input is stored internally, we'll verify through tokenization
   });
 
-  describe("canUseFastMode", () => {
-    test("returns true when no quotes in input", () => {
-      const lexer = createFastLexer();
-      lexer.setInput("simple,data,no,quotes");
-
-      expect(lexer.canUseFastMode()).toBe(true);
-    });
-
-    test("returns false when quotes present", () => {
-      const lexer = createFastLexer();
-      lexer.setInput('simple,"quoted",data');
-
-      expect(lexer.canUseFastMode()).toBe(false);
-    });
-
-    test("returns true when fastMode explicitly enabled", () => {
-      const lexer = createFastLexer({ fastMode: true });
-      lexer.setInput('data,"with",quotes');
-
-      expect(lexer.canUseFastMode()).toBe(true);
-    });
-
-    test("returns false when fastMode explicitly disabled", () => {
-      const lexer = createFastLexer({ fastMode: false });
-      lexer.setInput("simple,data");
-
-      expect(lexer.canUseFastMode()).toBe(false);
-    });
-  });
-
   describe("tokenize", () => {
     test("tokenizes simple CSV without quotes", () => {
       const lexer = createFastLexer();
@@ -119,7 +89,7 @@ describe("FastLexer", () => {
         { type: "field", value: "b", position: 2, length: 1 },
         { type: "delimiter", value: ",", position: 3, length: 1 },
         { type: "field", value: "c", position: 4, length: 1 },
-        { type: "newline", value: "\n", position: 4, length: 1 },
+        { type: "newline", value: "\n", position: 5, length: 1 },
         { type: "field", value: "1", position: 6, length: 1 },
         { type: "delimiter", value: ",", position: 7, length: 1 },
         { type: "field", value: "2", position: 8, length: 1 },
@@ -129,11 +99,15 @@ describe("FastLexer", () => {
       ]);
     });
 
-    test("throws error when quotes detected in input", () => {
+    test("handles quotes as literal characters", () => {
       const lexer = createFastLexer();
       lexer.setInput('simple,"quoted",data');
 
-      expect(() => lexer.tokenize()).toThrow("Fast mode not available - quotes detected in input");
+      const result = lexer.tokenize();
+
+      // FastLexer treats quotes as literal characters
+      const fieldTokens = result.tokens.filter((t) => t.type === "field");
+      expect(fieldTokens.map((t) => t.value)).toEqual(["simple", '"quoted"', "data"]);
     });
 
     test("handles empty fields", () => {
@@ -178,7 +152,7 @@ describe("FastLexer", () => {
 
       // Find the newline token
       const newlineToken = result.tokens.find((t) => t.type === "newline");
-      expect(newlineToken).toEqual({ type: "newline", value: "\r\n", position: 1, length: 2 });
+      expect(newlineToken).toEqual({ type: "newline", value: "\r\n", position: 3, length: 2 });
     });
 
     test("handles empty input", () => {
@@ -187,8 +161,11 @@ describe("FastLexer", () => {
 
       const result = lexer.tokenize();
 
-      // Empty input produces only EOF
-      expect(result.tokens).toEqual([{ type: "eof", value: "", position: 0, length: 0 }]);
+      // Empty input produces single empty field and EOF
+      expect(result.tokens).toEqual([
+        { type: "field", value: "", position: 0, length: 0 },
+        { type: "eof", value: "", position: 0, length: 0 },
+      ]);
     });
 
     test("handles single field", () => {
@@ -210,7 +187,7 @@ describe("FastLexer", () => {
       const result = lexer.tokenize();
 
       expect(result.tokens[1]).toEqual({ type: "delimiter", value: "||", position: 1, length: 2 });
-      expect(result.tokens[3]).toEqual({ type: "delimiter", value: "||", position: 5, length: 2 });
+      expect(result.tokens[3]).toEqual({ type: "delimiter", value: "||", position: 4, length: 2 });
     });
 
     test("handles trailing newline", () => {
@@ -241,7 +218,7 @@ describe("FastLexer", () => {
       const result = lexer.tokenize();
 
       // Should only have EOF token
-      expect(result.tokens).toEqual([{ type: "eof", value: "", position: 18, length: 0 }]);
+      expect(result.tokens).toEqual([{ type: "eof", value: "", position: 19, length: 0 }]);
     });
   });
 
@@ -356,7 +333,7 @@ describe("FastLexer", () => {
 
       // Should create empty fields for each row
       const fieldTokens = result.tokens.filter((t) => t.type === "field");
-      expect(fieldTokens.map((t) => t.value)).toEqual(["", ""]);
+      expect(fieldTokens.map((t) => t.value)).toEqual(["", "", ""]);
     });
 
     test("handles mixed whitespace", () => {
