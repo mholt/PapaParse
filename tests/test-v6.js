@@ -49,7 +49,7 @@ var server = app.listen(8071, function() {
 	console.log('Testing with Papa Parse entry point:', papaEntryPoint);
 
 	if (process.argv.indexOf('--mocha-headless-chrome') !== -1) {
-		childProcess.spawn('node_modules/.bin/mocha-headless-chrome', ['-f', 'http://localhost:8071/tests/tests.html', '-a="--no-sandbox"'], {
+		childProcess.spawn('node_modules/.bin/mocha-headless-chrome', ['-f', 'http://localhost:8071/tests/tests.html'], {
 			stdio: 'inherit'
 		}).on('exit', function(code) {
 			cleanup();
