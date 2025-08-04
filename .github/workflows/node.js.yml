@@ -43,5 +43,6 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-    - run: npm install
+    - uses: oven-sh/setup-bun@v2
+    - run: bun install
     - run: npm run build:tsup && npm run test-node:v6
