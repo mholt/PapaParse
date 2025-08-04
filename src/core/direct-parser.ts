@@ -65,11 +65,25 @@ export class DirectParser {
     let rowStart = 0;
 
     // Single linear scan with zero-copy field extraction
-    while (rowStart < input.length && !this._aborted) {
+    // Note: We check rowStart <= input.length to handle the case where input ends with newline
+    // This creates an implicit empty line at the end that should be processed
+    while (rowStart <= input.length && !this._aborted) {
       // Find next newline efficiently
       const nlIdx = input.indexOf(newline, rowStart);
       const rowEnd = nlIdx === -1 ? input.length : nlIdx;
       const rowLen = rowEnd - rowStart;
+
+      // If we're at the end of input, only process if there's an implicit empty line
+      if (rowStart === input.length) {
+        // Only process this empty line if the input actually ended with a newline
+        // Check if the previous characters were a newline
+        if (rowStart >= newLen && input.substring(rowStart - newLen, rowStart) === newline) {
+          if (!skipEmptyLines) {
+            data.push([""]);
+          }
+        }
+        break;
+      }
 
       // Skip empty rows only if configured
       if (rowLen === 0 && skipEmptyLines) {
@@ -180,7 +194,7 @@ export class DirectParser {
     }
 
     // Set final cursor position
-    meta.cursor = rowStart;
+    meta.cursor = input.length;
 
     return { data, errors, meta };
   }
@@ -202,7 +216,7 @@ export class DirectParser {
         // Check for safe integer range
         const MAX_SAFE_FLOAT = 2 ** 53;
         const MIN_SAFE_FLOAT = -MAX_SAFE_FLOAT;
-        if (num >= MIN_SAFE_FLOAT && num <= MAX_SAFE_FLOAT) {
+        if (num > MIN_SAFE_FLOAT && num < MAX_SAFE_FLOAT) {
           return num;
         }
       }
