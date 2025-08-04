@@ -31,8 +31,6 @@ export class DirectParser {
         ? this.config.delimiter(input)
         : this.config.delimiter || CONSTANTS.DefaultDelimiter;
 
-
-
     const newline = this.config.newline || "\n";
     const comments = this.config.comments;
     const skipEmptyLines = this.config.skipEmptyLines;
@@ -87,7 +85,7 @@ export class DirectParser {
 
       // Extract fields in-place using zero-copy slices
       const fields: any[] = [];
-      
+
       // Handle empty rows
       if (rowLen === 0) {
         // Empty row generates single empty field
@@ -97,34 +95,34 @@ export class DirectParser {
 
         // Optimized single-character delimiter path
         for (let i = rowStart; i <= rowEnd; i++) {
-        if (i === rowEnd || input.charCodeAt(i) === delimCode) {
-          let value = input.slice(fStart, i); // zero-copy slice
+          if (i === rowEnd || input.charCodeAt(i) === delimCode) {
+            let value = input.slice(fStart, i); // zero-copy slice
 
-          // Apply transforms and dynamic typing
-          if (transform) {
-            value = transform(value, fields.length);
-          }
-          if (dynamicTyping) {
-            if (isTypingFunction) {
-              if (dynamicTyping(fields.length)) {
-                value = this.castValue(value);
-              }
-            } else if (typeof dynamicTyping === "object") {
-              // Handle object map: check by index or field name (if header processed)
-              const shouldType =
-                dynamicTyping[fields.length] || (meta.fields && dynamicTyping[meta.fields[fields.length]]);
-              if (shouldType) {
-                value = this.castValue(value);
-              }
-            } else {
-              value = this.castValue(value);
+            // Apply transforms and dynamic typing
+            if (transform) {
+              value = transform(value, fields.length);
             }
-          }
+            if (dynamicTyping) {
+              if (isTypingFunction) {
+                if (dynamicTyping(fields.length)) {
+                  value = this.castValue(value);
+                }
+              } else if (typeof dynamicTyping === "object") {
+                // Handle object map: check by index or field name (if header processed)
+                const shouldType =
+                  dynamicTyping[fields.length] || (meta.fields && dynamicTyping[meta.fields[fields.length]]);
+                if (shouldType) {
+                  value = this.castValue(value);
+                }
+              } else {
+                value = this.castValue(value);
+              }
+            }
 
-          fields.push(value);
-          fStart = i + 1;
+            fields.push(value);
+            fStart = i + 1;
+          }
         }
-      }
       }
 
       // Skip empty lines if configured (optimized)
