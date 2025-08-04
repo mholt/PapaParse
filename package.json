@@ -56,6 +56,7 @@
     "eslint": "^4.19.1",
     "grunt": "^1.5.2",
     "grunt-contrib-uglify": "^5.2.0",
+    "happy-dom": "^18.0.1",
     "mocha": "^5.2.0",
     "mocha-headless-chrome": "^4.0.0",
     "open": "7.0.0",
@@ -89,7 +90,9 @@
     "clean": "rm -Rf dist && rm -Rf node_modules",
     "refactor:test": "npm run ci:foundation",
     "check": "biome check --diagnostic-level=error src",
-    "check:fix": "biome check --diagnostic-level=error --write src "
+    "check:fix": "biome check --diagnostic-level=error --write src ",
+    "test:e2e": "bun test src/e2e-tests/",
+    "test:e2e:watch": "bun test --watch src/e2e-tests/"
   },
   "private": true
 }
