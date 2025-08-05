@@ -1,0 +1,108 @@
+Issue #1098 Replication Script
+==============================
+
+Test Case 1: Renaming headers (keeping unmapped headers) - WORKING
+-------------------------------------------------------------------
+  Transforming "Code Set" to "codeSet"
+  Transforming "Code Name" to "codeName"
+  Transforming "Code Value" to "codeValue"
+  Keeping header "description" as is
+  Keeping header "extra_column1" as is
+  Keeping header "extra_column2" as is
+  Keeping header "codeSet" as is
+  Keeping header "codeName" as is
+  Keeping header "codeValue" as is
+  Keeping header "description" as is
+  Keeping header "extra_column1" as is
+  Keeping header "extra_column2" as is
+
+Parsed data (first row):
+{
+  "codeSet": "CS001",
+  "codeName": "Test Code",
+  "codeValue": "TC123",
+  "description": "This is a test code",
+  "extra_column1": "Extra Data 1",
+  "extra_column2": "Extra Data 2"
+}
+
+Total rows parsed: 3
+
+
+Test Case 2: Renaming headers and ignoring unmapped (returning null) - BROKEN
+------------------------------------------------------------------------------
+  Transforming "Code Set" to "codeSet"
+  Transforming "Code Name" to "codeName"
+  Transforming "Code Value" to "codeValue"
+  Returning null for header "description"
+  Returning null for header "extra_column1"
+  Returning null for header "extra_column2"
+  Returning null for header "codeSet"
+  Returning null for header "codeName"
+  Returning null for header "codeValue"
+
+ERROR: Cannot read properties of null (reading 'charCodeAt')
+Stack trace: TypeError: Cannot read properties of null (reading 'charCodeAt')
+    at stripBom (/Users/dboskovic/Code/Contrib/PapaParse/papaparse.js:190:14)
+    at addHeader (/Users/dboskovic/Code/Contrib/PapaParse/papaparse.js:1234:14)
+    at Array.forEach (<anonymous>)
+    at fillHeaderFields (/Users/dboskovic/Code/Contrib/PapaParse/papaparse.js:1244:23)
+
+
+Test Case 3: Using array of headers without renaming - TESTING
+---------------------------------------------------------------
+  Keeping header "Code Set"
+  Keeping header "Code Name"
+  Keeping header "Code Value"
+  Returning null for header "description"
+  Returning null for header "extra_column1"
+  Returning null for header "extra_column2"
+  Keeping header "Code Set"
+  Keeping header "Code Name"
+  Keeping header "Code Value"
+
+ERROR: Cannot read properties of null (reading 'charCodeAt')
+Stack trace: TypeError: Cannot read properties of null (reading 'charCodeAt')
+    at stripBom (/Users/dboskovic/Code/Contrib/PapaParse/papaparse.js:190:14)
+    at addHeader (/Users/dboskovic/Code/Contrib/PapaParse/papaparse.js:1234:14)
+    at Array.forEach (<anonymous>)
+    at fillHeaderFields (/Users/dboskovic/Code/Contrib/PapaParse/papaparse.js:1244:23)
+
+
+Test Case 4: Workaround - returning empty string instead of null
+-----------------------------------------------------------------
+  Transforming "Code Set" to "codeSet"
+  Transforming "Code Name" to "codeName"
+  Transforming "Code Value" to "codeValue"
+  Returning empty string for header "description"
+  Returning empty string for header "extra_column1"
+  Returning empty string for header "extra_column2"
+  Returning empty string for header "codeSet"
+  Returning empty string for header "codeName"
+  Returning empty string for header "codeValue"
+  Returning empty string for header ""
+  Returning empty string for header "_1"
+  Returning empty string for header "_2"
+
+Parsed data (first row):
+{
+  "": "Extra Data 2"
+}
+
+Total rows parsed: 3
+
+
+SUMMARY
+=======
+
+Expected behavior:
+- Test Case 1: Headers should be renamed according to headerMap, unmapped headers kept as is
+- Test Case 2: Headers should be renamed according to headerMap, unmapped headers should be ignored/removed
+- Test Case 3: Headers in validHeaders array should be kept, others should be ignored/removed
+- Test Case 4: Workaround test - using empty string instead of null
+
+Actual behavior:
+- Test Case 1: Works as expected
+- Test Case 2: BUG - Causes TypeError when trying to process null headers
+- Test Case 3: Same issue - TypeError when returning null
+- Test Case 4: Check if empty string works as a workaround
