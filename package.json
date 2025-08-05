@@ -91,6 +91,7 @@
     "refactor:test": "npm run ci:foundation",
     "check": "biome check --diagnostic-level=error src",
     "check:fix": "biome check --diagnostic-level=error --write src ",
+    "test:unit": "bun test src/**/*.spec.ts",
     "test:e2e": "bun test src/e2e-tests/",
     "test:e2e:watch": "bun test --watch src/e2e-tests/"
   },
