@@ -1,6 +1,8 @@
 "use strict";
 
-var Papa = require("../papaparse.js");
+// Allow environment variable to override Papa entry point for testing new implementation
+var papaEntryPoint = process.env.PAPA_ENTRY_POINT || "../legacy/papaparse.js";
+var Papa = require(papaEntryPoint);
 
 var fs = require('fs');
 var assert = require('assert');
