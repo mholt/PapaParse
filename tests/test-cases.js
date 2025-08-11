@@ -641,6 +641,7 @@ var CORE_PARSER_TESTS = [
 			}
 		}
 	},
+
 ];
 
 describe('Core Parser Tests', function() {
@@ -1652,7 +1653,8 @@ var PARSE_TESTS = [
 			data: [['1','2','3','4']],
 			errors: []
 		}
-	}
+	},
+
 ];
 
 describe('Parse Tests', function() {
@@ -1671,6 +1673,26 @@ describe('Parse Tests', function() {
 	for (var i = 0; i < PARSE_TESTS.length; i++) {
 		generateTest(PARSE_TESTS[i]);
 	}
+
+	// Custom test for Issue 1024 - renamedHeaders regression test
+	it('Issue 1024: renamedHeaders returned for simple duplicate headers (regression test)', function() {
+		var result = Papa.parse('Column,Column\n1-1,1-2\n2-1,2-2\n3-1,3-2', { header: true });
+
+		// Test data structure
+		assert.deepEqual(result.data, [
+			{Column: '1-1', Column_1: '1-2'},
+			{Column: '2-1', Column_1: '2-2'},
+			{Column: '3-1', Column_1: '3-2'}
+		]);
+
+		// Test errors
+		assert.deepEqual(result.errors, []);
+
+		// Test that renamedHeaders is present and correct
+		assert.isNotNull(result.meta.renamedHeaders, 'renamedHeaders should not be null');
+		assert.isObject(result.meta.renamedHeaders, 'renamedHeaders should be an object');
+		assert.deepEqual(result.meta.renamedHeaders, {Column_1: 'Column'}, 'renamedHeaders should contain the renamed header mapping');
+	});
 });
 
 
