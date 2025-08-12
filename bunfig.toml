@@ -1,0 +1,3 @@
+[test]
+# Setup file to run before tests
+preload = ["./src/e2e-tests/setup.ts"]
