@@ -1,0 +1,30 @@
+{
+  "name": "edge_case_empty",
+  "input": {
+    "csvContent": "",
+    "config": {
+      "dynamicTyping": false,
+      "transform": false
+    }
+  },
+  "output": {
+    "data": [],
+    "errors": [
+      {
+        "type": "Delimiter",
+        "code": "UndetectableDelimiter",
+        "message": "Unable to auto-detect delimiting character; defaulted to ','"
+      }
+    ],
+    "meta": {
+      "delimiter": ",",
+      "linebreak": "\n",
+      "aborted": false,
+      "truncated": false,
+      "cursor": 0,
+      "renamedHeaders": null
+    }
+  },
+  "checksum": "58b959bd26bfc22602568dcd31559a1feed2c1952eead50c83bd45300b258a9a",
+  "version": "1.0.0"
+}

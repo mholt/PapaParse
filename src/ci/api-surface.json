@@ -1,0 +1,196 @@
+{
+  "properties": [
+    {
+      "name": "BAD_DELIMITERS",
+      "type": "object",
+      "value": {
+        "isArray": true,
+        "length": 4,
+        "sample": [
+          "\r",
+          "\n",
+          "\""
+        ]
+      },
+      "isFunction": false,
+      "isConfigurable": true,
+      "isEnumerable": true,
+      "isWritable": true
+    },
+    {
+      "name": "BYTE_ORDER_MARK",
+      "type": "string",
+      "value": "﻿",
+      "isFunction": false,
+      "isConfigurable": true,
+      "isEnumerable": true,
+      "isWritable": true
+    },
+    {
+      "name": "DefaultDelimiter",
+      "type": "string",
+      "value": ",",
+      "isFunction": false,
+      "isConfigurable": true,
+      "isEnumerable": true,
+      "isWritable": true
+    },
+    {
+      "name": "DuplexStreamStreamer",
+      "type": "function",
+      "value": "[Function]",
+      "isFunction": true,
+      "isConfigurable": true,
+      "isEnumerable": true,
+      "isWritable": true
+    },
+    {
+      "name": "FileStreamer",
+      "type": "function",
+      "value": "[Function]",
+      "isFunction": true,
+      "isConfigurable": true,
+      "isEnumerable": true,
+      "isWritable": true
+    },
+    {
+      "name": "LocalChunkSize",
+      "type": "number",
+      "value": 10485760,
+      "isFunction": false,
+      "isConfigurable": true,
+      "isEnumerable": true,
+      "isWritable": true
+    },
+    {
+      "name": "NODE_STREAM_INPUT",
+      "type": "number",
+      "value": 1,
+      "isFunction": false,
+      "isConfigurable": true,
+      "isEnumerable": true,
+      "isWritable": true
+    },
+    {
+      "name": "NetworkStreamer",
+      "type": "function",
+      "value": "[Function]",
+      "isFunction": true,
+      "isConfigurable": true,
+      "isEnumerable": true,
+      "isWritable": true
+    },
+    {
+      "name": "Parser",
+      "type": "function",
+      "value": "[Function]",
+      "isFunction": true,
+      "isConfigurable": true,
+      "isEnumerable": true,
+      "isWritable": true
+    },
+    {
+      "name": "ParserHandle",
+      "type": "function",
+      "value": "[Function]",
+      "isFunction": true,
+      "isConfigurable": true,
+      "isEnumerable": true,
+      "isWritable": true
+    },
+    {
+      "name": "RECORD_SEP",
+      "type": "string",
+      "value": "\u001e",
+      "isFunction": false,
+      "isConfigurable": true,
+      "isEnumerable": true,
+      "isWritable": true
+    },
+    {
+      "name": "ReadableStreamStreamer",
+      "type": "function",
+      "value": "[Function]",
+      "isFunction": true,
+      "isConfigurable": true,
+      "isEnumerable": true,
+      "isWritable": true
+    },
+    {
+      "name": "RemoteChunkSize",
+      "type": "number",
+      "value": 5242880,
+      "isFunction": false,
+      "isConfigurable": true,
+      "isEnumerable": true,
+      "isWritable": true
+    },
+    {
+      "name": "StringStreamer",
+      "type": "function",
+      "value": "[Function]",
+      "isFunction": true,
+      "isConfigurable": true,
+      "isEnumerable": true,
+      "isWritable": true
+    },
+    {
+      "name": "UNIT_SEP",
+      "type": "string",
+      "value": "\u001f",
+      "isFunction": false,
+      "isConfigurable": true,
+      "isEnumerable": true,
+      "isWritable": true
+    },
+    {
+      "name": "WORKERS_SUPPORTED",
+      "type": "boolean",
+      "value": false,
+      "isFunction": false,
+      "isConfigurable": true,
+      "isEnumerable": true,
+      "isWritable": true
+    },
+    {
+      "name": "parse",
+      "type": "function",
+      "value": "[Function]",
+      "isFunction": true,
+      "isConfigurable": true,
+      "isEnumerable": true,
+      "isWritable": true
+    },
+    {
+      "name": "unparse",
+      "type": "function",
+      "value": "[Function]",
+      "isFunction": true,
+      "isConfigurable": true,
+      "isEnumerable": true,
+      "isWritable": true
+    }
+  ],
+  "keys": [
+    "BAD_DELIMITERS",
+    "BYTE_ORDER_MARK",
+    "DefaultDelimiter",
+    "DuplexStreamStreamer",
+    "FileStreamer",
+    "LocalChunkSize",
+    "NODE_STREAM_INPUT",
+    "NetworkStreamer",
+    "Parser",
+    "ParserHandle",
+    "RECORD_SEP",
+    "ReadableStreamStreamer",
+    "RemoteChunkSize",
+    "StringStreamer",
+    "UNIT_SEP",
+    "WORKERS_SUPPORTED",
+    "parse",
+    "unparse"
+  ],
+  "version": "legacy",
+  "timestamp": "2025-07-28T22:09:11.071Z"
+}

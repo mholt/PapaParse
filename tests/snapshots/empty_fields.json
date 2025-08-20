@@ -1,0 +1,46 @@
+{
+  "name": "empty_fields",
+  "input": {
+    "csvContent": "a,b,c\n1,,3\n,2,\n,,",
+    "config": {
+      "header": true,
+      "dynamicTyping": false,
+      "transform": false
+    }
+  },
+  "output": {
+    "data": [
+      {
+        "a": "1",
+        "b": "",
+        "c": "3"
+      },
+      {
+        "a": "",
+        "b": "2",
+        "c": ""
+      },
+      {
+        "a": "",
+        "b": "",
+        "c": ""
+      }
+    ],
+    "errors": [],
+    "meta": {
+      "delimiter": ",",
+      "linebreak": "\n",
+      "aborted": false,
+      "truncated": false,
+      "cursor": 17,
+      "renamedHeaders": null,
+      "fields": [
+        "a",
+        "b",
+        "c"
+      ]
+    }
+  },
+  "checksum": "4fee89ca69e645265256377f3546f0ecbf3e4ccc3e4df5304692bdec340aab0f",
+  "version": "1.0.0"
+}
