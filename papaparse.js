@@ -739,6 +739,7 @@ License: MIT
 		ChunkStreamer.call(this, config);
 
 		var reader, slice;
+		var decoder = new TextDecoder(config.encoding || 'utf-8');
 
 		// FileReader is better than FileReaderSync (even in worker) - see http://stackoverflow.com/q/24708649/1048862
 		// But Firefox is a pill, too - see issue #76: https://github.com/mholt/PapaParse/issues/76
@@ -775,17 +776,33 @@ License: MIT
 				var end = Math.min(this._start + this._config.chunkSize, this._input.size);
 				input = slice.call(input, this._start, end);
 			}
-			var txt = reader.readAsText(input, this._config.encoding);
+			var buffer = reader.readAsArrayBuffer(input);
 			if (!usingAsyncReader)
-				this._chunkLoaded({ target: { result: txt } });	// mimic the async signature
+				this._chunkLoaded({ target: { result: buffer } });	// mimic the async signature
 		};
 
 		this._chunkLoaded = function(event)
 		{
+			var buffer = event.target.result;
+			var resize = 0;
+
+			// Bugfix: #751 Avoid splitting chunks in the middle of UTF-8 characters
+			if (decoder.encoding === 'utf-8') {
+				var bytes = new Uint8Array(buffer.slice(-3));	// UTF-8 characters can be up to four bytes
+				if ((bytes[0] & 0xF8) === 0xF0) resize = 3;	// Four-byte sequence
+				else if ((bytes[1] & 0xF0) >= 0xE0) resize = 2;	// Three-byte or four-byte sequence
+				else if ((bytes[2] & 0xE0) >= 0xC0) resize = 1;	// Two-byte, three-byte or four-byte sequence
+			}
+
+			if (resize > 0)
+				buffer = buffer.slice(0, -resize);
+
+			var chunk = decoder.decode(buffer);
+
 			// Very important to increment start each time before handling results
-			this._start += this._config.chunkSize;
+			this._start += this._config.chunkSize - resize;
 			this._finished = !this._config.chunkSize || this._start >= this._input.size;
-			this.parseChunk(event.target.result);
+			this.parseChunk(chunk);
 		};
 
 		this._chunkError = function()
