@@ -42,12 +42,12 @@ const csv = Papa.unparse(data[, config]);
 Homepage & Demo
 ----------------
 
-- [Homepage](http://papaparse.com)
-- [Demo](http://papaparse.com/demo)
+- [Homepage](https://www.papaparse.com)
+- [Demo](https://www.papaparse.com/demo)
 
 To learn how to use Papa Parse:
 
-- [Documentation](http://papaparse.com/docs)
+- [Documentation](https://www.papaparse.com/docs)
 
 The website is hosted on [Github Pages](https://pages.github.com/). Its content is also included in the docs folder of this repository. If you want to contribute on it just clone the master of this repository and open a pull request.
 
@@ -62,7 +62,7 @@ Papa Parse can also parse in a node streaming style which makes `.pipe` availabl
 Get Started
 -----------
 
-For usage instructions, see the [homepage](http://papaparse.com) and, for more detail, the [documentation](http://papaparse.com/docs).
+For usage instructions, see the [homepage](https://www.papaparse.com) and, for more detail, the [documentation](https://www.papaparse.com/docs).
 
 Tests
 -----
