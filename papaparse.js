@@ -192,6 +192,20 @@ License: MIT
 		}
 		return string;
 	}
+	
+	function typeFunction(value)
+	{
+		if (value === 'true' || value === 'TRUE')
+			return true;
+		else if (value === 'false' || value === 'FALSE')
+			return false;
+		else if (testFloat(value))
+			return parseFloat(value);
+		else if (ISO_DATE.test(value))
+			return new Date(value);
+		else
+			return (value === '' ? null : value);
+	}
 
 	function CsvToJson(_input, _config)
 	{
@@ -203,6 +217,10 @@ License: MIT
 			dynamicTyping = {};
 		}
 		_config.dynamicTyping = dynamicTyping;
+
+		_config.typeCastFunction = isFunction(_config.typeCastFunction)
+			? _config.typeCastFunction
+			: typeFunction()
 
 		_config.transform = isFunction(_config.transform) ? _config.transform : false;
 
@@ -1260,20 +1278,9 @@ License: MIT
 
 		function parseDynamic(field, value)
 		{
-			if (shouldApplyDynamicTyping(field))
-			{
-				if (value === 'true' || value === 'TRUE')
-					return true;
-				else if (value === 'false' || value === 'FALSE')
-					return false;
-				else if (testFloat(value))
-					return parseFloat(value);
-				else if (ISO_DATE.test(value))
-					return new Date(value);
-				else
-					return (value === '' ? null : value);
-			}
-			return value;
+			return (shouldApplyDynamicTyping(field))
+				? _config.typeCastFunction(value)
+				: value;
 		}
 
 		function applyHeaderAndDynamicTypingAndTransformation()
