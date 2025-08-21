@@ -45,6 +45,10 @@ License: MIT
 		return {};
 	})();
 
+	var MAX_FLOAT = Math.pow(2, 53);
+	var MIN_FLOAT = -MAX_FLOAT;
+	var FLOAT = /^\s*-?(\d+\.?|\.\d+|\d+\.\d+)([eE][-+]?\d+)?\s*$/;
+	var ISO_DATE = /^((\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z)))$/;
 
 	function getWorkerBlob() {
 		var URL = global.URL || global.webkitURL || null;
@@ -193,6 +197,16 @@ License: MIT
 		return string;
 	}
 
+	function testFloat(s) {
+		if (FLOAT.test(s)) {
+			var floatValue = parseFloat(s);
+			if (floatValue > MIN_FLOAT && floatValue < MAX_FLOAT) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	function CsvToJson(_input, _config)
 	{
 		_config = _config || {};
@@ -203,6 +217,21 @@ License: MIT
 			dynamicTyping = {};
 		}
 		_config.dynamicTyping = dynamicTyping;
+
+		_config.typeCastFunction = isFunction(_config.typeCastFunction)
+			? _config.typeCastFunction
+			: (value) => {
+				if (value === 'true' || value === 'TRUE')
+					return true;
+				else if (value === 'false' || value === 'FALSE')
+					return false;
+				else if (testFloat(value))
+					return parseFloat(value);
+				else if (ISO_DATE.test(value))
+					return new Date(value);
+				else
+					return (value === '' ? null : value);
+			};
 
 		_config.transform = isFunction(_config.transform) ? _config.transform : false;
 
@@ -1028,10 +1057,6 @@ License: MIT
 	function ParserHandle(_config)
 	{
 		// One goal is to minimize the use of regular expressions...
-		var MAX_FLOAT = Math.pow(2, 53);
-		var MIN_FLOAT = -MAX_FLOAT;
-		var FLOAT = /^\s*-?(\d+\.?|\.\d+|\d+\.\d+)([eE][-+]?\d+)?\s*$/;
-		var ISO_DATE = /^((\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z)))$/;
 		var self = this;
 		var _stepCounter = 0;	// Number of times step was called (number of rows parsed)
 		var _rowCounter = 0;	// Number of rows that have been parsed so far
@@ -1188,16 +1213,6 @@ License: MIT
 			return _config.skipEmptyLines === 'greedy' ? s.join('').trim() === '' : s.length === 1 && s[0].length === 0;
 		}
 
-		function testFloat(s) {
-			if (FLOAT.test(s)) {
-				var floatValue = parseFloat(s);
-				if (floatValue > MIN_FLOAT && floatValue < MAX_FLOAT) {
-					return true;
-				}
-			}
-			return false;
-		}
-
 		function processResults()
 		{
 			if (_results && _delimiterError)
@@ -1260,20 +1275,9 @@ License: MIT
 
 		function parseDynamic(field, value)
 		{
-			if (shouldApplyDynamicTyping(field))
-			{
-				if (value === 'true' || value === 'TRUE')
-					return true;
-				else if (value === 'false' || value === 'FALSE')
-					return false;
-				else if (testFloat(value))
-					return parseFloat(value);
-				else if (ISO_DATE.test(value))
-					return new Date(value);
-				else
-					return (value === '' ? null : value);
-			}
-			return value;
+			return (shouldApplyDynamicTyping(field))
+				? _config.typeCastFunction(value)
+				: value;
 		}
 
 		function applyHeaderAndDynamicTypingAndTransformation()
