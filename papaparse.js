@@ -206,6 +206,7 @@ License: MIT
 
 		_config.transform = isFunction(_config.transform) ? _config.transform : false;
 
+
 		if (_config.worker && Papa.WORKERS_SUPPORTED)
 		{
 			var w = newWorker();
@@ -219,6 +220,10 @@ License: MIT
 			_config.chunk = isFunction(_config.chunk);
 			_config.complete = isFunction(_config.complete);
 			_config.error = isFunction(_config.error);
+			
+			if (isFunction(_config.transformHeader)) {
+				_config.transformHeader = _config.transformHeader.toString();
+			}
 			delete _config.worker;	// prevent infinite loop
 
 			w.postMessage({
@@ -1898,6 +1903,9 @@ License: MIT
 
 		if (typeof Papa.WORKER_ID === 'undefined' && msg)
 			Papa.WORKER_ID = msg.workerId;
+
+		if (typeof msg.config.transformHeader === "string") {
+			eval('msg.config.transformHeader = ' + msg.config.transformHeader);
 
 		if (typeof msg.input === 'string')
 		{
