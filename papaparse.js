@@ -565,8 +565,8 @@ License: MIT
 					this._halted = true;
 					return;
 				}
+				this._completeResults = results;
 				results = undefined;
-				this._completeResults = undefined;
 			}
 
 			if (!this._config.step && !this._config.chunk) {
@@ -1866,23 +1866,23 @@ License: MIT
 					if (aborted)
 						break;
 				}
-				delete msg.results;	// free memory ASAP
 			}
 			else if (isFunction(worker.userChunk))
 			{
 				worker.userChunk(msg.results, handle, msg.file);
-				delete msg.results;
 			}
 		}
 
 		if (msg.finished && !aborted)
-			completeWorker(msg.workerId, msg.results);
+			completeWorker(msg.workerId, msg.results, msg.file);
+
+		delete msg.results;
 	}
 
-	function completeWorker(workerId, results) {
+	function completeWorker(workerId, results, file) {
 		var worker = workers[workerId];
 		if (isFunction(worker.userComplete))
-			worker.userComplete(results);
+			worker.userComplete(results, file);
 		worker.terminate();
 		delete workers[workerId];
 	}
