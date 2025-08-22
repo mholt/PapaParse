@@ -622,6 +622,22 @@ License: MIT
 		ChunkStreamer.call(this, config);
 
 		var xhr;
+		// Will update `totalContentSize` with possible total size info from Content-Range response header
+		// Its value will be -1 to indicate the total size info can't be retrieve from Content-Range response header (or not available)
+		var totalContentSize = -1;
+
+		// the `this._config.chunkSize` could be large than total size of the file
+		// which lead to server response 416 (Range Not Satisfiable error) on the first chunk / range request
+		// If this happened on the first, we should only retry request content without range header once
+		var shouldDisableChunk = false;
+
+		// indicate we are processing the first chunk
+		// if http 416 error is captured, we will disable chunk and retry the request
+		var isFirstChunk = true;
+
+		// indicate we have retried the request without range header (or without end range if it's not the first chunk)
+		// we can check this field to make sure that we only ever retry once
+		var hasRetriedRequestFor416 = false;
 
 		if (IS_WORKER)
 		{
@@ -678,9 +694,14 @@ License: MIT
 				}
 			}
 
-			if (this._config.chunkSize)
+			if (this._config.chunkSize && !shouldDisableChunk)
 			{
 				var end = this._start + this._config.chunkSize - 1;	// minus one because byte range is inclusive
+				if(totalContentSize > 1 && end > totalContentSize - 1) {
+					// if valid totalContentSize (retrieved from content-range response header) is available
+					// and end is beyond totalContentSize, replace end with totalContentSize - 1 (as range is inclusive)
+					end = totalContentSize - 1;
+				}
 				xhr.setRequestHeader('Range', 'bytes=' + this._start + '-' + end);
 			}
 
@@ -700,14 +721,32 @@ License: MIT
 			if (xhr.readyState !== 4)
 				return;
 
+			if (xhr.status === 416 && isFirstChunk && !hasRetriedRequestFor416) {
+				isFirstChunk = false;
+				hasRetriedRequestFor416 = true;
+				shouldDisableChunk = true;
+				// retry once
+				this._nextChunk();
+				return;
+			}
+
 			if (xhr.status < 200 || xhr.status >= 400)
 			{
 				this._chunkError();
 				return;
 			}
 
-			// Use chunckSize as it may be a diference on reponse lentgh due to characters with more than 1 byte
-			this._start += this._config.chunkSize ? this._config.chunkSize : xhr.responseText.length;
+			var size = getFileSize(xhr);
+
+			if (size !== -1) {
+				// we only update totalContentSize when we can get valid content range header
+				totalContentSize = size;
+			}
+
+			var chunkSize = getChunkSize(xhr);
+
+			// Use chunckSize that is retrieved from content-length header if available
+			this._start += chunkSize !== -1 ?  chunkSize : this._config.chunkSize;
 			this._finished = !this._config.chunkSize || this._start >= getFileSize(xhr);
 			this.parseChunk(xhr.responseText);
 		};
@@ -718,13 +757,24 @@ License: MIT
 			this._sendError(new Error(errorText));
 		};
 
+		function getChunkSize(xhr)
+		{
+			var contentLength = xhr.getResponseHeader('Content-Length');
+			if (contentLength === null) { // no content length, return -1 to indicate this
+				return -1;
+			}
+			var length = parseInt(contentLength);
+			return length > 0 ? length : -1;
+		}
+
 		function getFileSize(xhr)
 		{
 			var contentRange = xhr.getResponseHeader('Content-Range');
 			if (contentRange === null) { // no content range, then finish!
 				return -1;
 			}
-			return parseInt(contentRange.substring(contentRange.lastIndexOf('/') + 1));
+			var size = parseInt(contentRange.substring(contentRange.lastIndexOf('/') + 1));
+			return size > 0 ? size : -1; // this also exclude the situation that size is NaN
 		}
 	}
 	NetworkStreamer.prototype = Object.create(ChunkStreamer.prototype);
