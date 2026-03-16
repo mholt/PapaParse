@@ -1,0 +1,41 @@
+{
+  "name": "simple_csv",
+  "input": {
+    "csvContent": "name,age,city\nJohn,30,NYC\nJane,25,LA",
+    "config": {
+      "header": true,
+      "dynamicTyping": false,
+      "transform": false
+    }
+  },
+  "output": {
+    "data": [
+      {
+        "name": "John",
+        "age": "30",
+        "city": "NYC"
+      },
+      {
+        "name": "Jane",
+        "age": "25",
+        "city": "LA"
+      }
+    ],
+    "errors": [],
+    "meta": {
+      "delimiter": ",",
+      "linebreak": "\n",
+      "aborted": false,
+      "truncated": false,
+      "cursor": 36,
+      "renamedHeaders": null,
+      "fields": [
+        "name",
+        "age",
+        "city"
+      ]
+    }
+  },
+  "checksum": "0423b324abe92cf93c11d33acb1bac7b7cfb1bce204b383b323aaa274bea2851",
+  "version": "1.0.0"
+}
