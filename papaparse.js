@@ -1165,23 +1165,22 @@ License: MIT
 			var re = new RegExp(escapeRegExp(quoteChar) + '([^]*?)' + escapeRegExp(quoteChar), 'gm');
 			input = input.replace(re, '');
 
-			var r = input.split('\r');
+			// Count each line-ending style and pick the most frequent. Counting
+			// \r\n explicitly (rather than inferring from which of \r/\n appears
+			// first) avoids mis-detecting a CRLF file as LF when an early lone \n
+			// precedes the CRLF rows (e.g. an LF header line followed by CRLF data),
+			// which previously left a stray \r on every row's last field.
+			var crlf = (input.match(/\r\n/g) || []).length;
+			var totalR = input.split('\r').length - 1;
+			var totalN = input.split('\n').length - 1;
+			var loneR = totalR - crlf;
+			var loneN = totalN - crlf;
 
-			var n = input.split('\n');
-
-			var nAppearsFirst = (n.length > 1 && n[0].length < r[0].length);
-
-			if (r.length === 1 || nAppearsFirst)
-				return '\n';
-
-			var numWithN = 0;
-			for (var i = 0; i < r.length; i++)
-			{
-				if (r[i][0] === '\n')
-					numWithN++;
-			}
-
-			return numWithN >= r.length / 2 ? '\r\n' : '\r';
+			if (crlf > 0 && crlf >= loneR && crlf >= loneN)
+				return '\r\n';
+			if (loneR > 0 && loneR >= loneN)
+				return '\r';
+			return '\n';
 		};
 
 		function testEmptyLine(s) {
