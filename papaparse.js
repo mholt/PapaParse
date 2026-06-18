@@ -357,8 +357,10 @@ License: MIT
 			if (typeof _config.newline === 'string')
 				_newline = _config.newline;
 
-			if (typeof _config.quoteChar === 'string')
+			if (typeof _config.quoteChar === 'string') {
 				_quoteChar = _config.quoteChar;
+				_escapedQuote = _quoteChar + _quoteChar;
+			}
 
 			if (typeof _config.header === 'boolean')
 				_writeHeader = _config.header;
@@ -460,7 +462,8 @@ License: MIT
 				needsQuotes = true;
 			}
 
-			var escapedQuoteStr = str.toString().replace(quoteCharRegex, _escapedQuote);
+			var strValue = str.toString();
+			var escapedQuoteStr = strValue.replace(quoteCharRegex, _escapedQuote);
 
 			needsQuotes = needsQuotes
 							|| _quotes === true
@@ -468,6 +471,7 @@ License: MIT
 							|| (Array.isArray(_quotes) && _quotes[col])
 							|| hasAny(escapedQuoteStr, Papa.BAD_DELIMITERS)
 							|| escapedQuoteStr.indexOf(_delimiter) > -1
+							|| strValue.indexOf(_quoteChar) > -1
 							|| escapedQuoteStr.charAt(0) === ' '
 							|| escapedQuoteStr.charAt(escapedQuoteStr.length - 1) === ' ';
 
