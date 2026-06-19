@@ -2059,6 +2059,18 @@ var UNPARSE_TESTS = [
 		expected: 'foo,"""quoted"""'
 	},
 	{
+		description: "Custom quoteChar escapes and quotes embedded quoteChar (no escapeChar)",
+		input: [['a', 'x+y']],
+		config: {header: false, quoteChar: '+'},
+		expected: 'a,+x++y+'
+	},
+	{
+		description: "Custom quoteChar with custom escapeChar quotes and escapes embedded quoteChar",
+		input: [['a', 'x+y']],
+		config: {header: false, quoteChar: '+', escapeChar: '\\'},
+		expected: 'a,+x\\+y+'
+	},
+	{
 		description: "Escape formulae",
 		input: [{ "Col1": "=danger", "Col2": "@danger", "Col3": "safe" }, { "Col1": "safe=safe", "Col2": "+danger", "Col3": "-danger, danger" }, { "Col1": "'+safe", "Col2": "'@safe", "Col3": "safe, safe" }],
 		config: { escapeFormulae: true },
@@ -2079,7 +2091,7 @@ var UNPARSE_TESTS = [
 		description: "Escape formulae with single-quote quoteChar and escapeChar",
 		input: [{ "Col1": "=danger", "Col2": "@danger", "Col3": "safe" }, { "Col1": "safe=safe", "Col2": "+danger", "Col3": "-danger, danger" }, { "Col1": "'+safe", "Col2": "'@safe", "Col3": "safe, safe" }],
 		config: { escapeFormulae: true, quoteChar: "'", escapeChar: "'" },
-		expected: 'Col1,Col2,Col3\r\n\'\'\'=danger\',\'\'\'@danger\',safe\r\nsafe=safe,\'\'\'+danger\',\'\'\'-danger, danger\'\r\n\'\'+safe,\'\'@safe,\'safe, safe\''
+		expected: 'Col1,Col2,Col3\r\n\'\'\'=danger\',\'\'\'@danger\',safe\r\nsafe=safe,\'\'\'+danger\',\'\'\'-danger, danger\'\r\n\'\'\'+safe\',\'\'\'@safe\',\'safe, safe\''
 	},
 	{
 		description: "Escape formulae with single-quote quoteChar and escapeChar and forced quotes",
