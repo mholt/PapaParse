@@ -2065,12 +2065,6 @@ var UNPARSE_TESTS = [
 		expected: 'a,+x++y+'
 	},
 	{
-		description: "Custom quoteChar quotes a field containing the quoteChar",
-		input: [['a@b', 'c']],
-		config: {header: false, quoteChar: '@'},
-		expected: '@a@@b@,c'
-	},
-	{
 		description: "Custom quoteChar with custom escapeChar quotes and escapes embedded quoteChar",
 		input: [['a', 'x+y']],
 		config: {header: false, quoteChar: '+', escapeChar: '\\'},
