@@ -512,8 +512,25 @@ var csv = Papa.unparse({
 									<code>transformHeader</code>
 								</td>
 								<td>
-									A function to apply on each header. Requires <code>header</code> to be <code>true</code>. The function receives the header as its first argument and the index as second.<br>
+									A function to apply on each header. Requires <code>header</code> to be <code>true</code>. The arguments are:
+									<ul>
+										<li><b>header:</b> the current header text, as parsed from the appropriate cell in the specified header row</li>
+										<li><b>index:</b> the column number of the header text (0 for first column)</li>
+										<li><b>arr:</b> the string array of data for that row</li>
+										<li><b>acc:</b> the existing header for that column based on previous lines iteration ('' if no previous lines)</li>
+										<li><b>j:</b> the rowNumber (0 for the first line)</li>
+									</ul>
 									Only available starting with version 5.0.
+									The latter three parameters (arr, acc, j) are only available when used in conjunction with config.headerLines and from version 5.4+.
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<code>headerLines</code>
+								</td>
+								<td>
+									The number of rows which will be used to transform into a header, and removed from the rest of the data. Requires header to be true. Default 1.
+									Only available starting with veresion 5.4.
 								</td>
 							</tr>
 							<tr>
