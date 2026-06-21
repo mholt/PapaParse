@@ -511,6 +511,8 @@ License: MIT
 
 		this.parseChunk = function(chunk, isFakeChunk)
 		{
+			var notFirstChunk = !this.isFirstChunk;
+
 			// First chunk pre-processing
 			const skipFirstNLines = parseInt(this._config.skipFirstNLines) || 0;
 			if (this.isFirstChunk && skipFirstNLines > 0) {
@@ -534,7 +536,7 @@ License: MIT
 			// Rejoin the line we likely just split in two by chunking the file
 			var aggregate = this._partialLine + chunk;
 			this._partialLine = '';
-			var results = this._handle.parse(aggregate, this._baseIndex, !this._finished);
+			var results = this._handle.parse(aggregate, this._baseIndex, !this._finished, notFirstChunk);
 
 			if (this._handle.paused() || this._handle.aborted()) {
 				this._halted = true;
@@ -1084,7 +1086,7 @@ License: MIT
 		 * and ignoreLastRow parameters. They are used by streamers (wrapper functions)
 		 * when an input comes in multiple chunks, like from a file.
 		 */
-		this.parse = function(input, baseIndex, ignoreLastRow)
+		this.parse = function(input, baseIndex, ignoreLastRow, notFirstChunk)
 		{
 			var quoteChar = _config.quoteChar || '"';
 			if (!_config.newline)
@@ -1115,7 +1117,7 @@ License: MIT
 
 			_input = input;
 			_parser = new Parser(parserConfig);
-			_results = _parser.parse(_input, baseIndex, ignoreLastRow);
+			_results = _parser.parse(_input, baseIndex, ignoreLastRow, notFirstChunk);
 			processResults();
 			return _paused ? { meta: { paused: true } } : (_results || { meta: { paused: false } });
 		};
@@ -1462,7 +1464,7 @@ License: MIT
 		var cursor = 0;
 		var aborted = false;
 
-		this.parse = function(input, baseIndex, ignoreLastRow)
+		this.parse = function(input, baseIndex, ignoreLastRow, notFirstChunk)
 		{
 			// For some reason, in Chrome, this speeds things up (!?)
 			if (typeof input !== 'string')
@@ -1744,7 +1746,7 @@ License: MIT
 			/** Returns an object with the results, errors, and meta. */
 			function returnable(stopped)
 			{
-				if (config.header && !baseIndex && data.length && !headerParsed)
+				if (config.header && !notFirstChunk && data.length && !headerParsed)
 				{
 					const result = data[0];
 					const headerCount = Object.create(null); // To track the count of each base header
