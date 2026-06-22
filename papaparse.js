@@ -1343,6 +1343,7 @@ License: MIT
 
 		function guessDelimiter(input, newline, skipEmptyLines, comments, delimitersToGuess) {
 			var bestDelim, bestDelta, fieldCountPrevRow, maxFieldCount;
+			var singleColumnConsistent = false;
 
 			delimitersToGuess = delimitersToGuess || [',', '\t', '|', ';', Papa.RECORD_SEP, Papa.UNIT_SEP];
 
@@ -1379,6 +1380,13 @@ License: MIT
 				if (preview.data.length > 0)
 					avgFieldCount /= (preview.data.length - emptyLinesCount);
 
+				// A valid single-column CSV with multiple rows has no delimiter to detect;
+				// suppress the false-positive UndetectableDelimiter error in that case.
+				// Require more than one non-empty row to avoid masking genuine single-field issues.
+				if (!singleColumnConsistent && delta === 0 && avgFieldCount === 1
+						&& (preview.data.length - emptyLinesCount) > 1)
+					singleColumnConsistent = true;
+
 				if ((typeof bestDelta === 'undefined' || delta <= bestDelta)
 					&& (typeof maxFieldCount === 'undefined' || avgFieldCount > maxFieldCount) && avgFieldCount > 1.99) {
 					bestDelta = delta;
@@ -1390,8 +1398,8 @@ License: MIT
 			_config.delimiter = bestDelim;
 
 			return {
-				successful: !!bestDelim,
-				bestDelimiter: bestDelim
+				successful: !!bestDelim || singleColumnConsistent,
+				bestDelimiter: bestDelim || (singleColumnConsistent ? Papa.DefaultDelimiter : undefined)
 			};
 		}
 
