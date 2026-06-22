@@ -517,7 +517,7 @@ License: MIT
 				let _newline = this._config.newline;
 				if (!_newline) {
 					const quoteChar = this._config.quoteChar || '"';
-					_newline = this._handle.guessLineEndings(chunk, quoteChar);
+					_newline = this._handle.guessLineEndings(chunk, quoteChar, this._config.escapeChar);
 				}
 				const splitChunk = chunk.split(_newline);
 				chunk = [...splitChunk.slice(skipFirstNLines)].join(_newline);
@@ -1088,7 +1088,7 @@ License: MIT
 		{
 			var quoteChar = _config.quoteChar || '"';
 			if (!_config.newline)
-				_config.newline = this.guessLineEndings(input, quoteChar);
+				_config.newline = this.guessLineEndings(input, quoteChar, _config.escapeChar);
 
 			_delimiterError = false;
 			if (!_config.delimiter)
@@ -1162,9 +1162,15 @@ License: MIT
 			_input = '';
 		};
 
-		this.guessLineEndings = function(input, quoteChar)
+		this.guessLineEndings = function(input, quoteChar, escapeChar)
 		{
 			input = input.substring(0, 1024 * 1024);	// max length 1 MB
+			// Remove escaped quotes so they do not break the quote pairing below
+			// (with a distinct escapeChar an embedded quote is escapeChar+quoteChar,
+			// not a doubled quoteChar, which would otherwise mis-pair the quotes).
+			if (escapeChar && escapeChar !== quoteChar) {
+				input = input.split(escapeChar + quoteChar).join('');
+			}
 			// Replace all the text inside quotes
 			var re = new RegExp(escapeRegExp(quoteChar) + '([^]*?)' + escapeRegExp(quoteChar), 'gm');
 			input = input.replace(re, '');
