@@ -1292,6 +1292,26 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Single-column CSV does not emit false-positive UndetectableDelimiter error",
+		notes: "A valid single-column CSV has no field delimiter but should parse cleanly without errors",
+		input: 'id\n1\n2\n3',
+		config: {},
+		expected: {
+			data: [['id'], ['1'], ['2'], ['3']],
+			errors: []
+		}
+	},
+	{
+		description: "Single-column CSV with header does not emit UndetectableDelimiter error",
+		notes: "header:true on a single-column CSV should not produce a false-positive delimiter error",
+		input: 'id\n1\n2\n3',
+		config: { header: true },
+		expected: {
+			data: [{ id: '1' }, { id: '2' }, { id: '3' }],
+			errors: []
+		}
+	},
+	{
 		description: "Lines with comments are not used when guessing the delimiter in an escaped file",
 		notes: "Guessing the delimiter should work even if there are many lines of comments at the start of the file",
 		input: '#1\n#2\n#3\n#4\n#5\n#6\n#7\n#8\n#9\n#10\none,"t,w,o",three\nfour,five,six',
