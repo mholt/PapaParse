@@ -2311,6 +2311,31 @@ var CUSTOM_TESTS = [
 		}
 	},
 	{
+		description: "Quoted field with \\r\\n line ending split across a chunk boundary does not emit a spurious InvalidQuotes error (#1103)",
+		expected: [[['a', 'bc'], ['d', 'ef']], []],
+		run: function(callback) {
+			var data = [];
+			var errors = [];
+			// chunkSize 9 makes the first chunk end on the "\r" of the first "\r\n",
+			// splitting the line ending across the chunk boundary. The closing quote of
+			// "bc" is then followed only by a lone "\r" (neither a delimiter nor a full
+			// newline), which previously tripped a false "Trailing quote on quoted field
+			// is malformed" error even though the row is simply incomplete.
+			Papa.parse('"a","bc"\r\n"d","ef"', {
+				delimiter: ',',
+				newline: '\r\n',
+				chunkSize: 9,
+				chunk: function(results) {
+					data = data.concat(results.data);
+					errors = errors.concat(results.errors);
+				},
+				complete: function() {
+					callback([data, errors]);
+				}
+			});
+		}
+	},
+	{
 		description: "Step is called for each row",
 		expected: 2,
 		run: function(callback) {

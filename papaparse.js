@@ -1625,6 +1625,14 @@ License: MIT
 						}
 
 
+						// When streaming, a closing quote with no further newline left in this
+						// chunk means the row is still incomplete -- most likely a delimiter or
+						// newline split across the chunk boundary (e.g. a "\r\n" cut right after
+						// the "\r"). Defer the row to the next chunk instead of reporting a
+						// spurious malformed-quote error. (#1103)
+						if (ignoreLastRow && nextNewline === -1)
+							return finish();
+
 						// Checks for valid closing quotes are complete (escaped quotes or quote followed by EOF/delimiter/newline) -- assume these quotes are part of an invalid text string
 						errors.push({
 							type: 'Quotes',
