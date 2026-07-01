@@ -1379,8 +1379,11 @@ License: MIT
 				if (preview.data.length > 0)
 					avgFieldCount /= (preview.data.length - emptyLinesCount);
 
-				if ((typeof bestDelta === 'undefined' || delta <= bestDelta)
-					&& (typeof maxFieldCount === 'undefined' || avgFieldCount > maxFieldCount) && avgFieldCount > 1.99) {
+				// Lowest delta (most consistent field count across rows) wins; average
+				// field count only breaks ties between equally consistent delimiters.
+				if (avgFieldCount > 1.99 && (typeof bestDelta === 'undefined'
+					|| delta < bestDelta
+					|| (delta === bestDelta && avgFieldCount > maxFieldCount))) {
 					bestDelta = delta;
 					bestDelim = delim;
 					maxFieldCount = avgFieldCount;
