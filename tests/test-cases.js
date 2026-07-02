@@ -1352,6 +1352,20 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Delimiter is guessed correctly when a quoted field holds newlines and other delimiter characters",
+		notes: "A wrong delimiter that splits the quoted field into many pieces can report a higher average field count; the most consistent delimiter (lowest delta) should still win. See issue #1077",
+		input: 'id;title;data\r\n1;row one;"{\n  ""a"": 1,\n  ""b"": 2,\n  ""c"": 3,\n  ""d"": 4\n}"\r\n2;row two;"{\n  ""a"": 1,\n  ""b"": 2,\n  ""c"": 3,\n  ""d"": 4\n}"',
+		config: {},
+		expected: {
+			data: [
+				['id', 'title', 'data'],
+				['1', 'row one', '{\n  "a": 1,\n  "b": 2,\n  "c": 3,\n  "d": 4\n}'],
+				['2', 'row two', '{\n  "a": 1,\n  "b": 2,\n  "c": 3,\n  "d": 4\n}']
+			],
+			errors: []
+		}
+	},
+	{
 		description: "Single quote as quote character",
 		notes: "Must parse correctly when single quote is specified as a quote character",
 		input: "a,b,'c,d'",
