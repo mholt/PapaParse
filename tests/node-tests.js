@@ -251,6 +251,38 @@ describe('PapaParse', function() {
 		});
 	});
 
+	it('should correctly identify the header row when streaming (Regression Test for Bug #998)', function(done) {
+		var rows = [];
+		Papa.parse(fs.createReadStream(__dirname + '/rows-with-duplicates.csv', 'utf8'), {
+			header: true,
+			step: function(results, parser) {
+				rows = rows.concat(results.data);
+				parser.pause();
+				setTimeout(function() {
+					parser.resume();
+				}, 200);
+			},
+			error: function(err) {
+				done(new Error(err));
+			},
+			complete: function() {
+				assert.deepEqual(rows[1], {
+					A: 'x',
+					B: 'y',
+					C: 'y',
+					D: 'z',
+				});
+				assert.deepEqual(rows[2], {
+					A: '',
+					B: '',
+					C: 'y',
+					D: 'z',
+				});
+				done();
+			}
+		});
+	});
+
 	it('handles errors in beforeFirstChunk', function(done) {
 		var expectedError = new Error('test');
 		Papa.parse(fs.createReadStream(__dirname + '/long-sample.csv', 'utf8'), {
