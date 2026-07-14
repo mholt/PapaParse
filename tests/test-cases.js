@@ -2838,6 +2838,30 @@ var CUSTOM_TESTS = [
 			});
 		}
 	},
+	{
+		description: "transformHeader is called exactly once per header when streaming in chunks",
+		// Each header must be passed to transformHeader exactly once, with its
+		// original (untransformed) value. Regression test for #1083.
+		expected: ['Col1', 'Col2', 'Col3'],
+		run: function(callback) {
+			var seen = [];
+			var rows = [];
+			for (var i = 0; i < 20; i++)
+				rows.push('a' + i + ',b' + i + ',c' + i);
+			var input = 'Col1,Col2,Col3\r\n' + rows.join('\r\n');
+			Papa.parse(input, {
+				header: true,
+				chunkSize: 10,	// force many chunks so the header row is crossed once
+				transformHeader: function(header) {
+					seen.push(header);
+					return header.toLowerCase();
+				},
+				complete: function() {
+					callback(seen);
+				}
+			});
+		}
+	},
 ];
 
 describe('Custom Tests', function() {

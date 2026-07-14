@@ -1233,12 +1233,13 @@ License: MIT
 			if (!_results)
 				return;
 
-			function addHeader(header, i)
+			function addHeader(header)
 			{
-				header = stripBom(header);
-				if (isFunction(_config.transformHeader))
-					header = _config.transformHeader(header, i);
-
+				// Headers have already been BOM-stripped, transformed (via
+				// transformHeader) and de-duplicated in place by the core
+				// Parser's returnable(). Re-applying transformHeader here would
+				// run it a second time per column (issue #1083), so we simply
+				// collect the already-processed header value.
 				_fields.push(header);
 			}
 
