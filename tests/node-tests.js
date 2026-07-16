@@ -179,6 +179,58 @@ describe('PapaParse', function() {
 		});
 	});
 
+	it('does not leak duplicate-header suffixes into data rows under backpressure (header: true)', function(done) {
+		// Regression test: a slow downstream consumer applies backpressure, so
+		// the piped stream pauses/resumes during the first chunk. The duplicate-
+		// header dedupe must only ever apply to the true header row; duplicate or
+		// blank cell values in DATA rows must not gain "_1"/"_2" suffixes.
+		var numRows = 500;
+		var input = 'email,middle_name,address2,country\n';
+		for (var i = 0; i < numRows; i++) {
+			input += 'user' + i + '@example.com,,,US\n';
+		}
+		var rows = [];
+		var csvStream = Papa.parse(Papa.NODE_STREAM_INPUT, {header: true});
+		csvStream.on('error', done);
+		csvStream.on('end', function() {
+			assert.equal(rows.length, numRows);
+			var corrupted = rows.filter(function(row) {
+				return Object.keys(row).some(function(key) {
+					return typeof row[key] === 'string' && /_\d+$/.test(row[key]);
+				});
+			});
+			assert.deepEqual(corrupted, []);
+			rows.forEach(function(row) {
+				assert.equal(row.middle_name, '');
+				assert.equal(row.address2, '');
+				assert.equal(row.country, 'US');
+				assert.ok(!('__parsed_extra' in row));
+			});
+			done();
+		});
+		// Slow reader: yield to the event loop between rows so the transform's
+		// readable buffer fills past its highWaterMark and PapaParse hits
+		// backpressure (pause/resume) mid-first-chunk.
+		var pump = function() {
+			var chunk = csvStream.read();
+			if (chunk === null) {
+				csvStream.once('readable', pump);
+				return;
+			}
+			rows.push(chunk);
+			setImmediate(pump);
+		};
+		csvStream.once('readable', pump);
+		csvStream.end(Buffer.from(input, 'utf8'));
+	});
+
+	it('still renames genuinely duplicate header columns', function() {
+		var result = Papa.parse('email,email,name\na@x.com,b@x.com,alice', {header: true});
+		assert.deepEqual(result.data, [
+			{ email: 'a@x.com', email_1: 'b@x.com', name: 'alice' }
+		]);
+	});
+
 	it('should support pausing and resuming on same tick when streaming', function(done) {
 		var rows = [];
 		Papa.parse(fs.createReadStream(__dirname + '/long-sample.csv', 'utf8'), {

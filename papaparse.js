@@ -1113,6 +1113,18 @@ License: MIT
 			if (_config.preview && _config.header)
 				parserConfig.preview++;	// to compensate for header row
 
+			// Once the header row has been consumed (_fields populated) it must
+			// never be re-derived. A fresh low-level Parser is created for every
+			// chunk AND every pause/resume, so the per-Parser `headerParsed` flag
+			// and the `!baseIndex` heuristic are not sufficient on their own: a
+			// pause during the first chunk (backpressure from a slow consumer)
+			// returns from parseChunk before `_baseIndex` advances past 0, so the
+			// resumed parse would otherwise treat the next DATA row as a header
+			// and apply duplicate-header suffixing (e.g. "" -> "_1") to its
+			// values. Gating on whether the header was already parsed prevents
+			// that corruption.
+			parserConfig.headerAlreadyParsed = _config.header && _fields.length > 0;
+
 			_input = input;
 			_parser = new Parser(parserConfig);
 			_results = _parser.parse(_input, baseIndex, ignoreLastRow);
@@ -1747,7 +1759,7 @@ License: MIT
 			/** Returns an object with the results, errors, and meta. */
 			function returnable(stopped)
 			{
-				if (config.header && !baseIndex && data.length && !headerParsed)
+				if (config.header && !config.headerAlreadyParsed && !baseIndex && data.length && !headerParsed)
 				{
 					const result = data[0];
 					const headerCount = Object.create(null); // To track the count of each base header
