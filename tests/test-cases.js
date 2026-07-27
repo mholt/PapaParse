@@ -2312,6 +2312,48 @@ var CUSTOM_TESTS = [
 		}
 	},
 	{
+		description: "Duplicate values in a data row are not renamed after resume (Regression Test for Issue #998)",
+		expected: [
+			{c1: 'foo, bar', c2: 'foo, bar', c3: 'v1'},
+			{c1: 'foo, bar', c2: 'foo, bar', c3: 'v2'}
+		],
+		run: function(callback) {
+			var rows = [];
+			Papa.parse('c1,c2,c3\n"foo, bar","foo, bar",v1\n"foo, bar","foo, bar",v2\n', {
+				header: true,
+				step: function(results, parser) {
+					parser.pause();
+					rows.push(results.data);
+					parser.resume();
+				},
+				complete: function() {
+					callback(rows);
+				}
+			});
+		}
+	},
+	{
+		description: "Empty trailing fields stay empty after resume (Regression Test for Issue #985)",
+		expected: [
+			{a: '1', b: 'x', c: '', d: ''},
+			{a: '2', b: 'y', c: '', d: ''}
+		],
+		run: function(callback) {
+			var rows = [];
+			Papa.parse('a,b,c,d\n1,x,,\n2,y,,\n', {
+				header: true,
+				step: function(results, parser) {
+					parser.pause();
+					rows.push(results.data);
+					parser.resume();
+				},
+				complete: function() {
+					callback(rows);
+				}
+			});
+		}
+	},
+	{
 		description: "Complete is called with all results if neither step nor chunk is defined",
 		expected: [['A', 'b', 'c'], ['d', 'E', 'f'], ['G', 'h', 'i']],
 		disabled: !FILES_ENABLED,

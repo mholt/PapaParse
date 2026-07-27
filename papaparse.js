@@ -1110,6 +1110,14 @@ License: MIT
 			}
 
 			var parserConfig = copy(_config);
+			// The core parser reads the header row out of the first rows it sees
+			// and decides "first" from baseIndex, which does not advance while the
+			// caller is paused. On every resume it therefore treated the next data
+			// row as a header row and rewrote its duplicate and empty values in
+			// place. The handle already knows whether the header has been
+			// consumed, so tell the parser instead of letting it guess from an
+			// offset. (issues #985, #998)
+			parserConfig.header = needsHeaderRow();
 			if (_config.preview && _config.header)
 				parserConfig.preview++;	// to compensate for header row
 
