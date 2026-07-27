@@ -774,6 +774,7 @@ License: MIT
 		var queue = [];
 		var parseOnData = true;
 		var streamHasEnded = false;
+		var decoder = null;
 
 		this.pause = function()
 		{
@@ -816,11 +817,29 @@ License: MIT
 			}
 		};
 
+		// A chunk boundary can fall inside a multi-byte character, so the bytes
+		// cannot be decoded one chunk at a time: an incomplete sequence has to be
+		// held back until the next chunk completes it, or both halves decode to
+		// U+FFFD and the field is silently corrupted.
+		this._decode = function(chunk)
+		{
+			if (typeof PAPA_BROWSER_CONTEXT === 'undefined')
+			{
+				if (decoder === null)
+				{
+					var StringDecoder = require('string_decoder').StringDecoder;
+					decoder = new StringDecoder(this._config.encoding || 'utf8');
+				}
+				return decoder.write(chunk);
+			}
+			return chunk.toString(this._config.encoding);
+		};
+
 		this._streamData = bindFunction(function(chunk)
 		{
 			try
 			{
-				queue.push(typeof chunk === 'string' ? chunk : chunk.toString(this._config.encoding));
+				queue.push(typeof chunk === 'string' ? chunk : this._decode(chunk));
 
 				if (parseOnData)
 				{
@@ -845,7 +864,9 @@ License: MIT
 		{
 			this._streamCleanUp();
 			streamHasEnded = true;
-			this._streamData('');
+			// Flushing the decoder also delivers the empty sentinel chunk the
+			// finish check looks for.
+			this._streamData(decoder === null ? '' : decoder.end());
 		}, this);
 
 		this._streamCleanUp = bindFunction(function()
