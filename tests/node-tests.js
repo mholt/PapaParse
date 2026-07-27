@@ -4,6 +4,7 @@ var Papa = require("../papaparse.js");
 
 var fs = require('fs');
 var assert = require('assert');
+var Readable = require('stream').Readable;
 var longSampleRawCsv = fs.readFileSync(__dirname + '/long-sample.csv', 'utf8');
 var utf8BomSampleRawCsv = fs.readFileSync(__dirname + '/utf-8-bom-sample.csv', 'utf8');
 
@@ -247,6 +248,42 @@ describe('PapaParse', function() {
 					'Phasellus@Quisquetincidunt.example'
 				]);
 				done();
+			}
+		});
+	});
+
+	it('pause() applies backpressure to the source stream', function(done) {
+		var ROW = '0123456789,abcdefghijklmnopqrstuvwxyz,ABCDEFGHIJKLMNOPQRSTUVWXYZ\n';
+		var block = Buffer.from(ROW.repeat(200));	// 13 KB per push
+		var limit = 2 * 1024 * 1024;
+		var pushed = 0;
+		var source = new Readable({
+			read: function() {
+				if (pushed >= limit) {
+					this.push(null);
+					return;
+				}
+				pushed += block.length;
+				this.push(block);
+			}
+		});
+		var pausedAt = null;
+		Papa.parse(source, {
+			step: function(results, parser) {
+				if (pausedAt !== null)
+					return;
+				pausedAt = pushed;
+				parser.pause();
+				setTimeout(function() {
+					var extra = pushed - pausedAt;
+					source.destroy();
+					// One block may already be in flight; anything beyond that
+					// means the source was never throttled and the rest of the
+					// input is piling up in the streamer's queue.
+					assert.ok(extra <= 2 * block.length,
+						'source pushed ' + extra + ' bytes while the parser was paused');
+					done();
+				}, 250);
 			}
 		});
 	});
