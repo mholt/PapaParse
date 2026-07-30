@@ -21,8 +21,7 @@
 		"workers",
 		"thread",
 		"threading",
-		"multi-threaded",
-		"jquery-plugin"
+		"multi-threaded"
 	],
 	"homepage": "https://www.papaparse.com/",
 	"repository": {
