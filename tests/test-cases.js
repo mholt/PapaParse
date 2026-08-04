@@ -1707,6 +1707,18 @@ describe('Parse Tests', function() {
 		assert.isObject(result.meta.renamedHeaders, 'renamedHeaders should be an object');
 		assert.deepEqual(result.meta.renamedHeaders, {Column_1: 'Column'}, 'renamedHeaders should contain the renamed header mapping');
 	});
+
+	it('downloadTimeout throws when set to a value not parsable by parseInt', function() {
+		assert.throws(function() {
+			Papa.parse('A,B,C', { downloadTimeout: 'not-a-number' });
+		}, /downloadTimeout/);
+	});
+
+	it('downloadTimeout is coerced to a number when parsable', function() {
+		var result = Papa.parse('A,B,C', { downloadTimeout: '5000' });
+
+		assert.deepEqual(result.data, [['A', 'B', 'C']]);
+	});
 });
 
 
@@ -2834,6 +2846,42 @@ var CUSTOM_TESTS = [
 				},
 				complete: function() {
 					callback(data);
+				}
+			});
+		}
+	},
+	{
+		description: "downloadTimeout aborts a slow remote request with a timeout error",
+		disabled: !XHR_ENABLED,
+		timeout: 5000,
+		expected: true,
+		run: function(callback) {
+			Papa.parse(BASE_PATH + "slow-sample.csv", {
+				download: true,
+				downloadTimeout: 200,
+				error: function(err) {
+					callback(/timed out/i.test(err.message));
+				},
+				complete: function() {
+					callback(false);
+				}
+			});
+		}
+	},
+	{
+		description: "downloadTimeout does not interfere with a request that finishes in time",
+		disabled: !XHR_ENABLED,
+		timeout: 5000,
+		expected: [['A', 'B', 'C'], ['X', 'Y', 'Z']],
+		run: function(callback) {
+			Papa.parse(BASE_PATH + "sample.csv", {
+				download: true,
+				downloadTimeout: 10000,
+				complete: function(results) {
+					callback(results.data);
+				},
+				error: function(err) {
+					callback(err);
 				}
 			});
 		}

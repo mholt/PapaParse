@@ -443,6 +443,7 @@ var csv = Papa.unparse({
 	download: false,
 	downloadRequestHeaders: undefined,
 	downloadRequestBody: undefined,
+	downloadTimeout: undefined,
 	skipEmptyLines: false,
 	chunk: undefined,
 	chunkSize: undefined,
@@ -617,6 +618,14 @@ var csv = Papa.unparse({
 								</td>
 								<td>
 									Use POST request on the URL of the download option. The value passed will be set as the body of the request.
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<code>downloadTimeout</code>
+								</td>
+								<td>
+									Number of milliseconds after which the download of a remote file is aborted with a timeout error, if it hasn't finished yet. If not set (or <code>0</code>), no timeout is applied. Only used together with <code>download: true</code>.
 								</td>
 							</tr>
 							<tr>
