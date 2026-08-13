@@ -2011,6 +2011,16 @@ var UNPARSE_TESTS = [
 		expected: 'date,not a date\r\n2018-05-04T21:08:03.269Z,16\r\n2018-05-08T15:20:22.000Z,32'
 	},
 	{
+		description: "Invalid Date objects are exported as an empty field",
+		input: [{date: new Date("not a date"), "not a date": 16}],
+		expected: 'date,not a date\r\n,16'
+	},
+	{
+		description: "Date objects with an expanded year are exported in its full ISO representation",
+		input: [{date: new Date("+010000-01-01T00:00:00.000Z"), "not a date": 16}],
+		expected: 'date,not a date\r\n+010000-01-01T00:00:00.000Z,16'
+	},
+	{
 		description: "Returns empty rows when empty rows are passed and skipEmptyLines is false",
 		input: [[null, ' '], [], ['1', '2']],
 		config: {skipEmptyLines: false},
