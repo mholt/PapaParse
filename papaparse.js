@@ -453,7 +453,13 @@ License: MIT
 				return '';
 
 			if (str.constructor === Date)
-				return JSON.stringify(str).slice(1, 25);
+			{
+				// An invalid Date has no ISO representation; JSON.stringify() turns it
+				// into null, which we write out the same way as any other null value.
+				if (isNaN(str.getTime()))
+					return '';
+				return str.toISOString();
+			}
 
 			var needsQuotes = false;
 
