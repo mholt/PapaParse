@@ -454,8 +454,7 @@ License: MIT
 
 			if (str.constructor === Date)
 			{
-				// An invalid Date has no ISO representation; JSON.stringify() turns it
-				// into null, which we write out the same way as any other null value.
+				// Return empty string for invalid dates
 				if (isNaN(str.getTime()))
 					return '';
 				return str.toISOString();
