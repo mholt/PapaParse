@@ -422,6 +422,13 @@ License: MIT
 		this.parseChunk = function(chunk, isFakeChunk)
 		{
 			// First chunk pre-processing
+			// A byte order mark is an encoding artifact rather than data. String input
+			// is stripped in CsvToJson, but every other input reaches the parser through
+			// here, so strip it at the front of the stream too. Without this the mark
+			// stays inside the first field of the first row, where it is invisible.
+			if (this.isFirstChunk)
+				chunk = stripBom(chunk);
+
 			const skipFirstNLines = parseInt(this._config.skipFirstNLines) || 0;
 			if (this.isFirstChunk && skipFirstNLines > 0) {
 				let _newline = this._config.newline;
