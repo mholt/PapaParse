@@ -1020,7 +1020,7 @@ License: MIT
 			}
 
 			var parserConfig = copy(_config);
-            // Tell the parser the header instead of reguessing on each chunk
+			// Tell the parser the header instead of reguessing on each chunk
 			parserConfig.header = needsHeaderRow();
 			if (_config.preview && _config.header)
 				parserConfig.preview++;	// to compensate for header row
