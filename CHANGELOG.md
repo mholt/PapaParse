@@ -1,5 +1,18 @@
 # Changelog
 
+## 5.7.0
+
+### Features
+
+- Add the `downloadTimeout` option to abort slow remote requests after a configurable duration (#1138, #786)
+
+## 5.6.1
+
+### Bug Fixes
+
+- Call `transformHeader` only once per header in streaming mode (#1130)
+- Prevent header de-duplication from running again after resuming parsing (#1135)
+
 ## 5.6.0
 
 ### Features
