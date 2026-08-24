@@ -1,5 +1,32 @@
 # Changelog
 
+## 5.6.0
+
+### Features
+
+- Remove the optional jQuery plugin integration (#1137)
+
+## 5.5.5
+
+### Bug Fixes
+
+- Improve automatic delimiter detection by prioritizing row consistency over field count (#1128, #1077)
+- Serialize dates with `Date.toISOString()`, preserving expanded years and writing invalid dates as empty fields (#1140)
+
+## 5.5.4
+
+### Bug Fixes
+
+- Strip the byte order mark (BOM) from header column names
+- Correctly quote and escape custom quote characters when unparsing (#1124, #1068)
+
+### Maintenance
+
+- Update supported Node.js versions in CI (#1097)
+- Document `Papa.BYTE_ORDER_MARK` (#1096)
+- Add regression coverage for `renamedHeaders` with duplicate headers (#1024, #1102)
+- Use HTTPS for README links (#1104)
+
 ## 5.5.3
 
 ### Bug Fixes

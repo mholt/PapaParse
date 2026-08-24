@@ -1,6 +1,6 @@
 /* @license
 Papa Parse
-v5.5.3
+v5.6.0
 https://github.com/mholt/PapaParse
 License: MIT
 */
@@ -84,101 +84,6 @@ License: MIT
 	if (typeof PAPA_BROWSER_CONTEXT === 'undefined') {
 		Papa.DuplexStreamStreamer = DuplexStreamStreamer;
 	}
-
-	if (global.jQuery)
-	{
-		var $ = global.jQuery;
-		$.fn.parse = function(options)
-		{
-			var config = options.config || {};
-			var queue = [];
-
-			this.each(function(idx)
-			{
-				var supported = $(this).prop('tagName').toUpperCase() === 'INPUT'
-								&& $(this).attr('type').toLowerCase() === 'file'
-								&& global.FileReader;
-
-				if (!supported || !this.files || this.files.length === 0)
-					return true;	// continue to next input element
-
-				for (var i = 0; i < this.files.length; i++)
-				{
-					queue.push({
-						file: this.files[i],
-						inputElem: this,
-						instanceConfig: $.extend({}, config)
-					});
-				}
-			});
-
-			parseNextFile();	// begin parsing
-			return this;		// maintains chainability
-
-
-			function parseNextFile()
-			{
-				if (queue.length === 0)
-				{
-					if (isFunction(options.complete))
-						options.complete();
-					return;
-				}
-
-				var f = queue[0];
-
-				if (isFunction(options.before))
-				{
-					var returned = options.before(f.file, f.inputElem);
-
-					if (typeof returned === 'object')
-					{
-						if (returned.action === 'abort')
-						{
-							error('AbortError', f.file, f.inputElem, returned.reason);
-							return;	// Aborts all queued files immediately
-						}
-						else if (returned.action === 'skip')
-						{
-							fileComplete();	// parse the next file in the queue, if any
-							return;
-						}
-						else if (typeof returned.config === 'object')
-							f.instanceConfig = $.extend(f.instanceConfig, returned.config);
-					}
-					else if (returned === 'skip')
-					{
-						fileComplete();	// parse the next file in the queue, if any
-						return;
-					}
-				}
-
-				// Wrap up the user's complete callback, if any, so that ours also gets executed
-				var userCompleteFunc = f.instanceConfig.complete;
-				f.instanceConfig.complete = function(results)
-				{
-					if (isFunction(userCompleteFunc))
-						userCompleteFunc(results, f.file, f.inputElem);
-					fileComplete();
-				};
-
-				Papa.parse(f.file, f.instanceConfig);
-			}
-
-			function error(name, file, elem, reason)
-			{
-				if (isFunction(options.error))
-					options.error({name: name}, file, elem, reason);
-			}
-
-			function fileComplete()
-			{
-				queue.splice(0, 1);
-				parseNextFile();
-			}
-		};
-	}
-
 
 	if (IS_PAPA_WORKER)
 	{
@@ -463,7 +368,12 @@ License: MIT
 				return '';
 
 			if (str.constructor === Date)
-				return JSON.stringify(str).slice(1, 25);
+			{
+				// Return empty string for invalid dates
+				if (isNaN(str.getTime()))
+					return '';
+				return str.toISOString();
+			}
 
 			var needsQuotes = false;
 
@@ -1132,6 +1042,8 @@ License: MIT
 			}
 
 			var parserConfig = copy(_config);
+			// Tell the parser the header instead of reguessing on each chunk
+			parserConfig.header = needsHeaderRow();
 			if (_config.preview && _config.header)
 				parserConfig.preview++;	// to compensate for header row
 
@@ -1255,12 +1167,8 @@ License: MIT
 			if (!_results)
 				return;
 
-			function addHeader(header, i)
+			function addHeader(header)
 			{
-				header = stripBom(header);
-				if (isFunction(_config.transformHeader))
-					header = _config.transformHeader(header, i);
-
 				_fields.push(header);
 			}
 

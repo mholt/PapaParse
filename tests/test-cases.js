@@ -2023,6 +2023,16 @@ var UNPARSE_TESTS = [
 		expected: 'date,not a date\r\n2018-05-04T21:08:03.269Z,16\r\n2018-05-08T15:20:22.000Z,32'
 	},
 	{
+		description: "Invalid Date objects are exported as an empty field",
+		input: [{date: new Date("not a date"), "not a date": 16}],
+		expected: 'date,not a date\r\n,16'
+	},
+	{
+		description: "Date objects with an expanded year are exported in its full ISO representation",
+		input: [{date: new Date("+010000-01-01T00:00:00.000Z"), "not a date": 16}],
+		expected: 'date,not a date\r\n+010000-01-01T00:00:00.000Z,16'
+	},
+	{
 		description: "Returns empty rows when empty rows are passed and skipEmptyLines is false",
 		input: [[null, ' '], [], ['1', '2']],
 		config: {skipEmptyLines: false},
@@ -2321,6 +2331,48 @@ var CUSTOM_TESTS = [
 				callback(err);
 				return;
 			}
+		}
+	},
+	{
+		description: "Duplicate values in a data row are not renamed after resume (Regression Test for Issue #998)",
+		expected: [
+			{c1: 'foo, bar', c2: 'foo, bar', c3: 'v1'},
+			{c1: 'foo, bar', c2: 'foo, bar', c3: 'v2'}
+		],
+		run: function(callback) {
+			var rows = [];
+			Papa.parse('c1,c2,c3\n"foo, bar","foo, bar",v1\n"foo, bar","foo, bar",v2\n', {
+				header: true,
+				step: function(results, parser) {
+					parser.pause();
+					rows.push(results.data);
+					parser.resume();
+				},
+				complete: function() {
+					callback(rows);
+				}
+			});
+		}
+	},
+	{
+		description: "Empty trailing fields stay empty after resume (Regression Test for Issue #985)",
+		expected: [
+			{a: '1', b: 'x', c: '', d: ''},
+			{a: '2', b: 'y', c: '', d: ''}
+		],
+		run: function(callback) {
+			var rows = [];
+			Papa.parse('a,b,c,d\n1,x,,\n2,y,,\n', {
+				header: true,
+				step: function(results, parser) {
+					parser.pause();
+					rows.push(results.data);
+					parser.resume();
+				},
+				complete: function() {
+					callback(rows);
+				}
+			});
 		}
 	},
 	{
@@ -2882,6 +2934,25 @@ var CUSTOM_TESTS = [
 				},
 				error: function(err) {
 					callback(err);
+		description: "transformHeader is called exactly once per header when streaming in chunks",
+		// Each header must be passed to transformHeader exactly once, with its
+		// original (untransformed) value. Regression test for #1083.
+		expected: ['Col1', 'Col2', 'Col3'],
+		run: function(callback) {
+			var seen = [];
+			var rows = [];
+			for (var i = 0; i < 20; i++)
+				rows.push('a' + i + ',b' + i + ',c' + i);
+			var input = 'Col1,Col2,Col3\r\n' + rows.join('\r\n');
+			Papa.parse(input, {
+				header: true,
+				chunkSize: 10,	// force many chunks so the header row is crossed once
+				transformHeader: function(header) {
+					seen.push(header);
+					return header.toLowerCase();
+				},
+				complete: function() {
+					callback(seen);
 				}
 			});
 		}
