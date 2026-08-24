@@ -2934,6 +2934,11 @@ var CUSTOM_TESTS = [
 				},
 				error: function(err) {
 					callback(err);
+				}
+			});
+		}
+	},
+	{
 		description: "transformHeader is called exactly once per header when streaming in chunks",
 		// Each header must be passed to transformHeader exactly once, with its
 		// original (untransformed) value. Regression test for #1083.
