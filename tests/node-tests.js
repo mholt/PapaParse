@@ -255,9 +255,15 @@ describe('PapaParse', function() {
 	it('pause() applies backpressure to the source stream', function(done) {
 		var ROW = '0123456789,abcdefghijklmnopqrstuvwxyz,ABCDEFGHIJKLMNOPQRSTUVWXYZ\n';
 		var block = Buffer.from(ROW.repeat(200));	// 13 KB per push
+		// Pinned, because a throttled source still fills its own buffer to the
+		// high-water mark, and Node's default for that grew from 16 KB to 64 KB.
+		// Left at the default, this test measures the runtime's buffer size
+		// rather than whether the parser throttled the source at all.
+		var HIGH_WATER_MARK = 16 * 1024;
 		var limit = 2 * 1024 * 1024;
 		var pushed = 0;
 		var source = new Readable({
+			highWaterMark: HIGH_WATER_MARK,
 			read: function() {
 				if (pushed >= limit) {
 					this.push(null);
@@ -277,11 +283,14 @@ describe('PapaParse', function() {
 				setTimeout(function() {
 					var extra = pushed - pausedAt;
 					source.destroy();
-					// One block may already be in flight; anything beyond that
-					// means the source was never throttled and the rest of the
-					// input is piling up in the streamer's queue.
-					assert.ok(extra <= 2 * block.length,
-						'source pushed ' + extra + ' bytes while the parser was paused');
+					// A throttled source may still fill its own buffer to the
+					// high-water mark, and one block may already be in flight.
+					// Beyond that the source was never throttled and the rest of
+					// the input piles up in the streamer's queue - unthrottled,
+					// this reaches the full 2 MB the source is willing to push.
+					var allowed = HIGH_WATER_MARK + block.length;
+					assert.ok(extra <= allowed,
+						'source pushed ' + extra + ' bytes while the parser was paused, allowed ' + allowed);
 					done();
 				}, 250);
 			}
