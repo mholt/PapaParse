@@ -122,6 +122,11 @@ var peopleLovePapa = [
 		quote: "Papa makes it easy for our users to customize CSV parsing to match their business logic."
 	},
 	{
+		link: "https://www.authier.pm/",
+		name: "Authier",
+		description: "is an open-source password manager that uses Papa Parse for client-side CSV credential imports and CSV exports of credentials and TOTP records."
+	},
+	{
 		link: "https://www.hellodata.ai/",
 		name: "HelloData",
 		description: "Automatic rent surveys with real-time data on over 25M multifamily units nationwide, direct from property websites.",
