@@ -2095,6 +2095,13 @@ var UNPARSE_TESTS = [
 		expected: 'foo,"""quoted"""'
 	},
 	{
+		description: "Custom quoteChar does not quote a field containing the default quote character",
+		notes: "Issue #1035: a literal double-quote must not force quoting when quoteChar is customized",
+		input: [['x"y']],
+		config: {quoteChar: '@', delimiter: ' '},
+		expected: 'x"y'
+	},
+	{
 		description: "Custom quoteChar escapes and quotes embedded quoteChar (no escapeChar)",
 		input: [['a', 'x+y']],
 		config: {header: false, quoteChar: '+'},
