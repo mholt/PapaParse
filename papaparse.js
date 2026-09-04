@@ -537,6 +537,11 @@ License: MIT
 		}
 	}
 
+	// Source flow control. Streamers whose source can be throttled override these;
+	// for the rest, pausing the parser simply does not throttle anything.
+	ChunkStreamer.prototype.pause = function() {};
+	ChunkStreamer.prototype.resume = function() {};
+
 
 	function NetworkStreamer(config)
 	{
@@ -761,7 +766,7 @@ License: MIT
 			return this.parseChunk(chunk);
 		};
 	}
-	StringStreamer.prototype = Object.create(StringStreamer.prototype);
+	StringStreamer.prototype = Object.create(ChunkStreamer.prototype);
 	StringStreamer.prototype.constructor = StringStreamer;
 
 
@@ -1064,6 +1069,11 @@ License: MIT
 			_paused = true;
 			_parser.abort();
 
+			// Throttle the source as well. Without this the streamer keeps queueing
+			// the rest of the input in memory for as long as the caller stays
+			// paused, which is exactly what pausing exists to avoid.
+			self.streamer.pause();
+
 			// If it is streaming via "chunking", the reader will start appending correctly already so no need to substring,
 			// otherwise we can get duplicate content within a row
 			_input = isFunction(_config.chunk) ? "" : _input.substring(_parser.getCharIndex());
@@ -1071,6 +1081,8 @@ License: MIT
 
 		this.resume = function()
 		{
+			self.streamer.resume();
+
 			if(self.streamer._halted) {
 				_paused = false;
 				self.streamer.parseChunk(_input, true);
