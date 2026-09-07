@@ -38,7 +38,7 @@ export class ParserHandle implements PapaParseParser {
   // Constants for float validation (legacy reference: lines 1031-1034)
   private static readonly MAX_FLOAT = 2 ** 53;
   private static readonly MIN_FLOAT = -ParserHandle.MAX_FLOAT;
-  private static readonly FLOAT = /^\s*-?(\d+\.?|\.\d+|\d+\.\d+)([eE][-+]?\d+)?\s*$/;
+  private static readonly FLOAT = /^\s*[-+]?(\d+\.?|\.\d+|\d+\.\d+)([eE][-+]?\d+)?\s*$/;
   private static readonly ISO_DATE =
     /^((\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z)))$/;
 

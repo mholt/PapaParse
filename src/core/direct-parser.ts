@@ -210,7 +210,7 @@ export class DirectParser {
     if (value === "false") return false;
 
     // Try number
-    if (/^\s*-?(\d+\.?|\.\d+|\d+\.\d+)([eE][-+]?\d+)?\s*$/.test(value)) {
+    if (/^\s*[-+]?(\d+\.?|\.\d+|\d+\.\d+)([eE][-+]?\d+)?\s*$/.test(value)) {
       const num = parseFloat(value);
       if (!isNaN(num)) {
         // Check for safe integer range

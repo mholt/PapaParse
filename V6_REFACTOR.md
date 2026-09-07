@@ -236,6 +236,7 @@ This document outlines the migration plan from the legacy single-file format (`l
 ### Algorithms & Coordination ✅ COMPLETED
 - [x] **Delimiter Detection** (`src/heuristics/guess-delimiter.ts`) - Pure function for field count analysis
 - [x] **Dynamic Typing** (`src/heuristics/dynamic-typing.ts`) - Boolean, numeric, date, and null detection
+- [x] **Dynamic Typing** - Accept a leading plus sign in numbers, including scientific notation (#1070), across the fast parser, parser handle, and exported helper; cover numeric range limits and invalid signs in integration tests
 - [x] **Line Endings** (`src/heuristics/line-endings.ts`) - Quote-aware line ending detection
 - [x] **Heuristics Integration** - All algorithms as stateless, reusable functions
 - [x] **Type Safety** - Full TypeScript compatibility with legacy API
