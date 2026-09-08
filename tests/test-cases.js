@@ -2964,6 +2964,67 @@ var CUSTOM_TESTS = [
 	},
 ];
 
+describe('Pause and resume cursors', function() {
+	[
+		{records: ['a,b', '1,x', '22,yy', '333,zzz'], newline: '\n', data: [{a: '1', b: 'x'}, {a: '22', b: 'yy'}, {a: '333', b: 'zzz'}]},
+		{records: ['a,b', '1,"x,\ny"', '22,"z""z"', '333,\u00e9'], newline: '\r\n', data: [{a: '1', b: 'x,\ny'}, {a: '22', b: 'z"z'}, {a: '333', b: '\u00e9'}]}
+	].forEach(function(test, index) {
+		[undefined, 5, 12, 500].forEach(function(chunkSize) {
+			it('preserves step cursors for input ' + index + ' with chunk size ' + chunkSize, function(done) {
+				var expectedCursors = [];
+				var position = 0;
+				test.records.forEach(function(record, row) {
+					position += record.length + (row < test.records.length - 1 ? test.newline.length : 0);
+					if (row > 0) expectedCursors.push(position);
+				});
+				var cursors = [];
+				var rows = [];
+				Papa.parse(test.records.join(test.newline), {
+					header: true,
+					delimiter: ',',
+					newline: test.newline,
+					chunkSize: chunkSize,
+					step: function(results, parser) {
+						cursors.push(results.meta.cursor);
+						rows.push(results.data);
+						parser.pause();
+						setTimeout(function() {
+							parser.resume();
+						}, 0);
+					},
+					complete: function() {
+						assert.deepEqual(rows, test.data);
+						assert.deepEqual(cursors, expectedCursors);
+						done();
+					}
+				});
+			});
+		});
+	});
+
+	it('does not count chunk cursors twice after pausing', function(done) {
+		var cursors = [];
+		var rows = [];
+		Papa.parse('a,b\n1,x\n22,yy\n333,zzz', {
+			header: true,
+			chunkSize: 10,
+			chunk: function(results, parser) {
+				cursors.push(results.meta.cursor);
+				rows = rows.concat(results.data);
+				parser.pause();
+				setTimeout(function() {
+					parser.resume();
+				}, 0);
+			},
+			complete: function() {
+				assert.deepEqual(rows, [{a: '1', b: 'x'}, {a: '22', b: 'yy'}, {a: '333', b: 'zzz'}]);
+				assert.deepEqual(cursors, [8, 14, 21]);
+				done();
+			}
+		});
+	});
+});
+
 describe('Custom Tests', function() {
 	function generateTest(test) {
 		(test.disabled ? it.skip : it)(test.description, function(done) {
