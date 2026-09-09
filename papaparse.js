@@ -294,7 +294,8 @@ License: MIT
 			if (_config.escapeFormulae instanceof RegExp) {
 				_escapeFormulae = _config.escapeFormulae;
 			} else if (typeof _config.escapeFormulae === 'boolean' && _config.escapeFormulae) {
-				_escapeFormulae =  /^[=+\-@\t\r].*$/;
+				// No `.*$` tail: `.` excludes line terminators, so it would skip multi-line values
+				_escapeFormulae =  /^[=+\-@\t\r]/;
 			}
 		}
 
