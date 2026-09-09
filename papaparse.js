@@ -216,7 +216,9 @@ License: MIT
 
 		if (Array.isArray(_input))
 		{
-			if (!_input.length || Array.isArray(_input[0]))
+			if (!_input.length)
+				return serialize(_columns, _input, _skipEmptyLines);
+			else if (Array.isArray(_input[0]))
 				return serialize(null, _input, _skipEmptyLines);
 			else if (typeof _input[0] === 'object')
 				return serialize(_columns || Object.keys(_input[0]), _input, _skipEmptyLines);
