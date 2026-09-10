@@ -473,6 +473,8 @@ License: MIT
 				this._rowCount += results.data.length;
 
 			var finishedIncludingPreview = this._finished || (this._config.preview && this._rowCount >= this._config.preview);
+			if (this._config.preview && isFunction(this._config.step) && this._rowCount >= this._config.preview && isFunction(this._finishPreview))
+				this._finishPreview();
 
 			if (IS_PAPA_WORKER)
 			{
@@ -854,6 +856,12 @@ License: MIT
 			this._input.removeListener('end', this._streamEnd);
 			this._input.removeListener('error', this._streamError);
 		}, this);
+
+		this._finishPreview = function()
+		{
+			this._streamCleanUp();
+			queue = [];
+		};
 	}
 	ReadableStreamStreamer.prototype = Object.create(ChunkStreamer.prototype);
 	ReadableStreamStreamer.prototype.constructor = ReadableStreamStreamer;
@@ -970,6 +978,7 @@ License: MIT
 		var ISO_DATE = /^((\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z)))$/;
 		var self = this;
 		var _stepCounter = 0;	// Number of times step was called (number of rows parsed)
+		var _previewAborted = false;	// Core parser stopped after the preview, not a user abort
 		var _rowCounter = 0;	// Number of rows that have been parsed so far
 		var _input;				// The input being parsed
 		var _parser;			// The core parser being used
@@ -1001,9 +1010,13 @@ License: MIT
 						return;
 
 					_stepCounter += results.data.length;
-					if (_config.preview && _stepCounter > _config.preview)
+					if (_config.preview && _stepCounter > _config.preview) {
+						_previewAborted = true;
 						_parser.abort();
+					}
 					else {
+						if (_config.preview && self.streamer)
+							self.streamer._rowCount = _stepCounter;
 						_results.data = _results.data[0];
 						userStep(_results, self);
 					}
@@ -1044,12 +1057,19 @@ License: MIT
 			var parserConfig = copy(_config);
 			// Tell the parser the header instead of reguessing on each chunk
 			parserConfig.header = needsHeaderRow();
-			if (_config.preview && _config.header)
+			if (isFunction(_config.step))
+				parserConfig.preview = 0;	// The step counter counts rows after headers and empty lines are removed
+			else if (_config.preview && _config.header)
 				parserConfig.preview++;	// to compensate for header row
 
 			_input = input;
 			_parser = new Parser(parserConfig);
+			_previewAborted = false;
 			_results = _parser.parse(_input, baseIndex, ignoreLastRow);
+			if (_previewAborted && !_aborted && !_paused) {
+				_results.meta.aborted = false;
+				_results.meta.truncated = true;
+			}
 			processResults();
 			return _paused ? { meta: { paused: true } } : (_results || { meta: { paused: false } });
 		};

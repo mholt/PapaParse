@@ -2982,7 +2982,97 @@ describe('Custom Tests', function() {
 	}
 });
 
+describe('step preview', function() {
+	var csv = 'A,B\nC,D\nE,F';
+	[
+		{ name: 'completes a fast preview', input: csv, config: { preview: 1, fastMode: true }, expected: [['A', 'B']] },
+		{ name: 'completes a quoted preview', input: '"A",B\nC,D\nE,F', config: { preview: 1, fastMode: false }, expected: [['A', 'B']] },
+		{ name: 'counts preview data rows after headers and empty lines', input: 'one,two\n\n\nA,B\nC,D', config: { preview: 1, header: true, skipEmptyLines: true }, expected: [{ one: 'A', two: 'B' }] },
+		{ name: 'completes preview across string chunks', input: csv, config: { preview: 1, chunkSize: 4 }, expected: [['A', 'B']] },
+		{ name: 'completes preview across header chunks', input: 'one,two\n\n\nA,B\nC,D', config: { preview: 1, header: true, skipEmptyLines: true, chunkSize: 4 }, expected: [{ one: 'A', two: 'B' }] },
+		{ name: 'completes preview at the end of input', input: csv, config: { preview: 3 }, expected: [['A', 'B'], ['C', 'D'], ['E', 'F']] },
+		{ name: 'completes preview larger than the input', input: csv, config: { preview: 4 }, expected: [['A', 'B'], ['C', 'D'], ['E', 'F']] },
+		{ name: 'keeps preview zero unlimited', input: csv, config: { preview: 0 }, expected: [['A', 'B'], ['C', 'D'], ['E', 'F']] }
+	].forEach(function(test) {
+		it(test.name, function() {
+			var rows = [];
+			var completed = 0;
+			var config = test.config;
+			config.delimiter = ',';
+			config.newline = '\n';
+			config.step = function(results) {
+				rows.push(results.data);
+			};
+			config.complete = function() {
+				completed++;
+			};
+			Papa.parse(test.input, config);
+			assert.strictEqual(completed, 1);
+			assert.deepEqual(rows, test.expected);
+		});
+	});
+
+	it('keeps manual abort distinct from preview completion', function() {
+		var completed = 0;
+		Papa.parse(csv, {
+			preview: 1,
+			step: function(results, parser) {
+				parser.abort();
+			},
+			complete: function(results) {
+				completed++;
+				assert.strictEqual(results.meta.aborted, true);
+			}
+		});
+		assert.strictEqual(completed, 1);
+	});
+
+	it('completes preview only after a paused step resumes', function(done) {
+		var rows = [];
+		var completed = 0;
+		Papa.parse(csv, {
+			preview: 1,
+			step: function(results, parser) {
+				rows.push(results.data);
+				parser.pause();
+				setTimeout(function() {
+					assert.strictEqual(completed, 0);
+					parser.resume();
+				}, 0);
+			},
+			complete: function() {
+				completed++;
+				assert.strictEqual(completed, 1);
+				assert.deepEqual(rows, [['A', 'B']]);
+				done();
+			}
+		});
+	});
+});
+
 (typeof window !== "undefined" ? describe : describe.skip)("Browser Tests", () => {
+	it('completes preview with steps across FileReader chunks', function(done) {
+		if (typeof File === 'undefined' || typeof FileReader === 'undefined')
+			this.skip();
+		var rows = [];
+		var completed = 0;
+		Papa.parse(new File(['A,B\nC,D\nE,F'], 'preview.csv'), {
+			preview: 1,
+			chunkSize: 4,
+			delimiter: ',',
+			newline: '\n',
+			step: function(results) {
+				rows.push(results.data);
+			},
+			complete: function() {
+				completed++;
+				assert.strictEqual(completed, 1);
+				assert.deepEqual(rows, [['A', 'B']]);
+				done();
+			}
+		});
+	});
+
 	it("When parsing synchronously inside a web-worker not owned by PapaParse we should not invoke postMessage", async() => {
 		// Arrange
 		const papaParseScriptPath = new URL("../papaparse.js", window.document.baseURI).href;
