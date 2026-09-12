@@ -2028,6 +2028,48 @@ var UNPARSE_TESTS = [
 		expected: 'date,not a date\r\n,16'
 	},
 	{
+		description: "Date objects are quoted when their ISO representation contains the delimiter",
+		input: [[new Date("2024-01-02T03:04:05.000Z")]],
+		config: {delimiter: ':'},
+		expected: '"2024-01-02T03:04:05.000Z"'
+	},
+	{
+		description: "Date objects escape custom quote characters in their ISO representation",
+		input: [[new Date("2024-01-02T03:04:05.000Z")]],
+		config: {quoteChar: ':'},
+		expected: ':2024-01-02T03::04::05.000Z:'
+	},
+	{
+		description: "Date objects use the configured escape character",
+		input: [[new Date("2024-01-02T03:04:05.000Z")]],
+		config: {quoteChar: ':', escapeChar: '\\'},
+		expected: ':2024-01-02T03\\:04\\:05.000Z:'
+	},
+	{
+		description: "Date objects keep ignoring boolean forced quotes",
+		input: [[new Date("2024-01-02T03:04:05.000Z")]],
+		config: {quotes: true},
+		expected: '2024-01-02T03:04:05.000Z'
+	},
+	{
+		description: "Date objects keep ignoring per-column forced quotes",
+		input: [[new Date("2024-01-02T03:04:05.000Z")]],
+		config: {quotes: [true]},
+		expected: '2024-01-02T03:04:05.000Z'
+	},
+	{
+		description: "Date objects keep ignoring a forced quotes callback",
+		input: [[new Date("2024-01-02T03:04:05.000Z")]],
+		config: {quotes: function() { return true; }},
+		expected: '2024-01-02T03:04:05.000Z'
+	},
+	{
+		description: "Expanded Date objects retain their value with escapeFormulae enabled",
+		input: [[new Date("+010000-01-01T00:00:00.000Z")]],
+		config: {escapeFormulae: true},
+		expected: '+010000-01-01T00:00:00.000Z'
+	},
+	{
 		description: "Date objects with an expanded year are exported in its full ISO representation",
 		input: [{date: new Date("+010000-01-01T00:00:00.000Z"), "not a date": 16}],
 		expected: 'date,not a date\r\n+010000-01-01T00:00:00.000Z,16'
