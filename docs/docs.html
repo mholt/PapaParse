@@ -538,7 +538,7 @@ var csv = Papa.unparse({
 									<code>encoding</code>
 								</td>
 								<td>
-									The encoding to use when opening local files. If specified, it must be a value supported by the FileReader API.
+									The encoding to use when opening local files. If specified, it must be a value supported by the FileReader API. Leaving it unset or using <code>""</code> delegates decoding to <code>FileReader</code>, which falls back to UTF-8. A Unicode byte-order mark can select a different encoding according to the <a href="https://w3c.github.io/FileAPI/#package-data-a-blob" target="_blank">File API decoding rules</a>. Papa Parse does not guess arbitrary file encodings; specify an encoding such as <code>"windows-1252"</code> when needed. This option does not re-decode string input.
 								</td>
 							</tr>
 							<tr>
