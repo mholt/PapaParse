@@ -775,6 +775,23 @@ License: MIT
 		var parseOnData = true;
 		var streamHasEnded = false;
 
+		var parseChunk = this.parseChunk;
+		this.parseChunk = function(chunk, isFakeChunk)
+		{
+			var results = parseChunk.call(this, chunk, isFakeChunk);
+
+			// Once the preview row count is reached nothing else is parsed,
+			// so stop reading the stream instead of queueing the rest of it
+			if (this._config.preview && this._rowCount >= this._config.preview && !streamHasEnded)
+			{
+				this._streamCleanUp();
+				this._input.pause();
+				queue = [];
+			}
+
+			return results;
+		};
+
 		this.pause = function()
 		{
 			ChunkStreamer.prototype.pause.apply(this, arguments);
