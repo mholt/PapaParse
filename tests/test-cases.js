@@ -2160,6 +2160,12 @@ var UNPARSE_TESTS = [
 		config: { escapeFormulae: true, quotes: true, quoteChar: "'", escapeChar: "'" },
 		expected: '\'Col1\',\'Col2\',\'Col3\'\r\n\'\'\'\tdanger\',\'\'\'\rdanger,\',\'safe, \t\r\''
 	},
+	{
+		description: "Escape formulae in a value that contains a line break",
+		input: [{ "Col1": "=danger\ndanger", "Col2": "@danger\r\ndanger", "Col3": "safe\n=safe" }],
+		config: { escapeFormulae: true },
+		expected: 'Col1,Col2,Col3\r\n"\'=danger\ndanger","\'@danger\r\ndanger","safe\n=safe"'
+	},
 ];
 
 describe('Unparse Tests', function() {
