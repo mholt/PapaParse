@@ -367,17 +367,18 @@ License: MIT
 			if (typeof str === 'undefined' || str === null)
 				return '';
 
-			if (str.constructor === Date)
+			var isDate = str.constructor === Date;
+			if (isDate)
 			{
 				// Return empty string for invalid dates
 				if (isNaN(str.getTime()))
 					return '';
-				return str.toISOString();
+				str = str.toISOString();
 			}
 
 			var needsQuotes = false;
 
-			if (_escapeFormulae && typeof str === "string" && _escapeFormulae.test(str)) {
+			if (!isDate && _escapeFormulae && typeof str === "string" && _escapeFormulae.test(str)) {
 				str = "'" + str;
 				needsQuotes = true;
 			}
@@ -386,9 +387,9 @@ License: MIT
 			var escapedQuoteStr = strValue.replace(quoteCharRegex, _escapedQuote);
 
 			needsQuotes = needsQuotes
-							|| _quotes === true
-							|| (typeof _quotes === 'function' && _quotes(str, col))
-							|| (Array.isArray(_quotes) && _quotes[col])
+							|| (!isDate && (_quotes === true
+								|| (typeof _quotes === 'function' && _quotes(str, col))
+								|| (Array.isArray(_quotes) && _quotes[col])))
 							|| hasAny(escapedQuoteStr, Papa.BAD_DELIMITERS)
 							|| escapedQuoteStr.indexOf(_delimiter) > -1
 							|| strValue.indexOf(_quoteChar) > -1
