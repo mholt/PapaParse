@@ -1019,13 +1019,35 @@ License: MIT
 		this.parse = function(input, baseIndex, ignoreLastRow)
 		{
 			var quoteChar = _config.quoteChar || '"';
-			if (!_config.newline)
-				_config.newline = this.guessLineEndings(input, quoteChar);
+
+			// When the input is one chunk of a longer stream its tail is an
+			// incomplete row, and it can even stop between the CR and the LF of a
+			// CRLF pair. Both guesses below are cached for the whole file, so a
+			// guess taken from that tail silently corrupts every later row. Guess
+			// from complete lines only, and cache the line ending only once the
+			// sample actually contained one.
+			var completeSample = ignoreLastRow ? completeLines(input) : input;
+			var guessSample = completeSample;
+			if (guessSample === null)
+			{
+				// Nothing in this chunk is a line we can trust. Guess from it
+				// anyway, but never from a trailing CR whose LF may be in the
+				// next chunk, or the guess becomes '\r' and the row is cut in two.
+				guessSample = input.charAt(input.length - 1) === '\r' ? input.slice(0, -1) : input;
+			}
+
+			var newline = _config.newline;
+			if (!newline)
+			{
+				newline = this.guessLineEndings(guessSample, quoteChar);
+				if (completeSample !== null)
+					_config.newline = newline;
+			}
 
 			_delimiterError = false;
 			if (!_config.delimiter)
 			{
-				var delimGuess = guessDelimiter(input, _config.newline, _config.skipEmptyLines, _config.comments, _config.delimitersToGuess);
+				var delimGuess = guessDelimiter(guessSample, newline, _config.skipEmptyLines, _config.comments, _config.delimitersToGuess);
 				if (delimGuess.successful)
 					_config.delimiter = delimGuess.bestDelimiter;
 				else
@@ -1046,6 +1068,9 @@ License: MIT
 			parserConfig.header = needsHeaderRow();
 			if (_config.preview && _config.header)
 				parserConfig.preview++;	// to compensate for header row
+
+			// Not _config.newline: that is only set once a guess could be trusted.
+			parserConfig.newline = newline;
 
 			_input = input;
 			_parser = new Parser(parserConfig);
@@ -1340,6 +1365,20 @@ License: MIT
 			}
 			_results.errors.push(error);
 		}
+	}
+
+	/**
+	 * The leading part of input that is known to consist of whole lines, or null
+	 * when input holds no line ending that is certainly complete. A trailing CR is
+	 * never trusted: the LF that would pair with it may be in the next chunk.
+	 */
+	function completeLines(input)
+	{
+		var lastLf = input.lastIndexOf('\n');
+		if (lastLf !== -1)
+			return input.substring(0, lastLf + 1);
+		var lastCr = input.length > 1 ? input.lastIndexOf('\r', input.length - 2) : -1;
+		return lastCr === -1 ? null : input.substring(0, lastCr + 1);
 	}
 
 	/** https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions */

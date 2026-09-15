@@ -2962,6 +2962,56 @@ var CUSTOM_TESTS = [
 			});
 		}
 	},
+	{
+		description: "Line ending is not guessed from a chunk that holds no complete line",
+		expected: [{aaaa: '1', bbbb: '2', cccc: '3', dddd: '4'}, {aaaa: '5', bbbb: '6', cccc: '7', dddd: '8'}],
+		run: function(callback) {
+			var rows = [];
+			// The header row is longer than a chunk, so the first chunk contains
+			// no line break at all and the guess used to be cached as '\n'.
+			Papa.parse('aaaa,bbbb,cccc,dddd\r\n1,2,3,4\r\n5,6,7,8', {
+				header: true,
+				chunkSize: 12,
+				step: function(results) {
+					rows.push(results.data);
+				},
+				complete: function() {
+					callback(rows);
+				}
+			});
+		}
+	},
+	{
+		description: "A CRLF file parses the same at every chunk size",
+		timeout: 10000,
+		expected: [],
+		run: function(callback) {
+			var csv = 'aaaa,bbbb,cccc,dddd\r\n1,2,3,4\r\n5,6,7,8\r\n';
+			var expected = JSON.stringify(Papa.parse(csv).data);
+			var sizes = [];
+			for (var i = 1; i <= csv.length; i++)
+				sizes.push(i);
+			var disagreed = [];
+			(function next() {
+				if (!sizes.length)
+					return callback(disagreed);
+				var chunkSize = sizes.shift();
+				var rows = [];
+				Papa.parse(csv, {
+					chunkSize: chunkSize,
+					step: function(results) {
+						rows.push(results.data);
+					},
+					complete: function() {
+						if (JSON.stringify(rows) !== expected)
+							disagreed.push(chunkSize);
+						// A string parse is synchronous, so unwind between sizes.
+						setTimeout(next, 0);
+					}
+				});
+			})();
+		}
+	},
 ];
 
 describe('Custom Tests', function() {
