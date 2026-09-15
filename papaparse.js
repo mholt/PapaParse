@@ -49,7 +49,14 @@ License: MIT
 	function getWorkerBlob() {
 		var URL = global.URL || global.webkitURL || null;
 		var code = moduleFactory.toString();
-		return Papa.BLOB_URL || (Papa.BLOB_URL = URL.createObjectURL(new Blob(["var global = (function() { if (typeof self !== 'undefined') { return self; } if (typeof window !== 'undefined') { return window; } if (typeof global !== 'undefined') { return global; } return {}; })(); global.IS_PAPA_WORKER=true; ", '(', code, ')();'], {type: 'text/javascript'})));
+		// The leading 'use strict' pins the worker script to strict mode. Without it the
+		// blob runs as a sloppy-mode classic worker, so Annex B.3.3 hoists a function
+		// declared inside a block up to the enclosing function as an (initially undefined)
+		// var. When a minifier renames that inner function to the same identifier as the
+		// enclosing _config parameter, the hoisted var shadows _config and reads such as
+		// _config.skipEmptyLines throw "Cannot read properties of undefined". Strict mode
+		// keeps the inner function block-scoped, so no shadowing occurs.
+		return Papa.BLOB_URL || (Papa.BLOB_URL = URL.createObjectURL(new Blob(["'use strict'; var global = (function() { if (typeof self !== 'undefined') { return self; } if (typeof window !== 'undefined') { return window; } if (typeof global !== 'undefined') { return global; } return {}; })(); global.IS_PAPA_WORKER=true; ", '(', code, ')();'], {type: 'text/javascript'})));
 	}
 
 	var IS_WORKER = !global.document && !!global.postMessage,
