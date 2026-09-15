@@ -530,7 +530,7 @@ var csv = Papa.unparse({
 									<code>preview</code>
 								</td>
 								<td>
-									If &gt; 0, only that many rows will be parsed.
+									If &gt; 0, limits the number of rows returned in the parse results. This does not limit the sample used for automatic delimiter detection, which may examine rows beyond the preview. If the delimiter is known, set it explicitly, for example: <code>Papa.parse(csv, { preview: 1, delimiter: ";" })</code>.
 								</td>
 							</tr>
 							<tr>
