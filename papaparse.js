@@ -383,7 +383,9 @@ License: MIT
 			}
 
 			var strValue = str.toString();
-			var escapedQuoteStr = strValue.replace(quoteCharRegex, _escapedQuote);
+			var escapedQuoteStr = strValue.replace(quoteCharRegex, function() {
+				return _escapedQuote;
+			});
 
 			needsQuotes = needsQuotes
 							|| _quotes === true

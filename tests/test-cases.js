@@ -2107,6 +2107,30 @@ var UNPARSE_TESTS = [
 		expected: 'a,+x\\+y+'
 	},
 	{
+		description: "Dollar quote character is escaped literally",
+		input: [["a", "x$y"]],
+		config: {"quoteChar": "$"},
+		expected: "a,$x$$y$"
+	},
+	{
+		description: "Dollar escape character before single quotes is literal",
+		input: [["a", "x'y'z"]],
+		config: {"quoteChar": "'", "escapeChar": "$"},
+		expected: "a,'x$'y$'z'"
+	},
+	{
+		description: "Dollar escape character before ampersands is literal",
+		input: [["a", "x&y&z"]],
+		config: {"quoteChar": "&", "escapeChar": "$"},
+		expected: "a,&x$&y$&z&"
+	},
+	{
+		description: "Dollar escape character before backticks is literal",
+		input: [["a", "x`y`z"]],
+		config: {"quoteChar": "`", "escapeChar": "$"},
+		expected: "a,`x$`y$`z`"
+	},
+	{
 		description: "Escape formulae",
 		input: [{ "Col1": "=danger", "Col2": "@danger", "Col3": "safe" }, { "Col1": "safe=safe", "Col2": "+danger", "Col3": "-danger, danger" }, { "Col1": "'+safe", "Col2": "'@safe", "Col3": "safe, safe" }],
 		config: { escapeFormulae: true },
@@ -2163,6 +2187,26 @@ var UNPARSE_TESTS = [
 ];
 
 describe('Unparse Tests', function() {
+	it('preserves data when quote escaping contains replacement metacharacters', function() {
+		[
+			{quoteChar: '$'},
+			{quoteChar: "'", escapeChar: '$'},
+			{quoteChar: '&', escapeChar: '$'},
+			{quoteChar: '`', escapeChar: '$'}
+		].forEach(function(config) {
+			var input = [['a' + config.quoteChar + 'b' + config.quoteChar + 'c', 'tail']];
+			var csv = Papa.unparse(input, config);
+			var parsed = Papa.parse(csv, {
+				quoteChar: config.quoteChar,
+				escapeChar: config.escapeChar,
+				delimiter: ',',
+				newline: '\r\n'
+			});
+			assert.deepEqual(parsed.errors, []);
+			assert.deepEqual(parsed.data, input);
+		});
+	});
+
 	function generateTest(test) {
 		(test.disabled ? it.skip : it)(test.description, function() {
 			var actual;
