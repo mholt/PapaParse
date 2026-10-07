@@ -292,7 +292,7 @@ License: MIT
 			}
 
 			if (_config.escapeFormulae instanceof RegExp) {
-				_escapeFormulae = _config.escapeFormulae;
+				_escapeFormulae = new RegExp(_config.escapeFormulae);
 			} else if (typeof _config.escapeFormulae === 'boolean' && _config.escapeFormulae) {
 				_escapeFormulae =  /^[=+\-@\t\r].*$/;
 			}
@@ -377,9 +377,12 @@ License: MIT
 
 			var needsQuotes = false;
 
-			if (_escapeFormulae && typeof str === "string" && _escapeFormulae.test(str)) {
-				str = "'" + str;
-				needsQuotes = true;
+			if (_escapeFormulae && typeof str === "string") {
+				_escapeFormulae.lastIndex = 0;
+				if (_escapeFormulae.test(str)) {
+					str = "'" + str;
+					needsQuotes = true;
+				}
 			}
 
 			var strValue = str.toString();
