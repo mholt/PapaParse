@@ -333,7 +333,7 @@ License: MIT
 				var nullLine = hasHeader ? Object.keys(data[row]).length === 0 : data[row].length === 0;
 				if (skipEmptyLines && !hasHeader)
 				{
-					emptyLine = skipEmptyLines === 'greedy' ? data[row].join('').trim() === '' : data[row].length === 1 && data[row][0].length === 0;
+					emptyLine = skipEmptyLines === 'greedy' ? data[row].join('').trim() === '' : data[row].length === 1 && (data[row][0] === null || data[row][0] === undefined || data[row][0].length === 0);
 				}
 				if (skipEmptyLines === 'greedy' && hasHeader) {
 					var line = [];
