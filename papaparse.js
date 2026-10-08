@@ -775,6 +775,14 @@ License: MIT
 		var parseOnData = true;
 		var streamHasEnded = false;
 
+		this.abort = function()
+		{
+			this._streamCleanUp();
+			if (this._input.listenerCount('data') === 0)
+				this._input.pause();
+			queue = [];
+		};
+
 		this.pause = function()
 		{
 			ChunkStreamer.prototype.pause.apply(this, arguments);
@@ -1091,6 +1099,8 @@ License: MIT
 			_aborted = true;
 			_parser.abort();
 			_results.meta.aborted = true;
+			if (self.streamer && isFunction(self.streamer.abort))
+				self.streamer.abort();
 			if (isFunction(_config.complete))
 				_config.complete(_results);
 			_input = '';

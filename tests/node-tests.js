@@ -39,6 +39,125 @@ function assertLongSampleParsedCorrectly(parsedCsv) {
 }
 
 describe('PapaParse', function() {
+	['step', 'chunk'].forEach(function(mode) {
+		it('cleans up a readable when aborted while ' + mode + ' parsing is paused', function(done) {
+			var PassThrough = require('stream').PassThrough;
+			var source = new PassThrough();
+			var handle;
+			var calls = 0;
+			var completed = 0;
+			var snapshot;
+			var config = {
+				delimiter: ',',
+				complete: function(results) {
+					completed++;
+					snapshot = [results.meta.aborted, source.listenerCount('data'), source.listenerCount('end'), source.listenerCount('error')];
+				}
+			};
+			config[mode] = function(results, parser) {
+				calls++;
+				handle = parser;
+				parser.pause();
+			};
+			Papa.parse(source, config);
+			source.write('first,row\n');
+			source.write('queued,row\n');
+			handle.abort();
+			assert.deepEqual(snapshot, [true, 0, 0, 0]);
+			assert.strictEqual(source.isPaused(), true);
+			assert.strictEqual(source.destroyed, false);
+			source.on('end', function() {
+				assert.strictEqual(calls, 1);
+				assert.strictEqual(completed, 1);
+				done();
+			});
+			source.end('later,row\n');
+			source.resume();
+		});
+		[true, false].forEach(function(pipeFirst) {
+			it('preserves a shared pipe and end after ' + mode + ' abort (pipe first: ' + pipeFirst + ')', function(done) {
+				var streams = require('stream');
+				var source = new streams.PassThrough();
+				var chunks = [];
+				var ended = 0;
+				var completed = 0;
+				var calls = 0;
+				var sink = new streams.Writable({write: function(chunk, encoding, callback) {
+					chunks.push(chunk.toString());
+					callback();
+				}});
+				var config = {delimiter: ',', complete: function() { completed++; }};
+				config[mode] = function(results, parser) { calls++; parser.abort(); };
+				source.on('end', function() { ended++; });
+				if (pipeFirst) source.pipe(sink);
+				Papa.parse(source, config);
+				if (!pipeFirst) source.pipe(sink);
+				sink.on('finish', function() {
+					assert.deepEqual(chunks, ['first,row\n', 'second,row\n']);
+					assert.strictEqual(ended, 1);
+					assert.strictEqual(completed, 1);
+					assert.strictEqual(calls, 1);
+					done();
+				});
+				source.write('first,row\n');
+				source.end('second,row\n');
+			});
+		});
+	});
+	it('keeps another readable consumer flowing after parsing is aborted', function(done) {
+		var PassThrough = require('stream').PassThrough;
+		var source = new PassThrough();
+		var chunks = [];
+		source.on('data', function(chunk) { chunks.push(chunk.toString()); });
+		Papa.parse(source, {delimiter: ',', step: function(results, parser) { parser.abort(); }});
+		source.write('first,row\n');
+		source.end('second,row\n');
+		setImmediate(function() {
+			assert.deepEqual(chunks, ['first,row\n', 'second,row\n']);
+			done();
+		});
+	});
+	['step', 'chunk'].forEach(function(mode) {
+		it('detaches from a readable stream when ' + mode + ' parsing is aborted', function(done) {
+			var PassThrough = require('stream').PassThrough;
+			var source = new PassThrough();
+			var calls = 0;
+			var completed = 0;
+			var failures = [];
+			var expectedError = new Error('source error after abort');
+			var sourceErrors = [];
+			var listenersAtComplete;
+			source.on('error', function(error) { sourceErrors.push(error); });
+			var config = {
+				delimiter: ',',
+				error: function(error) { failures.push(error); },
+				complete: function(results) {
+					completed++;
+					assert.strictEqual(results.meta.aborted, true);
+					listenersAtComplete = ['data', 'end', 'error'].map(function(event) {
+						return source.listenerCount(event);
+					});
+				}
+			};
+			config[mode] = function(results, parser) {
+				calls++;
+				parser.abort();
+			};
+			Papa.parse(source, config);
+			source.write('a,b\n');
+			source.emit('error', expectedError);
+			source.end('c,d\n');
+			setImmediate(function() {
+				assert.deepEqual(listenersAtComplete, [0, 0, 1]);
+				assert.strictEqual(calls, 1);
+				assert.strictEqual(completed, 1);
+				assert.deepEqual(failures, []);
+				assert.deepEqual(sourceErrors, [expectedError]);
+				assert.strictEqual(source.destroyed, false);
+				done();
+			});
+		});
+	});
 	it('synchronously parsed CSV should be correctly parsed', function() {
 		assertLongSampleParsedCorrectly(Papa.parse(longSampleRawCsv));
 	});
