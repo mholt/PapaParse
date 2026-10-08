@@ -2051,6 +2051,31 @@ var UNPARSE_TESTS = [
 		expected: '1,2\r\n3,4'
 	},
 	{
+		description: "Skips single-cell rows containing null or undefined when skipEmptyLines is true",
+		notes: "Regression test for issue #1163: unparse threw a TypeError when a row contained a single null or undefined value",
+		input: [[null], ['hello'], [undefined], ['world']],
+		config: {skipEmptyLines: true},
+		expected: 'hello\r\nworld'
+	},
+	{
+		description: "Returns empty rows for single-cell rows containing null or undefined when skipEmptyLines is false",
+		input: [[null], ['hello'], [undefined], ['world']],
+		config: {skipEmptyLines: false},
+		expected: '\r\nhello\r\n\r\nworld'
+	},
+	{
+		description: "Skips single-cell rows containing null or undefined when skipEmptyLines is 'greedy'",
+		input: [[null], ['hello'], [undefined], ['world']],
+		config: {skipEmptyLines: 'greedy'},
+		expected: 'hello\r\nworld'
+	},
+	{
+		description: "Does not skip single-cell rows containing 0 when skipEmptyLines is true",
+		input: [[0], ['hello']],
+		config: {skipEmptyLines: true},
+		expected: '0\r\nhello'
+	},
+	{
 		description: "Returns empty rows when empty rows are passed and skipEmptyLines is false with headers",
 		input: [{a: null, b: ' '}, {}, {a: '1', b: '2'}],
 		config: {skipEmptyLines: false, header: true},
