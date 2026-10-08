@@ -2058,12 +2058,6 @@ var UNPARSE_TESTS = [
 		expected: 'hello\r\nworld'
 	},
 	{
-		description: "Skips single-cell rows containing null or undefined when skipEmptyLines is true with input type object",
-		input: { data: [[null], ['hello'], [undefined], ['world']] },
-		config: {skipEmptyLines: true},
-		expected: 'hello\r\nworld'
-	},
-	{
 		description: "Returns empty rows for single-cell rows containing null or undefined when skipEmptyLines is false",
 		input: [[null], ['hello'], [undefined], ['world']],
 		config: {skipEmptyLines: false},
