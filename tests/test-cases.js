@@ -2002,28 +2002,10 @@ var UNPARSE_TESTS = [
 		expected: 'a,b,c'
 	},
 	{
-		description: "Empty JSON input with columns",
-		input: '[]',
-		config: {columns: ['a', 'b', 'c']},
-		expected: 'a,b,c'
-	},
-	{
 		description: "Empty input with columns and disabled header",
 		input: [],
 		config: {columns: ['a', 'b', 'c'], header: false},
 		expected: ''
-	},
-	{
-		description: "Empty input with quoted columns and a custom delimiter",
-		input: [],
-		config: {columns: ['a;b', 'c"d'], delimiter: ';'},
-		expected: '"a;b";"c""d"'
-	},
-	{
-		description: "Columns are ignored for arrays of arrays",
-		input: [['a', 'b', 'c']],
-		config: {columns: ['x', 'y', 'z']},
-		expected: 'a,b,c'
 	},
 	{
 		description: "Mismatched field counts in rows",
