@@ -39,6 +39,124 @@ function assertLongSampleParsedCorrectly(parsedCsv) {
 }
 
 describe('PapaParse', function() {
+	[false, true].forEach(function(header) {
+		[false, true].forEach(function(stepping) {
+			it('reports absolute quote error rows with header=' + header + ' and step=' + stepping, function() {
+				var errors = [];
+				var config = {
+					header: header,
+					delimiter: ',',
+					newline: '\n',
+					chunkSize: 8,
+					chunk: function(results) { errors = errors.concat(results.errors); }
+				};
+				if (stepping) {
+					delete config.chunk;
+					config.step = function(results) { errors = errors.concat(results.errors); };
+				}
+				Papa.parse('a,b\n1,2\n3,4\n5,"unterminated', config);
+				assert.deepStrictEqual(errors.map(function(error) { return [error.code, error.row]; }), [
+					['MissingQuotes', header ? 2 : 3]
+				]);
+			});
+		});
+	});
+
+	[false, true].forEach(function(header) {
+		[undefined, 16].forEach(function(chunkSize) {
+			it('reports absolute InvalidQuotes rows with header=' + header + ' and chunkSize=' + chunkSize, function() {
+				var errors = [];
+				var input = 'a,b\n1,2\n3,"bad"quote"\n';
+				var result = Papa.parse(input, {
+					header: header,
+					delimiter: ',',
+					newline: '\n',
+					skipEmptyLines: true,
+					chunkSize: chunkSize,
+					chunk: chunkSize ? function(results) { errors = errors.concat(results.errors); } : undefined
+				});
+				if (!chunkSize)
+					errors = result.errors;
+				var expected = [['InvalidQuotes', header ? 1 : 2]];
+				// An incomplete row is parsed again in the next chunk (#882).
+				// Preserve that separate behavior while checking both row offsets.
+				if (chunkSize)
+					expected.push(['InvalidQuotes', header ? 1 : 2]);
+				assert.deepStrictEqual(errors.map(function(error) { return [error.code, error.row]; }), expected);
+			});
+		});
+	});
+
+	it('preserves quote error rows across pause and resume', function(done) {
+		var errors = [];
+		var paused = false;
+		Papa.parse('a,b\n1,2\n3,"unterminated', {
+			header: true,
+			delimiter: ',',
+			newline: '\n',
+			step: function(results, parser) {
+				errors = errors.concat(results.errors);
+				if (!paused) {
+					paused = true;
+					parser.pause();
+					setTimeout(function() { parser.resume(); }, 0);
+				}
+			},
+			complete: function() {
+				assert.deepStrictEqual(errors.map(function(error) { return [error.code, error.row]; }), [['MissingQuotes', 1]]);
+				done();
+			}
+		});
+	});
+
+	[false, true].forEach(function(header) {
+		[false, true].forEach(function(stepping) {
+			it('preserves raw quote rows with skipped empty lines and comments, header=' + header + ', step=' + stepping, function() {
+				var errors = [];
+				var rows = [];
+				var config = {header: header, delimiter: ',', newline: '\n', comments: '#', skipEmptyLines: true, chunkSize: 7};
+				config[stepping ? 'step' : 'chunk'] = function(results) {
+					errors = errors.concat(results.errors);
+					rows = rows.concat(stepping ? [results.data] : results.data);
+				};
+				Papa.parse('#comment\na,b\n\n1,2\n#comment\n3,"bad', config);
+				assert.deepStrictEqual(errors.map(function(error) { return [error.code, error.row]; }), [['MissingQuotes', header ? 2 : 3]]);
+				assert.deepStrictEqual(rows, header ? [{a: '1', b: '2'}, {a: '3', b: 'bad'}] : [['a', 'b'], ['1', '2'], ['3', 'bad']]);
+			});
+		});
+	});
+
+	it('counts greedy empty rows but not newlines inside quoted fields', function() {
+		var errors = [];
+		Papa.parse('a,b\n , \n1,"two\nlines"\n3,"bad', {
+			header: true, delimiter: ',', newline: '\n', skipEmptyLines: 'greedy', chunkSize: 6,
+			chunk: function(results) { errors = errors.concat(results.errors); }
+		});
+		assert.deepStrictEqual(errors.map(function(error) { return [error.code, error.row]; }), [['MissingQuotes', 2]]);
+	});
+
+	it('does not report a negative quote row for a malformed header', function() {
+		var result = Papa.parse('a,"bad', {header: true, delimiter: ',', newline: '\n'});
+		assert.deepStrictEqual(result.errors.map(function(error) { return [error.code, error.row]; }), [['MissingQuotes', 0]]);
+		assert.deepStrictEqual(result.data, []);
+	});
+
+	it('preserves preview data and non-quote error row numbering', function() {
+		var input = 'a,b\n1\n2,3\n4,"bad';
+		var result = Papa.parse(input, {header: true, delimiter: ',', newline: '\n', preview: 1});
+		assert.deepStrictEqual(result.data, [{a: '1'}]);
+		assert.deepStrictEqual(result.errors.map(function(error) { return [error.code, error.row]; }), [['TooFewFields', 0]]);
+		assert.strictEqual(result.meta.truncated, true);
+		var steps = [];
+		Papa.parse(input, {
+			header: true, delimiter: ',', newline: '\n', preview: 1,
+			step: function(results) { steps.push(results); }
+		});
+		assert.strictEqual(steps.length, 1);
+		assert.deepStrictEqual(steps[0].data, {a: '1'});
+		assert.deepStrictEqual(steps[0].errors.map(function(error) { return [error.code, error.row]; }), [['TooFewFields', 0]]);
+	});
+
 	it('synchronously parsed CSV should be correctly parsed', function() {
 		assertLongSampleParsedCorrectly(Papa.parse(longSampleRawCsv));
 	});
