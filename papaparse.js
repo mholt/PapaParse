@@ -1287,6 +1287,8 @@ License: MIT
 					comments: comments,
 					delimiter: delim,
 					newline: newline,
+					quoteChar: _config.quoteChar,
+					escapeChar: _config.escapeChar,
 					preview: 10
 				}).parse(input);
 
