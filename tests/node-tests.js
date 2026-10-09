@@ -134,6 +134,49 @@ describe('PapaParse', function() {
 		});
 	});
 
+	it('handles trailing carriage return at chunk boundary (Issue #1103)', function(done) {
+		var Readable = require('stream').Readable;
+		var stream = new Readable({ objectMode: true, read: function() {} });
+		Papa.parse(stream, {
+			delimiter: ',',
+			newline: '\r\n',
+			skipEmptyLines: true,
+			header: true,
+			complete: function(results) {
+				assert.equal(results.errors.length, 0);
+				assert.equal(results.data.length, 1);
+				assert.deepEqual(results.data[0], {name: 'foo', value: 'FOO'});
+				done();
+			}
+		});
+		stream.push('name,value\r\n');
+		stream.push('foo,"FOO"\r');
+		stream.push('\n');
+		stream.push(null);
+	});
+
+	it('handles partial newline and quotes at chunk boundaries without duplicating errors', function(done) {
+		var Readable = require('stream').Readable;
+		var stream = new Readable({ objectMode: true, read: function() {} });
+		Papa.parse(stream, {
+			delimiter: ',',
+			newline: '\n',
+			skipEmptyLines: true,
+			header: false,
+			complete: function(results) {
+				assert.equal(results.errors.length, 2);
+				assert.equal(results.errors[0].code, 'InvalidQuotes');
+				assert.equal(results.errors[1].code, 'MissingQuotes');
+				assert.equal(results.data.length, 1);
+				assert.deepEqual(results.data[0], ['foo', 'FOO"invalid\nbar,baz\nnext,chunk\n']);
+				done();
+			}
+		});
+		stream.push('foo,"FOO"invalid\nbar,baz\n');
+		stream.push('next,chunk\n');
+		stream.push(null);
+	});
+
 	it('piped streaming CSV should be correctly parsed', function(done) {
 		var data = [];
 		var readStream = fs.createReadStream(__dirname + '/long-sample.csv', 'utf8');
