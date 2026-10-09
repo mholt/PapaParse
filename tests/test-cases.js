@@ -1996,6 +1996,18 @@ var UNPARSE_TESTS = [
 		expected: ''
 	},
 	{
+		description: "Empty input with columns",
+		input: [],
+		config: {columns: ['a', 'b', 'c']},
+		expected: 'a,b,c'
+	},
+	{
+		description: "Empty input with columns and disabled header",
+		input: [],
+		config: {columns: ['a', 'b', 'c'], header: false},
+		expected: ''
+	},
+	{
 		description: "Mismatched field counts in rows",
 		input: [['a', 'b', 'c'], ['d', 'e'], ['f']],
 		expected: 'a,b,c\r\nd,e\r\nf'
