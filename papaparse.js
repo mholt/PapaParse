@@ -211,6 +211,17 @@ License: MIT
 
 		var quoteCharRegex = new RegExp(escapeRegExp(_quoteChar), 'g');
 
+		/**
+		 * Characters that force a field to be wrapped in quotes. Papa.BAD_DELIMITERS
+		 * includes the default quote character ("), which is only structural when it
+		 * is actually the configured quoteChar. A custom quoteChar is handled by the
+		 * dedicated _quoteChar check in safe(), so a literal " must not force quoting
+		 * when quoteChar has been customized.
+		 */
+		var _quoteForcingChars = _quoteChar === '"'
+			? Papa.BAD_DELIMITERS
+			: ['\r', '\n', Papa.BYTE_ORDER_MARK];
+
 		if (typeof _input === 'string')
 			_input = JSON.parse(_input);
 
@@ -389,7 +400,7 @@ License: MIT
 							|| _quotes === true
 							|| (typeof _quotes === 'function' && _quotes(str, col))
 							|| (Array.isArray(_quotes) && _quotes[col])
-							|| hasAny(escapedQuoteStr, Papa.BAD_DELIMITERS)
+							|| hasAny(escapedQuoteStr, _quoteForcingChars)
 							|| escapedQuoteStr.indexOf(_delimiter) > -1
 							|| strValue.indexOf(_quoteChar) > -1
 							|| escapedQuoteStr.charAt(0) === ' '
