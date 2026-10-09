@@ -1767,6 +1767,7 @@ License: MIT
 		var w = new global.Worker(workerUrl);
 		w.onmessage = mainThreadReceivedMessage;
 		w.id = workerIdCounter++;
+		w.rowCount = 0;
 		workers[w.id] = w;
 		return w;
 	}
@@ -1795,11 +1796,33 @@ License: MIT
 
 			if (isFunction(worker.userStep))
 			{
+				var errorsByRow = {};
+				var sharedErrors = [];
+				for (var j = 0; j < msg.results.errors.length; j++)
+				{
+					var error = msg.results.errors[j];
+					// FieldMismatch rows count data after header removal and empty-row skipping.
+					// Other errors (including Quotes) do not use that same row index.
+					if (error.type === 'FieldMismatch' && typeof error.row === 'number'
+						&& error.row % 1 === 0 && error.row >= worker.rowCount
+						&& error.row < worker.rowCount + msg.results.data.length)
+					{
+						if (!errorsByRow[error.row])
+							errorsByRow[error.row] = [];
+						errorsByRow[error.row].push(error);
+					}
+					else
+						sharedErrors.push(error);
+				}
 				for (var i = 0; i < msg.results.data.length; i++)
 				{
+					var rowErrors = errorsByRow[worker.rowCount++];
+					// Parser errors precede the FieldMismatch errors added by ParserHandle.
+					if (rowErrors && sharedErrors.length)
+						rowErrors = sharedErrors.concat(rowErrors);
 					worker.userStep({
 						data: msg.results.data[i],
-						errors: msg.results.errors,
+						errors: rowErrors || sharedErrors,
 						meta: msg.results.meta
 					}, handle);
 					if (aborted)
