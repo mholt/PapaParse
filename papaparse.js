@@ -428,19 +428,43 @@ License: MIT
 			meta: {}
 		};
 		replaceConfig.call(this, config);
+		var skipFirstNLines = parseInt(this._config.skipFirstNLines) || 0;
+		var skipNewline = this._config.newline;
+		var skipPartial = '';
 
 		this.parseChunk = function(chunk, isFakeChunk)
 		{
 			// First chunk pre-processing
-			const skipFirstNLines = parseInt(this._config.skipFirstNLines) || 0;
-			if (this.isFirstChunk && skipFirstNLines > 0) {
-				let _newline = this._config.newline;
-				if (!_newline) {
+			if (skipFirstNLines > 0) {
+				chunk = skipPartial + chunk;
+				skipPartial = '';
+				if (!skipNewline) {
+					// A trailing CR may be the first half of a CRLF in the next chunk.
+					const sample = !this._finished && chunk.slice(-1) === '\r' ? chunk.slice(0, -1) : chunk;
+					if (!this._finished && !/[\r\n]/.test(sample)) {
+						skipPartial = chunk.slice(-1) === '\r' ? '\r' : '';
+						return this._nextChunk();
+					}
 					const quoteChar = this._config.quoteChar || '"';
-					_newline = this._handle.guessLineEndings(chunk, quoteChar);
+					skipNewline = this._handle.guessLineEndings(sample, quoteChar);
 				}
-				const splitChunk = chunk.split(_newline);
-				chunk = [...splitChunk.slice(skipFirstNLines)].join(_newline);
+				var skipped = 0;
+				var newlineIndex;
+				while (skipFirstNLines > 0 && (newlineIndex = chunk.indexOf(skipNewline, skipped)) !== -1) {
+					skipped = newlineIndex + skipNewline.length;
+					skipFirstNLines--;
+				}
+				if (skipFirstNLines > 0) {
+					if (!this._finished) {
+						skipPartial = chunk.slice(Math.max(skipped, chunk.length - skipNewline.length + 1));
+						return this._nextChunk();
+					}
+					chunk = '';
+				} else {
+					chunk = chunk.substring(skipped);
+				}
+				if (!chunk && !this._finished)
+					return this._nextChunk();
 			}
 			if (this.isFirstChunk && isFunction(this._config.beforeFirstChunk))
 			{

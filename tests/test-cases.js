@@ -2989,6 +2989,74 @@ var CUSTOM_TESTS = [
 	},
 ];
 
+describe('skipFirstNLines with chunks', function() {
+	['\n', '\r\n', '\r'].forEach(function(newline) {
+		it('skips complete lines across ' + JSON.stringify(newline) + ' chunk boundaries', function() {
+			[1, 3, 8, 16, 64].forEach(function(chunkSize) {
+				var rows = [];
+				var errors = [];
+				Papa.parse(['metadata one', 'metadata two', 'name,value', 'a,1', 'b,2'].join(newline), {
+					skipFirstNLines: 2,
+					header: true,
+					delimiter: ',',
+					newline: newline,
+					chunkSize: chunkSize,
+					chunk: function(results) {
+						rows = rows.concat(results.data);
+						errors = errors.concat(results.errors);
+					}
+				});
+				assert.deepEqual(rows, [{name: 'a', value: '1'}, {name: 'b', value: '2'}]);
+				assert.deepEqual(errors, []);
+			});
+		});
+	});
+
+	it('runs beforeFirstChunk once after skipping and before step callbacks', function() {
+		var events = [];
+		Papa.parse('discard1\ndiscard2\nold,value\na,1', {
+			skipFirstNLines: 2,
+			header: true,
+			delimiter: ',',
+			newline: '\n',
+			chunkSize: 9,
+			beforeFirstChunk: function(chunk) {
+				events.push('before');
+				return chunk.replace('old', 'name');
+			},
+			step: function(results) {
+				events.push(results.data);
+			},
+			complete: function() {
+				events.push('complete');
+			}
+		});
+		assert.deepEqual(events, ['before', {name: 'a', value: '1'}, 'complete']);
+	});
+
+	it('finishes when all lines are skipped, including an unterminated last line', function() {
+		['', 'metadata', 'metadata\n', 'metadata\nlast'].forEach(function(input) {
+			var rows = [];
+			var completed = 0;
+			Papa.parse(input, {
+				skipFirstNLines: 3,
+				header: true,
+				delimiter: ',',
+				newline: '\n',
+				chunkSize: 2,
+				chunk: function(results) {
+					rows = rows.concat(results.data);
+				},
+				complete: function() {
+					completed++;
+				}
+			});
+			assert.deepEqual(rows, []);
+			assert.equal(completed, 1);
+		});
+	});
+});
+
 describe('Custom Tests', function() {
 	function generateTest(test) {
 		(test.disabled ? it.skip : it)(test.description, function(done) {
