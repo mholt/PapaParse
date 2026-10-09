@@ -1381,10 +1381,10 @@ License: MIT
 			delim = ',';
 
 		// Comment character must be valid
+		if (comments === true)
+			comments = '#';
 		if (comments === delim)
 			throw new Error('Comment character same as delimiter');
-		else if (comments === true)
-			comments = '#';
 		else if (typeof comments !== 'string'
 			|| Papa.BAD_DELIMITERS.indexOf(comments) > -1)
 			comments = false;
