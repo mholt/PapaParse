@@ -1,0 +1,4 @@
+{
+	"main": "./index.mjs",
+	"browser": "./index.browser.mjs"
+}
