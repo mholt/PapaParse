@@ -299,4 +299,45 @@ describe('PapaParse', function() {
 			}
 		});
 	});
+
+	it('strips the utf-8 BOM from a piped stream', function(done) {
+		// The mark is only invisible: without stripping it, data[0][0] is '\ufeffA'
+		// rather than 'A', so the first field of the first row never compares equal.
+		// Only string input went through stripBom, and header:true hid it because the
+		// header is stripped separately.
+		var data = [];
+		var readStream = fs.createReadStream(__dirname + '/utf-8-bom-sample.csv', 'utf8');
+		var csvStream = readStream.pipe(Papa.parse(Papa.NODE_STREAM_INPUT));
+		csvStream.on('data', function(item) {
+			data.push(item);
+		});
+		csvStream.on('end', function() {
+			assert.deepEqual(data[0], ['A', 'B', 'C']);
+			assert.deepEqual(data[1], ['X', 'Y', 'Z']);
+			done();
+		});
+	});
+
+	it('strips the utf-8 BOM from a piped stream when header is true', function(done) {
+		var data = [];
+		var readStream = fs.createReadStream(__dirname + '/utf-8-bom-sample.csv', 'utf8');
+		var csvStream = readStream.pipe(Papa.parse(Papa.NODE_STREAM_INPUT, { header: true }));
+		csvStream.on('data', function(item) {
+			data.push(item);
+		});
+		csvStream.on('end', function() {
+			assert.deepEqual(data[0], { A: 'X', B: 'Y', C: 'Z' });
+			done();
+		});
+	});
+
+	it('keeps a BOM character that is not at the start of the input', function(done) {
+		// Only a leading mark is an encoding artifact; anywhere else it is data.
+		Papa.parse('A,B\nX,\ufeffY', {
+			complete: function(parsedCsv) {
+				assert.deepEqual(parsedCsv.data[1], ['X', '\ufeffY']);
+				done();
+			}
+		});
+	});
 });
