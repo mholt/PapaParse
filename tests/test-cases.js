@@ -3019,6 +3019,125 @@ describe('Custom Tests', function() {
 	}
 });
 
+(Papa.WORKERS_SUPPORTED ? describe : describe.skip)('Worker step row errors', function() {
+	var csv = '\n \n' + 'id,value,extra\n0,ok,yes\n1,"first\nline",ok\n2\n3,x,y,z\n , , \n4,ok,yes\n5,last\n6,ok,end';
+	var config = {header: true, delimiter: ',', newline: '\n', skipEmptyLines: 'greedy'};
+	var expected = [
+		{data: {id: '0', value: 'ok', extra: 'yes'}, errors: []},
+		{data: {id: '1', value: 'first\nline', extra: 'ok'}, errors: []},
+		{data: {id: '2'}, errors: [{type: 'FieldMismatch', code: 'TooFewFields', message: 'Too few fields: expected 3 fields but parsed 1', row: 2}]},
+		{data: {id: '3', value: 'x', extra: 'y', __parsed_extra: ['z']}, errors: [{type: 'FieldMismatch', code: 'TooManyFields', message: 'Too many fields: expected 3 fields but parsed 4', row: 3}]},
+		{data: {id: '4', value: 'ok', extra: 'yes'}, errors: []},
+		{data: {id: '5', value: 'last'}, errors: [{type: 'FieldMismatch', code: 'TooFewFields', message: 'Too few fields: expected 3 fields but parsed 2', row: 5}]},
+		{data: {id: '6', value: 'ok', extra: 'end'}, errors: []}
+	];
+
+	function parseSteps(input, options, worker) {
+		return new Promise(function(resolve, reject) {
+			var steps = [];
+			var cursors = [];
+			Papa.parse(input, Object.assign({}, options, {
+				worker: worker,
+				step: function(result) {
+					steps.push({data: result.data, errors: result.errors});
+					cursors.push(result.meta.cursor);
+				},
+				complete: function() { resolve({steps: steps, cursors: cursors}); },
+				error: reject
+			}));
+		});
+	}
+
+	[
+		{name: 'a single file batch', chunkSize: undefined},
+		{name: 'later file batches', chunkSize: 37},
+		{name: 'chunks smaller than a row', chunkSize: 7}
+	].forEach(function(test) {
+		it('isolates FieldMismatch errors in ' + test.name, function() {
+			var options = Object.assign({}, config, {chunkSize: test.chunkSize});
+			return parseSteps(csv, config, false).then(function(control) {
+				assert.deepEqual(control.steps, expected);
+				return parseSteps(new File([csv], 'row-errors.csv'), options, true);
+			}).then(function(result) {
+				assert.deepEqual(result.steps, expected);
+				if (test.chunkSize)
+					assert.isAbove(new Set(result.cursors).size, 1, 'data must span worker batches');
+			});
+		});
+	});
+
+	it('preserves shared quote errors alongside row-specific FieldMismatch errors', function() {
+		var input = 'id,value\n0,ok\n1\n2,"unterminated';
+		var options = {header: true, delimiter: ',', newline: '\n'};
+		var batch = Papa.parse(input, options);
+		var quoteErrors = batch.errors.filter(function(error) { return error.type === 'Quotes'; });
+		assert.lengthOf(quoteErrors, 1);
+		return parseSteps(input, options, true).then(function(result) {
+			assert.deepEqual(result.steps, batch.data.map(function(row, index) {
+				return {data: row, errors: batch.errors.filter(function(error) {
+					return error.type !== 'FieldMismatch' || error.row === index;
+				})};
+			}));
+		});
+	});
+
+	it('preserves errors without row information for every step', function() {
+		var input = 'value\none\ntwo';
+		var options = {header: true};
+		var batch = Papa.parse(input, options);
+		assert.lengthOf(batch.errors, 1);
+		assert.strictEqual(batch.errors[0].type, 'Delimiter');
+		assert.notProperty(batch.errors[0], 'row');
+		return parseSteps(input, options, true).then(function(result) {
+			assert.deepEqual(result.steps, batch.data.map(function(row) {
+				return {data: row, errors: batch.errors};
+			}));
+		});
+	});
+
+	it('keeps chunk callbacks receiving the complete batch errors', function() {
+		return new Promise(function(resolve, reject) {
+			var chunks = [];
+			Papa.parse(csv, Object.assign({}, config, {
+				worker: true,
+				chunk: function(result) { chunks.push(result); },
+				complete: function() { resolve(chunks); },
+				error: reject
+			}));
+		}).then(function(chunks) {
+			assert.lengthOf(chunks, 1);
+			assert.deepEqual(chunks[0], Papa.parse(csv, config));
+		});
+	});
+
+	it('aborts on a malformed row without dispatching remaining steps', function(done) {
+		var steps = [];
+		var completions = 0;
+		Papa.parse(new File([csv], 'abort-row-errors.csv'), Object.assign({}, config, {
+			worker: true,
+			chunkSize: 37,
+			step: function(result, handle) {
+				steps.push({data: result.data, errors: result.errors});
+				if (steps.length === 3)
+					handle.abort();
+			},
+			complete: function(result) {
+				completions++;
+				setTimeout(function() {
+					try {
+						assert.deepEqual(steps, expected.slice(0, 3));
+						assert.deepEqual(result, {data: [], errors: [], meta: {aborted: true}});
+						assert.strictEqual(completions, 1);
+						done();
+					} catch (error) { done(error); }
+				}, 20);
+			},
+			error: done
+		}));
+	});
+});
+
+
 (typeof window !== "undefined" ? describe : describe.skip)("Browser Tests", () => {
 	it("When parsing synchronously inside a web-worker not owned by PapaParse we should not invoke postMessage", async() => {
 		// Arrange
