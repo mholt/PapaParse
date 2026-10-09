@@ -88,6 +88,38 @@ describe('PapaParse', function() {
 		});
 	});
 
+	[5, 500].forEach(function(chunkSize) {
+		it('preserves stream step cursors across pause/resume with chunk size ' + chunkSize, function(done) {
+			var expectedCursors = [];
+			var position = 0;
+			longSampleRawCsv.split(/(\r\n|\n|\r)/).forEach(function(part, index) {
+				position += part.length;
+				if (index % 2 === 1) expectedCursors.push(position);
+			});
+			if (expectedCursors[expectedCursors.length - 1] !== longSampleRawCsv.length)
+				expectedCursors.push(longSampleRawCsv.length);
+			expectedCursors.shift(); // The first record is consumed as the header.
+			var cursors = [];
+			Papa.parse(fs.createReadStream(__dirname + '/long-sample.csv', {encoding: 'utf8', highWaterMark: chunkSize}), {
+				header: true,
+				delimiter: ',',
+				newline: '\n',
+				step: function(results, parser) {
+					cursors.push(results.meta.cursor);
+					parser.pause();
+					setTimeout(function() {
+						parser.resume();
+					}, 0);
+				},
+				complete: function() {
+					assert.deepEqual(cursors, expectedCursors);
+					done();
+				},
+				error: done
+			});
+		});
+	});
+
 	it('asynchronously parsed streaming CSV should be correctly parsed', function(done) {
 		Papa.parse(fs.createReadStream(__dirname + '/long-sample.csv', 'utf8'), {
 			complete: function(parsedCsv) {

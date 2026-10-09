@@ -457,6 +457,9 @@ License: MIT
 			var results = this._handle.parse(aggregate, this._baseIndex, !this._finished);
 
 			if (this._handle.paused() || this._handle.aborted()) {
+				// Resume parses only the unconsumed input, so retain its absolute offset.
+				if (this._handle.paused())
+					this._baseIndex = results.meta.cursor;
 				this._halted = true;
 				return;
 			}
@@ -1051,7 +1054,7 @@ License: MIT
 			_parser = new Parser(parserConfig);
 			_results = _parser.parse(_input, baseIndex, ignoreLastRow);
 			processResults();
-			return _paused ? { meta: { paused: true } } : (_results || { meta: { paused: false } });
+			return _paused ? { meta: { paused: true, cursor: _results.meta.cursor } } : (_results || { meta: { paused: false } });
 		};
 
 		this.paused = function()
