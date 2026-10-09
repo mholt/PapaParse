@@ -971,6 +971,7 @@ License: MIT
 		var self = this;
 		var _stepCounter = 0;	// Number of times step was called (number of rows parsed)
 		var _rowCounter = 0;	// Number of rows that have been parsed so far
+		var _quoteRowCounter = 0;	// Rows consumed before the current parser result, including the header
 		var _input;				// The input being parsed
 		var _parser;			// The core parser being used
 		var _paused = false;	// Whether we are paused or not
@@ -1138,6 +1139,15 @@ License: MIT
 
 		function processResults()
 		{
+			if (_results)
+			{
+				_results.errors.forEach(function(error) {
+					if (error.type === 'Quotes')
+						error.row = Math.max(0, error.row + _quoteRowCounter - (_config.header ? 1 : 0));
+				});
+				_quoteRowCounter += _results.data.length;
+			}
+
 			if (_results && _delimiterError)
 			{
 				addError('Delimiter', 'UndetectableDelimiter', 'Unable to auto-detect delimiting character; defaulted to \'' + Papa.DefaultDelimiter + '\'');
