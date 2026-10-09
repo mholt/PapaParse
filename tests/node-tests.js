@@ -4,6 +4,7 @@ var Papa = require("../papaparse.js");
 
 var fs = require('fs');
 var assert = require('assert');
+var Readable = require('stream').Readable;
 var longSampleRawCsv = fs.readFileSync(__dirname + '/long-sample.csv', 'utf8');
 var utf8BomSampleRawCsv = fs.readFileSync(__dirname + '/utf-8-bom-sample.csv', 'utf8');
 
@@ -36,6 +37,17 @@ function assertLongSampleParsedCorrectly(parsedCsv) {
 		"cursor": 1209
 	});
 	assert.equal(parsedCsv.errors.length, 0);
+}
+
+// A readable stream that delivers exactly the buffers it is given, so the chunk
+// boundaries are fixed rather than left to the file system.
+function bufferStream(buffers) {
+	var i = 0;
+	return new Readable({
+		read: function() {
+			this.push(i < buffers.length ? buffers[i++] : null);
+		}
+	});
 }
 
 describe('PapaParse', function() {
@@ -285,6 +297,25 @@ describe('PapaParse', function() {
 			},
 			error: function(err) {
 				assert.deepEqual(err, expectedError);
+				done();
+			}
+		});
+	});
+
+	it('handles a multi-byte character split across a chunk boundary', function(done) {
+		// Two CJK ideographs, three UTF-8 bytes each, built from code points so
+		// this file stays pure ASCII.
+		var cjk = String.fromCharCode(0x4e2d, 0x6587);
+		var bytes = Buffer.from('a,b\n1,' + cjk + '\n2,x\n', 'utf8');
+		var split = bytes.indexOf(0xe4) + 1;	// one byte into the first ideograph
+		var rows = [];
+		Papa.parse(bufferStream([bytes.subarray(0, split), bytes.subarray(split)]), {
+			step: function(results) {
+				rows.push(results.data);
+			},
+			error: done,
+			complete: function() {
+				assert.deepEqual(rows, [['a', 'b'], ['1', cjk], ['2', 'x']]);
 				done();
 			}
 		});
