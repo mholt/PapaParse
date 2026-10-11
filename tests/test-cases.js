@@ -1065,6 +1065,46 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Dynamic typing preserves invalid ISO date strings",
+		input: '2024-00-15T00:00:00Z\n2024-13-15T00:00:00Z\n2024-01-00T00:00:00Z\n2024-01-32T00:00:00Z\n2024-01-15T25:00:00Z\n2024-01-15T12:00:00+24:00',
+		config: { delimiter: ',', dynamicTyping: true },
+		expected: {
+			data: [['2024-00-15T00:00:00Z'], ['2024-13-15T00:00:00Z'], ['2024-01-00T00:00:00Z'], ['2024-01-32T00:00:00Z'], ['2024-01-15T25:00:00Z'], ['2024-01-15T12:00:00+24:00']],
+			errors: []
+		}
+	},
+	{
+		description: "Dynamic typing preserves invalid dates alongside other types",
+		input: '"2024-02-29T12:34:56.789Z","2024-13-15T00:00:00Z",42,true,',
+		config: { delimiter: ',', dynamicTyping: true },
+		expected: {
+			data: [[new Date('2024-02-29T12:34:56.789Z'), '2024-13-15T00:00:00Z', 42, true, null]],
+			errors: []
+		}
+	},
+	{
+		description: "Field dynamic typing preserves invalid dates",
+		input: 'date,text\n2024-13-15T00:00:00Z,2024-02-29T00:00:00Z\n2024-01-01T12:34:56+05:30,2024-01-15T25:00:00Z',
+		config: { delimiter: ',', header: true, dynamicTyping: { date: true } },
+		expected: {
+			data: [{date: '2024-13-15T00:00:00Z', text: '2024-02-29T00:00:00Z'}, {date: new Date('2024-01-01T12:34:56+05:30'), text: '2024-01-15T25:00:00Z'}],
+			errors: []
+		}
+	},
+	{
+		description: "Dynamic typing preserves invalid dates after transformation",
+		input: ' 2024-01-15T12:00:00+24:00 , 2024-01-15T24:00:00Z ',
+		config: {
+			delimiter: ',',
+			dynamicTyping: true,
+			transform: function(value) { return value.trim(); }
+		},
+		expected: {
+			data: [['2024-01-15T12:00:00+24:00', new Date('2024-01-15T24:00:00Z')]],
+			errors: []
+		}
+	},
+	{
 		description: "Dynamic typing skips ISO date strings ocurring in other strings",
 		input: 'ISO date,String with ISO date\r\n2018-05-04T21:08:03.269Z,The date is 2018-05-04T21:08:03.269Z\r\n2018-05-08T15:20:22.642Z,The date is 2018-05-08T15:20:22.642Z',
 		config: { dynamicTyping: true },
@@ -2422,6 +2462,51 @@ var CUSTOM_TESTS = [
 				complete: function(response) {
 					callback(response.data);
 				}
+			});
+		}
+	},
+	{
+		description: "Invalid dynamically typed dates survive CSV export",
+		expected: '2024-13-15T00:00:00Z',
+		run: function(callback) {
+			var result = Papa.parse('2024-13-15T00:00:00Z', {
+				delimiter: ',',
+				dynamicTyping: true
+			});
+			callback(Papa.unparse(result.data));
+		}
+	},
+	{
+		description: "Dynamic typing preserves invalid dates in step callbacks",
+		expected: [['2024-13-15T00:00:00Z'], [new Date('2024-02-29T00:00:00Z')]],
+		run: function(callback) {
+			var data = [];
+			Papa.parse('2024-13-15T00:00:00Z\n2024-02-29T00:00:00Z', {
+				delimiter: ',',
+				dynamicTyping: true,
+				step: function(result) { data.push(result.data); },
+				complete: function() { callback(data); }
+			});
+		}
+	},
+	{
+		description: "Dynamic typing preserves invalid dates across chunks",
+		expected: {
+			data: [['2024-13-15T00:00:00Z'], [new Date('2024-02-29T00:00:00Z')]],
+			errors: []
+		},
+		run: function(callback) {
+			var data = [];
+			var errors = [];
+			Papa.parse('2024-13-15T00:00:00Z\n2024-02-29T00:00:00Z', {
+				delimiter: ',',
+				dynamicTyping: true,
+				chunkSize: 7,
+				chunk: function(result) {
+					data = data.concat(result.data);
+					errors = errors.concat(result.errors);
+				},
+				complete: function() { callback({data: data, errors: errors}); }
 			});
 		}
 	},
