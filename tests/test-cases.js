@@ -816,6 +816,16 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Transformed duplicate headers do not overwrite a later transformed name",
+		input: 'A,A,A_1,a_2\none,two,three,four',
+		config: { header: true, transformHeader: function(header) { return header.toLowerCase(); } },
+		expected: {
+			data: [{ a: 'one', a_3: 'two', a_1: 'three', a_2: 'four' }],
+			errors: [],
+			meta: { delimiter: ',', linebreak: '\n', aborted: false, truncated: false, cursor: 30, fields: ['a', 'a_3', 'a_1', 'a_2'], renamedHeaders: { a_3: 'a' } }
+		}
+	},
+	{
 		description: "Header rows are transformed when transformHeader function is provided",
 		input: 'A,B,C\r\na,b,c',
 		config: { header: true, transformHeader: function(header) { return header.toLowerCase(); } },
