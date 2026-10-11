@@ -39,6 +39,27 @@ function assertLongSampleParsedCorrectly(parsedCsv) {
 }
 
 describe('PapaParse', function() {
+	it('reserves transformed header names across chunks without transforming twice', function() {
+		var calls = [];
+		var rows = [];
+		Papa.parse('A,A,A_1\none,two,three\nfour,five,six', {
+			header: true,
+			chunkSize: 4,
+			transformHeader: function(header, index) {
+				calls.push([header, index]);
+				return header.toLowerCase();
+			},
+			chunk: function(results) {
+				rows = rows.concat(results.data);
+			}
+		});
+		assert.deepEqual(calls, [['A', 0], ['A', 1], ['A_1', 2]]);
+		assert.deepEqual(rows, [
+			{ a: 'one', a_2: 'two', a_1: 'three' },
+			{ a: 'four', a_2: 'five', a_1: 'six' }
+		]);
+	});
+
 	it('synchronously parsed CSV should be correctly parsed', function() {
 		assertLongSampleParsedCorrectly(Papa.parse(longSampleRawCsv));
 	});

@@ -1681,15 +1681,17 @@ License: MIT
 			{
 				if (config.header && !baseIndex && data.length && !headerParsed)
 				{
-					const result = data[0];
+					const result = data[0].map(function(header, i) {
+						header = stripBom(header);
+						return isFunction(config.transformHeader) ? config.transformHeader(header, i) : header;
+					});
+					data[0] = result;
 					const headerCount = Object.create(null); // To track the count of each base header
 					const usedHeaders = new Set(result); // To track used headers and avoid duplicates
 					let duplicateHeaders = false;
 
 					for (let i = 0; i < result.length; i++) {
-						let header = stripBom(result[i]);
-						if (isFunction(config.transformHeader))
-							header = config.transformHeader(header, i);
+						const header = result[i];
 
 						if (!headerCount[header]) {
 							headerCount[header] = 1;
