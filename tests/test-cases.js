@@ -1930,6 +1930,36 @@ var UNPARSE_TESTS = [
 		expected: 'A, b, c\r\nd, e, "f, g"'
 	},
 	{
+		description: "Multi-character delimiter overlaps the end of a field",
+		input: [['a|', 'b'], ['c', 'd|']],
+		config: { delimiter: '||' },
+		expected: '"a|"||b\r\nc||"d|"'
+	},
+	{
+		description: "Multi-character delimiter overlaps a longer field suffix",
+		input: [['aab', 'b'], ['c', 'd']],
+		config: { delimiter: 'aba' },
+		expected: '"aab"abab\r\ncabad'
+	},
+	{
+		description: "Multi-character delimiter does not overlap a field suffix",
+		input: [['a,', 'b'], ['a', 'b']],
+		config: { delimiter: ', ' },
+		expected: 'a,, b\r\na, b'
+	},
+	{
+		description: "Multi-character delimiter overlaps a header field",
+		input: { fields: ['a:', 'b'], data: [['c:', 'd']] },
+		config: { delimiter: '::' },
+		expected: '"a:"::b\r\n"c:"::d'
+	},
+	{
+		description: "Multi-character delimiter overlaps a field with custom quotes",
+		input: [['a|', 'b']],
+		config: { delimiter: '||', quoteChar: "'" },
+		expected: "'a|'||b"
+	},
+	{
 		description: "Bad delimiter (\\n)",
 		notes: "Should default to comma",
 		input: [['a', 'b', 'c'], ['d', 'e', 'f']],
@@ -2216,6 +2246,18 @@ describe('Unparse Tests', function() {
 			assert.strictEqual(actual, test.expected);
 		});
 	}
+
+	it('Round-trips fields at overlapping multi-character delimiter boundaries', function() {
+		['||', '::', 'aba', 'aaaa', 'abcab', ', '].forEach(function(delimiter) {
+			for (var length = 1; length < delimiter.length; length++) {
+				var input = [['prefix' + delimiter.slice(0, length), 'next', 'last']];
+				var csv = Papa.unparse(input, { delimiter: delimiter });
+				var parsed = Papa.parse(csv, { delimiter: delimiter });
+				assert.deepEqual(parsed.errors, []);
+				assert.deepEqual(parsed.data, input);
+			}
+		});
+	});
 
 	for (var i = 0; i < UNPARSE_TESTS.length; i++) {
 		generateTest(UNPARSE_TESTS[i]);
