@@ -1532,7 +1532,10 @@ License: MIT
 								quoteSearch = input.indexOf(quoteChar, cursor);
 							}
 							nextDelim = input.indexOf(delim, cursor);
-							nextNewline = input.indexOf(newline, cursor);
+							// Only rescan if the cached newline is behind the cursor; rescanning
+							// to the end of the row for every field makes wide rows quadratic.
+							if (nextNewline !== -1 && nextNewline < cursor)
+								nextNewline = input.indexOf(newline, cursor);
 							break;
 						}
 

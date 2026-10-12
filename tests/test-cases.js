@@ -2999,6 +2999,46 @@ var CUSTOM_TESTS = [
 			});
 		}
 	},
+	{
+		description: "Parses rows mixing quoted fields, escaped quotes and line breaks inside quotes",
+		expected: [
+			['a', 'b"c', 'd', 'e\nf', 'g'],
+			['h', 'i', 'j"k', 'l'],
+			['m', 'n\r\no', 'p']
+		],
+		run: function(callback) {
+			var input = '"a","b""c",d,"e\nf",g\n' +
+				'h,"i","j""k","l"\n' +
+				'"m","n\r\no","p"';
+			callback(Papa.parse(input).data);
+		}
+	},
+	{
+		description: "Parses a row with a very large number of quoted fields",
+		// Every quoted field used to rescan the rest of the row for the next
+		// newline, which made wide rows quadratic. The timeout is a generous
+		// guard against that regression; the main check is the parsed output.
+		timeout: 5000,
+		expected: true,
+		run: function(callback) {
+			var cellCount = 300000;
+			var pattern = ['"a"', '"b""c"', 'd'];
+			var expectedPattern = ['a', 'b"c', 'd'];
+			var input = [];
+			var expectedRow = [];
+			for (var i = 0; i < cellCount; i++) {
+				input.push(pattern[i % 3]);
+				expectedRow.push(expectedPattern[i % 3]);
+			}
+			var results = Papa.parse(input.join(',') + '\n"z"\n"y"');
+			var matches = results.errors.length === 0
+				&& results.data.length === 3
+				&& results.data[0].length === cellCount
+				&& results.data[0].every(function(cell, index) { return cell === expectedRow[index]; })
+				&& JSON.stringify(results.data.slice(1)) === JSON.stringify([['z'], ['y']]);
+			callback(matches);
+		}
+	},
 ];
 
 describe('Custom Tests', function() {
