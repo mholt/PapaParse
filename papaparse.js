@@ -1421,6 +1421,7 @@ License: MIT
 			if (fastMode || (fastMode !== false && input.indexOf(quoteChar) === -1))
 			{
 				var rows = input.split(newline);
+				var rowCount = 0;
 				for (var i = 0; i < rows.length; i++)
 				{
 					row = rows[i];
@@ -1442,7 +1443,7 @@ License: MIT
 					}
 					else
 						pushRow(row.split(delim));
-					if (preview && i >= preview)
+					if (preview && ++rowCount > preview)
 					{
 						data = data.slice(0, preview);
 						return returnable(true);
