@@ -393,11 +393,18 @@ License: MIT
 							|| (Array.isArray(_quotes) && _quotes[col])
 							|| hasAny(escapedQuoteStr, Papa.BAD_DELIMITERS)
 							|| escapedQuoteStr.indexOf(_delimiter) > -1
+							|| (_delimiter.length > 1 && hasDelimiterAtBoundary(escapedQuoteStr))
 							|| strValue.indexOf(_quoteChar) > -1
 							|| escapedQuoteStr.charAt(0) === ' '
 							|| escapedQuoteStr.charAt(escapedQuoteStr.length - 1) === ' ';
 
 			return needsQuotes ? _quoteChar + escapedQuoteStr + _quoteChar : escapedQuoteStr;
+		}
+
+		function hasDelimiterAtBoundary(str)
+		{
+			var suffix = str.slice(1 - _delimiter.length);
+			return (suffix + _delimiter).indexOf(_delimiter) < suffix.length;
 		}
 
 		function hasAny(str, substrings)
