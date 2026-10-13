@@ -1836,6 +1836,60 @@ describe('Parse Async Tests', function() {
 });
 
 
+// The worker runs a classic (non-module) script built from moduleFactory.toString().
+// If that script runs in sloppy mode, Annex B.3.3 hoists a function declared inside a
+// block up to the enclosing function as an initially-undefined var; when a minifier
+// renames that inner function to the same identifier as the enclosing _config
+// parameter, the hoisted var shadows _config and reads such as _config.skipEmptyLines
+// throw "Cannot read properties of undefined (reading 'skipEmptyLines')" in the worker.
+// getWorkerBlob() therefore pins the whole worker script to strict mode. These tests
+// guard that invariant. The unminified papaparse.js used by this suite has no colliding
+// identifiers, so a plain worker parse cannot reproduce the crash - only the strict
+// prologue can be asserted directly.
+describe('Worker strict mode', function() {
+	var WORKERS_SUPPORTED = typeof Worker !== 'undefined' && typeof URL !== 'undefined' && typeof URL.createObjectURL === 'function';
+
+	(WORKERS_SUPPORTED ? it : it.skip)('generated worker script is pinned to strict mode', function(done) {
+		// Parsing with worker: true lazily creates the blob; capture its URL, fetch the
+		// source and assert the very first statement is a "use strict" directive so the
+		// bootstrap that runs outside moduleFactory cannot fall back to sloppy mode.
+		Papa.parse('A,B,C\nX,Y,Z', {
+			worker: true,
+			complete: function() {
+				assert.isString(Papa.BLOB_URL, 'a worker blob URL should have been created');
+				fetch(Papa.BLOB_URL).then(function(response) {
+					return response.text();
+				}).then(function(code) {
+					assert.match(code, /^\s*(['"])use strict\1\s*;/, 'worker script must begin with a "use strict" directive');
+					done();
+				}).catch(done);
+			},
+			error: function(err) {
+				done(err instanceof Error ? err : new Error(String(err)));
+			}
+		});
+	});
+
+	// A worker parse that walks the header de-duplication path (the code the crashing
+	// build faulted on) together with skipEmptyLines - the exact production shape.
+	(WORKERS_SUPPORTED ? it : it.skip)('parses headers and skips empty lines in a worker without throwing', function(done) {
+		Papa.parse('Col,Col,Value\r\n\r\na,b,1\r\n', {
+			worker: true,
+			header: true,
+			skipEmptyLines: true,
+			complete: function(results) {
+				assert.deepEqual(results.errors, []);
+				assert.deepEqual(results.data, [{Col: 'a', Col_1: 'b', Value: '1'}]);
+				done();
+			},
+			error: function(err) {
+				done(err instanceof Error ? err : new Error(String(err)));
+			}
+		});
+	});
+});
+
+
 
 // Tests for Papa.unparse() function (JSON to CSV)
 var UNPARSE_TESTS = [
