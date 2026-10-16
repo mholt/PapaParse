@@ -310,6 +310,25 @@ var CORE_PARSER_TESTS = [
 		}
 	},
 	{
+		description: "Quoted field has valid trailing quote via spaces and EOF",
+		input: 'a,b,c\nd,e,"f" ',
+		notes: "Trailing quote is valid due to EOF, extra spaces after it are ignored",
+		expected: {
+			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
+			errors: []
+		}
+	},
+	{
+		description: "Quoted field has valid trailing quote via \\r and EOF when newline is \\r\\n",
+		input: 'a,b,c\r\nd,e,"f"\r',
+		config: { newline: '\r\n' },
+		notes: "A stray \\r at the end of the input is not a malformed trailing quote. See issue #1071",
+		expected: {
+			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
+			errors: []
+		}
+	},
+	{
 		description: "Quoted field contains delimiters and \\n with valid trailing quote",
 		input: 'a,"b,c\nd,e,f"',
 		notes: "Trailing quote is valid due to trailing delimiter",
@@ -724,6 +743,16 @@ var PARSE_TESTS = [
 		input: 'A,"B" ,C,"D" \r\nE,F,"G"  ,"H"  \r\nQ,W,"E" ,R',
 		expected: {
 			data: [['A', 'B', 'C','D'],['E', 'F', 'G','H'],['Q', 'W', 'E','R']],
+			errors: []
+		}
+	},
+	{
+		description: "Quoted fields with \\r\\n line endings and a stray \\r after the last closing quote",
+		input: '"A","B","C"\r\n"1","","3"\r\n"4","5","6"\r\n"7","8","9"\r',
+		config: { delimiter: ',', skipEmptyLines: true },
+		notes: "Issue #1071: the stray \\r at the end of the input should not make the last field malformed",
+		expected: {
+			data: [['A', 'B', 'C'], ['1', '', '3'], ['4', '5', '6'], ['7', '8', '9']],
 			errors: []
 		}
 	},
