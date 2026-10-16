@@ -1559,6 +1559,10 @@ License: MIT
 							break;
 						}
 
+						// Closing quote followed by 'unnecessary spaces + EOF' (e.g. a stray \r at the end of the input)
+						if (extraSpaces(inputLen))
+							return finish(input.substring(cursor, quoteSearch).replace(quoteCharRegex, quoteChar));
+
 
 						// Checks for valid closing quotes are complete (escaped quotes or quote followed by EOF/delimiter/newline) -- assume these quotes are part of an invalid text string
 						errors.push({
