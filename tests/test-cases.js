@@ -935,10 +935,10 @@ var PARSE_TESTS = [
 	},
 	{
 		description: "Dynamic typing converts boolean literals",
-		input: 'true,false,T,F,TRUE,FALSE,True,False',
+		input: 'true,false,T,F,TRUE,FALSE,tRuE,fAlSe',
 		config: { dynamicTyping: true },
 		expected: {
-			data: [[true, false, "T", "F", true, false, "True", "False"]],
+			data: [[true, false, "T", "F", true, false, "tRuE", "fAlSe"]],
 			errors: []
 		}
 	},

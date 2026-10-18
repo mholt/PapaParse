@@ -156,17 +156,87 @@ describe("Parse Features Tests", () => {
     });
   });
 
-  it("should apply dynamic typing to booleans", () => {
+  for (const fastMode of [true, false]) {
+    it(`should apply dynamic typing to booleans with fastMode=${fastMode}`, () => {
+      runParseTest({
+        description: "Dynamic typing converts to booleans",
+        input: "true,false,T,F,TRUE,FALSE,True,False",
+        config: { dynamicTyping: true, fastMode },
+        expected: {
+          data: [[true, false, "T", "F", true, false, true, false]],
+          errors: [],
+        },
+      });
+    });
+
+    it(`should preserve unsupported boolean spellings with fastMode=${fastMode}`, () => {
+      const values = ["tRuE", "fAlSe", " True", "True ", " False", "False "];
+      runParseTest({
+        description: "Boolean conversion requires an exact supported spelling",
+        input: values.join(","),
+        config: { dynamicTyping: true, fastMode },
+        expected: { data: [values], errors: [] },
+      });
+    });
+
+    it(`should apply boolean dynamic typing only to selected columns with fastMode=${fastMode}`, () => {
+      runParseTest({
+        description: "Title-case booleans with column-specific typing",
+        input: "True,False\nFalse,True",
+        config: { dynamicTyping: { 0: true, 1: false }, fastMode },
+        expected: {
+          data: [
+            [true, "False"],
+            [false, "True"],
+          ],
+          errors: [],
+        },
+      });
+    });
+  }
+
+  it("should convert quoted title-case booleans", () => {
     runParseTest({
-      description: "Dynamic typing converts to booleans",
-      input: "true,false,T,F,TRUE,FALSE,True,False",
+      description: "Quoted title-case booleans",
+      input: '"True","False"',
       config: { dynamicTyping: true },
       expected: {
-        data: [[true, false, "T", "F", true, false, "True", "False"]],
+        data: [[true, false]],
         errors: [],
       },
     });
   });
+
+  for (const dynamicTyping of [undefined, false]) {
+    it(`should preserve title-case booleans with dynamicTyping=${dynamicTyping}`, () => {
+      runParseTest({
+        description: "Title-case booleans remain strings without dynamic typing",
+        input: "True,False",
+        config: { dynamicTyping },
+        expected: { data: [["True", "False"]], errors: [] },
+      });
+    });
+  }
+
+  for (const useCallback of [false, true]) {
+    it(`should respect boolean typing by header ${useCallback ? "callback" : "map"}`, () => {
+      runParseTest({
+        description: "Title-case booleans with header-specific typing",
+        input: "typed,text\nTrue,False\nFalse,True",
+        config: {
+          header: true,
+          dynamicTyping: useCallback ? (field) => field === "typed" : { typed: true, text: false },
+        },
+        expected: {
+          data: [
+            { typed: true, text: "False" },
+            { typed: false, text: "True" },
+          ],
+          errors: [],
+        },
+      });
+    });
+  }
 
   it("should apply dynamic typing with header", () => {
     runParseTest({

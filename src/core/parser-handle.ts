@@ -465,8 +465,8 @@ export class ParserHandle implements PapaParseParser {
     if (value.trim() === "") return value;
 
     // Boolean values (exact case matches only)
-    if (value === "true" || value === "TRUE") return true;
-    if (value === "false" || value === "FALSE") return false;
+    if (value === "true" || value === "TRUE" || value === "True") return true;
+    if (value === "false" || value === "FALSE" || value === "False") return false;
 
     // Number values - check for safe integer range
     if (/^-?\d+$/.test(value)) {

@@ -206,8 +206,8 @@ export class DirectParser {
     if (value === "") return value;
 
     // Try boolean first
-    if (value === "true") return true;
-    if (value === "false") return false;
+    if (value === "true" || value === "TRUE" || value === "True") return true;
+    if (value === "false" || value === "FALSE" || value === "False") return false;
 
     // Try number
     if (/^\s*-?(\d+\.?|\.\d+|\d+\.\d+)([eE][-+]?\d+)?\s*$/.test(value)) {
