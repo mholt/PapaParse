@@ -51,9 +51,9 @@ export function shouldApplyDynamicTyping(field: string | number, config: Dynamic
  */
 export function parseDynamic(field: string | number, value: string, config: DynamicTypingConfig): any {
   if (shouldApplyDynamicTyping(field, config)) {
-    if (value === "true" || value === "TRUE") {
+    if (value === "true" || value === "TRUE" || value === "True") {
       return true;
-    } else if (value === "false" || value === "FALSE") {
+    } else if (value === "false" || value === "FALSE" || value === "False") {
       return false;
     } else if (testFloat(value)) {
       return parseFloat(value);

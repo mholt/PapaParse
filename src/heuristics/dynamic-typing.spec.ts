@@ -77,6 +77,8 @@ describe("parseDynamic", () => {
   test("returns original value when dynamic typing disabled", () => {
     const config = { dynamicTyping: false };
     expect(parseDynamic("field", "123", config)).toBe("123");
+    expect(parseDynamic("field", "True", config)).toBe("True");
+    expect(parseDynamic("field", "False", config)).toBe("False");
   });
 
   test("parses 'true' as boolean", () => {
@@ -89,6 +91,11 @@ describe("parseDynamic", () => {
     expect(parseDynamic("field", "TRUE", config)).toBe(true);
   });
 
+  test("parses 'True' as boolean", () => {
+    const config = { dynamicTyping: true };
+    expect(parseDynamic("field", "True", config)).toBe(true);
+  });
+
   test("parses 'false' as boolean", () => {
     const config = { dynamicTyping: true };
     expect(parseDynamic("field", "false", config)).toBe(false);
@@ -97,6 +104,18 @@ describe("parseDynamic", () => {
   test("parses 'FALSE' as boolean", () => {
     const config = { dynamicTyping: true };
     expect(parseDynamic("field", "FALSE", config)).toBe(false);
+  });
+
+  test("parses 'False' as boolean", () => {
+    const config = { dynamicTyping: true };
+    expect(parseDynamic("field", "False", config)).toBe(false);
+  });
+
+  test("preserves unsupported boolean spellings and surrounding whitespace", () => {
+    const config = { dynamicTyping: true };
+    for (const value of ["T", "F", "tRuE", "fAlSe", " True", "True ", " False", "False "]) {
+      expect(parseDynamic("field", value, config)).toBe(value);
+    }
   });
 
   test("parses valid integer as number", () => {
