@@ -260,7 +260,8 @@
 	header: true,
 	newline: "\r\n",
 	skipEmptyLines: false, //other option is 'greedy', meaning skip delimiters, quotes, and whitespace.
-	columns: null //or array of strings
+	columns: null, //or array of strings
+	transformHeader: undefined
 }
 					</code></pre>
 				</div>
@@ -336,6 +337,12 @@
 								</td>
 								<td>
 									If <code>data</code> is an array of objects this option can be used to manually specify the keys (columns) you expect in the objects. If not set the keys of the first objects are used as column.
+								</td>
+							</tr>
+							<tr>
+								<td><code>transformHeader</code></td>
+								<td>
+									A function receiving the original field name and zero-based column index, returning the label to write in the header row. Object keys and column order are unchanged. The returned label is quoted and escaped using the normal output settings. Called once per emitted header, including when data is empty; not called when <code>header: false</code> or no fields are available.
 								</td>
 							</tr>
 							<tr>
