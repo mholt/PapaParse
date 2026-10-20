@@ -204,6 +204,9 @@ License: MIT
 		/** the columns (keys) we expect when we unparse objects */
 		var _columns = null;
 
+		/** optional transformation of emitted header labels */
+		var _transformHeader = false;
+
 		/** whether to prevent outputting cells that can be parsed as formulae by spreadsheet software (Excel and LibreOffice) */
 		var _escapeFormulae = false;
 
@@ -289,6 +292,9 @@ License: MIT
 				_columns = _config.columns;
 			}
 
+			if (isFunction(_config.transformHeader))
+				_transformHeader = _config.transformHeader;
+
 			if (_config.escapeChar !== undefined) {
 				_escapedQuote = _config.escapeChar + _quoteChar;
 			}
@@ -320,7 +326,7 @@ License: MIT
 				{
 					if (i > 0)
 						csv += _delimiter;
-					csv += safe(fields[i], i);
+					csv += safe(_transformHeader ? _transformHeader(fields[i], i) : fields[i], i);
 				}
 				if (data.length > 0)
 					csv += _newline;
