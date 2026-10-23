@@ -1489,13 +1489,6 @@ License: MIT
 							return finish();
 						}
 
-						// Closing quote at EOF
-						if (quoteSearch === inputLen - 1)
-						{
-							var value = input.substring(cursor, quoteSearch).replace(quoteCharRegex, quoteChar);
-							return finish(value);
-						}
-
 						// If this quote is escaped, it's part of the data; skip it
 						// If the quote character is the escape character, then check if the next character is the escape character
 						if (quoteChar === escapeChar &&  input[quoteSearch + 1] === escapeChar)
@@ -1508,6 +1501,13 @@ License: MIT
 						if (quoteChar !== escapeChar && quoteSearch !== 0 && input[quoteSearch - 1] === escapeChar)
 						{
 							continue;
+						}
+
+						// Closing quote at EOF
+						if (quoteSearch === inputLen - 1)
+						{
+							var value = input.substring(cursor, quoteSearch).replace(quoteCharRegex, quoteChar);
+							return finish(value);
 						}
 
 						if(nextDelim !== -1 && nextDelim < (quoteSearch + 1)) {
