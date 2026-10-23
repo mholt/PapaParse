@@ -647,7 +647,7 @@ License: MIT
 
 		this._chunkError = function(errorMessage)
 		{
-			var errorText = xhr.statusText || errorMessage;
+			var errorText = xhr.statusText || (typeof errorMessage === 'string' ? errorMessage : 'Network error');
 			this._sendError(new Error(errorText));
 		};
 

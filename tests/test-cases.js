@@ -2940,6 +2940,39 @@ var CUSTOM_TESTS = [
 		}
 	},
 	{
+		description: "A failed download reports a network error",
+		disabled: !XHR_ENABLED,
+		timeout: 5000,
+		expected: 'Network error',
+		run: function(callback) {
+			Papa.parse(BASE_PATH + "network-error.csv", {
+				download: true,
+				error: function(err) {
+					callback(err.message);
+				},
+				complete: function() {
+					callback('Download unexpectedly completed');
+				}
+			});
+		}
+	},
+	{
+		description: "A failed download preserves the HTTP status text",
+		disabled: !XHR_ENABLED,
+		expected: 'Not Found',
+		run: function(callback) {
+			Papa.parse(BASE_PATH + "missing-sample.csv", {
+				download: true,
+				error: function(err) {
+					callback(err.message);
+				},
+				complete: function() {
+					callback('Download unexpectedly completed');
+				}
+			});
+		}
+	},
+	{
 		description: "downloadTimeout aborts a slow remote request with a timeout error",
 		disabled: !XHR_ENABLED,
 		timeout: 5000,
