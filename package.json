@@ -42,7 +42,7 @@
 		"grunt": "^1.5.2",
 		"grunt-contrib-uglify": "^5.2.0",
 		"mocha": "^5.2.0",
-		"mocha-headless-chrome": "^4.0.0",
+		"mocha-headless-chrome": "^5.1.0",
 		"open": "7.0.0",
 		"serve-static": "^1.7.1"
 	},

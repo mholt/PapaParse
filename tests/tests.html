@@ -16,6 +16,8 @@
 
 	<script>
 		mocha.checkLeaks();
+		// Injected by Puppeteer 24 (mocha-headless-chrome 5) for ARIA selectors.
+		mocha.globals(['puppeteer___ariaQuerySelector', '__ariaQuerySelector', 'puppeteer___ariaQuerySelectorAll', '__ariaQuerySelectorAll']);
 		mocha.run();
 	</script>
 	</body>
