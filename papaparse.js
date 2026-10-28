@@ -312,6 +312,7 @@ License: MIT
 
 			var hasHeader = Array.isArray(fields) && fields.length > 0;
 			var dataKeyedByField = !(Array.isArray(data[0]));
+			var hasWrittenRow = hasHeader && _writeHeader;
 
 			// If there a header row, write it first
 			if (hasHeader && _writeHeader)
@@ -322,7 +323,7 @@ License: MIT
 						csv += _delimiter;
 					csv += safe(fields[i], i);
 				}
-				if (data.length > 0)
+				if (data.length > 0 && !skipEmptyLines)
 					csv += _newline;
 			}
 
@@ -345,8 +346,12 @@ License: MIT
 					}
 					emptyLine = line.join('').trim() === '';
 				}
-				if (!emptyLine)
+				if (!emptyLine && (!skipEmptyLines || !nullLine))
 				{
+					// Separate emitted rows, not input rows that may be skipped.
+					if (skipEmptyLines && hasWrittenRow)
+						csv += _newline;
+					hasWrittenRow = true;
 					for (var col = 0; col < maxCol; col++)
 					{
 						if (col > 0 && !nullLine)
@@ -354,7 +359,7 @@ License: MIT
 						var colIdx = hasHeader && dataKeyedByField ? fields[col] : col;
 						csv += safe(data[row][colIdx], col);
 					}
-					if (row < data.length - 1 && (!skipEmptyLines || (maxCol > 0 && !nullLine)))
+					if (row < data.length - 1 && !skipEmptyLines)
 					{
 						csv += _newline;
 					}
