@@ -2063,6 +2063,54 @@ var UNPARSE_TESTS = [
 		expected: '1,2\r\n3,4'
 	},
 	{
+		description: "Preserves trailing empty rows when skipping is disabled",
+		input: [['keep'], [''], []],
+		config: {skipEmptyLines: false},
+		expected: 'keep\r\n\r\n'
+	},
+	{
+		description: "Preserves an empty cell row between nonempty rows when skipping is disabled",
+		input: [['a'], [''], ['b']],
+		config: {skipEmptyLines: false},
+		expected: 'a\r\n\r\nb'
+	},
+	{
+		description: "Skips trailing empty rows without emitting an extra record",
+		input: [['keep'], [''], [null], [undefined], []],
+		config: {skipEmptyLines: true},
+		expected: 'keep'
+	},
+	{
+		description: "Skips trailing greedy empty rows with a custom newline",
+		input: [['a', 'b'], ['', ' '], []],
+		config: {skipEmptyLines: 'greedy', newline: '\n'},
+		expected: 'a,b'
+	},
+	{
+		description: "Skips trailing empty objects without emitting an extra record",
+		input: [{a: 'x', b: 'y'}, {}],
+		config: {skipEmptyLines: true},
+		expected: 'a,b\r\nx,y'
+	},
+	{
+		description: "Skips trailing greedy empty objects without emitting an extra record",
+		input: [{a: 'x', b: 'y'}, {a: '', b: ' '}],
+		config: {skipEmptyLines: 'greedy'},
+		expected: 'a,b\r\nx,y'
+	},
+	{
+		description: "Skips all greedy empty data rows after the header",
+		input: {fields: ['a', 'b'], data: [['', ' '], []]},
+		config: {skipEmptyLines: 'greedy'},
+		expected: 'a,b'
+	},
+	{
+		description: "Skips empty rows before and after headerless object data",
+		input: [{a: '', b: ''}, {a: 'x', b: 'y'}, {}],
+		config: {skipEmptyLines: 'greedy', header: false},
+		expected: 'x,y'
+	},
+	{
 		description: "Skips single-cell rows containing null or undefined when skipEmptyLines is true",
 		notes: "Regression test for issue #1163: unparse threw a TypeError when a row contained a single null or undefined value",
 		input: [[null], ['hello'], [undefined], ['world']],
