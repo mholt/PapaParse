@@ -39,6 +39,70 @@ function assertLongSampleParsedCorrectly(parsedCsv) {
 }
 
 describe('PapaParse', function() {
+	it('completes preview with steps from a Readable', function(done) {
+		var rows = [];
+		var completed = 0;
+		Papa.parse(require('stream').Readable.from(['A,B\nC,D\nE,F']), {
+			preview: 1,
+			delimiter: ',',
+			step: function(results) {
+				rows.push(results.data);
+			},
+			complete: function() {
+				completed++;
+				assert.strictEqual(completed, 1);
+				assert.deepEqual(rows, [['A', 'B']]);
+				done();
+			},
+			error: done
+		});
+	});
+
+	[true, false].forEach(function(withComplete) {
+		it('detaches only its own stream listeners when preview completes ' + (withComplete ? 'with' : 'without') + ' a callback', function(done) {
+			var PassThrough = require('stream').PassThrough;
+			var stream = new PassThrough();
+			var rows = [];
+			var completed = 0;
+			var userData = function() {};
+			var userEnd = function() {};
+			var userError = function() {};
+			stream.on('data', userData);
+			stream.on('end', userEnd);
+			stream.on('error', userError);
+			var config = {
+				preview: 1,
+				delimiter: ',',
+				step: function(results) {
+					rows.push(results.data);
+				},
+				complete: function() {
+					completed++;
+				},
+				error: done
+			};
+			if (!withComplete)
+				delete config.complete;
+			Papa.parse(stream, config);
+			stream.write('A,B\n');
+			stream.write('C,D\n');
+			setImmediate(function() {
+				var listeners = ['data', 'end', 'error'].map(function(event) {
+					return stream.listeners(event);
+				});
+				var destroyed = stream.destroyed;
+				var paused = stream.isPaused();
+				stream.end();
+				assert.strictEqual(completed, withComplete ? 1 : 0);
+				assert.deepEqual(rows, [['A', 'B']]);
+				assert.deepEqual(listeners, [[userData], [userEnd], [userError]]);
+				assert.strictEqual(destroyed, false);
+				assert.strictEqual(paused, false);
+				done();
+			});
+		});
+	});
+
 	it('synchronously parsed CSV should be correctly parsed', function() {
 		assertLongSampleParsedCorrectly(Papa.parse(longSampleRawCsv));
 	});
