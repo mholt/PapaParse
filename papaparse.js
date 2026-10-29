@@ -1188,7 +1188,7 @@ License: MIT
 
 		function shouldApplyDynamicTyping(field) {
 			// Cache function values to avoid calling it for each row
-			if (_config.dynamicTypingFunction && _config.dynamicTyping[field] === undefined) {
+			if (_config.dynamicTypingFunction && (!Object.prototype.hasOwnProperty.call(_config.dynamicTyping, field) || _config.dynamicTyping[field] === undefined)) {
 				_config.dynamicTyping[field] = _config.dynamicTypingFunction(field);
 			}
 			return (_config.dynamicTyping[field] || _config.dynamicTyping) === true;

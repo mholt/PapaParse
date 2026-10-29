@@ -39,6 +39,34 @@ function assertLongSampleParsedCorrectly(parsedCsv) {
 }
 
 describe('PapaParse', function() {
+	['whole', 'step', 'chunk'].forEach(function(mode) {
+		it('applies dynamic typing callbacks to inherited header names in ' + mode + ' mode', function() {
+			var calls = [];
+			var rows = [];
+			var config = {
+				header: true,
+				delimiter: ',',
+				dynamicTyping: function(field) {
+					calls.push(field);
+					return field !== 'valueOf';
+				}
+			};
+			if (mode === 'step') {
+				config.step = function(results) { rows.push(results.data); };
+			} else if (mode === 'chunk') {
+				config.chunkSize = 7;
+				config.chunk = function(results) { rows = rows.concat(results.data); };
+			}
+			var results = Papa.parse('toString,valueOf,constructor,hasOwnProperty,normal\n42,43,true,44,45\n46,47,false,48,49', config);
+			if (mode === 'whole') rows = results.data;
+			assert.deepStrictEqual(rows, [
+				{ toString: 42, valueOf: '43', constructor: true, hasOwnProperty: 44, normal: 45 },
+				{ toString: 46, valueOf: '47', constructor: false, hasOwnProperty: 48, normal: 49 }
+			]);
+			assert.deepStrictEqual(calls, ['toString', 'valueOf', 'constructor', 'hasOwnProperty', 'normal']);
+		});
+	});
+
 	it('synchronously parsed CSV should be correctly parsed', function() {
 		assertLongSampleParsedCorrectly(Papa.parse(longSampleRawCsv));
 	});
