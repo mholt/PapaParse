@@ -2057,6 +2057,24 @@ var UNPARSE_TESTS = [
 		expected: '," "\r\n1,2'
 	},
 	{
+		description: "Skips single null fields without skipping rows containing delimiters",
+		input: [[null], [null, null], ['keep']],
+		config: {skipEmptyLines: true},
+		expected: ',\r\nkeep'
+	},
+	{
+		description: "Skips single undefined fields",
+		input: [[undefined], ['keep']],
+		config: {skipEmptyLines: true},
+		expected: 'keep'
+	},
+	{
+		description: "Preserves zero, false and whitespace when skipEmptyLines is true",
+		input: [[0], [false], [' '], ['keep']],
+		config: {skipEmptyLines: true},
+		expected: '0\r\nfalse\r\n" "\r\nkeep'
+	},
+	{
 		description: "Returns without rows with no content when skipEmptyLines is 'greedy'",
 		input: [[null, ' '], [], ['1', '2']].concat(new Array(500000).fill(['', ''])).concat([['3', '4']]),
 		config: {skipEmptyLines: 'greedy'},
