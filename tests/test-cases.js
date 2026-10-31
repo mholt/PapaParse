@@ -664,6 +664,30 @@ describe('Core Parser Tests', function() {
 // Tests for Papa.parse() function -- high-level wrapped parser (CSV to JSON)
 var PARSE_TESTS = [
 	{
+		description: "Preview ignores skipped empty rows (true, true)",
+		input: '\nA\n\nB\nC',
+		config: { delimiter: ',', preview: 2, skipEmptyLines: true, fastMode: true },
+		expected: { data: [['A'], ['B']], errors: [] }
+	},
+	{
+		description: "Preview ignores skipped empty rows (true, 'greedy')",
+		input: ' , \nA,B\n , \nC,D\nE,F',
+		config: { delimiter: ',', preview: 2, skipEmptyLines: 'greedy', fastMode: true },
+		expected: { data: [['A', 'B'], ['C', 'D']], errors: [] }
+	},
+	{
+		description: "Preview ignores skipped empty rows (false, true)",
+		input: '\nA\n\nB\nC',
+		config: { delimiter: ',', preview: 2, skipEmptyLines: true, fastMode: false },
+		expected: { data: [['A'], ['B']], errors: [] }
+	},
+	{
+		description: "Preview ignores skipped empty rows (false, 'greedy')",
+		input: ' , \nA,B\n , \nC,D\nE,F',
+		config: { delimiter: ',', preview: 2, skipEmptyLines: 'greedy', fastMode: false },
+		expected: { data: [['A', 'B'], ['C', 'D']], errors: [] }
+	},
+	{
 		description: "Two rows, just \\r",
 		input: 'A,b,c\rd,E,f',
 		expected: {
@@ -3065,5 +3089,14 @@ describe('Custom Tests', function() {
 		// Assert
 		assert.equal("ParseExecutedSuccessfully", webWorkerMessage.type);
 		assert.equal(3, webWorkerMessage.results.data.length);
+	});
+});
+
+
+describe('Parser reuse', function() {
+	it('resets the empty-row preview budget between parse calls', function() {
+		var parser = new Papa.Parser({ preview: 2, skipEmptyLines: true, fastMode: true });
+		parser.parse('\nA\nB\nC');
+		assert.deepEqual(parser.parse('A\nB\nC\nD').data, [['A'], ['B']]);
 	});
 });
