@@ -1840,6 +1840,49 @@ describe('Parse Async Tests', function() {
 // Tests for Papa.unparse() function (JSON to CSV)
 var UNPARSE_TESTS = [
 	{
+		description: "Transform unparse headers without changing object keys",
+		input: [{name: 'Alice', age: 30}],
+		config: {transformHeader: function(header, index) { return index + ':' + header.toUpperCase(); }},
+		expected: '0:NAME,1:AGE\r\nAlice,30'
+	},
+	{
+		description: "Transform unparse headers with selected columns",
+		input: [{name: 'Alice', age: 30}],
+		config: {columns: ['age', 'name'], transformHeader: function(header) { return header.toUpperCase(); }},
+		expected: 'AGE,NAME\r\n30,Alice'
+	},
+	{
+		description: "Transform explicit fields for array rows",
+		input: {fields: ['name'], data: [['Alice']]},
+		config: {transformHeader: function() { return 'Full, "name"'; }},
+		expected: '"Full, ""name"""\r\nAlice'
+	},
+	{
+		description: "Transform headers for empty input with columns",
+		input: [],
+		config: {columns: ['name'], transformHeader: function() { return 'Full name'; }},
+		expected: 'Full name'
+	},
+	{
+		description: "Do not transform disabled headers",
+		input: [{name: 'Alice'}],
+		config: {header: false, transformHeader: function() { throw new Error('No header emitted'); }},
+		expected: 'Alice'
+	},
+	{
+		description: "Do not transform array rows without fields",
+		input: [['Alice']],
+		config: {transformHeader: function() { throw new Error('No header emitted'); }},
+		expected: 'Alice'
+	},
+	{
+		description: "Apply formula escaping to transformed headers",
+		input: [{name: 'Alice'}],
+		config: {escapeFormulae: true, transformHeader: function() { return '=name'; }},
+		expected: '"\'=name"\r\nAlice'
+	},
+
+	{
 		description: "A simple row",
 		notes: "Comma should be default delimiter",
 		input: [['A', 'b', 'c']],
@@ -2198,6 +2241,41 @@ var UNPARSE_TESTS = [
 		expected: '\'Col1\',\'Col2\',\'Col3\'\r\n\'\'\'\tdanger\',\'\'\'\rdanger,\',\'safe, \t\r\''
 	},
 ];
+
+describe('Unparse header transformation', function() {
+	it('calls the transform once per field without mutating input or columns', function() {
+		var rows = [{name: 'Alice', age: 30}, {name: 'Bob', age: 40}];
+		var columns = ['age', 'name'];
+		var calls = [];
+		assert.strictEqual(Papa.unparse(rows, {
+			columns: columns,
+			transformHeader: function(field, index) {
+				calls.push([field, index]);
+				return field.toUpperCase();
+			}
+		}), 'AGE,NAME\r\n30,Alice\r\n40,Bob');
+		assert.deepEqual(calls, [['age', 0], ['name', 1]]);
+		assert.deepEqual(columns, ['age', 'name']);
+		assert.deepEqual(rows, [{name: 'Alice', age: 30}, {name: 'Bob', age: 40}]);
+	});
+	it('preserves explicit object field lookup and repeated output labels', function() {
+		var fields = ['a', 'b'];
+		assert.strictEqual(Papa.unparse({fields: fields, data: [{a: 1, b: 2}]}, {
+			transformHeader: function() { return 'same'; }
+		}), 'same,same\r\n1,2');
+		assert.deepEqual(fields, ['a', 'b']);
+	});
+	it('propagates transformation errors without affecting the next call', function() {
+		var failure = new Error('invalid label');
+		assert.throws(function() {
+			Papa.unparse([{a: 1}], {transformHeader: function() { throw failure; }});
+		}, 'invalid label');
+		assert.strictEqual(Papa.unparse([{a: 1}]), 'a\r\n1');
+	});
+	it('ignores a non-function transformHeader', function() {
+		assert.strictEqual(Papa.unparse([{a: 1}], {transformHeader: true}), 'a\r\n1');
+	});
+});
 
 describe('Unparse Tests', function() {
 	function generateTest(test) {
