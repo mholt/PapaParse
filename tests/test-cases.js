@@ -581,6 +581,36 @@ var CORE_PARSER_TESTS = [
 		}
 	},
 	{
+		description: "Fast preview does not count leading comments",
+		input: '# first comment\n# second comment\na,b\nc,d\ne,f',
+		config: { fastMode: true, comments: '#', preview: 2 },
+		expected: {
+			data: [['a', 'b'], ['c', 'd']],
+			errors: [],
+			meta: { truncated: true }
+		}
+	},
+	{
+		description: "Fast preview does not count comments between rows",
+		input: 'a,b\n// first comment\n// second comment\nc,d\ne,f\ng,h',
+		config: { fastMode: true, comments: '//', preview: 3 },
+		expected: {
+			data: [['a', 'b'], ['c', 'd'], ['e', 'f']],
+			errors: [],
+			meta: { truncated: true }
+		}
+	},
+	{
+		description: "Fast preview larger than data ignores comments",
+		input: '# first comment\n# second comment\na,b\nc,d',
+		config: { fastMode: true, comments: '#', preview: 3 },
+		expected: {
+			data: [['a', 'b'], ['c', 'd']],
+			errors: [],
+			meta: { truncated: false }
+		}
+	},
+	{
 		description: "Fast mode with blank line at end",
 		input: 'a,b,c\n',
 		config: { fastMode: true },
@@ -1226,6 +1256,24 @@ var PARSE_TESTS = [
 		config: { header: true, preview: 2 },
 		expected: {
 			data: [{"a": "d", "b": "e", "c": "f"}, {"a": "g", "b": "h", "c": "i"}],
+			errors: []
+		}
+	},
+	{
+		description: "Preview with leading comments in automatic fast mode",
+		input: '# first comment\n# second comment\na,b\nc,d\ne,f',
+		config: { comments: true, delimiter: ',', preview: 2 },
+		expected: {
+			data: [['a', 'b'], ['c', 'd']],
+			errors: []
+		}
+	},
+	{
+		description: "Preview with header and leading comments",
+		input: '# first comment\n# second comment\na,b\nc,d\ne,f\ng,h',
+		config: { header: true, comments: true, delimiter: ',', preview: 2 },
+		expected: {
+			data: [{a: 'c', b: 'd'}, {a: 'e', b: 'f'}],
 			errors: []
 		}
 	},
