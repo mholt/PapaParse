@@ -594,7 +594,7 @@ License: MIT
 
 			xhr.ontimeout = bindFunction(this._chunkTimeout, this);
 
-			xhr.open(this._config.downloadRequestBody ? 'POST' : 'GET', this._input, !IS_WORKER);
+			xhr.open(this._config.downloadRequestBody === undefined || this._config.downloadRequestBody === null ? 'GET' : 'POST', this._input, !IS_WORKER);
 			// Timeout is only supported for asynchronous requests
 			if (this._config.downloadTimeout && !IS_WORKER)
 			{
