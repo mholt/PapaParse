@@ -1204,8 +1204,10 @@ License: MIT
 					return false;
 				else if (testFloat(value))
 					return parseFloat(value);
-				else if (ISO_DATE.test(value))
-					return new Date(value);
+				else if (ISO_DATE.test(value)) {
+					var date = new Date(value);
+					return isNaN(date.getTime()) ? value : date;
+				}
 				else
 					return (value === '' ? null : value);
 			}
