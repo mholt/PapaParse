@@ -1650,8 +1650,17 @@ License: MIT
 			 */
 			function finish(value)
 			{
-				if (ignoreLastRow)
+				if (ignoreLastRow) {
+					var suspendedRowIndex = data.length;
+					var validErrors = [];
+					for (var i = 0; i < errors.length; i++) {
+						if (errors[i].row !== suspendedRowIndex) {
+							validErrors.push(errors[i]);
+						}
+					}
+					errors = validErrors;
 					return returnable();
+				}
 				if (typeof value === 'undefined')
 					value = input.substring(cursor);
 				row.push(value);
