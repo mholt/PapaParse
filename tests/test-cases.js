@@ -688,6 +688,16 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Custom escapeChar does not break line-ending detection",
+		notes: "A carriage return inside a field must not be mistaken for the row separator when escapeChar is set",
+		input: '"\\"","\r"\r\nz,z',
+		config: { escapeChar: '\\', delimiter: ',' },
+		expected: {
+			data: [['"', '\r'], ['z', 'z']],
+			errors: []
+		}
+	},
+	{
 		description: "Quoted field with \\r",
 		input: 'A,"B\rB",C',
 		expected: {
