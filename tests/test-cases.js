@@ -664,6 +664,33 @@ describe('Core Parser Tests', function() {
 // Tests for Papa.parse() function -- high-level wrapped parser (CSV to JSON)
 var PARSE_TESTS = [
 	{
+		description: "Delimiter guessing respects a custom quote character",
+		input: "'a,b,c';d\n'e,f,g';h",
+		config: {"quoteChar": "'"},
+		expected: {
+			data: [["a,b,c", "d"], ["e,f,g", "h"]],
+			errors: []
+		}
+	},
+	{
+		description: "Delimiter guessing respects a custom escape character",
+		input: "\"a\\\",b,c\";d\n\"e\\\",f,g\";h",
+		config: {"escapeChar": "\\"},
+		expected: {
+			data: [["a\",b,c", "d"], ["e\",f,g", "h"]],
+			errors: []
+		}
+	},
+	{
+		description: "Delimiter guessing respects custom quote and escape characters",
+		input: "'a\\',b,c';d\n'e\\',f,g';h",
+		config: {"quoteChar": "'", "escapeChar": "\\"},
+		expected: {
+			data: [["a',b,c", "d"], ["e',f,g", "h"]],
+			errors: []
+		}
+	},
+	{
 		description: "Two rows, just \\r",
 		input: 'A,b,c\rd,E,f',
 		expected: {
