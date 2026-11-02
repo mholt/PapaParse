@@ -3001,6 +3001,33 @@ var CUSTOM_TESTS = [
 	},
 ];
 
+describe('Formula escaping regular expressions', function() {
+	['', 'g', 'y', 'gy'].forEach(function(flags) {
+		it('escapes each cell independently with flags "' + flags + '"', function() {
+			var pattern = new RegExp('^=', flags);
+			var csv = Papa.unparse([['=1', '=2'], ['=3', 'safe']], {escapeFormulae: pattern});
+			assert.equal(csv, '"\'=1","\'=2"\r\n"\'=3",safe');
+		});
+
+		it('preserves caller regex state across calls with flags "' + flags + '"', function() {
+			var pattern = new RegExp('^=', flags);
+			pattern.lastIndex = 2;
+			var config = {escapeFormulae: pattern};
+			var input = {fields: ['=header'], data: [['=value']]};
+			var expected = '"\'=header"\r\n"\'=value"';
+			assert.equal(Papa.unparse(input, config), expected);
+			assert.equal(pattern.lastIndex, 2);
+			assert.equal(Papa.unparse(input, config), expected);
+			assert.equal(pattern.lastIndex, 2);
+		});
+	});
+
+	it('preserves case-insensitive and multiline matching', function() {
+		var csv = Papa.unparse([['CMD:run', 'safe\ncmd:run', 'safe']], {escapeFormulae: /^cmd:/gim});
+		assert.equal(csv, '"\'CMD:run","\'safe\ncmd:run",safe');
+	});
+});
+
 describe('Custom Tests', function() {
 	function generateTest(test) {
 		(test.disabled ? it.skip : it)(test.description, function(done) {
