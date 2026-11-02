@@ -39,6 +39,44 @@ function assertLongSampleParsedCorrectly(parsedCsv) {
 }
 
 describe('PapaParse', function() {
+	it('skipFirstNLines discards a preamble split across readable stream chunks', function(done) {
+		var input = require('stream').Readable.from(['meta', 'data\r', '\nmore', '\r', '\nname,value\r\na,1\r\nb,2']);
+		Papa.parse(input, {
+			skipFirstNLines: 2,
+			header: true,
+			delimiter: ',',
+			complete: function(results) {
+				assert.deepEqual(results.data, [{name: 'a', value: '1'}, {name: 'b', value: '2'}]);
+				assert.deepEqual(results.errors, []);
+				done();
+			},
+			error: done
+		});
+	});
+
+	it('skipFirstNLines preserves pause and resume after a streamed preamble', function(done) {
+		var input = require('stream').Readable.from(['metadata\n', 'more\nname,value\na,1\nb,2']);
+		var rows = [];
+		Papa.parse(input, {
+			skipFirstNLines: 2,
+			header: true,
+			delimiter: ',',
+			newline: '\n',
+			step: function(results, parser) {
+				rows.push(results.data);
+				parser.pause();
+				setImmediate(function() {
+					parser.resume();
+				});
+			},
+			complete: function() {
+				assert.deepEqual(rows, [{name: 'a', value: '1'}, {name: 'b', value: '2'}]);
+				done();
+			},
+			error: done
+		});
+	});
+
 	it('synchronously parsed CSV should be correctly parsed', function() {
 		assertLongSampleParsedCorrectly(Papa.parse(longSampleRawCsv));
 	});
