@@ -554,6 +554,22 @@ var CORE_PARSER_TESTS = [
 		}
 	},
 	{
+		description: "Multiple rows, one column, quoted",
+		input: '"a"\n"b,c"\n"d""e"\n"f\ng"\n"h"',
+		expected: {
+			data: [['a'], ['b,c'], ['d"e'], ['f\ng'], ['h']],
+			errors: []
+		}
+	},
+	{
+		description: "Quoted rows ending in a newline, then a row with a delimiter",
+		input: '"a"\n"b"\nc,d\n"e",f\n"g"',
+		expected: {
+			data: [['a'], ['b'], ['c', 'd'], ['e', 'f'], ['g']],
+			errors: []
+		}
+	},
+	{
 		description: "Fast mode, basic",
 		input: 'a,b,c\nd,e,f',
 		config: { fastMode: true },
@@ -2937,6 +2953,26 @@ var CUSTOM_TESTS = [
 					callback(data);
 				}
 			});
+		}
+	},
+	{
+		description: "Parses a large one-column file of quoted values",
+		// Times out if parse time grows quadratically with row count
+		timeout: 5000,
+		expected: true,
+		run: function(callback) {
+			var rowCount = 400000;
+			var input = [];
+			for (var i = 0; i < rowCount; i++) {
+				input.push(i === rowCount - 10 ? '"x,y"' : '"value ' + i + '"');
+			}
+			var results = Papa.parse(input.join('\n'), { delimiter: ',' });
+			var matches = results.errors.length === 0
+				&& results.data.length === rowCount
+				&& results.data.every(function(row, index) {
+					return row.length === 1 && row[0] === (index === rowCount - 10 ? 'x,y' : 'value ' + index);
+				});
+			callback(matches);
 		}
 	},
 	{

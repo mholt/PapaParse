@@ -1543,7 +1543,8 @@ License: MIT
 						{
 							row.push(input.substring(cursor, quoteSearch).replace(quoteCharRegex, quoteChar));
 							saveRow(quoteSearch + 1 + spacesBetweenQuoteAndNewLine + newlineLen);
-							nextDelim = input.indexOf(delim, cursor);	// because we may have skipped the nextDelim in the quoted field
+							if (nextDelim !== -1 && nextDelim < cursor)	// because we may have skipped the nextDelim in the quoted field
+								nextDelim = input.indexOf(delim, cursor);
 							quoteSearch = input.indexOf(quoteChar, cursor);	// we search for first quote in next line
 
 							if (stepIsFunction)
