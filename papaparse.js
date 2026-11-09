@@ -496,8 +496,12 @@ License: MIT
 			}
 
 			if (!this._config.step && !this._config.chunk) {
-				this._completeResults.data = this._completeResults.data.concat(results.data);
-				this._completeResults.errors = this._completeResults.errors.concat(results.errors);
+				// Append in place: concat would copy all rows collected so far on every chunk
+				var i;
+				for (i = 0; i < results.data.length; i++)
+					this._completeResults.data.push(results.data[i]);
+				for (i = 0; i < results.errors.length; i++)
+					this._completeResults.errors.push(results.errors[i]);
 				this._completeResults.meta = results.meta;
 			}
 
