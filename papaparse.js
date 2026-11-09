@@ -973,6 +973,7 @@ License: MIT
 		var self = this;
 		var _stepCounter = 0;	// Number of times step was called (number of rows parsed)
 		var _rowCounter = 0;	// Number of rows that have been parsed so far
+		var _previewCounter = 0;	// Number of rows returned so far, counted against preview
 		var _input;				// The input being parsed
 		var _parser;			// The core parser being used
 		var _paused = false;	// Whether we are paused or not
@@ -1046,13 +1047,22 @@ License: MIT
 			var parserConfig = copy(_config);
 			// Tell the parser the header instead of reguessing on each chunk
 			parserConfig.header = needsHeaderRow();
-			if (_config.preview && _config.header)
+			if (_config.preview && !isFunction(_config.step))
+			{
+				// Only the rows not yet returned by previous chunks
+				parserConfig.preview = _config.preview - _previewCounter;
+				if (parserConfig.header)
+					parserConfig.preview++;	// to compensate for header row
+			}
+			else if (_config.preview && _config.header)
 				parserConfig.preview++;	// to compensate for header row
 
 			_input = input;
 			_parser = new Parser(parserConfig);
 			_results = _parser.parse(_input, baseIndex, ignoreLastRow);
 			processResults();
+			if (_config.preview && !isFunction(_config.step) && _results && _results.data)
+				_previewCounter += _results.data.length;
 			return _paused ? { meta: { paused: true } } : (_results || { meta: { paused: false } });
 		};
 

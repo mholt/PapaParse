@@ -2722,6 +2722,41 @@ var CUSTOM_TESTS = [
 		}
 	},
 	{
+		description: "Preview limits the number of rows across chunks",
+		expected: [['A', 'b'], ['C', 'd']],
+		run: function(callback) {
+			var rows = [];
+			Papa.parse('A,b\nC,d\nE,f\nG,h\nI,j', {
+				preview: 2,
+				chunkSize: 6,
+				chunk: function(response) {
+					rows = rows.concat(response.data);
+				},
+				complete: function() {
+					callback(rows);
+				}
+			});
+		}
+	},
+	{
+		description: "Preview with header limits the number of rows across chunks",
+		expected: [{ h: 'a' }, { h: 'b' }],
+		run: function(callback) {
+			var rows = [];
+			Papa.parse('h\na\nb\nc\nd\ne', {
+				header: true,
+				preview: 2,
+				chunkSize: 5,
+				chunk: function(response) {
+					rows = rows.concat(response.data);
+				},
+				complete: function() {
+					callback(rows);
+				}
+			});
+		}
+	},
+	{
 		description: "Step exposes indexes for files",
 		expected: [6, 12, 17],
 		disabled: !FILES_ENABLED,
