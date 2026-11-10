@@ -641,6 +641,26 @@ var CORE_PARSER_TESTS = [
 			}
 		}
 	},
+	{
+		description: "Empty delimiter defaults to comma",
+		input: 'a,"b",c\nd,e,f',
+		config: { delimiter: '' },
+		expected: {
+			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
+			errors: [],
+			meta: { delimiter: ',' }
+		}
+	},
+	{
+		description: "Empty delimiter defaults to comma without quotes",
+		input: 'a,b,c\nd,e,f',
+		config: { delimiter: '' },
+		expected: {
+			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
+			errors: [],
+			meta: { delimiter: ',' }
+		}
+	},
 
 ];
 
@@ -921,6 +941,28 @@ var PARSE_TESTS = [
 		expected: {
 			data: [['a', 'b', 'c']],
 			errors: []
+		}
+	},
+	{
+		description: "Callback delimiter returning an empty string",
+		input: 'a,"b",c\nd,e,f',
+		config: { delimiter: function() { return ''; } },
+		expected: {
+			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
+			errors: []
+		}
+	},
+	{
+		description: "Empty string in delimitersToGuess",
+		input: 'a,"b",c\nd,e,f',
+		config: { delimitersToGuess: [''] },
+		expected: {
+			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
+			errors: [{
+				"type": "Delimiter",
+				"code": "UndetectableDelimiter",
+				"message": "Unable to auto-detect delimiting character; defaulted to ','"
+			}]
 		}
 	},
 	{
