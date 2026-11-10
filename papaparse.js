@@ -1706,7 +1706,7 @@ License: MIT
 
 							usedHeaders.add(newHeader); // Mark this new Header as used
 							result[i] = newHeader;
-							headerCount[header]++;
+							headerCount[header] = suffixCount;
 							duplicateHeaders = true;
 							if (renamedHeaders === null) {
 								renamedHeaders = {};
