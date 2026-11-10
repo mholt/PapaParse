@@ -290,6 +290,34 @@ describe('PapaParse', function() {
 		});
 	});
 
+	it('does not split the whole input to preview it or to guess its delimiter', function() {
+		// Past the megabyte guessLineEndings splits, which is bounded by design.
+		var rows = [];
+		for (var i = 0; i < 80000; i++)
+			rows.push(i + ',Lorem ipsum,' + (i * 3));
+		var input = 'id,text,n\n' + rows.join('\n');
+		var split = String.prototype.split;
+		var whole = 0;
+		String.prototype.split = function() {	// eslint-disable-line no-extend-native
+			if (String(this) === input)
+				whole++;
+			return split.apply(this, arguments);
+		};
+		try {
+			var preview = Papa.parse(input, { preview: 10, delimiter: ',' });
+			var previewSplits = whole;
+			whole = 0;
+			var guessed = Papa.parse(input, { preview: 10 });
+			assert.strictEqual(preview.data.length, 10);
+			assert.deepEqual(guessed.data, preview.data);
+			assert.strictEqual(guessed.meta.delimiter, ',');
+			assert.strictEqual(previewSplits, 0, 'split the whole input to preview it');
+			assert.strictEqual(whole, 0, 'split the whole input to guess its delimiter');
+		} finally {
+			String.prototype.split = split;	// eslint-disable-line no-extend-native
+		}
+	});
+
 	it('handles utf-8 BOM encoded files', function(done) {
 		Papa.parse(utf8BomSampleRawCsv, {
 			header: true,

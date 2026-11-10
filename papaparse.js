@@ -1420,13 +1420,17 @@ License: MIT
 
 			if (fastMode || (fastMode !== false && input.indexOf(quoteChar) === -1))
 			{
-				var rows = input.split(newline);
-				for (var i = 0; i < rows.length; i++)
+				// Line by line, so a preview (the delimiter guess's ten rows among them) reads
+				// only the lines it returns.
+				for (var i = 0, lineStart = 0; lineStart <= input.length; i++)
 				{
-					row = rows[i];
+					var lineEnd = input.indexOf(newline, lineStart);
+					var isLastRow = lineEnd === -1;
+					row = input.substring(lineStart, isLastRow ? input.length : lineEnd);
+					lineStart = isLastRow ? input.length + 1 : lineEnd + newline.length;
 					cursor += row.length;
 
-					if (i !== rows.length - 1)
+					if (!isLastRow)
 						cursor += newline.length;
 					else if (ignoreLastRow)
 						return returnable();
