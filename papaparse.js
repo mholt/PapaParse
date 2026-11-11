@@ -32,6 +32,15 @@ License: MIT
 {
 	'use strict';
 
+	/** Whether every cell is empty, whitespace, null or undefined: a row greedy skipEmptyLines drops. */
+	function isBlankRow(row)
+	{
+		for (var i = 0; i < row.length; i++)
+			if (row[i] !== null && row[i] !== undefined && String(row[i]).trim() !== '')
+				return false;
+		return true;
+	}
+
 	var global = (function() {
 		// alternative method, similar to `Function('return this')()`
 		// but without using `eval` (which is disabled when
@@ -335,7 +344,7 @@ License: MIT
 				var nullLine = hasHeader ? Object.keys(data[row]).length === 0 : data[row].length === 0;
 				if (skipEmptyLines && !hasHeader)
 				{
-					emptyLine = skipEmptyLines === 'greedy' ? data[row].join('').trim() === '' : data[row].length === 1 && (data[row][0] === null || data[row][0] === undefined || data[row][0].length === 0);
+					emptyLine = skipEmptyLines === 'greedy' ? isBlankRow(data[row]) : data[row].length === 1 && (data[row][0] === null || data[row][0] === undefined || data[row][0].length === 0);
 				}
 				if (skipEmptyLines === 'greedy' && hasHeader) {
 					var line = [];
@@ -343,7 +352,7 @@ License: MIT
 						var cx = dataKeyedByField ? fields[c] : c;
 						line.push(data[row][cx]);
 					}
-					emptyLine = line.join('').trim() === '';
+					emptyLine = isBlankRow(line);
 				}
 				if (!emptyLine)
 				{
@@ -1127,7 +1136,7 @@ License: MIT
 		};
 
 		function testEmptyLine(s) {
-			return _config.skipEmptyLines === 'greedy' ? s.join('').trim() === '' : s.length === 1 && s[0].length === 0;
+			return _config.skipEmptyLines === 'greedy' ? isBlankRow(s) : s.length === 1 && s[0].length === 0;
 		}
 
 		function testFloat(s) {
