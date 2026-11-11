@@ -2150,6 +2150,24 @@ var UNPARSE_TESTS = [
 		expected: 'Col1,Col2,Col3\r\n"\'=danger","\'@danger",safe\r\nsafe=safe,"\'+danger","\'-danger, danger"\r\n\'+safe,\'@safe,"safe, safe"'
 	},
 	{
+		description: "Escape formulae after converting arrays and objects to text",
+		input: [[['=1+1'], Object('+1+1'), { toString: function() { return '@danger'; } }]],
+		config: { escapeFormulae: true },
+		expected: '"\'=1+1","\'+1+1","\'@danger"'
+	},
+	{
+		description: "Escape converted values with a custom formula expression",
+		input: [[['=1+1'], { toString: function() { return '-1+1'; } }]],
+		config: { escapeFormulae: /^-/ },
+		expected: '=1+1,"\'-1+1"'
+	},
+	{
+		description: "Formula escaping preserves numbers and booleans",
+		input: [[-1, 0, 1, true, false]],
+		config: { escapeFormulae: true },
+		expected: '-1,0,1,true,false'
+	},
+	{
 		description: "Don't escape formulae by default",
 		input: [{ "Col1": "=danger", "Col2": "@danger", "Col3": "safe" }, { "Col1": "safe=safe", "Col2": "+danger", "Col3": "-danger, danger" }, { "Col1": "'+safe", "Col2": "'@safe", "Col3": "safe, safe" }],
 		expected: 'Col1,Col2,Col3\r\n=danger,@danger,safe\r\nsafe=safe,+danger,"-danger, danger"\r\n\'+safe,\'@safe,"safe, safe"'

@@ -378,13 +378,15 @@ License: MIT
 			}
 
 			var needsQuotes = false;
+			var strValue = str.toString();
 
-			if (_escapeFormulae && typeof str === "string" && _escapeFormulae.test(str)) {
-				str = "'" + str;
+			// Exclude numeric and boolean primitives, but check the serialized text of objects.
+			if (_escapeFormulae && typeof str !== 'number' && typeof str !== 'bigint' // eslint-disable-line valid-typeof
+				&& typeof str !== 'boolean' && _escapeFormulae.test(strValue)) {
+				strValue = "'" + strValue;
+				str = strValue;
 				needsQuotes = true;
 			}
-
-			var strValue = str.toString();
 			var escapedQuoteStr = strValue.replace(quoteCharRegex, _escapedQuote);
 
 			needsQuotes = needsQuotes
