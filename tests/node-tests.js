@@ -39,6 +39,14 @@ function assertLongSampleParsedCorrectly(parsedCsv) {
 }
 
 describe('PapaParse', function() {
+	it('round-trips columns when unparse receives an empty delimiter', function() {
+		var rows = [['a,b', 'a"b', 'a\nb'], ['1', '2', '3']];
+		var csv = Papa.unparse(rows, {delimiter: ''});
+		var parsed = Papa.parse(csv, {delimiter: ','});
+		assert.deepStrictEqual(parsed.data, rows);
+		assert.deepStrictEqual(parsed.errors, []);
+	});
+
 	it('synchronously parsed CSV should be correctly parsed', function() {
 		assertLongSampleParsedCorrectly(Papa.parse(longSampleRawCsv));
 	});

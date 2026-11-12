@@ -1972,6 +1972,30 @@ var UNPARSE_TESTS = [
 		expected: 'A, b, c\r\nd, e, "f, g"'
 	},
 	{
+		description: "Empty delimiter defaults to comma",
+		input: [['a', 'b'], ['1', '2']],
+		config: { delimiter: '' },
+		expected: 'a,b\r\n1,2'
+	},
+	{
+		description: "Empty delimiter preserves object headers and columns",
+		input: [{name: 'a', value: 'b'}],
+		config: { delimiter: '' },
+		expected: 'name,value\r\na,b'
+	},
+	{
+		description: "Empty delimiter still quotes fields for comma-separated output",
+		input: [['a,b', 'a"b', 'a\nb']],
+		config: { delimiter: '' },
+		expected: '"a,b","a""b","a\nb"'
+	},
+	{
+		description: "Empty delimiter defaults to comma without an object header",
+		input: [{name: 'a', value: 'b'}],
+		config: { delimiter: '', header: false },
+		expected: 'a,b'
+	},
+	{
 		description: "Bad delimiter (\\n)",
 		notes: "Should default to comma",
 		input: [['a', 'b', 'c'], ['d', 'e', 'f']],
