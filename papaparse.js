@@ -1293,7 +1293,9 @@ License: MIT
 				}).parse(input);
 
 				for (var j = 0; j < preview.data.length; j++) {
-					if (skipEmptyLines && testEmptyLine(preview.data[j])) {
+					// The empty row after a trailing newline says nothing about the delimiter
+					var isTrailingEmptyRow = j === preview.data.length - 1 && preview.data[j].length === 1 && preview.data[j][0] === '';
+					if (isTrailingEmptyRow || (skipEmptyLines && testEmptyLine(preview.data[j]))) {
 						emptyLinesCount++;
 						continue;
 					}

@@ -684,6 +684,14 @@ describe('Core Parser Tests', function() {
 // Tests for Papa.parse() function -- high-level wrapped parser (CSV to JSON)
 var PARSE_TESTS = [
 	{
+		description: "Two-column file with a trailing newline is guessed",
+		input: 'a;b\n1;2\n',
+		expected: {
+			data: [['a', 'b'], ['1', '2'], ['']],
+			errors: []
+		}
+	},
+	{
 		description: "Two rows, just \\r",
 		input: 'A,b,c\rd,E,f',
 		expected: {
