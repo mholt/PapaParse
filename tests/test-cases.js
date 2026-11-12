@@ -1708,6 +1708,22 @@ describe('Parse Tests', function() {
 		assert.deepEqual(result.meta.renamedHeaders, {Column_1: 'Column'}, 'renamedHeaders should contain the renamed header mapping');
 	});
 
+	it('rejects the default comment marker when it matches the delimiter', function() {
+		['', '#first\nsecond#row'].forEach(function(input) {
+			[true, '#'].forEach(function(comments) {
+				assert.throws(function() {
+					Papa.parse(input, {delimiter: '#', comments: comments});
+				}, Error, 'Comment character same as delimiter');
+			});
+		});
+	});
+
+	it('allows a comment marker as the delimiter when comments are disabled', function() {
+		var result = Papa.parse('#first\nsecond#row', {delimiter: '#', comments: false});
+		assert.deepEqual(result.data, [['', 'first'], ['second', 'row']]);
+		assert.deepEqual(result.errors, []);
+	});
+
 	it('downloadTimeout throws when set to a value not parsable by parseInt', function() {
 		assert.throws(function() {
 			Papa.parse('A,B,C', { downloadTimeout: 'not-a-number' });
