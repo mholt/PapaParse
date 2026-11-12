@@ -1689,7 +1689,7 @@ License: MIT
 				if (config.header && !baseIndex && data.length && !headerParsed)
 				{
 					const result = data[0];
-					const headerCount = Object.create(null); // To track the count of each base header
+					const headerCount = Object.create(null);
 					const usedHeaders = new Set(result); // To track used headers and avoid duplicates
 					let duplicateHeaders = false;
 
@@ -1713,7 +1713,7 @@ License: MIT
 
 							usedHeaders.add(newHeader); // Mark this new Header as used
 							result[i] = newHeader;
-							headerCount[header]++;
+							headerCount[header] = suffixCount;
 							duplicateHeaders = true;
 							if (renamedHeaders === null) {
 								renamedHeaders = {};
