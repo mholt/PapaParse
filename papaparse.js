@@ -1379,6 +1379,7 @@ License: MIT
 
 		// Delimiter must be valid
 		if (typeof delim !== 'string'
+			|| delim === ''
 			|| Papa.BAD_DELIMITERS.indexOf(delim) > -1)
 			delim = ',';
 
