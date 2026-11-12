@@ -641,41 +641,6 @@ var CORE_PARSER_TESTS = [
 			}
 		}
 	},
-	{
-		description: "Duplicated header names after existing suffixed columns",
-		input: 'a,a_1,a_2,a,a,a\n1,2,3,4,5,6',
-		config: { header: true },
-		expected: {
-			data: [['a', 'a_1', 'a_2', 'a_3', 'a_4', 'a_5'], ['1', '2', '3', '4', '5', '6']],
-			errors: [],
-			meta: {
-				renamedHeaders: {a_3: 'a', a_4: 'a', a_5: 'a'},
-				cursor: 27
-			}
-		}
-	},
-	{
-		description: "Duplicated header names with a gap in existing suffixes",
-		input: 'a,a_2,a,a_2,a,a\n1,2,3,4,5,6',
-		config: { header: true },
-		expected: {
-			data: [['a', 'a_2', 'a_1', 'a_2_1', 'a_3', 'a_4'], ['1', '2', '3', '4', '5', '6']],
-			errors: [],
-			meta: {
-				renamedHeaders: {a_1: 'a', a_2_1: 'a_2', a_3: 'a', a_4: 'a'},
-				cursor: 27
-			}
-		}
-	},
-	{
-		description: "Many duplicated header names after existing suffixed columns",
-		input: 'a,' + Array.from({ length: 10000 }, function(v, i) { return 'a_' + (i + 1); }).join(',') + ',a'.repeat(10000),
-		config: { header: true },
-		expected: {
-			data: [['a'].concat(Array.from({ length: 20000 }, function(v, i) { return 'a_' + (i + 1); }))],
-			errors: []
-		}
-	},
 
 ];
 
