@@ -2833,6 +2833,59 @@ var CUSTOM_TESTS = [
 		}
 	},
 	{
+		description: "Multi-byte characters split between file chunks are handled",
+		expected: [['a', '\u00e9'], ['b', '\u20ac'], ['c', '\ud83d\ude00']],
+		disabled: typeof FileReader === 'undefined',
+		run: function(callback) {
+			var updates = [];
+			Papa.parse(new File(['a,\u00e9\nb,\u20ac\nc,\ud83d\ude00'], 'sample.csv'), {
+				chunkSize: 1,
+				step: function(response) {
+					updates.push(response.data);
+				},
+				complete: function() {
+					callback(updates);
+				}
+			});
+		}
+	},
+	{
+		description: "Byte order mark selects the encoding of a chunked file",
+		expected: [['a', '\u00e9'], ['b', '\u20ac']],
+		disabled: typeof FileReader === 'undefined',
+		run: function(callback) {
+			var updates = [];
+			var utf16le = new Uint8Array([0xFF, 0xFE, 0x61, 0, 0x2C, 0, 0xE9, 0, 0x0A, 0, 0x62, 0, 0x2C, 0, 0xAC, 0x20]);
+			Papa.parse(new File([utf16le], 'sample.csv'), {
+				chunkSize: 5,
+				step: function(response) {
+					updates.push(response.data);
+				},
+				complete: function() {
+					callback(updates);
+				}
+			});
+		}
+	},
+	{
+		description: "Empty encoding falls back to UTF-8 for a chunked file",
+		expected: [['a', '\u00e9'], ['b', '\u20ac']],
+		disabled: typeof FileReader === 'undefined',
+		run: function(callback) {
+			var updates = [];
+			Papa.parse(new File(['a,\u00e9\nb,\u20ac'], 'sample.csv'), {
+				encoding: '',
+				chunkSize: 3,
+				step: function(response) {
+					updates.push(response.data);
+				},
+				complete: function() {
+					callback(updates);
+				}
+			});
+		}
+	},
+	{
 		description: "Step functions can abort parsing",
 		expected: [['A', 'b', 'c']],
 		run: function(callback) {
