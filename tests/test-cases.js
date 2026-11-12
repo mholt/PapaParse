@@ -188,6 +188,36 @@ var CORE_PARSER_TESTS = [
 		}
 	},
 	{
+		description: "Custom escaped quote at EOF does not close a quoted field",
+		input: 'a,"b\\"',
+		config: { escapeChar: '\\' },
+		expected: {
+			data: [['a', 'b\\"']],
+			errors: [{
+				"type": "Quotes",
+				"code": "MissingQuotes",
+				"message": "Quoted field unterminated",
+				"row": 0,
+				"index": 3
+			}]
+		}
+	},
+	{
+		description: "Custom escaped single quote at EOF does not close a quoted field",
+		input: "a,'b\\'",
+		config: { quoteChar: "'", escapeChar: '\\' },
+		expected: {
+			data: [['a', "b\\'"]],
+			errors: [{
+				"type": "Quotes",
+				"code": "MissingQuotes",
+				"message": "Quoted field unterminated",
+				"row": 0,
+				"index": 3
+			}]
+		}
+	},
+	{
 		description: "Quoted field has no closing quote",
 		input: 'a,"b,c\nd,e,f',
 		expected: {
