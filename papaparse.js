@@ -257,6 +257,7 @@ License: MIT
 				return;
 
 			if (typeof _config.delimiter === 'string'
+                && _config.delimiter.length > 0
                 && !Papa.BAD_DELIMITERS.filter(function(value) { return _config.delimiter.indexOf(value) !== -1; }).length)
 			{
 				_delimiter = _config.delimiter;
