@@ -678,7 +678,8 @@ License: MIT
 			config.chunkSize = Papa.LocalChunkSize;
 		ChunkStreamer.call(this, config);
 
-		var reader, slice;
+		var reader, slice, decoder;
+		var decodeSlices = this._config.chunkSize && typeof TextDecoder !== 'undefined';
 
 		// FileReader is better than FileReaderSync (even in worker) - see http://stackoverflow.com/q/24708649/1048862
 		// But Firefox is a pill, too - see issue #76: https://github.com/mholt/PapaParse/issues/76
@@ -715,9 +716,9 @@ License: MIT
 				var end = Math.min(this._start + this._config.chunkSize, this._input.size);
 				input = slice.call(input, this._start, end);
 			}
-			var txt = reader.readAsText(input, this._config.encoding);
+			var result = decodeSlices ? reader.readAsArrayBuffer(input) : reader.readAsText(input, this._config.encoding);
 			if (!usingAsyncReader)
-				this._chunkLoaded({ target: { result: txt } });	// mimic the async signature
+				this._chunkLoaded({ target: { result: result } });	// mimic the async signature
 		};
 
 		this._chunkLoaded = function(event)
@@ -725,7 +726,16 @@ License: MIT
 			// Very important to increment start each time before handling results
 			this._start += this._config.chunkSize;
 			this._finished = !this._config.chunkSize || this._start >= this._input.size;
-			this.parseChunk(event.target.result);
+			var chunk = event.target.result;
+			if (decodeSlices)
+			{
+				var buffer = chunk;
+				decoder = decoder || getDecoder(buffer, this._config.encoding);
+				chunk = decoder.decode(buffer, { stream: !this._finished });
+				if (buffer.transfer)
+					buffer.transfer(0);	// frees the slice now instead of at the next garbage collection
+			}
+			this.parseChunk(chunk);
 		};
 
 		this._chunkError = function()
@@ -733,6 +743,24 @@ License: MIT
 			this._sendError(reader.error);
 		};
 
+		// Picks the encoding like readAsText does: a byte order mark wins, an unknown encoding means UTF-8
+		function getDecoder(buffer, encoding)
+		{
+			var bytes = new Uint8Array(buffer);
+			if (bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF)
+				encoding = 'utf-8';
+			else if (bytes[0] === 0xFE && bytes[1] === 0xFF)
+				encoding = 'utf-16be';
+			else if (bytes[0] === 0xFF && bytes[1] === 0xFE)
+				encoding = 'utf-16le';
+
+			try {
+				return new TextDecoder(encoding);
+			}
+			catch (e) {
+				return new TextDecoder();
+			}
+		}
 	}
 	FileStreamer.prototype = Object.create(ChunkStreamer.prototype);
 	FileStreamer.prototype.constructor = FileStreamer;
