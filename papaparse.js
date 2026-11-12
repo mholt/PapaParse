@@ -1644,7 +1644,7 @@ License: MIT
 				var spaceLength = 0;
 				if (index !== -1) {
 					var textBetweenClosingQuoteAndIndex = input.substring(quoteSearch + 1, index);
-					if (textBetweenClosingQuoteAndIndex && textBetweenClosingQuoteAndIndex.trim() === '') {
+					if (textBetweenClosingQuoteAndIndex && textBetweenClosingQuoteAndIndex.trimStart() === '') {
 						spaceLength = textBetweenClosingQuoteAndIndex.length;
 					}
 				}
