@@ -8,6 +8,9 @@ var childProcess = require('child_process');
 var SLOW_SAMPLE_DELAY_MS = 1000;
 
 var server = connect().
+	use('/tests/network-error.csv', function(req, res) {
+		res.socket.destroy();
+	}).
 	use('/tests/slow-sample.csv', function(req, res, next) {
 		setTimeout(next, SLOW_SAMPLE_DELAY_MS);
 	}).
