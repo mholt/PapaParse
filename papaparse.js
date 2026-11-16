@@ -744,6 +744,8 @@ License: MIT
 		ChunkStreamer.call(this, config);
 
 		var remaining;
+		var parsing = false;
+		var nextChunkPending = false;
 		this.stream = function(s)
 		{
 			remaining = s;
@@ -752,17 +754,29 @@ License: MIT
 		this._nextChunk = function()
 		{
 			if (this._finished) return;
-			var size = this._config.chunkSize;
-			var chunk;
-			if(size) {
-				chunk = remaining.substring(0, size);
-				remaining = remaining.substring(size);
-			} else {
-				chunk = remaining;
-				remaining = '';
+			nextChunkPending = true;
+			if (parsing) return;
+			parsing = true;
+			try {
+				var results;
+				while (nextChunkPending) {
+					nextChunkPending = false;
+					var size = this._config.chunkSize;
+					var chunk;
+					if(size) {
+						chunk = remaining.substring(0, size);
+						remaining = remaining.substring(size);
+					} else {
+						chunk = remaining;
+						remaining = '';
+					}
+					this._finished = !remaining;
+					results = this.parseChunk(chunk);
+				}
+				return results;
+			} finally {
+				parsing = false;
 			}
-			this._finished = !remaining;
-			return this.parseChunk(chunk);
 		};
 	}
 	StringStreamer.prototype = Object.create(StringStreamer.prototype);
