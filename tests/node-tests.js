@@ -134,6 +134,25 @@ describe('PapaParse', function() {
 		});
 	});
 
+	it('collects rows and errors from every chunk of a streamed CSV', function(done) {
+		Papa.parse(fs.createReadStream(__dirname + '/verylong-sample.csv', { highWaterMark: 1024 }), {
+			header: true,
+			fastMode: true,
+			complete: function(parsedCsv) {
+				assert.strictEqual(2000, parsedCsv.data.length);
+				assert.deepEqual(parsedCsv.data[1999], {
+					placeholder: 'Lorem ipsum dolor sit',
+					'meaning of life': '42',
+					TLD: 'ABC'
+				});
+				assert.deepEqual(parsedCsv.errors.map(function(error) {
+					return error.row;
+				}), [498, 998, 1498, 1998]);
+				done();
+			},
+		});
+	});
+
 	it('piped streaming CSV should be correctly parsed', function(done) {
 		var data = [];
 		var readStream = fs.createReadStream(__dirname + '/long-sample.csv', 'utf8');
