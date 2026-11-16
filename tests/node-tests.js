@@ -39,6 +39,75 @@ function assertLongSampleParsedCorrectly(parsedCsv) {
 }
 
 describe('PapaParse', function() {
+	it('parses many string chunks without growing the call stack', function() {
+		var rows = 0;
+		var completions = 0;
+		Papa.parse('a,b\n'.repeat(40000).slice(0, -1), {
+			delimiter: ',',
+			chunkSize: 16,
+			chunk: function(results) {
+				assert.strictEqual(results.errors.length, 0);
+				rows += results.data.length;
+			},
+			complete: function() {
+				completions++;
+			}
+		});
+		assert.strictEqual(rows, 40000);
+		assert.strictEqual(completions, 1);
+	});
+
+	it('resumes chunked strings after pausing a chunk callback', function(done) {
+		var rows = 0;
+		var chunks = 0;
+		Papa.parse('a,b\n'.repeat(40000).slice(0, -1), {
+			delimiter: ',',
+			chunkSize: 16,
+			chunk: function(results, parser) {
+				rows += results.data.length;
+				chunks++;
+				if (chunks === 1) {
+					parser.pause();
+					setTimeout(function() { parser.resume(); }, 0);
+				}
+			},
+			complete: function() {
+				assert.strictEqual(rows, 40000);
+				done();
+			}
+		});
+	});
+
+	it('stops chunked string parsing after a preview or abort', function() {
+		var rows = 0;
+		Papa.parse('a,b\n'.repeat(40000), {
+			delimiter: ',',
+			chunkSize: 16,
+			preview: 3,
+			chunk: function(results) {
+				rows += results.data.length;
+			}
+		});
+		assert.strictEqual(rows, 3);
+
+		var chunks = 0;
+		var completions = 0;
+		Papa.parse('a,b\n'.repeat(40000), {
+			delimiter: ',',
+			chunkSize: 16,
+			chunk: function(results, parser) {
+				chunks++;
+				parser.abort();
+			},
+			complete: function(results) {
+				completions++;
+				assert.strictEqual(results.meta.aborted, true);
+			}
+		});
+		assert.strictEqual(chunks, 1);
+		assert.strictEqual(completions, 1);
+	});
+
 	it('synchronously parsed CSV should be correctly parsed', function() {
 		assertLongSampleParsedCorrectly(Papa.parse(longSampleRawCsv));
 	});
