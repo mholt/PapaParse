@@ -39,6 +39,30 @@ function assertLongSampleParsedCorrectly(parsedCsv) {
 }
 
 describe('PapaParse', function() {
+	it('reports transform failures through the duplex stream error event', function(done) {
+		var error = new Error('Invalid record');
+		var parser = Papa.parse(Papa.NODE_STREAM_INPUT, {
+			transform: function() { throw error; }
+		});
+		parser.on('error', function(actual) {
+			assert.strictEqual(actual, error);
+			done();
+		});
+		assert.doesNotThrow(function() { parser.write('a,b\n'); });
+	});
+
+	it('reports transform failures while flushing the final duplex row', function(done) {
+		var error = new Error('Invalid final record');
+		var parser = Papa.parse(Papa.NODE_STREAM_INPUT, {
+			transform: function() { throw error; }
+		});
+		parser.on('error', function(actual) {
+			assert.strictEqual(actual, error);
+			done();
+		});
+		assert.doesNotThrow(function() { parser.end('a,b'); });
+	});
+
 	it('synchronously parsed CSV should be correctly parsed', function() {
 		assertLongSampleParsedCorrectly(Papa.parse(longSampleRawCsv));
 	});
