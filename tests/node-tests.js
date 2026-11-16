@@ -79,6 +79,117 @@ describe('PapaParse', function() {
 		});
 	});
 
+	it('Pause and resume maintains cursor offset correctly (Regression Test for Bug #1054)', function(done) {
+		// Input is 28 JS code units. chunkSize:15 creates 2 real chunks, so the pause
+		// crosses a chunk boundary. meta.cursor is a JavaScript string offset,
+		// measured in UTF-16 code units from the beginning of the full input.
+		var fileData = 'A,B\n' + '11,22\n' + '33,44\n' + '55,66\n' + '77,88\n';
+		// Cursor after each row: header(4)+11,22\n(6)=10, +33,44\n(6)=16, +55,66\n(6)=22,
+		// +77,88\n(6)=28. The trailing newline causes one extra empty-row step at 28.
+		var expectedCursors = [10, 16, 22, 28, 28];
+		var cursors = [];
+		var rows = [];
+		Papa.parse(fileData, {
+			header: true,
+			chunkSize: 15,
+			step: function(results, parser) {
+				cursors.push(results.meta.cursor);
+				if (results.data.A) rows.push(results.data.A);
+				if (results.data.A === '33') {
+					parser.pause();
+					parser.resume();
+				}
+			},
+			complete: function() {
+				assert.deepEqual(cursors, expectedCursors);
+				assert.deepEqual(rows, ['11', '33', '55', '77']);
+				done();
+			}
+		});
+	});
+
+	it('cursor accumulates correctly when pausing on every row asynchronously (Bug #1054)', function(done) {
+		this.timeout(5000);
+		// Every step callback pauses and resumes asynchronously. Cursor must
+		// increase monotonically, never repeating the same value across chunks.
+		// Input: 'X\n1\n2\n3\n4\n5\n' — 12 JS code units, chunkSize:3 forces many chunks.
+		// Header "X\n"=2, rows "1\n"=2 each, so expected absolute cursors: 4,6,8,10,12.
+		var fileData = 'X\n1\n2\n3\n4\n5\n';
+		var expectedRows  = ['1','2','3','4','5'];
+		var expectedCursors = [4, 6, 8, 10, 12];
+		var cursors = [];
+		var rows = [];
+		Papa.parse(fileData, {
+			header: true,
+			chunkSize: 3,
+			step: function(results, parser) {
+				if (results.data.X) rows.push(results.data.X);
+				cursors.push(results.meta.cursor);
+				parser.pause();
+				setTimeout(function() { parser.resume(); }, 0);
+			},
+			complete: function() {
+				assert.deepEqual(rows, expectedRows);
+				assert.deepEqual(cursors, expectedCursors);
+				done();
+			}
+		});
+	});
+
+	it('cursor uses JavaScript string offsets (UTF-16 code units) (Bug #1054)', function(done) {
+		// The character "é" in "café" is a single BMP code point and 1 JS code unit,
+		// but 2 UTF-8 bytes. The cursor must match JS string length.
+		// "item,price\n"=11, "caf\u00e9,3\n"=7, "pizza,8\n"=8 → total 26 code units.
+		// Expected cursors: header(11)+row1(7)=18, +row2(8)=26.
+		var fileData = 'item,price\ncaf\u00e9,3\npizza,8\n';
+		var expectedCursors = [18, 26];
+		var cursors = [];
+		var rows = [];
+		Papa.parse(fileData, {
+			header: true,
+			chunkSize: 12,
+			step: function(results, parser) {
+				cursors.push(results.meta.cursor);
+				rows.push(results.data.item);
+				parser.pause();
+				setTimeout(function() { parser.resume(); }, 0);
+			},
+			complete: function() {
+				assert.deepEqual(rows, ['caf\u00e9', 'pizza']);
+				assert.deepEqual(cursors, expectedCursors);
+				done();
+			}
+		});
+	});
+
+	it('abort from step does not emit extra rows or throw (Bug #1054 coverage)', function(done) {
+		// The fix touches the combined paused-or-aborted branch. Verify that aborting
+		// from a step callback still stops parsing cleanly with correct row data.
+		var fileData = 'A,B\n11,22\n33,44\n55,66\n';
+		var rows = [];
+		var completeCount = 0;
+		var completeResults = null;
+		Papa.parse(fileData, {
+			header: true,
+			chunkSize: 10,
+			step: function(results, parser) {
+				rows.push(Object.assign({}, results.data));
+				if (results.data.A === '33') {
+					parser.abort();
+				}
+			},
+			complete: function(results) {
+				completeCount++;
+				completeResults = results;
+			}
+		});
+		// String streamer is fully synchronous even with chunkSize
+		assert.strictEqual(completeCount, 1, 'complete callback should execute exactly once');
+		assert.strictEqual(completeResults.meta.aborted, true, 'meta.aborted should be true');
+		assert.deepEqual(rows, [{A: '11', B: '22'}, {A: '33', B: '44'}], 'Only rows up to the abort trigger should be collected');
+		done();
+	});
+
 	it('asynchronously parsed CSV should be correctly parsed', function(done) {
 		Papa.parse(longSampleRawCsv, {
 			complete: function(parsedCsv) {
