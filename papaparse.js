@@ -913,7 +913,15 @@ License: MIT
 			// when too many items have been added without their
 			// callback being invoked
 			parseCallbackQueue.push(bindFunction(function() {
-				this.parseChunk(typeof chunk === 'string' ? chunk : chunk.toString(config.encoding));
+				try {
+					this.parseChunk(typeof chunk === 'string' ? chunk : chunk.toString(config.encoding));
+				} catch (error) {
+					if (isFunction(callback)) {
+						return callback(error);
+					}
+					stream.destroy(error);
+					return;
+				}
 				if (isFunction(callback)) {
 					return callback();
 				}
