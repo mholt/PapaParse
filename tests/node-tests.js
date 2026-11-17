@@ -39,6 +39,47 @@ function assertLongSampleParsedCorrectly(parsedCsv) {
 }
 
 describe('PapaParse', function() {
+	describe('download request bodies', function() {
+		var originalXHR;
+		var request;
+
+		beforeEach(function() {
+			originalXHR = global.XMLHttpRequest;
+			global.XMLHttpRequest = function() {
+				request = this;
+				this.open = function(method, url, async) {
+					this.method = method;
+					this.url = url;
+					this.async = async;
+				};
+				this.send = function(body) { this.body = body; };
+			};
+		});
+
+		afterEach(function() {
+			if (originalXHR === undefined) delete global.XMLHttpRequest;
+			else global.XMLHttpRequest = originalXHR;
+		});
+
+		[
+			{body: '', method: 'POST'},
+			{body: 'query=value', method: 'POST'},
+			{body: null, method: 'GET'},
+			{method: 'GET'}
+		].forEach(function(testCase) {
+			it('uses ' + testCase.method + ' for body ' + JSON.stringify(testCase.body), function() {
+				Papa.parse('https://example.test/data.csv', {
+					download: true,
+					downloadRequestBody: testCase.body
+				});
+				assert.strictEqual(request.method, testCase.method);
+				assert.strictEqual(request.url, 'https://example.test/data.csv');
+				assert.strictEqual(request.async, true);
+				assert.strictEqual(request.body, testCase.body);
+			});
+		});
+	});
+
 	it('synchronously parsed CSV should be correctly parsed', function() {
 		assertLongSampleParsedCorrectly(Papa.parse(longSampleRawCsv));
 	});
