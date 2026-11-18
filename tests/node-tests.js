@@ -4,6 +4,7 @@ var Papa = require("../papaparse.js");
 
 var fs = require('fs');
 var assert = require('assert');
+var Readable = require('stream').Readable;
 var longSampleRawCsv = fs.readFileSync(__dirname + '/long-sample.csv', 'utf8');
 var utf8BomSampleRawCsv = fs.readFileSync(__dirname + '/utf-8-bom-sample.csv', 'utf8');
 
@@ -287,6 +288,52 @@ describe('PapaParse', function() {
 				assert.deepEqual(err, expectedError);
 				done();
 			}
+		});
+	});
+
+	it('handles a multi-byte character split across a chunk boundary', function(done) {
+		var cjk = String.fromCharCode(0x4e2d, 0x6587);
+		var bytes = Buffer.from('a,b\n1,' + cjk + '\n2,x\n', 'utf8');
+		var split = bytes.indexOf(0xe4) + 1;
+		var rows = [];
+		Papa.parse(Readable.from([bytes.subarray(0, split), bytes.subarray(split)]), {
+			step: function(results) {
+				rows.push(results.data);
+			},
+			error: done,
+			complete: function() {
+				assert.deepEqual(rows, [['a', 'b'], ['1', cjk], ['2', 'x']]);
+				done();
+			}
+		});
+	});
+
+	it('does not carry an incomplete character across a string chunk', function(done) {
+		var replacement = String.fromCharCode(0xfffd);
+		var chunks = [Buffer.from([0x61, 0x2c, 0xc3]), 'x\n', Buffer.from([0xa9]), Buffer.from([0xc3])];
+		Papa.parse(Readable.from(chunks), {
+			error: done,
+			complete: function(results) {
+				assert.deepEqual(results.data, [['a', replacement + 'x'], [replacement + replacement]]);
+				done();
+			}
+		});
+	});
+
+	it('handles a multi-byte character split across a chunk boundary when piped', function(done) {
+		var cjk = String.fromCharCode(0x4e2d, 0x6587);
+		var bytes = Buffer.from('a,b\n1,' + cjk + '\n2,x\n', 'utf8');
+		var split = bytes.indexOf(0xe4) + 1;
+		var replacement = String.fromCharCode(0xfffd);
+		var chunks = [bytes.subarray(0, split), bytes.subarray(split), Buffer.from([0xc3]), 'y\n', Buffer.from([0xc3])];
+		var rows = [];
+		var csvStream = Readable.from(chunks).pipe(Papa.parse(Papa.NODE_STREAM_INPUT));
+		csvStream.on('data', function(row) {
+			rows.push(row);
+		});
+		csvStream.on('end', function() {
+			assert.deepEqual(rows, [['a', 'b'], ['1', cjk], ['2', 'x'], [replacement + 'y'], [replacement]]);
+			done();
 		});
 	});
 
