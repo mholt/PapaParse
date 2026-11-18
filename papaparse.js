@@ -778,6 +778,7 @@ License: MIT
 		var queue = [];
 		var parseOnData = true;
 		var streamHasEnded = false;
+		var decode = chunkDecoder(config.encoding);
 
 		this.pause = function()
 		{
@@ -824,7 +825,7 @@ License: MIT
 		{
 			try
 			{
-				queue.push(typeof chunk === 'string' ? chunk : chunk.toString(this._config.encoding));
+				queue.push(decode(chunk));
 
 				if (parseOnData)
 				{
@@ -868,6 +869,7 @@ License: MIT
 		var config = copy(_config);
 		var parseOnWrite = true;
 		var writeStreamHasFinished = false;
+		var decode = chunkDecoder(config.encoding);
 		var parseCallbackQueue = [];
 		var stream = null;
 
@@ -913,7 +915,7 @@ License: MIT
 			// when too many items have been added without their
 			// callback being invoked
 			parseCallbackQueue.push(bindFunction(function() {
-				this.parseChunk(typeof chunk === 'string' ? chunk : chunk.toString(config.encoding));
+				this.parseChunk(decode(chunk));
 				if (isFunction(callback)) {
 					return callback();
 				}
@@ -1875,6 +1877,24 @@ License: MIT
 		for (var key in obj)
 			cpy[key] = copy(obj[key]);
 		return cpy;
+	}
+
+	function chunkDecoder(encoding)
+	{
+		var decoder = null;
+		return function(chunk)
+		{
+			if (typeof chunk === 'string')
+				return decoder === null ? chunk : decoder.end() + chunk;
+			if (typeof PAPA_BROWSER_CONTEXT !== 'undefined')
+				return chunk.toString(encoding);
+			if (decoder === null)
+			{
+				var StringDecoder = require('string_decoder').StringDecoder;
+				decoder = new StringDecoder(encoding);
+			}
+			return decoder.write(chunk);
+		};
 	}
 
 	function bindFunction(f, self)
