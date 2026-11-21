@@ -369,19 +369,20 @@ License: MIT
 			if (typeof str === 'undefined' || str === null)
 				return '';
 
-			if (str.constructor === Date)
+			var isDate = str.constructor === Date;
+			if (isDate)
 			{
 				// Return empty string for invalid dates
 				if (isNaN(str.getTime()))
 					return '';
-				return str.toISOString();
+				str = str.toISOString();
 			}
 
 			var needsQuotes = false;
 			var strValue = str.toString();
 
 			// Exclude numeric and boolean primitives, but check the serialized text of objects.
-			if (_escapeFormulae && typeof str !== 'number' && typeof str !== 'bigint' // eslint-disable-line valid-typeof
+			if (!isDate && _escapeFormulae && typeof str !== 'number' && typeof str !== 'bigint' // eslint-disable-line valid-typeof
 				&& typeof str !== 'boolean' && _escapeFormulae.test(strValue)) {
 				strValue = "'" + strValue;
 				str = strValue;
@@ -390,9 +391,9 @@ License: MIT
 			var escapedQuoteStr = strValue.replace(quoteCharRegex, _escapedQuote);
 
 			needsQuotes = needsQuotes
-							|| _quotes === true
-							|| (typeof _quotes === 'function' && _quotes(str, col))
-							|| (Array.isArray(_quotes) && _quotes[col])
+							|| (!isDate && (_quotes === true
+								|| (typeof _quotes === 'function' && _quotes(str, col))
+								|| (Array.isArray(_quotes) && _quotes[col])))
 							|| hasAny(escapedQuoteStr, Papa.BAD_DELIMITERS)
 							|| escapedQuoteStr.indexOf(_delimiter) > -1
 							|| strValue.indexOf(_quoteChar) > -1
