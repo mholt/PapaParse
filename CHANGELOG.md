@@ -1,5 +1,12 @@
 # Changelog
 
+## 5.7.1
+
+### Security Fixes
+
+- Apply `escapeFormulae` to the serialized text of arrays and objects to prevent formula escaping bypasses in CSV exports.
+- Avoid quadratic delimiter and newline searches when parsing quoted CSV, preventing excessive CPU usage with specially crafted input.
+
 ## 5.7.0
 
 ### Features

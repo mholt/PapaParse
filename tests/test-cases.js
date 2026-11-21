@@ -641,6 +641,26 @@ var CORE_PARSER_TESTS = [
 			}
 		}
 	},
+	{
+		description: "Empty delimiter defaults to comma",
+		input: 'a,"b",c\nd,e,f',
+		config: { delimiter: '' },
+		expected: {
+			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
+			errors: [],
+			meta: { delimiter: ',' }
+		}
+	},
+	{
+		description: "Empty delimiter defaults to comma without quotes",
+		input: 'a,b,c\nd,e,f',
+		config: { delimiter: '' },
+		expected: {
+			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
+			errors: [],
+			meta: { delimiter: ',' }
+		}
+	},
 
 ];
 
@@ -921,6 +941,28 @@ var PARSE_TESTS = [
 		expected: {
 			data: [['a', 'b', 'c']],
 			errors: []
+		}
+	},
+	{
+		description: "Callback delimiter returning an empty string",
+		input: 'a,"b",c\nd,e,f',
+		config: { delimiter: function() { return ''; } },
+		expected: {
+			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
+			errors: []
+		}
+	},
+	{
+		description: "Empty string in delimitersToGuess",
+		input: 'a,"b",c\nd,e,f',
+		config: { delimitersToGuess: [''] },
+		expected: {
+			data: [['a', 'b', 'c'], ['d', 'e', 'f']],
+			errors: [{
+				"type": "Delimiter",
+				"code": "UndetectableDelimiter",
+				"message": "Unable to auto-detect delimiting character; defaulted to ','"
+			}]
 		}
 	},
 	{
@@ -1996,6 +2038,18 @@ var UNPARSE_TESTS = [
 		expected: ''
 	},
 	{
+		description: "Empty input with columns",
+		input: [],
+		config: {columns: ['a', 'b', 'c']},
+		expected: 'a,b,c'
+	},
+	{
+		description: "Empty input with columns and disabled header",
+		input: [],
+		config: {columns: ['a', 'b', 'c'], header: false},
+		expected: ''
+	},
+	{
 		description: "Mismatched field counts in rows",
 		input: [['a', 'b', 'c'], ['d', 'e'], ['f']],
 		expected: 'a,b,c\r\nd,e\r\nf'
@@ -2093,6 +2147,31 @@ var UNPARSE_TESTS = [
 		expected: '1,2\r\n3,4'
 	},
 	{
+		description: "Skips single-cell rows containing null or undefined when skipEmptyLines is true",
+		notes: "Regression test for issue #1163: unparse threw a TypeError when a row contained a single null or undefined value",
+		input: [[null], ['hello'], [undefined], ['world']],
+		config: {skipEmptyLines: true},
+		expected: 'hello\r\nworld'
+	},
+	{
+		description: "Returns empty rows for single-cell rows containing null or undefined when skipEmptyLines is false",
+		input: [[null], ['hello'], [undefined], ['world']],
+		config: {skipEmptyLines: false},
+		expected: '\r\nhello\r\n\r\nworld'
+	},
+	{
+		description: "Skips single-cell rows containing null or undefined when skipEmptyLines is 'greedy'",
+		input: [[null], ['hello'], [undefined], ['world']],
+		config: {skipEmptyLines: 'greedy'},
+		expected: 'hello\r\nworld'
+	},
+	{
+		description: "Does not skip single-cell rows containing 0 when skipEmptyLines is true",
+		input: [[0], ['hello']],
+		config: {skipEmptyLines: true},
+		expected: '0\r\nhello'
+	},
+	{
 		description: "Returns empty rows when empty rows are passed and skipEmptyLines is false with headers",
 		input: [{a: null, b: ' '}, {}, {a: '1', b: '2'}],
 		config: {skipEmptyLines: false, header: true},
@@ -2153,6 +2232,24 @@ var UNPARSE_TESTS = [
 		input: [{ "Col1": "=danger", "Col2": "@danger", "Col3": "safe" }, { "Col1": "safe=safe", "Col2": "+danger", "Col3": "-danger, danger" }, { "Col1": "'+safe", "Col2": "'@safe", "Col3": "safe, safe" }],
 		config: { escapeFormulae: true },
 		expected: 'Col1,Col2,Col3\r\n"\'=danger","\'@danger",safe\r\nsafe=safe,"\'+danger","\'-danger, danger"\r\n\'+safe,\'@safe,"safe, safe"'
+	},
+	{
+		description: "Escape formulae after converting arrays and objects to text",
+		input: [[['=1+1'], Object('+1+1'), { toString: function() { return '@danger'; } }]],
+		config: { escapeFormulae: true },
+		expected: '"\'=1+1","\'+1+1","\'@danger"'
+	},
+	{
+		description: "Escape converted values with a custom formula expression",
+		input: [[['=1+1'], { toString: function() { return '-1+1'; } }]],
+		config: { escapeFormulae: /^-/ },
+		expected: '=1+1,"\'-1+1"'
+	},
+	{
+		description: "Formula escaping preserves numbers and booleans",
+		input: [[-1, 0, 1, true, false]],
+		config: { escapeFormulae: true },
+		expected: '-1,0,1,true,false'
 	},
 	{
 		description: "Don't escape formulae by default",

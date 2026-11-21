@@ -1,6 +1,6 @@
 /* @license
 Papa Parse
-v5.7.0
+v5.7.1
 https://github.com/mholt/PapaParse
 License: MIT
 */
@@ -216,7 +216,9 @@ License: MIT
 
 		if (Array.isArray(_input))
 		{
-			if (!_input.length || Array.isArray(_input[0]))
+			if (!_input.length)
+				return serialize(_columns, _input, _skipEmptyLines);
+			else if (Array.isArray(_input[0]))
 				return serialize(null, _input, _skipEmptyLines);
 			else if (typeof _input[0] === 'object')
 				return serialize(_columns || Object.keys(_input[0]), _input, _skipEmptyLines);
@@ -333,7 +335,7 @@ License: MIT
 				var nullLine = hasHeader ? Object.keys(data[row]).length === 0 : data[row].length === 0;
 				if (skipEmptyLines && !hasHeader)
 				{
-					emptyLine = skipEmptyLines === 'greedy' ? data[row].join('').trim() === '' : data[row].length === 1 && data[row][0].length === 0;
+					emptyLine = skipEmptyLines === 'greedy' ? data[row].join('').trim() === '' : data[row].length === 1 && (data[row][0] === null || data[row][0] === undefined || data[row][0].length === 0);
 				}
 				if (skipEmptyLines === 'greedy' && hasHeader) {
 					var line = [];
@@ -377,13 +379,15 @@ License: MIT
 			}
 
 			var needsQuotes = false;
+			var strValue = str.toString();
 
-			if (!isDate && _escapeFormulae && typeof str === "string" && _escapeFormulae.test(str)) {
-				str = "'" + str;
+			// Exclude numeric and boolean primitives, but check the serialized text of objects.
+			if (!isDate && _escapeFormulae && typeof str !== 'number' && typeof str !== 'bigint' // eslint-disable-line valid-typeof
+				&& typeof str !== 'boolean' && _escapeFormulae.test(strValue)) {
+				strValue = "'" + strValue;
+				str = strValue;
 				needsQuotes = true;
 			}
-
-			var strValue = str.toString();
 			var escapedQuoteStr = strValue.replace(quoteCharRegex, _escapedQuote);
 
 			needsQuotes = needsQuotes
@@ -1376,6 +1380,7 @@ License: MIT
 
 		// Delimiter must be valid
 		if (typeof delim !== 'string'
+			|| delim === ''
 			|| Papa.BAD_DELIMITERS.indexOf(delim) > -1)
 			delim = ',';
 
@@ -1530,8 +1535,10 @@ License: MIT
 							{
 								quoteSearch = input.indexOf(quoteChar, cursor);
 							}
-							nextDelim = input.indexOf(delim, cursor);
-							nextNewline = input.indexOf(newline, cursor);
+							if (nextDelim !== -1 && nextDelim < cursor)
+								nextDelim = input.indexOf(delim, cursor);
+							if (nextNewline !== -1 && nextNewline < cursor)
+								nextNewline = input.indexOf(newline, cursor);
 							break;
 						}
 
@@ -1542,7 +1549,9 @@ License: MIT
 						{
 							row.push(input.substring(cursor, quoteSearch).replace(quoteCharRegex, quoteChar));
 							saveRow(quoteSearch + 1 + spacesBetweenQuoteAndNewLine + newlineLen);
-							nextDelim = input.indexOf(delim, cursor);	// because we may have skipped the nextDelim in the quoted field
+							// Only search again if we skipped a delimiter in the quoted field.
+							if (nextDelim !== -1 && nextDelim < cursor)
+								nextDelim = input.indexOf(delim, cursor);
 							quoteSearch = input.indexOf(quoteChar, cursor);	// we search for first quote in next line
 
 							if (stepIsFunction)
@@ -1583,7 +1592,8 @@ License: MIT
 						return returnable();
 					cursor = nextNewline + newlineLen;
 					nextNewline = input.indexOf(newline, cursor);
-					nextDelim = input.indexOf(delim, cursor);
+					if (nextDelim !== -1 && nextDelim < cursor)
+						nextDelim = input.indexOf(delim, cursor);
 					continue;
 				}
 
@@ -1636,7 +1646,7 @@ License: MIT
 				var spaceLength = 0;
 				if (index !== -1) {
 					var textBetweenClosingQuoteAndIndex = input.substring(quoteSearch + 1, index);
-					if (textBetweenClosingQuoteAndIndex && textBetweenClosingQuoteAndIndex.trim() === '') {
+					if (textBetweenClosingQuoteAndIndex && textBetweenClosingQuoteAndIndex.trimStart() === '') {
 						spaceLength = textBetweenClosingQuoteAndIndex.length;
 					}
 				}
@@ -1681,7 +1691,7 @@ License: MIT
 				if (config.header && !baseIndex && data.length && !headerParsed)
 				{
 					const result = data[0];
-					const headerCount = Object.create(null); // To track the count of each base header
+					const headerCount = Object.create(null);
 					const usedHeaders = new Set(result); // To track used headers and avoid duplicates
 					let duplicateHeaders = false;
 
@@ -1705,7 +1715,7 @@ License: MIT
 
 							usedHeaders.add(newHeader); // Mark this new Header as used
 							result[i] = newHeader;
-							headerCount[header]++;
+							headerCount[header] = suffixCount;
 							duplicateHeaders = true;
 							if (renamedHeaders === null) {
 								renamedHeaders = {};
