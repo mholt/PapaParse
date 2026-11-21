@@ -82,9 +82,14 @@ export class FastLexer implements ILexer {
       const row = rows[i];
       const rowLen = row.length;
 
-      // Skip comment lines entirely
+      // Keep comment text separate from CSV fields, including its consumed newline in the length.
       if (comments && row.substring(0, commentsLen) === comments) {
-        // Skip comment lines completely - don't emit any tokens
+        tokens.push({
+          type: TokenType.COMMENT,
+          value: row,
+          position,
+          length: rowLen + (i < rowsLen - 1 ? newline.length : 0),
+        });
         if (i === rowsLen - 1) {
           terminatedByComment = true;
         }

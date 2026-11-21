@@ -123,15 +123,17 @@ describe("FastLexer", () => {
       expect(result.tokens[4]).toEqual({ type: "field", value: "c", position: 3, length: 1 });
     });
 
-    test("skips comment lines", () => {
+    test("keeps comment lines separate from fields", () => {
       const lexer = createFastLexer({ comments: "#" });
       lexer.setInput("a,b\n#comment\nc,d");
 
       const result = lexer.tokenize();
 
-      // Should skip the comment line entirely
       const fieldValues = result.tokens.filter((t) => t.type === "field").map((t) => t.value);
       expect(fieldValues).toEqual(["a", "b", "c", "d"]);
+      expect(result.tokens.filter((t) => t.type === "comment")).toEqual([
+        { type: "comment", value: "#comment", position: 4, length: 9 },
+      ]);
     });
 
     test("handles custom delimiters", () => {
@@ -217,8 +219,11 @@ describe("FastLexer", () => {
 
       const result = lexer.tokenize();
 
-      // Should only have EOF token
-      expect(result.tokens).toEqual([{ type: "eof", value: "", position: 19, length: 0 }]);
+      expect(result.tokens).toEqual([
+        { type: "comment", value: "#comment1", position: 0, length: 10 },
+        { type: "comment", value: "#comment2", position: 10, length: 9 },
+        { type: "eof", value: "", position: 19, length: 0 },
+      ]);
     });
   });
 

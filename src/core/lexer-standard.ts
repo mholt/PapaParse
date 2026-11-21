@@ -141,10 +141,17 @@ export class StandardLexer implements ILexer {
         continue;
       }
 
-      // Handle comment lines - skip them entirely
+      // Keep comment lines separate from CSV fields.
       // Legacy condition: comments && row.length === 0
       if (this.comments && state.atStartOfRow && this.isCommentStart(state.cursor)) {
+        const position = state.cursor;
         const result = this.skipComment(state, nextNewline);
+        tokens.push({
+          type: TokenType.COMMENT,
+          value: this.input.substring(position, nextNewline === -1 ? this.inputLen : nextNewline),
+          position,
+          length: state.cursor - position,
+        });
         if (result.endsAtEOF) {
           state.terminatedByComment = true;
           break;

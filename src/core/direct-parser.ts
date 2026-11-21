@@ -47,6 +47,7 @@ export class DirectParser {
       truncated: false,
       cursor: 0,
       renamedHeaders: null,
+      ...(comments ? { comments: [] } : {}),
     };
 
     if (!input) {
@@ -93,6 +94,7 @@ export class DirectParser {
 
       // Skip comment lines by checking directly on input string
       if (comments && input.startsWith(comments, rowStart)) {
+        meta.comments.push(input.slice(rowStart, rowEnd));
         rowStart = rowEnd + newLen;
         continue;
       }

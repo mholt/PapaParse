@@ -14,6 +14,7 @@ interface ParserHandleState {
   aborted: boolean;
   delimiterError: boolean;
   fields: string[];
+  pendingComments: string[];
   results: PapaParseResult;
   input: string;
   parser: Parser | null;
@@ -89,6 +90,11 @@ export class ParserHandle implements PapaParseParser {
     this.state.input = input;
     this.state.parser = new Parser(parserConfig);
     this.state.results = this.state.parser.parse(input, baseIndex, ignoreLastRow);
+
+    if (this.config.step && this.state.results.meta.comments) {
+      this.state.pendingComments = this.state.pendingComments.concat(this.state.results.meta.comments);
+      this.state.results.meta.comments = this.state.pendingComments;
+    }
 
     this.processResults();
 
@@ -234,6 +240,7 @@ export class ParserHandle implements PapaParseParser {
       aborted: false,
       delimiterError: false,
       fields: [],
+      pendingComments: [],
       results: {
         data: [],
         errors: [],
@@ -282,6 +289,10 @@ export class ParserHandle implements PapaParseParser {
     const userStep = this.config.step;
     this.config.step = (results: PapaParseResult) => {
       this.state.results = results;
+      if (results.meta.comments) {
+        this.state.pendingComments = this.state.pendingComments.concat(results.meta.comments);
+        results.meta.comments = this.state.pendingComments;
+      }
 
       if (this.needsHeaderRow()) {
         this.processResults();
@@ -303,6 +314,7 @@ export class ParserHandle implements PapaParseParser {
             ...this.state.results,
             data: this.state.results.data[0],
           };
+          this.state.pendingComments = [];
           userStep(singleRowResult, this);
         }
       }
