@@ -171,6 +171,13 @@ export class ChunkStreamer {
       // Use push.apply for much better performance than concat
       Array.prototype.push.apply(this._completeResults.data, results.data);
       Array.prototype.push.apply(this._completeResults.errors, results.errors);
+      const comments = this._completeResults.meta.comments;
+      this._completeResults.meta = results.meta;
+      if (comments && results.meta.comments) {
+        this._completeResults.meta = { ...results.meta, comments: comments.concat(results.meta.comments) };
+      }
+    } else if (this._hasStepCallback && !this._hasChunkCallback && results.meta.comments) {
+      // Comments following the last data row have no step callback to carry them.
       this._completeResults.meta = results.meta;
     }
 
