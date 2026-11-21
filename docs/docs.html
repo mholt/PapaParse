@@ -553,7 +553,7 @@ var csv = Papa.unparse({
 									<code>comments</code>
 								</td>
 								<td>
-									A string that indicates a comment (for example, "#" or "//"). When Papa encounters a line starting with this string, it will skip the line.
+									A string that indicates a comment (for example, "#" or "//"). When Papa encounters a line starting with this string, it will skip the line as data and retain its text in <code>meta.comments</code>.
 								</td>
 							</tr>
 							<tr>
@@ -823,12 +823,14 @@ var csv = Papa.unparse({
 	aborted:   // Whether process was aborted
 	fields:    // Array of field names
 	truncated: // Whether preview consumed all input
+	comments:  // Comment lines, including their marker but without line endings
 	renamedHeaders: // Headers that are automatically renamed by the library to avoid duplication. {Column 1_1: 'Column 1' // the later header 'Column 1' was renamed to 'Column 1_1'}
 }</code></pre>
 					</div>
 					<div class="grid-50">
 						<ul>
 							<li>Not all meta properties will always be available. For instance, <code>fields</code> is only given when header row is enabled.</li>
+							<li><code>comments</code> is present when the <code>comments</code> option is enabled. A chunk callback receives the complete comment lines consumed in that chunk. Without a worker, a step callback receives comments since the previous data callback, including comments before the header or skipped empty lines; comments after the last data callback are available in <code>complete</code>'s <code>meta.comments</code>. Without streaming callbacks, the completed result contains all comments.</li>
 						</ul>
 					</div>
 					<div class="clear"></div>
