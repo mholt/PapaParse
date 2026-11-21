@@ -193,7 +193,7 @@ describe("StandardLexer", () => {
   });
 
   describe("comment handling", () => {
-    test("skips comment lines", () => {
+    test("keeps comment lines separate from fields", () => {
       const config = { ...defaultConfig, comments: "#" };
       const lexer = new StandardLexer(config);
       lexer.setInput("a,b\n#comment\nc,d");
@@ -203,6 +203,9 @@ describe("StandardLexer", () => {
       expect(result.errors).toEqual([]);
       const fieldTokens = result.tokens.filter((t) => t.type === "field");
       expect(fieldTokens.map((t) => t.value)).toEqual(["a", "b", "c", "d"]);
+      expect(result.tokens.filter((t) => t.type === "comment")).toEqual([
+        { type: "comment", value: "#comment", position: 4, length: 9 },
+      ]);
     });
 
     test("handles comment at EOF", () => {

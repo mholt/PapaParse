@@ -58,6 +58,8 @@ export interface PapaParseMeta {
   paused?: boolean;
   /** Map of renamed headers (newName -> originalName) */
   renamedHeaders?: { [newHeader: string]: string } | null;
+  /** Comment lines, including the comment marker and excluding line endings. Present when comments are enabled. */
+  comments?: string[];
 }
 
 // Result structure for parsed data

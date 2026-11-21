@@ -24,6 +24,7 @@ interface ParserState {
   headerParsed: boolean;
   expectedFieldCount: number;
   renamedHeaders: { [newHeader: string]: string } | null;
+  comments?: string[];
   lastCursor: number;
   aborted: boolean;
 }
@@ -62,7 +63,7 @@ export class Parser implements PapaParseParser {
   /**
    * Check if DirectParser can be used for maximum performance
    */
-  private canUseDirectParser(input: string): boolean {
+  private canUseDirectParser(input: string, ignoreLastRow: boolean): boolean {
     const lexerConfig = createLexerConfig(this.config);
     const hasQuotes = input.indexOf(lexerConfig.quoteChar) !== -1;
 
@@ -76,6 +77,7 @@ export class Parser implements PapaParseParser {
     // - No step callback (streaming)
     // - No chunk callback (streaming)
     // - No header processing (DirectParser only returns arrays, not objects)
+    // - Complete input when retaining comments (the lexer handles partial comment lines)
     // - Fast mode enabled or auto-detected
     return (
       !hasQuotes &&
@@ -83,6 +85,7 @@ export class Parser implements PapaParseParser {
       !this.config.step &&
       !this.config.chunk &&
       !this.config.header &&
+      !(ignoreLastRow && lexerConfig.comments) &&
       (lexerConfig.fastMode || lexerConfig.fastMode !== false)
     );
   }
@@ -120,7 +123,7 @@ export class Parser implements PapaParseParser {
     }
 
     // Use DirectParser for maximum performance when possible
-    if (this.canUseDirectParser(input)) {
+    if (this.canUseDirectParser(input, ignoreLastRow)) {
       // console.log("🚀 Using DirectParser for", input.length, "characters");
       return this.parseWithDirectParser(input, baseIndex, ignoreLastRow);
     }
@@ -241,6 +244,7 @@ export class Parser implements PapaParseParser {
       headerParsed: false,
       expectedFieldCount: 0,
       renamedHeaders: null,
+      comments: createLexerConfig(this.config).comments ? [] : undefined,
       lastCursor: 0,
       aborted: false,
     };
@@ -261,6 +265,14 @@ export class Parser implements PapaParseParser {
 
         case TokenType.DELIMITER:
           // Delimiter handled implicitly by field processing
+          break;
+
+        case TokenType.COMMENT:
+          // A comment without its newline may continue in the next chunk.
+          if (!ignoreLastRow || token.length > token.value.length) {
+            this.state.comments?.push(token.value);
+            this.state.lastCursor = token.position + token.length;
+          }
           break;
 
         case TokenType.NEWLINE:
@@ -286,7 +298,13 @@ export class Parser implements PapaParseParser {
           // If EOF comes after a newline, add an empty row
           // This handles cases like "a\n" where the trailing newline should create an empty row
           // But NOT if terminated by comment (e.g. "a\n# Comment")
-          if (prevToken && prevToken.type === TokenType.NEWLINE && !ignoreLastRow && !terminatedByComment) {
+          if (
+            prevToken &&
+            (prevToken.type === TokenType.NEWLINE ||
+              (prevToken.type === TokenType.COMMENT && prevToken.length > prevToken.value.length)) &&
+            !ignoreLastRow &&
+            !terminatedByComment
+          ) {
             // Only add empty row if we're not already in an empty row
             if (this.state.currentRow.length === 0) {
               this.processField("");
@@ -363,6 +381,7 @@ export class Parser implements PapaParseParser {
     // Reset data and errors for next step
     this.state.data = [];
     this.state.errors = [];
+    if (this.state.comments) this.state.comments = [];
   }
 
   /**
@@ -439,6 +458,7 @@ export class Parser implements PapaParseParser {
         truncated: this.config.preview ? this.state.data.length >= this.config.preview : false,
         cursor: this.state.lastCursor + baseIndex,
         renamedHeaders: this.state.renamedHeaders,
+        ...(this.state.comments ? { comments: this.state.comments } : {}),
       },
     };
   }
