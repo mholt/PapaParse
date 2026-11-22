@@ -1105,6 +1105,9 @@ License: MIT
 			input = input.substring(0, 1024 * 1024);	// max length 1 MB
 			// Replace all the text inside quotes
 			var re = new RegExp(escapeRegExp(quoteChar) + '([^]*?)' + escapeRegExp(quoteChar), 'gm');
+			// Without any \r the answer is \n, so the quote stripping is not needed
+			if (input.indexOf('\r') === -1)
+				return '\n';
 			input = input.replace(re, '');
 
 			var r = input.split('\r');
