@@ -2473,6 +2473,45 @@ var CUSTOM_TESTS = [
 		}
 	},
 	{
+		description: "Renamed headers are preserved across chunks",
+		expected: [{a_1: 'a'}, {a_1: 'a'}, {a_1: 'a'}],
+		run: function(callback) {
+			var renamedHeaders = [];
+			Papa.parse('a,a\n1,2\n3,4', {
+				header: true,
+				delimiter: ',',
+				newline: '\n',
+				chunkSize: 4,
+				chunk: function(results) {
+					renamedHeaders.push(results.meta.renamedHeaders);
+				},
+				complete: function() {
+					callback(renamedHeaders);
+				}
+			});
+		}
+	},
+	{
+		description: "Renamed headers are preserved after pausing and resuming",
+		expected: [{a_1: 'a'}, {a_1: 'a'}],
+		run: function(callback) {
+			var renamedHeaders = [];
+			Papa.parse('a,a\n1,2\n3,4', {
+				header: true,
+				delimiter: ',',
+				newline: '\n',
+				step: function(results, parser) {
+					renamedHeaders.push(results.meta.renamedHeaders);
+					parser.pause();
+					parser.resume();
+				},
+				complete: function() {
+					callback(renamedHeaders);
+				}
+			});
+		}
+	},
+	{
 		description: "Complete is called with all results if neither step nor chunk is defined",
 		expected: [['A', 'b', 'c'], ['d', 'E', 'f'], ['G', 'h', 'i']],
 		disabled: !FILES_ENABLED,
