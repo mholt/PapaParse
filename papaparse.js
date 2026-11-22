@@ -981,6 +981,7 @@ License: MIT
 		var _aborted = false;	// Whether the parser has aborted or not
 		var _delimiterError;	// Temporary state between delimiter detection and processing results
 		var _fields = [];		// Fields are from the header row of the input, if there is one
+		var _renamedHeaders = null;
 		var _results = {		// The last results returned from the parser
 			data: [],
 			errors: [],
@@ -1171,6 +1172,8 @@ License: MIT
 			if (!_results)
 				return;
 
+			_renamedHeaders = _results.meta.renamedHeaders;
+
 			function addHeader(header)
 			{
 				_fields.push(header);
@@ -1269,7 +1272,10 @@ License: MIT
 
 
 			if (_config.header && _results.meta)
+			{
 				_results.meta.fields = _fields;
+				_results.meta.renamedHeaders = _renamedHeaders;
+			}
 
 			_rowCounter += incrementBy;
 			return _results;

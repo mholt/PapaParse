@@ -4,6 +4,7 @@ var Papa = require("../papaparse.js");
 
 var fs = require('fs');
 var assert = require('assert');
+var Readable = require('stream').Readable;
 var longSampleRawCsv = fs.readFileSync(__dirname + '/long-sample.csv', 'utf8');
 var utf8BomSampleRawCsv = fs.readFileSync(__dirname + '/utf-8-bom-sample.csv', 'utf8');
 
@@ -94,6 +95,23 @@ describe('PapaParse', function() {
 				assertLongSampleParsedCorrectly(parsedCsv);
 				done();
 			},
+		});
+	});
+
+	it('Renamed headers are preserved in stream completion metadata', function(done) {
+		var input = Readable.from(['a,a\n', '1,2\n', '3,4']);
+		Papa.parse(input, {
+			header: true,
+			delimiter: ',',
+			newline: '\n',
+			complete: function(results) {
+				assert.deepEqual(results.data, [{a: '1', a_1: '2'}, {a: '3', a_1: '4'}]);
+				assert.deepEqual(results.errors, []);
+				assert.deepEqual(results.meta.fields, ['a', 'a_1']);
+				assert.deepEqual(results.meta.renamedHeaders, {a_1: 'a'});
+				done();
+			},
+			error: done
 		});
 	});
 
