@@ -1416,6 +1416,7 @@ License: MIT
 
 			// Establish starting state
 			cursor = 0;
+			preview = config.preview;
 			var data = [], errors = [], row = [], lastCursor = 0;
 
 			if (!input)
@@ -1633,6 +1634,10 @@ License: MIT
 
 			function pushRow(row)
 			{
+				if (preview && config.skipEmptyLines && (config.skipEmptyLines === 'greedy'
+					? row.join('').trim() === ''
+					: row.length === 1 && row[0].length === 0))
+					preview++;
 				data.push(row);
 				lastCursor = cursor;
 			}
