@@ -251,6 +251,29 @@ describe('PapaParse', function() {
 		});
 	});
 
+	it('stops reading a stream once the preview row count is reached', function(done) {
+		var Readable = require('stream').Readable;
+		var totalChunks = 1000;
+		var chunksRead = 0;
+		var stream = new Readable({
+			read: function() {
+				chunksRead++;
+				this.push(chunksRead > totalChunks ? null : 'a,b,c\n'.repeat(100));
+			}
+		});
+		Papa.parse(stream, {
+			preview: 10,
+			complete: function(parsedCsv) {
+				assert.equal(parsedCsv.data.length, 10);
+				setTimeout(function() {
+					assert.ok(chunksRead < totalChunks, 'read ' + chunksRead + ' of ' + totalChunks + ' chunks');
+					assert.ok(stream.isPaused(), 'the input stream is paused');
+					done();
+				}, 100);
+			}
+		});
+	});
+
 	it('handles errors in beforeFirstChunk', function(done) {
 		var expectedError = new Error('test');
 		Papa.parse(fs.createReadStream(__dirname + '/long-sample.csv', 'utf8'), {
