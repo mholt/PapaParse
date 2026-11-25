@@ -3061,6 +3061,34 @@ var CUSTOM_TESTS = [
 	},
 ];
 
+describe('Custom CSV chunk boundaries', function() {
+	[1, 2, 3, 5, 7].forEach(function(chunkSize) {
+		it('keeps custom delimiters and escaped quotes intact with chunkSize ' + chunkSize, function(done) {
+			var rows = [];
+			var errors = [];
+			Papa.parse("name||note\nalpha||'line 1\nline 2'\nbeta||'it\\'s a || value'", {
+				delimiter: '||',
+				quoteChar: "'",
+				escapeChar: '\\',
+				chunkSize: chunkSize,
+				chunk: function(result) {
+					rows = rows.concat(result.data);
+					errors = errors.concat(result.errors);
+				},
+				complete: function() {
+					assert.deepEqual(rows, [
+						['name', 'note'],
+						['alpha', 'line 1\nline 2'],
+						['beta', "it's a || value"]
+					]);
+					assert.deepEqual(errors, []);
+					done();
+				}
+			});
+		});
+	});
+});
+
 describe('Custom Tests', function() {
 	function generateTest(test) {
 		(test.disabled ? it.skip : it)(test.description, function(done) {
