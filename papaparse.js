@@ -1029,7 +1029,7 @@ License: MIT
 			_delimiterError = false;
 			if (!_config.delimiter)
 			{
-				var delimGuess = guessDelimiter(input, _config.newline, _config.skipEmptyLines, _config.comments, _config.delimitersToGuess);
+				var delimGuess = guessDelimiter(input, _config.newline, _config.skipEmptyLines, _config.comments, _config.delimitersToGuess, _config.preview);
 				if (delimGuess.successful)
 					_config.delimiter = delimGuess.bestDelimiter;
 				else
@@ -1275,7 +1275,7 @@ License: MIT
 			return _results;
 		}
 
-		function guessDelimiter(input, newline, skipEmptyLines, comments, delimitersToGuess) {
+		function guessDelimiter(input, newline, skipEmptyLines, comments, delimitersToGuess, preview) {
 			var bestDelim, bestDelta, fieldCountPrevRow, maxFieldCount;
 
 			delimitersToGuess = delimitersToGuess || [',', '\t', '|', ';', Papa.RECORD_SEP, Papa.UNIT_SEP];
@@ -1285,19 +1285,19 @@ License: MIT
 				var delta = 0, avgFieldCount = 0, emptyLinesCount = 0;
 				fieldCountPrevRow = undefined;
 
-				var preview = new Parser({
+				var previewRows = new Parser({
 					comments: comments,
 					delimiter: delim,
 					newline: newline,
-					preview: 10
+					preview: preview || 10
 				}).parse(input);
 
-				for (var j = 0; j < preview.data.length; j++) {
-					if (skipEmptyLines && testEmptyLine(preview.data[j])) {
+				for (var j = 0; j < previewRows.data.length; j++) {
+					if (skipEmptyLines && testEmptyLine(previewRows.data[j])) {
 						emptyLinesCount++;
 						continue;
 					}
-					var fieldCount = preview.data[j].length;
+					var fieldCount = previewRows.data[j].length;
 					avgFieldCount += fieldCount;
 
 					if (typeof fieldCountPrevRow === 'undefined') {
@@ -1310,8 +1310,8 @@ License: MIT
 					}
 				}
 
-				if (preview.data.length > 0)
-					avgFieldCount /= (preview.data.length - emptyLinesCount);
+				if (previewRows.data.length > 0)
+					avgFieldCount /= (previewRows.data.length - emptyLinesCount);
 
 				// Lowest delta (most consistent field count across rows) wins; average
 				// field count only breaks ties between equally consistent delimiters.

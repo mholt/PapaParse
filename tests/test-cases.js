@@ -1354,6 +1354,16 @@ var PARSE_TESTS = [
 		}
 	},
 	{
+		description: "Delimiter guessing respects the preview row limit",
+		notes: "Regression test for issue #1116: rows after the preview limit must not affect delimiter guessing",
+		input: 'a;b\n1,2\n3,4\n5,6\n7,8\n9,10\n11,12\n13,14\n15,16\n17,18',
+		config: { preview: 1 },
+		expected: {
+			data: [['a', 'b']],
+			errors: []
+		}
+	},
+	{
 		description: "Pipe delimiter is guessed correctly when mixed with comas",
 		notes: "Guessing the delimiter should work even if there are many lines of comments at the start of the file",
 		input: 'one|two,two|three\nfour|five,five|six',
