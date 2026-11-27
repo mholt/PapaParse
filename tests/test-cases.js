@@ -1930,6 +1930,16 @@ var UNPARSE_TESTS = [
 		expected: 'Col1,Col2,Col3'
 	},
 	{
+		description: "Specifying column names with an empty data array",
+		input: { fields: ["Col1", "Col2", "Col3"], data: [] },
+		expected: 'Col1,Col2,Col3'
+	},
+	{
+		description: "Header-only parse results, with fields in meta and an empty data array",
+		input: { data: [], meta: { fields: ["Col1", "Col2", "Col3"] } },
+		expected: 'Col1,Col2,Col3'
+	},
+	{
 		description: "Specifying data only (no field names), improperly",
 		notes: "A single array for a single row is wrong, but it can be compensated.<br>Papa should add empty fields property to prevent errors.",
 		input: { data: ["abc", "d", "ef"] },

@@ -240,7 +240,7 @@ License: MIT
 							? Object.keys(_input.data[0])
 							: [];
 
-				if (!(Array.isArray(_input.data[0])) && typeof _input.data[0] !== 'object')
+				if (_input.data.length && !(Array.isArray(_input.data[0])) && typeof _input.data[0] !== 'object')
 					_input.data = [_input.data];	// handles input like [1,2,3] or ['asdf']
 			}
 
